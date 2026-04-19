@@ -1,0 +1,2570 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 1 · SQL Nâng Cao</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 290px; min-width: 290px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--text-muted); }
+  .level-label.l1 { color: var(--accent); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 44px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 960px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+  .kw { color: var(--accent); }
+  .str { color: var(--accent5); }
+  .fn { color: var(--accent4); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '□'; color: var(--accent5); font-size: 1.1rem; flex-shrink: 0; margin-top: -1px; }
+  .checklist li.done::before { content: '✓'; color: var(--accent2); }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>📘 Data Engineering Handbook Tutorial</h1>
+  <p>Giai đoạn 1 · Tuần 1 · SQL Nâng Cao cho Data Engineer (PostgreSQL + Oracle SQL)</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 1 · Foundation</span>
+    <span class="badge badge-orange">Tuần 1: SQL Nâng Cao</span>
+    <span class="badge badge-blue">Mục tiêu ~15 giờ · PostgreSQL + Oracle SQL</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">CHƯƠNG TRÌNH HỌC</div>
+    <div class="level-label l1">▶ TUẦN 1 · SQL ADVANCED</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W1.01</span>Tổng Quan Tuần</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W1.02</span>Window Functions</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W1.03</span>GROUPING SETS</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W1.04</span>SCD Type 1/2/3</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W1.05</span>Incremental Load</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W1.06</span>EXPLAIN & Optimize</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W1.07</span>Artifact SQL File</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W1.08</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+<!-- MODULE 1 -->
+<div class="module active" id="m0">
+  <div class="module-header">
+    <div class="module-tag">Tuần 1 · Module 01</div>
+    <div class="module-title">📌 Tổng Quan Tuần & Mục Tiêu</div>
+    <div class="module-subtitle">Phân biệt SQL Analyst và SQL Data Engineer · Checklist đầu ra tuần 1</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Module</th><th>Nội dung chính</th><th>Thời gian ước tính</th></tr>
+        <tr><td>W1.01</td><td>Tổng quan, mục tiêu, tiêu chí hoàn thành</td><td>45 phút</td></tr>
+        <tr><td>W1.02</td><td>Window Functions: ranking, lag/lead, frame</td><td>3 giờ</td></tr>
+        <tr><td>W1.03</td><td>GROUPING SETS, ROLLUP, CUBE</td><td>2 giờ</td></tr>
+        <tr><td>W1.04</td><td>SCD Type 1/2/3 và validation dữ liệu lịch sử</td><td>3 giờ</td></tr>
+        <tr><td>W1.05</td><td>Incremental patterns và idempotency</td><td>2 giờ</td></tr>
+        <tr><td>W1.06</td><td>EXPLAIN (PostgreSQL) / EXPLAIN PLAN (Oracle) và tối ưu query</td><td>2 giờ</td></tr>
+        <tr><td>W1.07</td><td>Đóng gói artifact week1_sql_advanced.sql</td><td>1 giờ</td></tr>
+        <tr><td>W1.08</td><td>Mini test 20 câu toàn tuần</td><td>30 phút</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Hiểu rõ SQL của Data Engineer không chỉ để trả lời câu hỏi, mà để xây pipeline ổn định và chạy lặp lại.</li>
+        <li>Định nghĩa chuẩn đầu ra tuần 1: 1 file SQL có 11 truy vấn có thể chạy và review độc lập.</li>
+        <li>Nắm tiêu chí thành công: window functions, SCD, incremental, optimization.</li>
+        <li>Biết cách tự đánh giá trước khi sang Tuần 2 Python cho DE.</li>
+      </ul>
+      <div class="info-box note">📌 <span>Tuần 1 là nền tảng của toàn bộ giai đoạn modeling và dbt. Làm chắc tuần này sẽ giảm rất nhiều lỗi ở các tuần sau.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>SQL Analyst vs SQL Data Engineer</h3>
+      <table>
+        <tr><th>Kỹ năng</th><th>Analyst</th><th>Data Engineer</th></tr>
+        <tr><td>Window Functions</td><td>Dùng cơ bản cho báo cáo</td><td>Dùng nâng cao cho logic production</td></tr>
+        <tr><td>Lịch sử dữ liệu</td><td>Ít quan tâm</td><td>SCD Type 1/2/3 là bắt buộc</td></tr>
+        <tr><td>Load strategy</td><td>Thường full refresh</td><td>Incremental, idempotent, có backfill</td></tr>
+        <tr><td>Hiệu năng</td><td>Query chạy được là đủ</td><td>Đọc execution plan (PostgreSQL EXPLAIN ANALYZE / Oracle EXPLAIN PLAN), tune scan/join/index</td></tr>
+        <tr><td>Pipeline mindset</td><td>Ad-hoc</td><td>Có checklist, test, rollback plan</td></tr>
+      </table>
+
+      <h3>Checklist hoàn thành tuần 1</h3>
+      <ul class="checklist">
+        <li>Viết được query dùng <code>ROW_NUMBER</code>, <code>RANK</code>, <code>LAG</code>, <code>LEAD</code> đúng ngữ cảnh.</li>
+        <li>Implement SCD Type 1 và Type 2 bằng SQL có validate.</li>
+        <li>Viết incremental load có watermark và test idempotency chạy 2 lần.</li>
+        <li>Tối ưu một query chậm bằng plan before/after: PostgreSQL dùng <code>EXPLAIN ANALYZE</code>, Oracle dùng <code>EXPLAIN PLAN</code> + <code>DBMS_XPLAN</code>.</li>
+        <li>Tạo file <code>week1_sql_advanced.sql</code> và commit lên repo artifacts.</li>
+      </ul>
+
+      <div class="cmd-block">
+        <div class="cmd-header">
+          <div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>
+          <span>week1_sql_advanced.sql · khung file</span>
+        </div>
+        <div class="cmd-body"><pre><span class="comment">-- 01_running_total.sql</span>
+<span class="comment">-- 02_rank_in_category.sql</span>
+<span class="comment">-- 03_lag_lead_compare.sql</span>
+<span class="comment">-- 04_retention_percentile.sql</span>
+<span class="comment">-- 05_consecutive_active.sql</span>
+<span class="comment">-- 06_grouping_sets.sql</span>
+<span class="comment">-- 07_rollup_sales.sql</span>
+<span class="comment">-- 08_scd_type1.sql</span>
+<span class="comment">-- 09_scd_type2.sql</span>
+<span class="comment">-- 10_incremental_load.sql</span>
+<span class="comment">-- 11_explain_optimize.sql</span></pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span>Mục tiêu của tuần này không phải học thuộc hàm, mà là dùng đúng pattern cho bài toán thật.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Điểm khác biệt quan trọng nhất giữa SQL Analyst và SQL Data Engineer là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Analyst cũng dùng JOIN và GROUP BY rất nhiều nên đây không phải khác biệt cốt lõi.')">A. Data Engineer dùng JOIN nhiều hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Data Engineer phải xây logic incremental, idempotent và quản lý lịch sử dữ liệu.')">B. Data Engineer phải tối ưu cho pipeline, lịch sử và tính lặp lại</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Visualization là phần BI, không phải trọng tâm của SQL Data Engineer.')">C. Data Engineer tập trung dashboard</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Ngôn ngữ SQL giống nhau, khác ở tư duy triển khai.')">D. Data Engineer dùng SQL khác hẳn</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Artifact bắt buộc của tuần 1 là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tuần 1 yêu cầu SQL file, không phải notebook Python.')">A. week1_sql_notebook.ipynb</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. File week1_sql_advanced.sql là đầu ra bắt buộc để commit portfolio.')">B. week1_sql_advanced.sql</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'README là phần bổ sung, không thay thế artifact SQL.')">C. week1_readme.md</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Airflow thuộc tuần sau, chưa phải đầu ra tuần này.')">D. airflow_dag_week1.py</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao cần học đọc execution plan ngay từ tuần 1?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Syntax SQL không thay đổi khi chạy nhanh hay chậm.')">A. Để viết SQL đúng cú pháp</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Đọc execution plan giúp tìm bottleneck thực tế và tối ưu có căn cứ ở cả PostgreSQL lẫn Oracle.')">B. Để đo và tìm điểm nghẽn của query thật</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Bảo mật là mảng khác, EXPLAIN không dùng cho mục tiêu này.')">C. Để mã hóa dữ liệu nhạy cảm</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'EXPLAIN dùng cả OLTP và OLAP khi cần tuning.')">D. Chỉ dùng cho data warehouse</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Nếu pipeline chạy lại cùng ngày và ra kết quả khác, vấn đề chính là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan trực tiếp tới index.')">A. Thiếu index</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Đây là dấu hiệu pipeline chưa idempotent.')">B. Thiếu tính idempotent</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Window function có thể đúng hoàn toàn nhưng vẫn không idempotent.')">C. Dùng sai window function</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Timezone có thể ảnh hưởng nhưng không phải luôn là gốc vấn đề.')">D. Sai múi giờ hệ thống</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tuần 1 trong roadmap thuộc giai đoạn nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Tuần 1 thuộc Giai đoạn 1 Foundation.')">A. Giai đoạn 1 Foundation</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Giai đoạn 0 là setup môi trường trước tuần 1.')">B. Giai đoạn 0 Setup</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Giai đoạn 2 bắt đầu từ modeling và dbt ở tuần 5 trở đi.')">C. Giai đoạn 2 Core Skills</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Giai đoạn 3 là cloud và spark, không phải tuần 1.')">D. Giai đoạn 3 Big Data</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào bạn nên chuyển sang Tuần 2?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Xem video giúp hiểu ý tưởng nhưng chưa chứng minh bạn triển khai được.')">A. Sau khi xem hết tutorial</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Làm nửa file sẽ thiếu pattern quan trọng.')">B. Khi hoàn thành 5/11 query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Chỉ nên sang tuần 2 khi hoàn thành đầy đủ artifact và tự kiểm tra logic.')">C. Khi hoàn thành 11 query và đã test cơ bản</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Điểm mini test cao hữu ích nhưng không thay thế artifact thực hành.')">D. Khi đạt 18 điểm mini test</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Mindset</strong>SQL DE tập trung pipeline ổn định, không chỉ ad-hoc query.</div>
+        <div class="summary-item"><strong>Đầu ra tuần</strong>File week1_sql_advanced.sql là artifact bắt buộc.</div>
+        <div class="summary-item"><strong>4 trụ cột</strong>Window, SCD, Incremental, Optimization là lõi tuần 1.</div>
+        <div class="summary-item"><strong>Đo lường</strong>Dùng EXPLAIN ANALYZE (PostgreSQL) hoặc EXPLAIN PLAN (Oracle) để tối ưu có số liệu.</div>
+        <div class="summary-item"><strong>Chất lượng</strong>Mọi query nên có comment, giả định, expected output.</div>
+        <div class="summary-item"><strong>Điều kiện qua tuần</strong>Hoàn thành 11 query và hiểu rõ trade-off từng pattern.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none;">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1 · Viết kế hoạch tuần 1 của bạn</div>
+        <div class="practice-task-body">
+          <p>Viết bảng kế hoạch 7 ngày gồm: module sẽ học, thời gian, output mỗi ngày. Mục tiêu là đảm bảo cuối tuần có đủ 11 query.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <table>
+              <tr><th>Ngày</th><th>Nội dung</th><th>Output</th></tr>
+              <tr><td>1</td><td>W1.01 + W1.02</td><td>01,02 query</td></tr>
+              <tr><td>2</td><td>W1.02 tiếp</td><td>03,04,05 query</td></tr>
+              <tr><td>3</td><td>W1.03</td><td>06,07 query</td></tr>
+              <tr><td>4</td><td>W1.04</td><td>08,09 query</td></tr>
+              <tr><td>5</td><td>W1.05</td><td>10 query</td></tr>
+              <tr><td>6</td><td>W1.06</td><td>11 query</td></tr>
+              <tr><td>7</td><td>W1.07 + review</td><td>Commit artifact</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 2 · Tạo skeleton artifact file</div>
+        <div class="practice-task-body">
+          <p>Tạo file <code>week1_sql_advanced.sql</code> và thêm 11 tiêu đề section để điền dần trong tuần.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header">
+                <div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>
+                <span>bash</span>
+              </div>
+              <div class="cmd-body"><pre><span class="prompt">$</span> touch week1_sql_advanced.sql
+<span class="prompt">$</span> <span class="comment"># mở file và thêm 11 section comment</span></pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(0)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(0)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<!-- MODULE 2 -->
+<div class="module" id="m1">
+  <div class="module-header">
+    <div class="module-tag">Tuần 1 · Module 02</div>
+    <div class="module-title">🧠 Window Functions Nâng Cao</div>
+    <div class="module-subtitle">OVER clause · Ranking · Offset · Frame · Statistical windows</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Nhóm hàm</th><th>Hàm tiêu biểu</th><th>Use case DE</th></tr>
+        <tr><td>Ranking</td><td>ROW_NUMBER, RANK, DENSE_RANK, NTILE</td><td>Top-N theo nhóm, dedup theo key</td></tr>
+        <tr><td>Offset</td><td>LAG, LEAD</td><td>So sánh kỳ trước, phát hiện biến động</td></tr>
+        <tr><td>Aggregate</td><td>SUM OVER, AVG OVER</td><td>Running total, rolling metric</td></tr>
+        <tr><td>Frame</td><td>ROWS/RANGE BETWEEN</td><td>Cửa sổ thời gian chính xác</td></tr>
+        <tr><td>Statistical</td><td>PERCENT_RANK, CUME_DIST</td><td>Phân vị retention và hành vi user</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Nắm đầy đủ cấu trúc <code>OVER(PARTITION BY ... ORDER BY ...)</code> và chọn frame đúng.</li>
+        <li>Phân biệt rõ <code>ROW_NUMBER</code>, <code>RANK</code>, <code>DENSE_RANK</code> trong tình huống tie.</li>
+        <li>Dùng <code>LAG</code>, <code>LEAD</code> để phân tích tăng giảm theo kỳ.</li>
+        <li>Viết được query top 3 theo tháng hoặc danh mục dùng CTE + window.</li>
+      </ul>
+      <div class="info-box tip">✅ <span>5 hàm phỏng vấn hỏi nhiều nhất: ROW_NUMBER, RANK, LAG, LEAD, SUM OVER.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>OVER clause gồm 3 phần cốt lõi</h3>
+      <ul>
+        <li><strong>PARTITION BY:</strong> chia dữ liệu thành các nhóm độc lập.</li>
+        <li><strong>ORDER BY:</strong> thứ tự tính toán bên trong mỗi partition.</li>
+        <li><strong>Frame:</strong> phạm vi hàng tham gia tính toán tại mỗi dòng.</li>
+      </ul>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · running_total.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Running total + moving average 7 ngày</span>
+<span class="kw">SELECT</span>
+  order_date,
+  revenue,
+  <span class="fn">SUM</span>(revenue) <span class="kw">OVER</span> (
+    <span class="kw">ORDER BY</span> order_date
+    <span class="kw">ROWS BETWEEN</span> <span class="kw">UNBOUNDED PRECEDING AND CURRENT ROW</span>
+  ) <span class="kw">AS</span> running_total,
+  <span class="fn">AVG</span>(revenue) <span class="kw">OVER</span> (
+    <span class="kw">ORDER BY</span> order_date
+    <span class="kw">ROWS BETWEEN</span> 6 <span class="kw">PRECEDING AND CURRENT ROW</span>
+  ) <span class="kw">AS</span> moving_avg_7d
+<span class="kw">FROM</span> fct_daily_revenue
+<span class="kw">ORDER BY</span> order_date;</pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · rank_in_category.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- So sánh ROW_NUMBER vs RANK vs DENSE_RANK</span>
+<span class="kw">SELECT</span>
+  category,
+  product_id,
+  sales,
+  <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> category <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>) <span class="kw">AS</span> rn,
+  <span class="fn">RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> category <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>) <span class="kw">AS</span> rnk,
+  <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> category <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>) <span class="kw">AS</span> dense_rnk
+<span class="kw">FROM</span> fct_product_sales;</pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · lag_lead_compare.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- So sánh doanh thu với kỳ trước và kỳ sau</span>
+<span class="kw">SELECT</span>
+  month,
+  revenue,
+  <span class="fn">LAG</span>(revenue, 1, 0) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">AS</span> prev_month_revenue,
+  <span class="fn">LEAD</span>(revenue, 1, 0) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">AS</span> next_month_revenue,
+  revenue - <span class="fn">LAG</span>(revenue, 1, 0) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">AS</span> delta_prev
+<span class="kw">FROM</span> fct_monthly_revenue;</pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · retention_percentile.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Phân vị retention của user cohort</span>
+<span class="kw">SELECT</span>
+  cohort_month,
+  user_id,
+  retention_30d,
+  <span class="fn">PERCENT_RANK</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> cohort_month
+    <span class="kw">ORDER BY</span> retention_30d
+  ) <span class="kw">AS</span> retention_percentile
+<span class="kw">FROM</span> fct_user_retention;</pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · top3_each_month.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Top 3 sản phẩm bán chạy nhất mỗi tháng</span>
+<span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    month,
+    product_id,
+    sales,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> month
+      <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>
+    ) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> fct_product_monthly_sales
+)
+<span class="kw">SELECT</span> month, product_id, sales
+<span class="kw">FROM</span> ranked
+<span class="kw">WHERE</span> rn &lt;= 3
+<span class="kw">ORDER BY</span> month, rn;</pre></div>
+      </div>
+
+      <div class="info-box warn">⚠️ <span>Không chỉ nhớ cú pháp. Hãy kiểm tra xem frame đang dùng có đúng business logic hay không, nhất là rolling metrics.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Nếu muốn đánh số duy nhất từng dòng trong mỗi category, dùng hàm nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. ROW_NUMBER luôn sinh số thứ tự liên tục không trùng trong partition.')">A. ROW_NUMBER()</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'RANK có thể nhảy số khi có tie nên không đảm bảo thứ tự duy nhất liên tục.')">B. RANK()</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'DENSE_RANK không nhảy số nhưng vẫn cho cùng rank khi tie.')">C. DENSE_RANK()</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'NTILE chia nhóm, không đánh số từng dòng.')">D. NTILE()</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">LAG khác LEAD ở điểm nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Cả hai đều cần ORDER BY để xác định vị trí dòng.')">A. LAG không cần ORDER BY</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. LAG nhìn về dòng trước, LEAD nhìn về dòng sau trong thứ tự đã cho.')">B. LAG lấy giá trị trước, LEAD lấy giá trị sau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây không phải khác biệt thực tế giữa hai hàm.')">C. LAG chỉ dùng cho số, LEAD chỉ dùng cho ngày</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Cả hai đều là window functions, không phải aggregate thường.')">D. LEAD không phải window function</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khác biệt chính giữa ROWS và RANGE trong frame là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'ROWS có thể dùng cả ASC và DESC, không bị giới hạn như mô tả này.')">A. ROWS chỉ dùng khi ORDER BY tăng dần</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. ROWS dựa theo vị trí vật lý của dòng, RANGE dựa theo giá trị ORDER BY.')">B. ROWS theo số dòng, RANGE theo giá trị</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Ngược lại: RANGE thường nhạy với duplicate giá trị hơn.')">C. RANGE luôn nhanh hơn ROWS</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không đúng, cả hai đều có thể dùng trong cùng query tùy mục tiêu.')">D. Không thể dùng chung trong cùng query</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Dùng hàm nào để chia dữ liệu thành 4 nhóm phần trăm bằng nhau?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'DENSE_RANK không chia bucket theo số nhóm cố định.')">A. DENSE_RANK(4)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. NTILE(4) chia tập dữ liệu thành 4 nhóm gần bằng nhau.')">B. NTILE(4)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'CUME_DIST trả phân phối tích lũy dạng số thực, không tạo bucket trực tiếp.')">C. CUME_DIST(4)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'PERCENT_RANK cũng trả tỷ lệ, không tự chia thành 4 nhãn nhóm.')">D. PERCENT_RANK(4)</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Mục đích của PARTITION BY là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. PARTITION BY tạo nhóm độc lập để window tính trên từng nhóm.')">A. Chia dữ liệu thành các nhóm để tính độc lập</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sort dữ liệu là vai trò chính của ORDER BY.')">B. Sắp xếp toàn bộ dữ liệu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Giới hạn số dòng trả về thuộc LIMIT.')">C. Giới hạn số record output</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Join là chức năng của FROM/JOIN, không phải PARTITION.')">D. Tạo join giữa bảng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi làm top 3 mỗi tháng, pattern ổn định nhất là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'GROUP BY không trả lại top N record chi tiết một cách trực tiếp.')">A. GROUP BY month rồi LIMIT 3</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Dùng ROW_NUMBER trong CTE theo từng month rồi lọc rn <= 3.')">B. ROW_NUMBER PARTITION BY month rồi filter</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'DISTINCT ON có thể dùng nhưng phụ thuộc DB và kém rõ ràng hơn cho top N tổng quát.')">C. DISTINCT ON month ORDER BY sales</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Random không liên quan đến top theo sales.')">D. ORDER BY random()</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>OVER Clause</strong>Gồm partition, order và frame, thiếu một phần là logic dễ sai.</div>
+        <div class="summary-item"><strong>Ranking</strong>ROW_NUMBER khác RANK ở xử lý tie và khoảng số.</div>
+        <div class="summary-item"><strong>Offset</strong>LAG/LEAD cực hữu ích cho phân tích biến động theo thời gian.</div>
+        <div class="summary-item"><strong>Rolling metrics</strong>ROWS BETWEEN giúp kiểm soát cửa sổ tính toán chính xác.</div>
+        <div class="summary-item"><strong>Statistical window</strong>PERCENT_RANK phù hợp phân vị retention hoặc score.</div>
+        <div class="summary-item"><strong>Production pattern</strong>Top-N per group nên dùng CTE + window + filter rõ ràng.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none;">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1 · Running total + moving avg</div>
+        <div class="practice-task-body">
+          <p>Với bảng <code>fct_daily_revenue(day, revenue)</code>, viết query trả về running total và moving average 7 ngày.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution.sql</span></div><div class="cmd-body"><pre><span class="kw">SELECT</span>
+  day,
+  revenue,
+  <span class="fn">SUM</span>(revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> day <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>) <span class="kw">AS</span> running_total,
+  <span class="fn">AVG</span>(revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> day <span class="kw">ROWS BETWEEN</span> 6 <span class="kw">PRECEDING AND CURRENT ROW</span>) <span class="kw">AS</span> moving_avg_7d
+<span class="kw">FROM</span> fct_daily_revenue;</pre></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 2 · Top 3 sản phẩm mỗi category</div>
+        <div class="practice-task-body">
+          <p>Viết query lấy top 3 sản phẩm có doanh số cao nhất trong từng category.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution.sql</span></div><div class="cmd-body"><pre><span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    category,
+    product_id,
+    sales,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> category <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> fct_product_sales
+)
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> ranked
+<span class="kw">WHERE</span> rn &lt;= 3;</pre></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 3 · LAG và tỷ lệ tăng trưởng</div>
+        <div class="practice-task-body">
+          <p>Từ bảng doanh thu tháng, tính tăng trưởng % so với tháng trước cho từng sản phẩm.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution.sql</span></div><div class="cmd-body"><pre><span class="kw">SELECT</span>
+  product_id,
+  month,
+  revenue,
+  <span class="fn">LAG</span>(revenue) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> product_id <span class="kw">ORDER BY</span> month) <span class="kw">AS</span> prev_revenue,
+  <span class="kw">CASE WHEN</span> <span class="fn">LAG</span>(revenue) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> product_id <span class="kw">ORDER BY</span> month) = 0 <span class="kw">THEN</span> <span class="kw">NULL</span>
+       <span class="kw">ELSE</span> (revenue - <span class="fn">LAG</span>(revenue) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> product_id <span class="kw">ORDER BY</span> month))
+            * 100.0 / <span class="fn">LAG</span>(revenue) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> product_id <span class="kw">ORDER BY</span> month)
+  <span class="kw">END AS</span> growth_pct
+<span class="kw">FROM</span> fct_product_monthly_revenue;</pre></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(1)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(1)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<!-- MODULE 3 -->
+<div class="module" id="m2">
+  <div class="module-header">
+    <div class="module-tag">Tuần 1 · Module 03</div>
+    <div class="module-title">🧮 GROUPING SETS, ROLLUP, CUBE</div>
+    <div class="module-subtitle">Phân tích đa chiều không cần viết nhiều UNION ALL lặp lại</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:38%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Chủ đề</th><th>Mục tiêu</th><th>Kết quả mong đợi</th></tr>
+        <tr><td>GROUPING SETS</td><td>Chỉ định rõ tổ hợp cần group</td><td>Thay thế nhiều UNION ALL</td></tr>
+        <tr><td>ROLLUP</td><td>Tạo subtotal theo hierarchy</td><td>Report năm-quý-tháng</td></tr>
+        <tr><td>CUBE</td><td>Tạo mọi tổ hợp chiều</td><td>Cross-dimensional summary</td></tr>
+        <tr><td>GROUPING()</td><td>Phân biệt NULL do tổng hợp</td><td>Label subtotal/grand total đúng</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Biết khi nào dùng GROUPING SETS thay vì UNION ALL nhiều truy vấn.</li>
+        <li>Hiểu ROLLUP phù hợp cấu trúc phân cấp thời gian hoặc địa lý.</li>
+        <li>Hiểu CUBE có thể nổ số dòng, nên dùng có kiểm soát.</li>
+        <li>Dùng <code>GROUPING()</code> để gắn nhãn dòng tổng hợp chính xác.</li>
+      </ul>
+      <div class="info-box note">📌 <span>Đây là pattern cực hay cho báo cáo đa chiều trong data mart và dashboard tổng hợp.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Vấn đề của cách làm truyền thống</h3>
+      <p>Nếu cần tổng hợp theo nhiều chiều như (store, category), (store), (category), (all), nhiều người viết 4 query UNION ALL. Cách đó dài, khó bảo trì và dễ sai khi thêm metric mới.</p>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · grouping_sets.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Sales report đa chiều gọn bằng GROUPING SETS</span>
+<span class="kw">SELECT</span>
+  store_id,
+  category,
+  <span class="fn">SUM</span>(sales_amount) <span class="kw">AS</span> total_sales,
+  <span class="fn">GROUPING</span>(store_id) <span class="kw">AS</span> g_store,
+  <span class="fn">GROUPING</span>(category) <span class="kw">AS</span> g_category
+<span class="kw">FROM</span> fct_sales
+<span class="kw">GROUP BY GROUPING SETS</span> (
+  (store_id, category),
+  (store_id),
+  (category),
+  ()
+)
+<span class="kw">ORDER BY</span> store_id <span class="kw">NULLS LAST</span>, category <span class="kw">NULLS LAST</span>;</pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · rollup_sales.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Subtotal theo hierarchy thời gian</span>
+<span class="kw">SELECT</span>
+  year,
+  quarter,
+  month,
+  <span class="fn">SUM</span>(sales_amount) <span class="kw">AS</span> total_sales
+<span class="kw">FROM</span> fct_sales_calendar
+<span class="kw">GROUP BY ROLLUP</span> (year, quarter, month)
+<span class="kw">ORDER BY</span> year, quarter, month;</pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · cube_activity.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Mọi tổ hợp nền tảng và action</span>
+<span class="kw">SELECT</span>
+  platform,
+  action_type,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> events
+<span class="kw">FROM</span> fct_user_events
+<span class="kw">GROUP BY CUBE</span> (platform, action_type)
+<span class="kw">ORDER BY</span> platform <span class="kw">NULLS LAST</span>, action_type <span class="kw">NULLS LAST</span>;</pre></div>
+      </div>
+
+      <h3>Khi nào dùng gì?</h3>
+      <table>
+        <tr><th>Pattern</th><th>Khi dùng</th><th>Lưu ý</th></tr>
+        <tr><td>GROUPING SETS</td><td>Cần vài tổ hợp cụ thể</td><td>Ít dòng dư thừa, dễ kiểm soát</td></tr>
+        <tr><td>ROLLUP</td><td>Dữ liệu có hierarchy rõ</td><td>Tạo subtotal theo thứ tự cột</td></tr>
+        <tr><td>CUBE</td><td>Cần đủ mọi tổ hợp dimensions</td><td>Cẩn thận bùng nổ số dòng</td></tr>
+      </table>
+
+      <div class="info-box warn">⚠️ <span>CUBE rất mạnh nhưng có thể tạo quá nhiều dòng trên bảng lớn. Chỉ dùng khi bạn thật sự cần tất cả tổ hợp.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">GROUPING SETS giúp giải quyết vấn đề nào tốt nhất?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'JOIN optimization là chủ đề khác, không phải mục tiêu chính của GROUPING SETS.')">A. Giảm số lượng JOIN</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. GROUPING SETS thay nhiều GROUP BY + UNION ALL bằng một query gọn hơn.')">B. Gộp nhiều mức tổng hợp trong một query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'GROUPING SETS không thay thế window functions.')">C. Thay thế hoàn toàn window functions</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'DELETE không liên quan tới mục tiêu báo cáo tổng hợp.')">D. Xóa dữ liệu trùng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">ROLLUP(year, quarter, month) sẽ tạo gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. ROLLUP tạo subtotal theo thứ tự phân cấp và tổng toàn cục.')">A. Tổng theo tháng, quý, năm và grand total</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là đặc trưng của CUBE, không phải ROLLUP.')">B. Mọi tổ hợp của year-quarter-month</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'ROLLUP có tạo subtotal, không phải chỉ detail rows.')">C. Chỉ dòng chi tiết gốc</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'ROLLUP vẫn group dữ liệu, không thay đổi định nghĩa metric.')">D. Trung bình thay vì tổng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Hàm GROUPING(col) thường dùng để làm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đếm NULL là nhiệm vụ của COUNT hoặc CASE riêng.')">A. Đếm số dòng NULL trong bảng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. GROUPING giúp phân biệt NULL thật và NULL do dòng tổng hợp.')">B. Nhận diện cột bị group-away trong subtotal</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải kiểm tra index.')">C. Kiểm tra index có được dùng không</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan order output.')">D. Ép thứ tự sắp xếp</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong ba pattern, pattern nào có nguy cơ nổ số tổ hợp cao nhất?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'GROUPING SETS kiểm soát rõ các tổ hợp nên ít rủi ro hơn.')">A. GROUPING SETS</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'ROLLUP đi theo chuỗi hierarchy nên ít tổ hợp hơn CUBE.')">B. ROLLUP</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. CUBE tạo đầy đủ mọi tổ hợp dimension.')">C. CUBE</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'UNION ALL thủ công dài nhưng không tự bùng nổ tổ hợp như CUBE.')">D. UNION ALL</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Bạn cần report theo (store, category), (store), (category), tổng toàn bộ. Nên chọn gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. GROUPING SETS mô tả đúng và đủ các tổ hợp cần thiết.')">A. GROUPING SETS</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'ROLLUP hợp khi có hierarchy tuyến tính, ở đây là 2 chiều ngang.')">B. ROLLUP(store, category)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'CUBE được nhưng tạo thêm tổ hợp không cần, dễ dư.')">C. CUBE(store, category)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Window function không thay cho nhóm tổng hợp đa mức.')">D. Window SUM OVER</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi output có NULL ở cột category sau GROUPING SETS, điều này luôn có nghĩa dữ liệu lỗi?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không đúng. NULL có thể là subtotal hợp lệ.')">A. Có, luôn là lỗi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Cần kiểm tra GROUPING(category) để biết NULL do subtotal hay do dữ liệu thật.')">B. Không, cần dùng GROUPING để phân biệt</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Ép COALESCE không giải quyết bản chất phân biệt nguồn NULL.')">C. Luôn dùng COALESCE là đủ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Thay bằng DISTINCT không giải quyết vấn đề phân cấp tổng hợp.')">D. Đổi sang DISTINCT</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>GROUPING SETS</strong>Phù hợp khi bạn biết rõ những tổ hợp cần tổng hợp.</div>
+        <div class="summary-item"><strong>ROLLUP</strong>Lý tưởng cho hierarchy như năm-quý-tháng hoặc vùng-tỉnh-huyện.</div>
+        <div class="summary-item"><strong>CUBE</strong>Tạo toàn bộ tổ hợp chiều, rất mạnh nhưng có thể rất nặng.</div>
+        <div class="summary-item"><strong>GROUPING()</strong>Giúp nhận diện dòng subtotal và grand total chuẩn xác.</div>
+        <div class="summary-item"><strong>Bảo trì</strong>Một query gọn dễ bảo trì hơn nhiều query UNION lặp lại.</div>
+        <div class="summary-item"><strong>Thực chiến</strong>Dùng pattern đúng giúp report đa chiều ổn định và mở rộng dễ hơn.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none;">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1 · Báo cáo sales đa chiều</div>
+        <div class="practice-task-body">
+          <p>Viết query trả doanh thu theo (store, category), (store), (category), tổng toàn bộ trong một query duy nhất.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution.sql</span></div><div class="cmd-body"><pre><span class="kw">SELECT</span>
+  store_id,
+  category,
+  <span class="fn">SUM</span>(sales_amount) <span class="kw">AS</span> total_sales
+<span class="kw">FROM</span> fct_sales
+<span class="kw">GROUP BY GROUPING SETS</span> ((store_id, category), (store_id), (category), ());</pre></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 2 · Label subtotal với GROUPING()</div>
+        <div class="practice-task-body">
+          <p>Trong output của bài 1, thêm cột <code>level_label</code> để phân biệt detail, subtotal, grand total.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution.sql</span></div><div class="cmd-body"><pre><span class="kw">CASE</span>
+  <span class="kw">WHEN</span> <span class="fn">GROUPING</span>(store_id)=0 <span class="kw">AND</span> <span class="fn">GROUPING</span>(category)=0 <span class="kw">THEN</span> <span class="str">'detail'</span>
+  <span class="kw">WHEN</span> <span class="fn">GROUPING</span>(store_id)=0 <span class="kw">AND</span> <span class="fn">GROUPING</span>(category)=1 <span class="kw">THEN</span> <span class="str">'store subtotal'</span>
+  <span class="kw">WHEN</span> <span class="fn">GROUPING</span>(store_id)=1 <span class="kw">AND</span> <span class="fn">GROUPING</span>(category)=0 <span class="kw">THEN</span> <span class="str">'category subtotal'</span>
+  <span class="kw">ELSE</span> <span class="str">'grand total'</span>
+<span class="kw">END AS</span> level_label</pre></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(2)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(2)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<!-- MODULE 4 -->
+<div class="module" id="m3">
+  <div class="module-header">
+    <div class="module-tag">Tuần 1 · Module 04</div>
+    <div class="module-title">🕒 Slowly Changing Dimensions (SCD)</div>
+    <div class="module-subtitle">Type 1 · Type 2 · Type 3 · validation dữ liệu lịch sử</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Loại SCD</th><th>Cơ chế</th><th>Khi dùng</th></tr>
+        <tr><td>Type 1</td><td>Overwrite record cũ</td><td>Khi không cần lịch sử</td></tr>
+        <tr><td>Type 2</td><td>Tạo record mới theo khoảng hiệu lực</td><td>Khi cần audit và historical analytics</td></tr>
+        <tr><td>Type 3</td><td>Giữ current + previous value</td><td>Khi chỉ cần một mức lịch sử gần nhất</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Hiểu vì sao dữ liệu dimension thay đổi theo thời gian cần cơ chế quản lý lịch sử.</li>
+        <li>Triển khai được SCD Type 1 và Type 2 bằng SQL chạy được trên cả PostgreSQL và Oracle Database.</li>
+        <li>Biết set các cột <code>effective_from</code>, <code>effective_to</code>, <code>is_current</code> chuẩn.</li>
+        <li>Viết validation query để phát hiện overlap hoặc nhiều record current cho cùng key.</li>
+      </ul>
+      <div class="info-box warn">⚠️ <span>SCD Type 2 sai date range là lỗi production nghiêm trọng vì làm sai toàn bộ báo cáo historical.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>SCD Type 1: overwrite nhanh, không giữ lịch sử</h3>
+      <div class="info-box note">📌 <span>Phần dưới hiển thị song song 2 dialect: PostgreSQL và Oracle SQL để bạn dùng theo hệ quản trị đang học.</span></div>
+      <h3>PostgreSQL · SCD Type 1</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · scd_type1.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Cập nhật trực tiếp bản ghi hiện tại</span>
+<span class="kw">UPDATE</span> dim_customer d
+<span class="kw">SET</span>
+  city = s.city,
+  email = s.email,
+  updated_at = <span class="kw">CURRENT_TIMESTAMP</span>
+<span class="kw">FROM</span> stg_customer s
+<span class="kw">WHERE</span> d.customer_id = s.customer_id
+  <span class="kw">AND</span> (d.city, d.email) <span class="kw">IS DISTINCT FROM</span> (s.city, s.email);</pre></div>
+      </div>
+
+      <h3>Oracle SQL · SCD Type 1</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · scd_type1.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Cập nhật trực tiếp bản ghi hiện tại</span>
+<span class="kw">MERGE INTO</span> dim_customer d
+<span class="kw">USING</span> stg_customer s
+   <span class="kw">ON</span> (d.customer_id = s.customer_id)
+ <span class="kw">WHEN MATCHED THEN</span>
+   <span class="kw">UPDATE SET</span>
+     d.city = s.city,
+     d.email = s.email,
+     d.updated_at = <span class="kw">SYSTIMESTAMP</span>
+   <span class="kw">WHERE</span> <span class="fn">NVL</span>(d.city, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.city, <span class="str">'<<NULL>>'</span>)
+      <span class="kw">OR</span> <span class="fn">NVL</span>(d.email, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.email, <span class="str">'<<NULL>>'</span>);</pre></div>
+      </div>
+
+      <h3>SCD Type 2: giữ lịch sử đầy đủ</h3>
+      <h3>PostgreSQL · SCD Type 2 DDL</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · dim_customer_scd2_ddl.sql</span></div>
+        <div class="cmd-body"><pre><span class="kw">CREATE TABLE IF NOT EXISTS</span> dim_customer_scd2 (
+  customer_sk <span class="kw">BIGSERIAL PRIMARY KEY</span>,
+  customer_id <span class="kw">BIGINT NOT NULL</span>,
+  customer_name <span class="kw">TEXT</span>,
+  city <span class="kw">TEXT</span>,
+  tier <span class="kw">TEXT</span>,
+  effective_from <span class="kw">DATE NOT NULL</span>,
+  effective_to <span class="kw">DATE NOT NULL DEFAULT</span> <span class="str">'9999-12-31'</span>,
+  is_current <span class="kw">BOOLEAN NOT NULL DEFAULT TRUE</span>
+);
+
+<span class="kw">CREATE INDEX</span> idx_dim_customer_current
+  <span class="kw">ON</span> dim_customer_scd2(customer_id)
+  <span class="kw">WHERE</span> is_current = <span class="kw">TRUE</span>;</pre></div>
+      </div>
+
+      <h3>Oracle SQL · SCD Type 2 DDL</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · dim_customer_scd2_ddl.sql</span></div>
+        <div class="cmd-body"><pre><span class="kw">CREATE TABLE</span> dim_customer_scd2 (
+  customer_sk <span class="kw">NUMBER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY</span>,
+  customer_id <span class="kw">NUMBER NOT NULL</span>,
+  customer_name <span class="kw">VARCHAR2(200)</span>,
+  city <span class="kw">VARCHAR2(100)</span>,
+  tier <span class="kw">VARCHAR2(30)</span>,
+  effective_from <span class="kw">DATE NOT NULL</span>,
+  effective_to <span class="kw">DATE DEFAULT DATE</span> <span class="str">'9999-12-31'</span> <span class="kw">NOT NULL</span>,
+  is_current <span class="kw">NUMBER(1) DEFAULT 1 NOT NULL</span>
+);
+
+<span class="kw">CREATE INDEX</span> idx_dim_customer_current
+  <span class="kw">ON</span> dim_customer_scd2(customer_id, is_current);</pre></div>
+      </div>
+
+      <h3>PostgreSQL · SCD Type 2 Incremental</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · scd_type2_incremental.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- B1: đóng bản ghi hiện tại nếu có thay đổi</span>
+<span class="kw">UPDATE</span> dim_customer_scd2 d
+<span class="kw">SET</span>
+  effective_to = <span class="kw">CURRENT_DATE</span> - <span class="kw">INTERVAL</span> <span class="str">'1 day'</span>,
+  is_current = <span class="kw">FALSE</span>
+<span class="kw">FROM</span> stg_customer s
+<span class="kw">WHERE</span> d.customer_id = s.customer_id
+  <span class="kw">AND</span> d.is_current = <span class="kw">TRUE</span>
+  <span class="kw">AND</span> (d.city, d.tier) <span class="kw">IS DISTINCT FROM</span> (s.city, s.tier);
+
+<span class="comment">-- B2: insert bản ghi mới cho khách mới hoặc khách vừa thay đổi</span>
+<span class="kw">INSERT INTO</span> dim_customer_scd2 (
+  customer_id, customer_name, city, tier, effective_from, effective_to, is_current
+)
+<span class="kw">SELECT</span>
+  s.customer_id,
+  s.customer_name,
+  s.city,
+  s.tier,
+  <span class="kw">CURRENT_DATE</span>,
+  <span class="str">'9999-12-31'</span>,
+  <span class="kw">TRUE</span>
+<span class="kw">FROM</span> stg_customer s
+<span class="kw">LEFT JOIN</span> dim_customer_scd2 d
+  <span class="kw">ON</span> d.customer_id = s.customer_id
+ <span class="kw">AND</span> d.is_current = <span class="kw">TRUE</span>
+<span class="kw">WHERE</span> d.customer_id <span class="kw">IS NULL</span>
+   <span class="kw">OR</span> (d.city, d.tier) <span class="kw">IS DISTINCT FROM</span> (s.city, s.tier);</pre></div>
+      </div>
+
+      <h3>Oracle SQL · SCD Type 2 Incremental</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · scd_type2_incremental.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- B1: đóng bản ghi hiện tại nếu có thay đổi</span>
+<span class="kw">UPDATE</span> dim_customer_scd2 d
+<span class="kw">SET</span>
+  effective_to = <span class="kw">TRUNC</span>(<span class="kw">SYSDATE</span>) - 1,
+  is_current = 0
+<span class="kw">WHERE</span> d.is_current = 1
+  <span class="kw">AND EXISTS</span> (
+    <span class="kw">SELECT</span> 1
+    <span class="kw">FROM</span> stg_customer s
+    <span class="kw">WHERE</span> s.customer_id = d.customer_id
+      <span class="kw">AND</span> (
+        <span class="fn">NVL</span>(d.city, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.city, <span class="str">'<<NULL>>'</span>)
+        <span class="kw">OR</span> <span class="fn">NVL</span>(d.tier, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.tier, <span class="str">'<<NULL>>'</span>)
+      )
+  );
+
+<span class="comment">-- B2: insert bản ghi mới cho khách mới hoặc khách vừa thay đổi</span>
+<span class="kw">INSERT INTO</span> dim_customer_scd2 (
+  customer_id, customer_name, city, tier, effective_from, effective_to, is_current
+)
+<span class="kw">SELECT</span>
+  s.customer_id,
+  s.customer_name,
+  s.city,
+  s.tier,
+  <span class="kw">TRUNC</span>(<span class="kw">SYSDATE</span>),
+  <span class="kw">DATE</span> <span class="str">'9999-12-31'</span>,
+  1
+<span class="kw">FROM</span> stg_customer s
+<span class="kw">LEFT JOIN</span> dim_customer_scd2 d
+  <span class="kw">ON</span> d.customer_id = s.customer_id
+ <span class="kw">AND</span> d.is_current = 1
+<span class="kw">WHERE</span> d.customer_id <span class="kw">IS NULL</span>
+   <span class="kw">OR</span> (
+     <span class="fn">NVL</span>(d.city, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.city, <span class="str">'<<NULL>>'</span>)
+     <span class="kw">OR</span> <span class="fn">NVL</span>(d.tier, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.tier, <span class="str">'<<NULL>>'</span>)
+   );</pre></div>
+      </div>
+
+      <h3>Validation bắt buộc sau SCD2</h3>
+      <h3>PostgreSQL · SCD2 Validation</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · scd2_validation.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Mỗi customer chỉ có 1 record current</span>
+<span class="kw">SELECT</span> customer_id, <span class="fn">COUNT</span>(*)
+<span class="kw">FROM</span> dim_customer_scd2
+<span class="kw">WHERE</span> is_current = <span class="kw">TRUE</span>
+<span class="kw">GROUP BY</span> customer_id
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; 1;
+
+<span class="comment">-- Không chồng lấn range cho cùng customer</span>
+<span class="kw">SELECT</span> a.customer_id
+<span class="kw">FROM</span> dim_customer_scd2 a
+<span class="kw">JOIN</span> dim_customer_scd2 b
+  <span class="kw">ON</span> a.customer_id = b.customer_id
+ <span class="kw">AND</span> a.customer_sk &lt;&gt; b.customer_sk
+ <span class="kw">AND</span> daterange(a.effective_from, a.effective_to, <span class="str">'[]'</span>)
+     &amp;&amp; daterange(b.effective_from, b.effective_to, <span class="str">'[]'</span>);</pre></div>
+      </div>
+
+      <h3>Oracle SQL · SCD2 Validation</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · scd2_validation.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Mỗi customer chỉ có 1 record current</span>
+<span class="kw">SELECT</span> customer_id, <span class="fn">COUNT</span>(*)
+<span class="kw">FROM</span> dim_customer_scd2
+<span class="kw">WHERE</span> is_current = 1
+<span class="kw">GROUP BY</span> customer_id
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; 1;
+
+<span class="comment">-- Không chồng lấn range cho cùng customer</span>
+<span class="kw">SELECT</span> a.customer_id
+<span class="kw">FROM</span> dim_customer_scd2 a
+<span class="kw">JOIN</span> dim_customer_scd2 b
+  <span class="kw">ON</span> a.customer_id = b.customer_id
+ <span class="kw">AND</span> a.customer_sk &lt; b.customer_sk
+ <span class="kw">AND</span> a.effective_from &lt;= b.effective_to
+ <span class="kw">AND</span> b.effective_from &lt;= a.effective_to;</pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span>Chạy validation ngay sau load giúp phát hiện lỗi logic trước khi dữ liệu lên dashboard.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào nên chọn SCD Type 1?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Type 1 phù hợp khi không cần giữ lịch sử thay đổi thuộc tính.')">A. Khi chỉ cần giá trị hiện tại, không cần lịch sử</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Nếu cần audit đầy đủ theo thời gian thì Type 2 mới phù hợp.')">B. Khi cần truy vết mọi thay đổi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Type 1 không dành riêng cho dữ liệu lớn hay nhỏ.')">C. Khi bảng có trên 1 tỷ dòng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Type 3 mới có current và previous cùng lúc.')">D. Khi cần cả current và previous value</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong SCD Type 2, cột nào dùng để đánh dấu bản ghi còn hiệu lực?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'created_at không đảm bảo trạng thái hiện tại.')">A. created_at</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Thực tế thường dùng is_current kết hợp effective_to = 9999-12-31.')">B. is_current</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'surrogate key chỉ định danh record, không chỉ trạng thái.')">C. customer_sk</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'last_login là thuộc tính nghiệp vụ, không phải metadata SCD chuẩn.')">D. last_login</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Bước đúng khi phát hiện thay đổi ở record current trong SCD2 là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Overwrite trực tiếp sẽ mất lịch sử.')">A. UPDATE trực tiếp record current</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Đóng record cũ rồi insert record mới là quy trình chuẩn SCD2.')">B. Đóng record cũ và insert record mới</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Delete record cũ làm mất trace lịch sử.')">C. Delete record cũ rồi insert mới</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không làm gì thì dữ liệu lịch sử không cập nhật.')">D. Giữ nguyên record và bỏ qua</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Validation nào là bắt buộc cho SCD2?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Chỉ đếm tổng dòng không đủ để bắt lỗi logic thời gian.')">A. COUNT(*) tăng theo ngày</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Không overlap range và mỗi key có 1 record current là 2 kiểm tra quan trọng nhất.')">B. Không overlap date range và đúng 1 current record</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Kiểm tra index có ích nhưng không thay cho validation logic SCD.')">C. Có index trên customer_id</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'ORDER BY không phản ánh tính đúng của lịch sử.')">D. Kết quả sort đúng thứ tự</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">SCD Type 3 lưu lịch sử theo cách nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là Type 2.')">A. Thêm nhiều bản ghi theo thời gian</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Type 3 thêm cột previous value trong cùng một dòng.')">B. Thêm cột previous_value bên cạnh current value</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây gần giống Type 1.')">C. Ghi đè hoàn toàn giá trị cũ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan tới cách biểu diễn history.')">D. Dùng bảng fact thay dimension</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Giá trị thường dùng cho effective_to của bản ghi current trong SCD2 là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Ngày load hiện tại không dùng làm end date cho record current.')">A. current_date</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. 9999-12-31 là sentinel date phổ biến cho record còn hiệu lực.')">B. 9999-12-31</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'NULL có thể dùng nhưng cần nhất quán; pattern yêu cầu ở đây dùng sentinel date.')">C. NULL</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, '1970-01-01 không có ý nghĩa end date current.')">D. 1970-01-01</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>SCD Type 1</strong>Đơn giản, overwrite, phù hợp khi không cần history.</div>
+        <div class="summary-item"><strong>SCD Type 2</strong>Chuẩn thực chiến cho analytics lịch sử theo thời gian.</div>
+        <div class="summary-item"><strong>Metadata cốt lõi</strong>effective_from, effective_to, is_current phải nhất quán.</div>
+        <div class="summary-item"><strong>Quy trình update</strong>Đóng record cũ trước, insert record mới sau.</div>
+        <div class="summary-item"><strong>Validation</strong>Không overlap range và không có nhiều current record.</div>
+        <div class="summary-item"><strong>Rủi ro</strong>Sai date range sẽ làm sai toàn bộ KPI historical.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none;">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1 · Implement SCD2 cho dim_product</div>
+        <div class="practice-task-body">
+          <p>Bảng nguồn có <code>product_id, price, category</code>. Viết logic incremental SCD2 cho dim_product với effective date và current flag.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Áp dụng cùng pattern ở dim_customer_scd2: UPDATE record current khi thuộc tính thay đổi, sau đó INSERT record mới với effective_from = current_date.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 2 · Viết validation query</div>
+        <div class="practice-task-body">
+          <p>Viết 2 query kiểm tra: (1) mỗi product chỉ có 1 record current, (2) không overlap date range.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Dùng <code>GROUP BY product_id HAVING COUNT(*) &gt; 1</code> với is_current = 1 và self-join điều kiện chồng lấn ngày theo ví dụ PostgreSQL hoặc Oracle trong module.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(3)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(3)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<!-- MODULE 5 -->
+<div class="module" id="m4">
+  <div class="module-header">
+    <div class="module-tag">Tuần 1 · Module 05</div>
+    <div class="module-title">♻️ Incremental Load Patterns</div>
+    <div class="module-subtitle">Timestamp watermark · Date partition · CDC · idempotency</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:63%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Pattern</th><th>Điều kiện dùng</th><th>Ưu điểm</th></tr>
+        <tr><td>Timestamp-based</td><td>Có cột updated_at tin cậy</td><td>Đơn giản, phổ biến</td></tr>
+        <tr><td>Date partition</td><td>Data theo ngày và có partition</td><td>Idempotent tốt, dễ backfill</td></tr>
+        <tr><td>CDC-based</td><td>Nguồn có change log</td><td>Giảm scan nguồn, gần real-time</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Phân biệt full load, backfill và incremental theo ngữ cảnh sản phẩm.</li>
+        <li>Thiết kế incremental query có watermark rõ ràng.</li>
+        <li>Đảm bảo pipeline idempotent: chạy lại không làm nhân bản dữ liệu.</li>
+        <li>Biết test an toàn trước khi đưa logic vào scheduler.</li>
+      </ul>
+      <div class="info-box tip">✅ <span>Luôn test idempotency bằng cách chạy cùng ngày 2 lần và so sánh row count + checksum.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Timestamp-based incremental</h3>
+      <h3>PostgreSQL · Incremental watermark</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · incremental_timestamp.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Lấy watermark cuối lần load trước</span>
+<span class="kw">WITH</span> wm <span class="kw">AS</span> (
+  <span class="kw">SELECT COALESCE</span>(<span class="fn">MAX</span>(updated_at), <span class="str">'1970-01-01'</span>::timestamp) <span class="kw">AS</span> last_wm
+  <span class="kw">FROM</span> dw_orders
+)
+<span class="kw">INSERT INTO</span> dw_orders (order_id, customer_id, amount, updated_at)
+<span class="kw">SELECT</span> s.order_id, s.customer_id, s.amount, s.updated_at
+<span class="kw">FROM</span> src_orders s
+<span class="kw">CROSS JOIN</span> wm
+<span class="kw">WHERE</span> s.updated_at &gt; wm.last_wm;</pre></div>
+      </div>
+
+      <h3>Oracle SQL · Incremental watermark</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · incremental_timestamp.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Lấy watermark cuối lần load trước</span>
+<span class="kw">WITH</span> wm <span class="kw">AS</span> (
+  <span class="kw">SELECT COALESCE</span>(<span class="fn">MAX</span>(updated_at), <span class="fn">TO_TIMESTAMP</span>(<span class="str">'1970-01-01 00:00:00'</span>, <span class="str">'YYYY-MM-DD HH24:MI:SS'</span>)) <span class="kw">AS</span> last_wm
+  <span class="kw">FROM</span> dw_orders
+)
+<span class="kw">INSERT INTO</span> dw_orders (order_id, customer_id, amount, updated_at)
+<span class="kw">SELECT</span> s.order_id, s.customer_id, s.amount, s.updated_at
+<span class="kw">FROM</span> src_orders s
+<span class="kw">CROSS JOIN</span> wm
+<span class="kw">WHERE</span> s.updated_at &gt; wm.last_wm;</pre></div>
+      </div>
+
+      <h3>Idempotent UPSERT</h3>
+      <h3>PostgreSQL · ON CONFLICT</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · incremental_upsert.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Tránh duplicate khi chạy lại</span>
+<span class="kw">INSERT INTO</span> dw_orders (order_id, customer_id, amount, updated_at)
+<span class="kw">SELECT</span> order_id, customer_id, amount, updated_at
+<span class="kw">FROM</span> stg_orders_delta
+<span class="kw">ON CONFLICT</span> (order_id)
+<span class="kw">DO UPDATE SET</span>
+  customer_id = <span class="kw">EXCLUDED</span>.customer_id,
+  amount = <span class="kw">EXCLUDED</span>.amount,
+  updated_at = <span class="kw">EXCLUDED</span>.updated_at
+<span class="kw">WHERE</span> dw_orders.updated_at &lt; <span class="kw">EXCLUDED</span>.updated_at;</pre></div>
+      </div>
+
+      <h3>Oracle SQL · MERGE</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · incremental_upsert.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Tránh duplicate khi chạy lại bằng MERGE</span>
+<span class="kw">MERGE INTO</span> dw_orders d
+<span class="kw">USING</span> stg_orders_delta s
+   <span class="kw">ON</span> (d.order_id = s.order_id)
+ <span class="kw">WHEN MATCHED THEN</span>
+   <span class="kw">UPDATE SET</span>
+     d.customer_id = s.customer_id,
+     d.amount = s.amount,
+     d.updated_at = s.updated_at
+   <span class="kw">WHERE</span> d.updated_at &lt; s.updated_at
+ <span class="kw">WHEN NOT MATCHED THEN</span>
+   <span class="kw">INSERT</span> (order_id, customer_id, amount, updated_at)
+   <span class="kw">VALUES</span> (s.order_id, s.customer_id, s.amount, s.updated_at);</pre></div>
+      </div>
+
+      <h3>Date partition pattern</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · partition_daily_load.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- target_date truyền từ scheduler</span>
+<span class="kw">DELETE FROM</span> fct_orders_daily
+<span class="kw">WHERE</span> order_date = <span class="str">:target_date</span>;
+
+<span class="kw">INSERT INTO</span> fct_orders_daily
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> stg_orders
+<span class="kw">WHERE</span> order_date = <span class="str">:target_date</span>;</pre></div>
+      </div>
+
+      <h3>Backfill vs Incremental</h3>
+      <table>
+        <tr><th>Loại chạy</th><th>Mục tiêu</th><th>Tần suất</th></tr>
+        <tr><td>Backfill</td><td>Nạp lịch sử còn thiếu</td><td>Một lần hoặc theo đợt</td></tr>
+        <tr><td>Incremental</td><td>Nạp dữ liệu mới phát sinh</td><td>Hàng giờ/hàng ngày</td></tr>
+      </table>
+
+      <div class="info-box note">📌 <span>Pattern tốt nhất là tách rõ luồng backfill và luồng daily incremental để giảm rủi ro.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Điều kiện tiên quyết của timestamp incremental là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Cần cột updated_at hoặc tương đương đáng tin cậy để xác định delta.')">A. Có cột watermark tin cậy như updated_at</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Primary key cần thiết nhưng không đủ để xác định record mới hay cập nhật.')">B. Chỉ cần primary key</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Index giúp nhanh hơn nhưng không thay được watermark logic.')">C. Chỉ cần index</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không cần network, đây là logic dữ liệu.')">D. Chỉ cần chạy trên cloud</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Idempotent nghĩa là gì trong pipeline?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải chỉ chạy nhanh hơn.')">A. Chạy lại sẽ nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Chạy nhiều lần cùng input phải cho cùng output.')">B. Chạy lại nhiều lần vẫn ra cùng kết quả</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Khả năng mở rộng khác với idempotency.')">C. Pipeline có thể scale ngang</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phụ thuộc Airflow, đây là tính chất logic data.')">D. Pipeline dùng Airflow</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Pattern nào phù hợp nhất cho bảng partition theo ngày?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Xử lý theo target_date và overwrite partition là pattern dễ kiểm soát.')">A. Delete + Insert theo target_date</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Full truncate gây tốn kém và không cần thiết.')">B. Truncate toàn bảng mỗi ngày</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Window function không thay thế load strategy.')">C. Chỉ dùng ROW_NUMBER</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Random sampling không liên quan ingestion chính xác.')">D. Lấy ngẫu nhiên 10 phần trăm dữ liệu</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Backfill khác incremental ở điểm nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Ngược lại mới đúng.')">A. Backfill chỉ chạy dữ liệu mới mỗi ngày</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Backfill xử lý dữ liệu lịch sử, incremental xử lý dữ liệu mới.')">B. Backfill xử lý lịch sử, incremental xử lý delta mới</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Cả hai đều có thể dùng SQL và scheduler.')">C. Backfill không thể dùng SQL</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phụ thuộc đội, phụ thuộc mục tiêu dữ liệu.')">D. Khác nhau theo team sử dụng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Cách kiểm tra idempotency tối thiểu?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Chạy 1 lần chưa đủ để chứng minh idempotent.')">A. Chạy 1 lần và kiểm tra không lỗi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Chạy 2 lần cùng input và so row count hoặc checksum là kiểm tra cơ bản.')">B. Chạy 2 lần cùng input và so sánh output</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Chỉ xem log không đủ xác nhận output dữ liệu.')">C. Chỉ xem log scheduler</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không cần restart DB để test idempotency.')">D. Restart database trước mỗi lần chạy</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Nếu cần hỗ trợ cả PostgreSQL và Oracle SQL, lựa chọn UPSERT nào là đúng nhất?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. PostgreSQL dùng ON CONFLICT, Oracle dùng MERGE. Tài liệu cần nêu rõ cả hai.')">A. Viết 2 phiên bản: PostgreSQL ON CONFLICT và Oracle MERGE</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không có một cú pháp SQL duy nhất chạy nguyên xi cho cả hai hệ quản trị này.')">B. Dùng một câu lệnh UPSERT chung cho mọi DB</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Xóa rồi insert toàn bộ không phải chiến lược an toàn cho idempotent production.')">C. Luôn DELETE + INSERT toàn bảng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Bỏ qua khác biệt dialect sẽ làm script không chạy ở một trong hai DB.')">D. Chỉ cần viết theo Oracle, PostgreSQL sẽ tự tương thích</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Incremental</strong>Nạp phần mới thay vì full refresh toàn bộ dữ liệu.</div>
+        <div class="summary-item"><strong>Watermark</strong>Là cột mấu chốt quyết định chất lượng delta load.</div>
+        <div class="summary-item"><strong>Idempotent</strong>Chạy lại cùng input phải không làm lệch output.</div>
+        <div class="summary-item"><strong>UPSERT</strong>PostgreSQL dùng ON CONFLICT, Oracle dùng MERGE để tránh duplicate khi rerun.</div>
+        <div class="summary-item"><strong>Backfill</strong>Tách riêng quy trình lịch sử để dễ vận hành.</div>
+        <div class="summary-item"><strong>Test trước deploy</strong>Row count và checksum là kiểm tra tối thiểu.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none;">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1 · Viết incremental cho orders</div>
+        <div class="practice-task-body">
+          <p>Viết script nạp delta từ <code>src_orders</code> sang <code>dw_orders</code> bằng updated_at watermark và MERGE.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Kết hợp CTE watermark + MERGE INTO ... USING ... như mẫu trong phần chi tiết module.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 2 · Test idempotency</div>
+        <div class="practice-task-body">
+          <p>Chạy script incremental 2 lần liên tiếp cùng target_date, chứng minh row count không đổi sau lần 2.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>validation.sql</span></div><div class="cmd-body"><pre><span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cnt, <span class="fn">SUM</span>(amount) <span class="kw">AS</span> total_amount
+<span class="kw">FROM</span> dw_orders
+<span class="kw">WHERE</span> order_date = <span class="str">:target_date</span>;</pre></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(4)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(4)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<!-- MODULE 6 -->
+<div class="module" id="m5">
+  <div class="module-header">
+    <div class="module-tag">Tuần 1 · Module 06</div>
+    <div class="module-title">⚡ Query Optimization & EXPLAIN</div>
+    <div class="module-subtitle">Đọc query plan và tối ưu scan, join, index, partition</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Hạng mục</th><th>Nội dung</th><th>Mục tiêu</th></tr>
+        <tr><td>EXPLAIN</td><td>Đọc plan tĩnh</td><td>Biết node nào tốn chi phí</td></tr>
+        <tr><td>PostgreSQL</td><td>EXPLAIN ANALYZE (actual plan)</td><td>Đo bottleneck với timing thực tế</td></tr>
+        <tr><td>Oracle SQL</td><td>EXPLAIN PLAN + DBMS_XPLAN.DISPLAY</td><td>Đọc execution plan trước/sau tối ưu</td></tr>
+        <tr><td>Index strategy</td><td>B-tree, partial, composite</td><td>Giảm full scan không cần thiết</td></tr>
+        <tr><td>Partition pruning</td><td>Lọc đúng partition</td><td>Giảm dữ liệu scan</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Đọc được khác biệt giữa Full Table Scan/Seq Scan và Index Scan/Index Range Scan.</li>
+        <li>Phân biệt Hash Join, Nested Loop, Merge Join trong ngữ cảnh dữ liệu.</li>
+        <li>Tối ưu query chậm bằng thay đổi index hoặc rewrite điều kiện lọc.</li>
+        <li>Trình bày before/after execution plan có số liệu hoặc cost thay đổi rõ ràng cho PostgreSQL và Oracle.</li>
+      </ul>
+      <div class="info-box note">📌 <span>Query chạy được chưa đủ cho production. Hãy đọc plan đúng theo DB đang dùng: PostgreSQL (EXPLAIN ANALYZE) hoặc Oracle (EXPLAIN PLAN).</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Các nguyên nhân query chậm thường gặp</h3>
+      <ul>
+        <li>Seq Scan trên bảng lớn do thiếu index phù hợp.</li>
+        <li>Implicit cast làm index không dùng được.</li>
+        <li>OR condition rộng hoặc SELECT * quá nhiều cột.</li>
+        <li>Join key không cùng kiểu dữ liệu.</li>
+      </ul>
+
+      <h3>PostgreSQL · Before/After plan</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · explain_before.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- BEFORE: thiếu index trên customer_id</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(amount)
+<span class="kw">FROM</span> fct_orders
+<span class="kw">WHERE</span> customer_id = 12345;
+
+<span class="output">Seq Scan on fct_orders  (cost=0.00..45210.00 rows=120 width=8)</span>
+<span class="output">Execution Time: 2410.532 ms</span></pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · add_index.sql</span></div>
+        <div class="cmd-body"><pre><span class="kw">CREATE INDEX</span> idx_fct_orders_customer_id
+  <span class="kw">ON</span> fct_orders(customer_id);</pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · explain_after.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- AFTER: query plan dùng index</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(amount)
+<span class="kw">FROM</span> fct_orders
+<span class="kw">WHERE</span> customer_id = 12345;
+
+<span class="output">Index Scan using idx_fct_orders_customer_id on fct_orders</span>
+<span class="output">Execution Time: 19.884 ms</span></pre></div>
+      </div>
+
+      <h3>Oracle SQL · Before/After plan</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · explain_before.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- BEFORE: thiếu index trên customer_id</span>
+<span class="kw">EXPLAIN PLAN FOR</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(amount)
+<span class="kw">FROM</span> fct_orders
+<span class="kw">WHERE</span> customer_id = 12345;
+
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> <span class="fn">TABLE</span>(<span class="fn">DBMS_XPLAN.DISPLAY</span>);
+
+<span class="output">TABLE ACCESS FULL FCT_ORDERS</span></pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · add_index.sql</span></div>
+        <div class="cmd-body"><pre><span class="kw">CREATE INDEX</span> idx_fct_orders_customer_id
+  <span class="kw">ON</span> fct_orders(customer_id);</pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · explain_after.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- AFTER: query plan dùng index</span>
+<span class="kw">EXPLAIN PLAN FOR</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(amount)
+<span class="kw">FROM</span> fct_orders
+<span class="kw">WHERE</span> customer_id = 12345;
+
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> <span class="fn">TABLE</span>(<span class="fn">DBMS_XPLAN.DISPLAY</span>);
+
+<span class="output">INDEX RANGE SCAN IDX_FCT_ORDERS_CUSTOMER_ID</span></pre></div>
+      </div>
+
+      <h3>Index strategies cho DE</h3>
+      <table>
+        <tr><th>Loại index</th><th>Use case</th><th>Ví dụ</th></tr>
+        <tr><td>B-tree</td><td>Equality + range</td><td>customer_id, event_date</td></tr>
+        <tr><td>Filtered/Partial index</td><td>Lọc theo điều kiện phổ biến</td><td>PostgreSQL: partial index; Oracle: cân nhắc function-based/index strategy tương đương</td></tr>
+        <tr><td>Composite index</td><td>Lọc trên nhiều cột</td><td>(country, event_date)</td></tr>
+        <tr><td>Expression index</td><td>Lọc theo biểu thức</td><td>lower(email)</td></tr>
+      </table>
+
+      <div class="info-box warn">⚠️ <span>Đừng thêm index mù quáng. Mỗi index tăng chi phí ghi và dung lượng lưu trữ.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Trong PostgreSQL, EXPLAIN ANALYZE khác EXPLAIN ở điểm nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'EXPLAIN vẫn cho execution plan, chỉ là không thực thi thật như ANALYZE.')">A. EXPLAIN chỉ hiển thị plan ước lượng, không chạy query thật</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. EXPLAIN ANALYZE thực thi query và đo thời gian thực tế từng node.')">B. EXPLAIN ANALYZE chạy thật và có timing thực</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'EXPLAIN ANALYZE không tạo index.')">C. EXPLAIN ANALYZE tự tối ưu query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không giới hạn theo bảng tạm.')">D. Chỉ dùng được cho bảng temporary</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi thấy Full Table Scan/Seq Scan trên bảng lớn với điều kiện equality, bước đầu tiên nên làm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Kiểm tra index phù hợp với cột lọc là bước đầu hợp lý nhất.')">A. Kiểm tra và tạo index phù hợp nếu thiếu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'SELECT * thường không tốt nhưng không phải bước đầu duy nhất.')">B. Đổi thành SELECT *</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'DROP TABLE là phá hủy dữ liệu, không liên quan tối ưu.')">C. DROP TABLE rồi nạp lại</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Restart DB không giải quyết thiếu index logic.')">D. Restart database</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Partial index hữu ích nhất khi nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải chỉ cho ORDER BY.')">A. Khi chỉ cần sắp xếp output</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Khi query thường xuyên lọc cùng một điều kiện cố định.')">B. Khi truy vấn lặp lại điều kiện lọc cụ thể</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Join count không tự quyết định cần partial index.')">C. Khi có nhiều bảng join</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phụ thuộc số lượng cột select.')">D. Khi SELECT ít cột</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Điều nào có thể làm index không được sử dụng?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Implicit cast giữa kiểu dữ liệu có thể vô hiệu hóa index scan.')">A. So sánh khác kiểu dữ liệu gây implicit cast</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'ORDER BY có thể vẫn dùng index nếu phù hợp.')">B. Dùng ORDER BY</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'GROUP BY không tự làm mất index.')">C. Dùng GROUP BY</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'LIMIT không làm index mất hiệu lực.')">D. Dùng LIMIT</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tiêu chí tốt nhất để đánh giá tối ưu thành công là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Viết ngắn hơn chưa chắc chạy nhanh hơn.')">A. Câu SQL ngắn hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. So sánh execution time và plan before/after là thước đo khách quan.')">B. Execution time và query plan cải thiện rõ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Số index nhiều không đồng nghĩa hiệu năng tốt.')">C. Nhiều index hơn trước</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Màu hiển thị không phản ánh chất lượng tối ưu.')">D. Highlight syntax đẹp hơn</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Partition pruning giúp gì cho query lớn?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Pruning giới hạn scan vào partition liên quan thay vì quét toàn bảng.')">A. Chỉ scan partition cần thiết</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không tự động tạo backup.')">B. Tự động backup dữ liệu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không tự nén toàn bộ bảng.')">C. Nén bảng vật lý</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không thay thế cơ chế replication.')">D. Thay thế replication</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Đọc plan</strong>EXPLAIN cho biết cách DB dự tính thực thi query.</div>
+        <div class="summary-item"><strong>Đo thực tế</strong>PostgreSQL dùng EXPLAIN ANALYZE, Oracle dùng EXPLAIN PLAN + DBMS_XPLAN để đối chiếu before/after.</div>
+        <div class="summary-item"><strong>Index phù hợp</strong>Tối ưu dựa trên pattern lọc và join thực tế.</div>
+        <div class="summary-item"><strong>Before/After</strong>Tối ưu phải có số liệu chứng minh, không chỉ cảm giác.</div>
+        <div class="summary-item"><strong>Common pitfalls</strong>Implicit cast và SELECT * thường làm query kém hiệu quả.</div>
+        <div class="summary-item"><strong>Scale mindset</strong>Tối ưu sớm giúp pipeline bền khi dữ liệu tăng trưởng.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none;">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1 · Tối ưu query filter theo customer_id</div>
+        <div class="practice-task-body">
+          <p>Chạy plan before/after khi tạo index cho cột customer_id: PostgreSQL dùng EXPLAIN ANALYZE, Oracle dùng EXPLAIN PLAN + DBMS_XPLAN.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Chuẩn hóa báo cáo theo format: plan_before, exec_ms_before, plan_after, exec_ms_after, improvement_ratio.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 2 · Rewrite điều kiện tránh implicit cast</div>
+        <div class="practice-task-body">
+          <p>Với query có <code>WHERE order_id = '12345'</code>, chỉnh lại để cùng kiểu dữ liệu với cột gốc.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Nếu order_id là NUMBER, dùng <code>WHERE order_id = 12345</code> thay vì string để tận dụng index.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(5)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(5)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<!-- MODULE 7 -->
+<div class="module" id="m6">
+  <div class="module-header">
+    <div class="module-tag">Tuần 1 · Module 07</div>
+    <div class="module-title">🧩 Artifact: week1_sql_advanced.sql</div>
+    <div class="module-subtitle">Đóng gói 11 query chuẩn portfolio và hướng dẫn commit</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Phần</th><th>Nội dung bắt buộc</th><th>Kết quả</th></tr>
+        <tr><td>Window</td><td>01 đến 05</td><td>5 query thực chiến</td></tr>
+        <tr><td>Grouping</td><td>06 đến 07</td><td>2 query đa chiều</td></tr>
+        <tr><td>SCD</td><td>08 đến 09</td><td>Type 1 và Type 2 có validation</td></tr>
+        <tr><td>Incremental</td><td>10</td><td>Idempotent load pattern</td></tr>
+        <tr><td>Optimization</td><td>11</td><td>EXPLAIN before/after</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Tổng hợp toàn bộ kỹ thuật tuần 1 vào một file duy nhất dễ review.</li>
+        <li>Biến kiến thức thành artifact có thể đưa vào portfolio hoặc phỏng vấn.</li>
+        <li>Tạo thói quen comment rõ ràng cho từng query: mục tiêu, input, output.</li>
+        <li>Chuẩn hóa commit message để theo dõi tiến độ học theo tuần.</li>
+      </ul>
+      <div class="info-box tip">✅ <span>Đây là file portfolio đầu tiên, hãy viết như đang gửi cho teammate review code.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Danh sách 11 query bắt buộc</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>week1_sql_advanced.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- 01_running_total.sql        : running total + moving avg 7 ngày</span>
+<span class="comment">-- 02_rank_in_category.sql     : top 3 theo category</span>
+<span class="comment">-- 03_lag_lead_compare.sql     : so sánh kỳ trước</span>
+<span class="comment">-- 04_retention_percentile.sql : PERCENT_RANK retention</span>
+<span class="comment">-- 05_consecutive_active.sql   : streak analysis</span>
+<span class="comment">-- 06_grouping_sets.sql        : tổng hợp đa chiều</span>
+<span class="comment">-- 07_rollup_sales.sql         : subtotal theo hierarchy</span>
+<span class="comment">-- 08_scd_type1.sql            : overwrite dimension</span>
+<span class="comment">-- 09_scd_type2.sql            : full SCD2 + validation</span>
+<span class="comment">-- 10_incremental_load.sql     : idempotent UPSERT</span>
+<span class="comment">-- 11_explain_optimize.sql     : tuning before/after</span></pre></div>
+      </div>
+
+      <h3>Template README cho thư mục tuần 1</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>README.md</span></div>
+        <div class="cmd-body"><pre><span class="comment"># Week 01 - SQL Advanced</span>
+<span class="comment">## Mục tiêu</span>
+<span class="comment">## Dataset dùng</span>
+<span class="comment">## Kết quả từng query</span>
+<span class="comment">## Bài học rút ra</span></pre></div>
+      </div>
+
+      <h3>Hướng dẫn commit</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>git workflow</span></div>
+        <div class="cmd-body"><pre><span class="prompt">$</span> git add week1_sql_advanced.sql README.md
+<span class="prompt">$</span> git commit -m <span class="str">"feat: week01 sql advanced artifact"</span>
+<span class="prompt">$</span> git push origin main</pre></div>
+      </div>
+
+      <div class="info-box note">📌 <span>Nên thêm phần "limitations" cho các query giả định dữ liệu sạch hoặc không có timezone shift.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Artifact tuần 1 cần bao nhiêu query tối thiểu?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, '5 query là chưa đủ coverage các chủ đề bắt buộc.')">A. 5</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, '8 query vẫn thiếu incremental hoặc optimization.')">B. 8</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Yêu cầu chuẩn là 11 query bao phủ toàn bộ module tuần 1.')">C. 11</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, '20 là số câu mini test, không phải số query artifact.')">D. 20</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Query nào chứng minh bạn đã làm phần optimization?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là query SCD2, không phải optimization.')">A. 09_scd_type2.sql</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Query 11 là phần so sánh execution plan before/after cho PostgreSQL hoặc Oracle.')">B. 11_explain_optimize.sql</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Query 03 là lag/lead, không phải tối ưu plan.')">C. 03_lag_lead_compare.sql</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Query 07 là rollup report.')">D. 07_rollup_sales.sql</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Vì sao nên comment cho từng query trong artifact?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'File vẫn chạy nhưng khó review và khó học lại sau này.')">A. Không cần comment nếu query chạy được</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Comment giúp người đọc hiểu mục tiêu và cách kiểm tra đúng sai.')">B. Giúp review, bảo trì và học lại hiệu quả</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Comment không làm query chạy nhanh hơn.')">C. Để query chạy nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan bảo mật trực tiếp.')">D. Để mã hóa dữ liệu đầu ra</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Commit message gợi ý cho artifact tuần 1 là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Message quá chung và không phản ánh nội dung tuần.')">A. update files</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Message này rõ tuần và mục đích deliverable.')">B. feat: week01 sql advanced artifact</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'fix bug không phù hợp ngữ cảnh tạo artifact mới.')">C. fix: sql</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'test không đúng semantic commit chính của artifact.')">D. test: week 1</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Nếu thiếu query SCD2, bạn có nên coi tuần 1 hoàn thành?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'SCD2 là năng lực lõi của DE modeling, không nên bỏ qua.')">A. Có, vì phần còn lại đã đủ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Thiếu SCD2 nghĩa là chưa đạt đủ mục tiêu tuần 1.')">B. Không, cần hoàn tất đủ 11 query bắt buộc</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'SCD2 không thay bằng README được.')">C. Chỉ cần mô tả bằng README</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Mini test không thay thế phần thực hành thiếu.')">D. Chỉ cần điểm mini test cao</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Artifact mindset</strong>Một file SQL tốt phải đọc được, chạy được, review được.</div>
+        <div class="summary-item"><strong>Coverage</strong>11 query đảm bảo đủ kỹ năng lõi tuần 1.</div>
+        <div class="summary-item"><strong>Documentation</strong>README ngắn giúp người khác hiểu nhanh deliverable.</div>
+        <div class="summary-item"><strong>Commit discipline</strong>Message rõ ràng giúp theo dõi tiến độ học dài hạn.</div>
+        <div class="summary-item"><strong>Portfolio</strong>Artifact này là bằng chứng kỹ thuật đầu tiên của roadmap.</div>
+        <div class="summary-item"><strong>Readiness</strong>Hoàn tất artifact là điều kiện sang tuần 2 Python.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none;">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1 · Tạo file artifact hoàn chỉnh</div>
+        <div class="practice-task-body">
+          <p>Tạo file <code>week1_sql_advanced.sql</code> và điền đủ 11 section query như checklist module này.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Làm lần lượt 01→11, mỗi query thêm 3 dòng comment: mục tiêu, logic chính, expected output.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 2 · Tự review trước commit</div>
+        <div class="practice-task-body">
+          <p>Chạy self-review theo checklist: cú pháp, idempotency, SCD validation, explain before/after.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <ul>
+              <li>Không query nào lỗi syntax.</li>
+              <li>SCD2 không overlap date range.</li>
+              <li>Incremental chạy 2 lần không nhân bản.</li>
+              <li>Query tối ưu có số liệu before/after.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(6)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(6)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<!-- MODULE 8 -->
+<div class="module" id="m7">
+  <div class="module-header">
+    <div class="module-tag">Tuần 1 · Module 08</div>
+    <div class="module-title">📝 Mini Test Tổng Kết Tuần 1</div>
+    <div class="module-subtitle">20 câu trắc nghiệm bao phủ window, grouping, SCD, incremental, optimization</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Nhóm câu hỏi</th><th>Số câu</th><th>Mục tiêu đánh giá</th></tr>
+        <tr><td>Window Functions</td><td>6</td><td>Hiểu over, frame, ranking, lag/lead</td></tr>
+        <tr><td>GROUPING SETS/ROLLUP/CUBE</td><td>3</td><td>Chọn đúng pattern đa chiều</td></tr>
+        <tr><td>SCD</td><td>4</td><td>Hiểu type, update flow, validation</td></tr>
+        <tr><td>Incremental</td><td>4</td><td>Watermark, idempotency, backfill</td></tr>
+        <tr><td>Optimization</td><td>3</td><td>Execution plan (PostgreSQL/Oracle) và index basics</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Tự đánh giá mức độ hiểu trước khi bước sang Tuần 2 Python cho DE.</li>
+        <li>Xác định nhóm kiến thức còn yếu để ôn lại có trọng tâm.</li>
+        <li>Rèn phản xạ chọn pattern đúng theo tình huống thực tế.</li>
+      </ul>
+      <div class="info-box note">📌 <span>Thang điểm gợi ý: &lt;12 ôn lại, 12-15 đạt nền tảng, 16-18 sẵn sàng, 19-20 xuất sắc.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Hãy làm test một lần liên tục, không tra cứu. Mục tiêu là kiểm tra khả năng nhớ pattern và quyết định kỹ thuật dưới áp lực thời gian.</p>
+      <ul>
+        <li>Nếu sai nhiều ở Window: quay lại W1.02 và viết lại 3 query chạy thực tế.</li>
+        <li>Nếu sai nhiều ở SCD: ôn lại logic đóng record và validation overlap.</li>
+        <li>Nếu sai nhiều ở Incremental: chạy lại bài idempotency 2 lần.</li>
+        <li>Nếu sai Optimization: thực hành thêm EXPLAIN before/after.</li>
+      </ul>
+      <div class="info-box tip">✅ <span>Mục tiêu không phải điểm tuyệt đối, mà là biết chính xác bạn cần ôn phần nào trước tuần 2.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div id="final-test">
+
+        <div class="test-question" data-q="1" data-correct="B">
+          <div class="test-question-title">Q1. Hàm nào luôn tạo thứ tự duy nhất trong mỗi partition?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q1" value="A"> A. RANK()</label>
+            <label class="test-option"><input type="radio" name="q1" value="B"> B. ROW_NUMBER()</label>
+            <label class="test-option"><input type="radio" name="q1" value="C"> C. DENSE_RANK()</label>
+            <label class="test-option"><input type="radio" name="q1" value="D"> D. NTILE()</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="2" data-correct="C">
+          <div class="test-question-title">Q2. LAG(revenue) thường dùng để làm gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q2" value="A"> A. Tính tổng cộng dồn</label>
+            <label class="test-option"><input type="radio" name="q2" value="B"> B. Chia bucket percentile</label>
+            <label class="test-option"><input type="radio" name="q2" value="C"> C. Lấy giá trị kỳ trước</label>
+            <label class="test-option"><input type="radio" name="q2" value="D"> D. Tìm giá trị lớn nhất</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="3" data-correct="A">
+          <div class="test-question-title">Q3. Với moving average 7 ngày, frame phù hợp nhất là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q3" value="A"> A. ROWS BETWEEN 6 PRECEDING AND CURRENT ROW</label>
+            <label class="test-option"><input type="radio" name="q3" value="B"> B. ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING</label>
+            <label class="test-option"><input type="radio" name="q3" value="C"> C. RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</label>
+            <label class="test-option"><input type="radio" name="q3" value="D"> D. PARTITION BY day</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="4" data-correct="D">
+          <div class="test-question-title">Q4. Hàm nào dùng để chia dữ liệu thành 4 nhóm đều nhau?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q4" value="A"> A. RANK(4)</label>
+            <label class="test-option"><input type="radio" name="q4" value="B"> B. DENSE_RANK(4)</label>
+            <label class="test-option"><input type="radio" name="q4" value="C"> C. PERCENT_RANK(4)</label>
+            <label class="test-option"><input type="radio" name="q4" value="D"> D. NTILE(4)</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="5" data-correct="B">
+          <div class="test-question-title">Q5. Pattern chuẩn để lấy top 3 theo mỗi tháng là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q5" value="A"> A. ORDER BY sales DESC LIMIT 3</label>
+            <label class="test-option"><input type="radio" name="q5" value="B"> B. ROW_NUMBER PARTITION BY month rồi lọc rn &lt;= 3</label>
+            <label class="test-option"><input type="radio" name="q5" value="C"> C. DISTINCT month, product</label>
+            <label class="test-option"><input type="radio" name="q5" value="D"> D. GROUP BY month LIMIT 3</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="6" data-correct="C">
+          <div class="test-question-title">Q6. PERCENT_RANK() phù hợp nhất cho use case nào?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q6" value="A"> A. Gán khóa chính</label>
+            <label class="test-option"><input type="radio" name="q6" value="B"> B. Deduplicate record</label>
+            <label class="test-option"><input type="radio" name="q6" value="C"> C. Đánh giá phân vị retention</label>
+            <label class="test-option"><input type="radio" name="q6" value="D"> D. Cập nhật SCD2</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="7" data-correct="A">
+          <div class="test-question-title">Q7. GROUPING SETS dùng tốt nhất khi nào?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q7" value="A"> A. Cần nhiều mức tổng hợp cụ thể trong một query</label>
+            <label class="test-option"><input type="radio" name="q7" value="B"> B. Cần cập nhật dữ liệu theo khóa</label>
+            <label class="test-option"><input type="radio" name="q7" value="C"> C. Cần tính moving average</label>
+            <label class="test-option"><input type="radio" name="q7" value="D"> D. Cần tạo index</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="8" data-correct="D">
+          <div class="test-question-title">Q8. Pattern nào tạo đầy đủ mọi tổ hợp chiều?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q8" value="A"> A. ROLLUP</label>
+            <label class="test-option"><input type="radio" name="q8" value="B"> B. GROUPING SETS</label>
+            <label class="test-option"><input type="radio" name="q8" value="C"> C. UNION ALL</label>
+            <label class="test-option"><input type="radio" name="q8" value="D"> D. CUBE</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="9" data-correct="B">
+          <div class="test-question-title">Q9. Hàm GROUPING(col) giúp gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q9" value="A"> A. Tăng tốc query</label>
+            <label class="test-option"><input type="radio" name="q9" value="B"> B. Phân biệt NULL subtotal và NULL dữ liệu thật</label>
+            <label class="test-option"><input type="radio" name="q9" value="C"> C. Tạo khóa surrogate</label>
+            <label class="test-option"><input type="radio" name="q9" value="D"> D. Kiểm tra duplicate</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="10" data-correct="A">
+          <div class="test-question-title">Q10. SCD Type 1 có đặc điểm gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q10" value="A"> A. Ghi đè record cũ, không giữ lịch sử</label>
+            <label class="test-option"><input type="radio" name="q10" value="B"> B. Tạo record mới cho mọi thay đổi</label>
+            <label class="test-option"><input type="radio" name="q10" value="C"> C. Lưu current và previous trong 2 bảng</label>
+            <label class="test-option"><input type="radio" name="q10" value="D"> D. Chỉ dùng cho fact table</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="11" data-correct="C">
+          <div class="test-question-title">Q11. Trong SCD2, record current thường có effective_to bằng?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q11" value="A"> A. current_date</label>
+            <label class="test-option"><input type="radio" name="q11" value="B"> B. NULL bắt buộc</label>
+            <label class="test-option"><input type="radio" name="q11" value="C"> C. 9999-12-31</label>
+            <label class="test-option"><input type="radio" name="q11" value="D"> D. 1970-01-01</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="12" data-correct="B">
+          <div class="test-question-title">Q12. Validation quan trọng nhất của SCD2 là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q12" value="A"> A. Tên cột viết hoa</label>
+            <label class="test-option"><input type="radio" name="q12" value="B"> B. Không overlap range và 1 current record mỗi key</label>
+            <label class="test-option"><input type="radio" name="q12" value="C"> C. Có đầy đủ index</label>
+            <label class="test-option"><input type="radio" name="q12" value="D"> D. Có comment trong file</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="13" data-correct="D">
+          <div class="test-question-title">Q13. Pattern incremental phổ biến nhất là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q13" value="A"> A. Full truncate mỗi ngày</label>
+            <label class="test-option"><input type="radio" name="q13" value="B"> B. Random sampling</label>
+            <label class="test-option"><input type="radio" name="q13" value="C"> C. Lọc theo alphabet</label>
+            <label class="test-option"><input type="radio" name="q13" value="D"> D. Lọc theo watermark updated_at</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="14" data-correct="A">
+          <div class="test-question-title">Q14. Idempotent trong ETL nghĩa là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q14" value="A"> A. Rerun cùng input cho cùng output</label>
+            <label class="test-option"><input type="radio" name="q14" value="B"> B. Luôn chạy nhanh hơn lần trước</label>
+            <label class="test-option"><input type="radio" name="q14" value="C"> C. Chạy được không cần scheduler</label>
+            <label class="test-option"><input type="radio" name="q14" value="D"> D. Dữ liệu luôn tăng vô hạn</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="15" data-correct="D">
+          <div class="test-question-title">Q15. Với tài liệu hỗ trợ cả PostgreSQL và Oracle SQL, phát biểu nào đúng?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q15" value="A"> A. Cả hai cùng dùng ON CONFLICT</label>
+            <label class="test-option"><input type="radio" name="q15" value="B"> B. Cả hai cùng dùng MERGE</label>
+            <label class="test-option"><input type="radio" name="q15" value="C"> C. PostgreSQL dùng MERGE, Oracle dùng ON CONFLICT</label>
+            <label class="test-option"><input type="radio" name="q15" value="D"> D. PostgreSQL dùng ON CONFLICT, Oracle dùng MERGE</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="16" data-correct="B">
+          <div class="test-question-title">Q16. Backfill dùng khi nào?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q16" value="A"> A. Nạp delta hàng ngày</label>
+            <label class="test-option"><input type="radio" name="q16" value="B"> B. Nạp lại dữ liệu lịch sử thiếu</label>
+            <label class="test-option"><input type="radio" name="q16" value="C"> C. Tối ưu index</label>
+            <label class="test-option"><input type="radio" name="q16" value="D"> D. Chạy mini test</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="17" data-correct="D">
+          <div class="test-question-title">Q17. Công cụ chính để đo bottleneck query là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q17" value="A"> A. SELECT *</label>
+            <label class="test-option"><input type="radio" name="q17" value="B"> B. DBMS_STATS</label>
+            <label class="test-option"><input type="radio" name="q17" value="C"> C. ANALYZE TABLE</label>
+            <label class="test-option"><input type="radio" name="q17" value="D"> D. EXPLAIN ANALYZE (PostgreSQL) hoặc EXPLAIN PLAN (Oracle)</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="18" data-correct="A">
+          <div class="test-question-title">Q18. Dấu hiệu thường thấy của thiếu index là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q18" value="A"> A. Seq Scan (PostgreSQL) hoặc Full Table Scan (Oracle) trên filter selective</label>
+            <label class="test-option"><input type="radio" name="q18" value="B"> B. Có nhiều comment trong query</label>
+            <label class="test-option"><input type="radio" name="q18" value="C"> C. Kết quả trả về rỗng</label>
+            <label class="test-option"><input type="radio" name="q18" value="D"> D. Có GROUP BY</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="19" data-correct="C">
+          <div class="test-question-title">Q19. Mục tiêu của query 11 trong artifact là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q19" value="A"> A. Làm SCD2</label>
+            <label class="test-option"><input type="radio" name="q19" value="B"> B. Làm grouping sets</label>
+            <label class="test-option"><input type="radio" name="q19" value="C"> C. Chứng minh tối ưu before/after bằng EXPLAIN</label>
+            <label class="test-option"><input type="radio" name="q19" value="D"> D. Tạo dashboard</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="20" data-correct="B">
+          <div class="test-question-title">Q20. Điều kiện hợp lý để sang Tuần 2 là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q20" value="A"> A. Chỉ cần đọc hết tutorial</label>
+            <label class="test-option"><input type="radio" name="q20" value="B"> B. Hoàn tất artifact 11 query và tự kiểm tra logic</label>
+            <label class="test-option"><input type="radio" name="q20" value="C"> C. Chỉ đạt 10 điểm mini test</label>
+            <label class="test-option"><input type="radio" name="q20" value="D"> D. Chỉ cần làm xong phần SCD</label>
+          </div>
+        </div>
+
+        <div class="test-actions">
+          <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+          <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+        </div>
+        <div class="test-result" id="final-test-result" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Đánh giá toàn diện</strong>20 câu bao phủ trọn các kỹ năng cốt lõi tuần 1.</div>
+        <div class="summary-item"><strong>Phản hồi tức thì</strong>Kết quả hiển thị đúng, sai, chưa trả lời sau khi chấm.</div>
+        <div class="summary-item"><strong>Mốc điểm</strong>16+ là sẵn sàng tốt cho tuần 2, 19+ là rất vững.</div>
+        <div class="summary-item"><strong>Học theo lỗ hổng</strong>Xem nhóm câu sai để ôn đúng module còn yếu.</div>
+        <div class="summary-item"><strong>Kết nối roadmap</strong>Xong tuần 1 là nền để học Python ETL tuần 2.</div>
+        <div class="summary-item"><strong>Kỷ luật thực chiến</strong>Test chỉ có ý nghĩa khi artifact đã làm thật và chạy thật.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none;">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1 · Kế hoạch ôn tập theo điểm số</div>
+        <div class="practice-task-body">
+          <p>Sau khi chấm điểm, viết kế hoạch 3 ngày ôn lại các nhóm câu sai và xác nhận bằng cách chạy lại query tương ứng.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem gợi ý</button>
+          <div class="solution-box">
+            <ul>
+              <li>&lt;12 điểm: ôn lại W1.02 đến W1.05 trước.</li>
+              <li>12-15 điểm: ưu tiên SCD2 và incremental idempotency.</li>
+              <li>16-18 điểm: review optimization + polish artifact.</li>
+              <li>19-20 điểm: sang tuần 2, giữ thói quen self-test.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 2 · Chuẩn bị sang Tuần 2</div>
+        <div class="practice-task-body">
+          <p>Tạo thư mục <code>week02_python_etl/</code> với các file rỗng <code>extract.py</code>, <code>transform.py</code>, <code>load.py</code>, <code>pipeline.py</code>.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lệnh mẫu</button>
+          <div class="solution-box">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>bash</span></div><div class="cmd-body"><pre><span class="prompt">$</span> mkdir -p week02_python_etl
+<span class="prompt">$</span> touch week02_python_etl/extract.py week02_python_etl/transform.py week02_python_etl/load.py week02_python_etl/pipeline.py</pre></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(7)">← Module trước</button>
+    <div style="text-align:center;color:var(--accent2);font-weight:700">🎉 Hoàn thành Tuần 1! Sẵn sàng sang Tuần 2 Python cho DE →</div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+  explain.textContent = (correct ? '✓ Chính xác! ' : '✗ Sai. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? '🔼 Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (correctCount >= 19) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn đã nắm rất chắc SQL tuần 1. Hoàn tất commit artifact và bắt đầu Tuần 2 Python cho DE.'; }
+  else if (correctCount >= 16) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Bạn đã sẵn sàng sang Tuần 2. Nên ôn lại vài câu sai để chắc hơn.'; }
+  else if (correctCount >= 12) { levelText = 'Đạt'; chipClass = 'warn'; guidance = 'Nền tảng ổn nhưng nên ôn lại SCD và incremental trước khi chuyển tuần.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Ôn lại W1.02 đến W1.06, làm lại artifact và test lại sau khi thực hành thêm.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đúng là <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng. Rất tốt.</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+</body>
+</html>
