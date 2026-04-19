@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 2 · Python cho Data Engineer</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 290px; min-width: 290px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--text-muted); }
+  .level-label.l1 { color: var(--accent); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 44px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 960px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+  .kw { color: var(--accent); }
+  .str { color: var(--accent5); }
+  .fn { color: var(--accent4); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '□'; color: var(--accent5); font-size: 1.1rem; flex-shrink: 0; margin-top: -1px; }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Data Engineering Handbook Tutorial</h1>
+  <p>Giai đoạn 1 · Tuần 2 · Python cho Data Engineer (PostgreSQL + Oracle SQL)</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 1 · Foundation</span>
+    <span class="badge badge-orange">Tuần 2: Python cho DE</span>
+    <span class="badge badge-blue">Artifact: week2_python_etl · Dùng cả PostgreSQL và Oracle SQL</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">CHƯƠNG TRÌNH HỌC</div>
+    <div class="level-label l1">▶ TUẦN 2 · PYTHON FOR DATA ENGINEERING</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W2.01</span>Tổng Quan & Tại Sao Python</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W2.02</span>pandas cho DE</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W2.03</span>SQLAlchemy & Database</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W2.04</span>REST API & Response</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W2.05</span>Error Handling & Logging</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W2.06</span>ETL Script Production</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W2.07</span>Artifact week2_python_etl</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W2.08</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+<div class="module active" id="m0">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · W2.01</div>
+    <div class="module-title">Tổng Quan & Tại Sao Python</div>
+    <div class="module-subtitle">Định vị Python trong pipeline Data Engineering thực chiến</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Hạng mục</th><th>Nội dung</th><th>Kết quả</th></tr>
+        <tr><td>Mục tiêu tuần</td><td>Xây nền Python ETL cho DE</td><td>Có project chạy được theo ngày</td></tr>
+        <tr><td>Stack</td><td>pandas, SQLAlchemy, requests, logging</td><td>Kết hợp SQL + Python chuẩn</td></tr>
+        <tr><td>Database</td><td>PostgreSQL và Oracle SQL</td><td>Hiểu khác biệt kết nối và load</td></tr>
+        <tr><td>Artifact</td><td>week2_python_etl/</td><td>extract.py, transform.py, load.py, pipeline.py</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Hiểu Python đóng vai trò orchestrator giữa file, API và database.</li>
+        <li>Biết chia công việc: SQL xử lý set-based, Python xử lý luồng và điều kiện.</li>
+        <li>Nắm mindset idempotent, retry, logging trước khi build pipeline lớn.</li>
+        <li>Chuẩn bị nền cho các module pandas, SQLAlchemy, API và artifact cuối tuần.</li>
+      </ul>
+      <div class="info-box note">📌 <span>Python cho DE không phải viết thuật toán phức tạp, mà là viết pipeline rõ ràng, có thể vận hành và chạy lại an toàn.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Python là lớp điều phối dữ liệu</h3>
+      <p>Trong dự án thực tế, bạn thường lấy dữ liệu từ API/CSV, chuẩn hóa bằng pandas, rồi ghi vào PostgreSQL hoặc Oracle. Python giúp gom các bước này vào một pipeline có thể test và deploy.</p>
+      <h3>Phân vai Python và SQL</h3>
+      <ul>
+        <li><strong>SQL</strong>: join, aggregate, merge dữ liệu lớn bên trong database.</li>
+        <li><strong>Python</strong>: gọi API, xử lý file, kiểm tra chất lượng dữ liệu, gọi SQL theo lịch.</li>
+      </ul>
+      <div class="info-box tip">✅ <span>Luôn tách rõ extract/transform/load ngay từ tuần 2 để các tuần sau tích hợp Airflow và dbt dễ hơn.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content"><div id="quiz-w2-01"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Python role</strong>Điều phối nhiều nguồn dữ liệu trong một script.</div>
+        <div class="summary-item"><strong>SQL role</strong>Xử lý set-based nhanh và ổn định trong database.</div>
+        <div class="summary-item"><strong>ETL mindset</strong>Tách extract/transform/load ngay từ đầu.</div>
+        <div class="summary-item"><strong>Idempotent</strong>Chạy lại không làm sai dữ liệu.</div>
+        <div class="summary-item"><strong>Observability</strong>Luôn có logging để truy vết.</div>
+        <div class="summary-item"><strong>Mục tiêu tuần</strong>Hoàn thành artifact chạy bằng CLI.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1: Thiết kế pipeline cá nhân</div>
+        <div class="practice-task-body">
+          <p>Vẽ pipeline bạn đang làm theo 3 bước extract/transform/load. Ghi rõ bước nào làm bằng Python, bước nào chạy bằng SQL trong database.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Ví dụ: Extract từ API bán hàng -> Transform chuẩn hóa schema bằng pandas -> Load vào bảng staging PostgreSQL/Oracle bằng SQLAlchemy, sau đó chạy SQL merge vào bảng đích.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(0)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(0)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<div class="module" id="m1">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · W2.02</div>
+    <div class="module-title">pandas cho Data Engineering</div>
+    <div class="module-subtitle">Đọc/ghi dữ liệu, xử lý null, merge, groupby và tối ưu memory</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:24%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Nhóm kỹ năng</th><th>Nội dung</th></tr>
+        <tr><td>Input</td><td>read_csv, read_json, read_parquet, đọc nhiều file bằng glob</td></tr>
+        <tr><td>Cleaning</td><td>dropna, fillna, astype, chuẩn hóa schema</td></tr>
+        <tr><td>Transform</td><td>merge/join, groupby/agg, xử lý duplicate</td></tr>
+        <tr><td>Output</td><td>to_sql, to_parquet, xuất dữ liệu cho bước load</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Đọc dữ liệu lớn theo chunk để tránh tràn RAM.</li>
+        <li>Làm sạch dữ liệu có kiểm soát type, null và duplicate.</li>
+        <li>Kết hợp dữ liệu nhiều nguồn bằng merge đúng khóa.</li>
+        <li>Chuẩn bị dataframe sẵn sàng cho load vào PostgreSQL/Oracle.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Đọc nhiều file và chuẩn hóa schema</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>python/pandas_ingest.py</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> glob
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+files = glob.<span class="fn">glob</span>(<span class="str">"data/sales_*.csv"</span>)
+df = pd.<span class="fn">concat</span>([pd.<span class="fn">read_csv</span>(f, dtype={<span class="str">"store_id"</span>: <span class="str">"string"</span>}) <span class="kw">for</span> f <span class="kw">in</span> files], ignore_index=<span class="kw">True</span>)
+
+df[<span class="str">"order_date"</span>] = pd.<span class="fn">to_datetime</span>(df[<span class="str">"order_date"</span>])
+df[<span class="str">"revenue"</span>] = df[<span class="str">"revenue"</span>].<span class="fn">fillna</span>(0)
+df = df.<span class="fn">drop_duplicates</span>(subset=[<span class="str">"order_id"</span>])</pre></div>
+      </div>
+
+      <h3>Đọc dữ liệu từ PostgreSQL và Oracle bằng pandas</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>python/read_sql_examples.py</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> os
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+pg = <span class="fn">create_engine</span>(os.<span class="fn">getenv</span>(<span class="str">"PG_DSN"</span>))
+oracle = <span class="fn">create_engine</span>(os.<span class="fn">getenv</span>(<span class="str">"ORACLE_DSN"</span>))
+
+pg_df = pd.<span class="fn">read_sql_query</span>(<span class="str">"SELECT order_id, revenue FROM fct_orders WHERE order_date >= CURRENT_DATE - INTERVAL '7 day'"</span>, pg)
+ora_df = pd.<span class="fn">read_sql_query</span>(<span class="str">"SELECT order_id, revenue FROM fct_orders WHERE order_date >= TRUNC(SYSDATE)-7"</span>, oracle)</pre></div>
+      </div>
+
+      <div class="info-box warn">⚠️ <span>Với dataset lớn, ưu tiên <code>chunksize</code> và chỉ lấy cột cần thiết. Tránh <code>SELECT *</code> khi kéo dữ liệu về pandas.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content"><div id="quiz-w2-02"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Ingest</strong>Dùng read_csv/json/parquet đúng schema.</div>
+        <div class="summary-item"><strong>Null handling</strong>fillna/dropna theo business rule.</div>
+        <div class="summary-item"><strong>Join</strong>merge đúng key và loại join.</div>
+        <div class="summary-item"><strong>Aggregate</strong>groupby/agg cho KPI sơ bộ.</div>
+        <div class="summary-item"><strong>Memory</strong>Dùng dtype và chunksize để tiết kiệm RAM.</div>
+        <div class="summary-item"><strong>DB bridge</strong>pandas + SQLAlchemy đọc PG/Oracle thuận tiện.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1: Gom nhiều file doanh thu theo ngày</div>
+        <div class="practice-task-body">
+          <p>Đọc tất cả file <code>sales_*.csv</code>, chuẩn hóa <code>order_date</code>, thay null revenue bằng 0, và xuất file Parquet đã clean.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Dùng <code>glob + pd.concat</code>, sau đó <code>to_datetime</code>, <code>fillna(0)</code>, <code>drop_duplicates</code> và cuối cùng <code>to_parquet</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(1)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(1)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<div class="module" id="m2">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · W2.03</div>
+    <div class="module-title">SQLAlchemy & Kết Nối Database</div>
+    <div class="module-subtitle">Engine, transaction, parameterized query và khác biệt PostgreSQL/Oracle</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:36%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Topic</th><th>Nội dung</th></tr>
+        <tr><td>Kết nối</td><td>create_engine cho PostgreSQL và Oracle</td></tr>
+        <tr><td>Query</td><td>read_sql_query + tham số an toàn</td></tr>
+        <tr><td>Load</td><td>to_sql / execute với transaction</td></tr>
+        <tr><td>Upsert</td><td>ON CONFLICT (PostgreSQL) vs MERGE (Oracle)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Viết kết nối DB linh hoạt theo biến môi trường.</li>
+        <li>Tránh SQL injection bằng parameterized query.</li>
+        <li>Hiểu khác biệt cú pháp load dữ liệu giữa PostgreSQL và Oracle.</li>
+        <li>Đảm bảo transaction rõ ràng để load dữ liệu an toàn.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Khởi tạo engine và query an toàn</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>python/sqlalchemy_connect.py</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> os
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+
+pg_engine = <span class="fn">create_engine</span>(os.<span class="fn">getenv</span>(<span class="str">"PG_DSN"</span>), pool_size=5, max_overflow=10)
+ora_engine = <span class="fn">create_engine</span>(os.<span class="fn">getenv</span>(<span class="str">"ORACLE_DSN"</span>), pool_size=5, max_overflow=10)
+
+sql = <span class="str">"SELECT order_id, revenue FROM fct_orders WHERE order_date >= :from_date"</span>
+params = {<span class="str">"from_date"</span>: <span class="str">"2024-01-01"</span>}
+
+<span class="kw">with</span> pg_engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+    rows = conn.<span class="fn">execute</span>(<span class="fn">text</span>(sql), params).<span class="fn">fetchall</span>()</pre></div>
+      </div>
+
+      <h3>Upsert: PostgreSQL vs Oracle SQL</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>sql/postgres_upsert.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
+<span class="kw">INSERT INTO</span> dim_customer (customer_id, city, updated_at)
+<span class="kw">VALUES</span> (:customer_id, :city, NOW())
+<span class="kw">ON CONFLICT</span> (customer_id)
+<span class="kw">DO UPDATE SET</span>
+  city = <span class="kw">EXCLUDED</span>.city,
+  updated_at = NOW();</pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>sql/oracle_merge.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Oracle SQL</span>
+<span class="kw">MERGE INTO</span> dim_customer d
+<span class="kw">USING</span> (
+  <span class="kw">SELECT</span> :customer_id customer_id, :city city <span class="kw">FROM</span> dual
+) s
+<span class="kw">ON</span> (d.customer_id = s.customer_id)
+<span class="kw">WHEN MATCHED THEN UPDATE SET</span>
+  d.city = s.city,
+  d.updated_at = SYSTIMESTAMP
+<span class="kw">WHEN NOT MATCHED THEN INSERT</span> (customer_id, city, updated_at)
+<span class="kw">VALUES</span> (s.customer_id, s.city, SYSTIMESTAMP);</pre></div>
+      </div>
+
+      <div class="info-box note">📌 <span>PostgreSQL tối ưu với <code>ON CONFLICT</code>, còn Oracle chuẩn production thường dùng <code>MERGE</code> cho upsert.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content"><div id="quiz-w2-03"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Engine</strong>create_engine hỗ trợ nhiều backend DB.</div>
+        <div class="summary-item"><strong>Pool</strong>Cấu hình connection pool để ổn định hiệu năng.</div>
+        <div class="summary-item"><strong>Safety</strong>Dùng bind param để tránh SQL injection.</div>
+        <div class="summary-item"><strong>Transaction</strong>Đặt logic load trong khối <code>begin()</code>.</div>
+        <div class="summary-item"><strong>PostgreSQL</strong>Upsert nhanh với ON CONFLICT.</div>
+        <div class="summary-item"><strong>Oracle</strong>Dùng MERGE để upsert chuẩn doanh nghiệp.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1: Viết load function hỗ trợ 2 dialect</div>
+        <div class="practice-task-body">
+          <p>Tạo hàm <code>load_customer(engine, dialect, rows)</code> để upsert theo PostgreSQL hoặc Oracle SQL.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Kiểm tra <code>dialect</code>, chọn câu SQL tương ứng (<code>ON CONFLICT</code> hoặc <code>MERGE</code>), thực thi bằng <code>conn.execute(text(...), row)</code> trong transaction.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(2)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(2)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<div class="module" id="m3">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · W2.04</div>
+    <div class="module-title">Gọi REST API & Xử Lý Response</div>
+    <div class="module-subtitle">Pagination, auth header, rate limit và retry backoff</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:48%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Thành phần</th><th>Nội dung</th></tr>
+        <tr><td>HTTP call</td><td>requests.get/post + timeout</td></tr>
+        <tr><td>Auth</td><td>Bearer token / API key trong header</td></tr>
+        <tr><td>Pagination</td><td>page number và next_page_token</td></tr>
+        <tr><td>Reliability</td><td>retry + exponential backoff cho 429/5xx</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Viết extract API ổn định khi API trả dữ liệu phân trang.</li>
+        <li>Xử lý lỗi tạm thời mà không làm fail pipeline ngay.</li>
+        <li>Ghi log đủ thông tin để kiểm tra API call theo batch.</li>
+        <li>Chuẩn hóa JSON về dataframe trước bước transform.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Pagination + retry backoff</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>python/extract_api.py</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> time
+<span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">fetch_orders</span>(base_url, token):
+    page = 1
+    all_rows = []
+    <span class="kw">while</span> <span class="kw">True</span>:
+        resp = requests.<span class="fn">get</span>(
+            <span class="str">f"{base_url}/orders"</span>,
+            headers={<span class="str">"Authorization"</span>: <span class="str">f"Bearer {token}"</span>},
+            params={<span class="str">"page"</span>: page, <span class="str">"page_size"</span>: 500},
+            timeout=30,
+        )
+        <span class="kw">if</span> resp.status_code <span class="kw">in</span> [429, 500, 502, 503, 504]:
+            time.<span class="fn">sleep</span>(min(2 ** page, 30))
+            <span class="kw">continue</span>
+        resp.<span class="fn">raise_for_status</span>()
+        payload = resp.<span class="fn">json</span>()
+        all_rows.<span class="fn">extend</span>(payload[<span class="str">"data"</span>])
+        <span class="kw">if</span> <span class="kw">not</span> payload.<span class="fn">get</span>(<span class="str">"has_more"</span>):
+            <span class="kw">break</span>
+        page += 1
+    <span class="kw">return</span> all_rows</pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span>Luôn đặt <code>timeout</code> cho request và chỉ retry các mã lỗi tạm thời. Tránh retry vô hạn gây treo pipeline.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content"><div id="quiz-w2-04"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Requests</strong>Dùng timeout và status check rõ ràng.</div>
+        <div class="summary-item"><strong>Auth</strong>Token/API key để truy cập endpoint bảo mật.</div>
+        <div class="summary-item"><strong>Pagination</strong>Lặp page/token đến khi hết dữ liệu.</div>
+        <div class="summary-item"><strong>Retry</strong>Backoff cho lỗi tạm thời 429/5xx.</div>
+        <div class="summary-item"><strong>JSON parsing</strong>Chuẩn hóa nested fields trước khi transform.</div>
+        <div class="summary-item"><strong>Logging</strong>Lưu request id và page để debug.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1: Extract API users theo pagination</div>
+        <div class="practice-task-body">
+          <p>Viết hàm lấy toàn bộ users từ API có <code>next_page_token</code>. Lưu kết quả thành JSON lines.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Dùng vòng <code>while token</code>, mỗi lần gọi API cập nhật token mới; nếu gặp 429 thì sleep backoff rồi gọi lại.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(3)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(3)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<div class="module" id="m4">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · W2.05</div>
+    <div class="module-title">Error Handling & Logging</div>
+    <div class="module-subtitle">try/except/finally, custom exception, structured logging và retry decorator</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Chủ đề</th><th>Nội dung</th></tr>
+        <tr><td>Error flow</td><td>try/except/finally + raise rõ ràng</td></tr>
+        <tr><td>Custom exception</td><td>Phân loại lỗi extract/transform/load</td></tr>
+        <tr><td>Logging</td><td>DEBUG/INFO/WARNING/ERROR + JSON format</td></tr>
+        <tr><td>Retry</td><td>Decorator retry cho lỗi transient</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Không nuốt lỗi; luôn log ngữ cảnh để debug nhanh.</li>
+        <li>Phân biệt lỗi tạm thời và lỗi dữ liệu để hành vi retry đúng.</li>
+        <li>Thiết kế log có trường batch_id, source, rows để quan sát pipeline.</li>
+        <li>Tạo retry decorator có giới hạn số lần thử.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Structured logging + retry decorator</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>python/logging_retry.py</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> json
+<span class="kw">import</span> logging
+<span class="kw">import</span> time
+
+logger = logging.<span class="fn">getLogger</span>(<span class="str">"etl"</span>)
+logger.<span class="fn">setLevel</span>(logging.INFO)
+handler = logging.<span class="fn">FileHandler</span>(<span class="str">"etl.log"</span>, encoding=<span class="str">"utf-8"</span>)
+logger.<span class="fn">addHandler</span>(handler)
+
+<span class="kw">def</span> <span class="fn">log_event</span>(level, **kwargs):
+    message = json.<span class="fn">dumps</span>(kwargs, ensure_ascii=<span class="kw">False</span>)
+    logger.<span class="fn">log</span>(level, message)
+
+<span class="kw">def</span> <span class="fn">retry</span>(max_attempts=3, delay=2):
+    <span class="kw">def</span> <span class="fn">decorator</span>(func):
+        <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+            <span class="kw">for</span> attempt <span class="kw">in</span> range(1, max_attempts + 1):
+                <span class="kw">try</span>:
+                    <span class="kw">return</span> func(*args, **kwargs)
+                <span class="kw">except</span> Exception <span class="kw">as</span> e:
+                    log_event(logging.WARNING, event=<span class="str">"retry"</span>, attempt=attempt, error=str(e))
+                    <span class="kw">if</span> attempt == max_attempts:
+                        <span class="kw">raise</span>
+                    time.<span class="fn">sleep</span>(delay * attempt)
+        <span class="kw">return</span> wrapper
+    <span class="kw">return</span> decorator</pre></div>
+      </div>
+      <div class="info-box warn">⚠️ <span>Tránh <code>except: pass</code>. Điều này làm mất tín hiệu lỗi và khiến pipeline fail ngầm trong production.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content"><div id="quiz-w2-05"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Exception flow</strong>Phân loại lỗi để xử lý đúng cách.</div>
+        <div class="summary-item"><strong>finally</strong>Dùng để cleanup tài nguyên.</div>
+        <div class="summary-item"><strong>Custom error</strong>Tách lỗi nghiệp vụ và lỗi hạ tầng.</div>
+        <div class="summary-item"><strong>JSON log</strong>Log máy đọc được, dễ query.</div>
+        <div class="summary-item"><strong>Retry</strong>Áp dụng cho lỗi tạm thời có thể hồi phục.</div>
+        <div class="summary-item"><strong>Operability</strong>Log tốt giảm thời gian xử lý incident.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1: Thêm logging chuẩn JSON vào pipeline</div>
+        <div class="practice-task-body">
+          <p>Bổ sung log <code>batch_id</code>, <code>step</code>, <code>row_count</code>, <code>duration_ms</code> cho từng bước ETL.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Tạo helper <code>log_event(level, **kwargs)</code> để mọi bước dùng chung schema log nhất quán.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(4)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(4)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<div class="module" id="m5">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · W2.06</div>
+    <div class="module-title">Cấu Trúc ETL Script Production</div>
+    <div class="module-subtitle">Class-based ETL, config .env, argparse và hỗ trợ PostgreSQL/Oracle</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Thành phần</th><th>Chi tiết</th></tr>
+        <tr><td>Config</td><td>.env + parser + biến runtime</td></tr>
+        <tr><td>Architecture</td><td>class ETLPipeline với extract/transform/load</td></tr>
+        <tr><td>CLI</td><td><code>python pipeline.py --date 2024-01-01 --dialect postgres</code></td></tr>
+        <tr><td>Dialect</td><td>SQL riêng cho PostgreSQL và Oracle SQL</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Thiết kế code rõ ràng để dễ test và bảo trì.</li>
+        <li>Tách config khỏi code để deploy linh hoạt nhiều môi trường.</li>
+        <li>Cho phép chạy theo ngày và theo dialect DB từ CLI.</li>
+        <li>Chuẩn bị nền tảng để tích hợp scheduler (Airflow) ở giai đoạn sau.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>python/pipeline.py</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> argparse
+<span class="kw">import</span> os
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+
+<span class="kw">class</span> ETLPipeline:
+    <span class="kw">def</span> __init__(self, engine, dialect):
+        self.engine = engine
+        self.dialect = dialect
+
+    <span class="kw">def</span> extract(self, run_date):
+        <span class="kw">return</span> [{<span class="str">"order_id"</span>: 1, <span class="str">"city"</span>: <span class="str">"HCM"</span>, <span class="str">"run_date"</span>: run_date}]
+
+    <span class="kw">def</span> transform(self, rows):
+        <span class="kw">return</span> rows
+
+    <span class="kw">def</span> load(self, rows):
+        pg_sql = <span class="str">"INSERT INTO stg_orders(order_id, city, run_date) VALUES (:order_id,:city,:run_date) ON CONFLICT (order_id) DO UPDATE SET city=EXCLUDED.city, run_date=EXCLUDED.run_date"</span>
+        ora_sql = <span class="str">"MERGE INTO stg_orders t USING (SELECT :order_id order_id, :city city, :run_date run_date FROM dual) s ON (t.order_id=s.order_id) WHEN MATCHED THEN UPDATE SET t.city=s.city, t.run_date=s.run_date WHEN NOT MATCHED THEN INSERT (order_id,city,run_date) VALUES (s.order_id,s.city,s.run_date)"</span>
+        sql = pg_sql <span class="kw">if</span> self.dialect == <span class="str">"postgres"</span> <span class="kw">else</span> ora_sql
+        <span class="kw">with</span> self.engine.<span class="fn">begin</span>() <span class="kw">as</span> conn:
+            <span class="kw">for</span> row <span class="kw">in</span> rows:
+                conn.<span class="fn">execute</span>(<span class="fn">text</span>(sql), row)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    parser = argparse.<span class="fn">ArgumentParser</span>()
+    parser.<span class="fn">add_argument</span>(<span class="str">"--date"</span>, required=<span class="kw">True</span>)
+    parser.<span class="fn">add_argument</span>(<span class="str">"--dialect"</span>, choices=[<span class="str">"postgres"</span>, <span class="str">"oracle"</span>], default=<span class="str">"postgres"</span>)
+    args = parser.<span class="fn">parse_args</span>()
+
+    pg_dsn = os.<span class="fn">getenv</span>(<span class="str">"PG_DSN"</span>)
+    oracle_dsn = os.<span class="fn">getenv</span>(<span class="str">"ORACLE_DSN"</span>)
+    url = pg_dsn <span class="kw">if</span> args.dialect == <span class="str">"postgres"</span> <span class="kw">else</span> oracle_dsn
+    pipeline = ETLPipeline(<span class="fn">create_engine</span>(url), args.dialect)
+    pipeline.<span class="fn">load</span>(pipeline.<span class="fn">transform</span>(pipeline.<span class="fn">extract</span>(args.date)))</pre></div>
+      </div>
+      <div class="info-box tip">✅ <span>Giữ signature hàm rõ ràng và có type hints trong project thật để unit test từng bước dễ hơn.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content"><div id="quiz-w2-06"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Structure</strong>Class ETL giúp tách trách nhiệm rõ ràng.</div>
+        <div class="summary-item"><strong>CLI</strong>argparse cho phép chạy theo ngày linh hoạt.</div>
+        <div class="summary-item"><strong>Config</strong>.env giảm hard-code và dễ deploy.</div>
+        <div class="summary-item"><strong>Dialect switch</strong>Chọn SQL theo postgres/oracle.</div>
+        <div class="summary-item"><strong>Main guard</strong>Giúp import module không chạy side-effect.</div>
+        <div class="summary-item"><strong>Scalability</strong>Khung này dễ gắn vào scheduler.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1: Chạy pipeline theo 2 dialect</div>
+        <div class="practice-task-body">
+          <p>Chạy 2 lệnh CLI với cùng ngày nhưng khác DB backend: PostgreSQL và Oracle. So sánh số bản ghi load thành công.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p><code>python pipeline.py --date 2024-01-01 --dialect postgres</code> và <code>python pipeline.py --date 2024-01-01 --dialect oracle</code>. Kiểm tra row count bằng SQL ở cả hai DB.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(5)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(5)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<div class="module" id="m6">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · W2.07</div>
+    <div class="module-title">Artifact: week2_python_etl/</div>
+    <div class="module-subtitle">Đóng gói thành project chạy được bằng một lệnh CLI</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>File</th><th>Vai trò</th></tr>
+        <tr><td>extract.py</td><td>Đọc CSV + gọi API và trả dữ liệu thô</td></tr>
+        <tr><td>transform.py</td><td>Clean, validate, chuẩn hóa schema</td></tr>
+        <tr><td>load.py</td><td>Ghi PostgreSQL/Oracle theo chế độ incremental</td></tr>
+        <tr><td>pipeline.py</td><td>Điều phối toàn bộ luồng, nhận tham số date</td></tr>
+        <tr><td>README.md</td><td>Mô tả cách chạy và expected output</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Biến kiến thức tuần 2 thành artifact có thể demo trong portfolio.</li>
+        <li>Đảm bảo chạy được với cả PostgreSQL và Oracle SQL.</li>
+        <li>Có command chuẩn để reproducible mỗi lần chạy.</li>
+        <li>Có README đủ rõ để người khác chạy lại.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>Cấu trúc thư mục đề xuất</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>tree week2_python_etl</span></div>
+        <div class="cmd-body"><pre>week2_python_etl/
+├── extract.py
+├── transform.py
+├── load.py
+├── pipeline.py
+├── requirements.txt
+└── README.md</pre></div>
+      </div>
+
+      <h3>Lệnh chạy chuẩn</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>terminal</span></div>
+        <div class="cmd-body"><pre><span class="prompt">$</span> python pipeline.py --date 2024-01-01 --dialect postgres
+<span class="output">INFO batch_date=2024-01-01 rows_extracted=10234 rows_loaded=10210 status=SUCCESS</span>
+
+<span class="prompt">$</span> python pipeline.py --date 2024-01-01 --dialect oracle
+<span class="output">INFO batch_date=2024-01-01 rows_extracted=10234 rows_loaded=10210 status=SUCCESS</span></pre></div>
+      </div>
+
+      <h3>SQL kiểm tra hậu load</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>sql/validation_postgres_oracle.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
+<span class="kw">SELECT</span> run_date, <span class="fn">COUNT</span>(*) row_count
+<span class="kw">FROM</span> stg_orders
+<span class="kw">WHERE</span> run_date = <span class="str">'2024-01-01'</span>
+<span class="kw">GROUP BY</span> run_date;
+
+<span class="comment">-- Oracle SQL</span>
+<span class="kw">SELECT</span> run_date, <span class="fn">COUNT</span>(*) row_count
+<span class="kw">FROM</span> stg_orders
+<span class="kw">WHERE</span> run_date = DATE <span class="str">'2024-01-01'</span>
+<span class="kw">GROUP BY</span> run_date;</pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span>Artifact tốt là artifact người khác clone repo và chạy được ngay bằng 1-2 lệnh rõ ràng.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content"><div id="quiz-w2-07"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Deliverable</strong>Artifact gồm 4 file Python + README.</div>
+        <div class="summary-item"><strong>CLI ready</strong>Chạy theo ngày với tham số rõ ràng.</div>
+        <div class="summary-item"><strong>Dialect support</strong>Load được cả PG và Oracle.</div>
+        <div class="summary-item"><strong>Validation</strong>Có SQL kiểm tra sau load.</div>
+        <div class="summary-item"><strong>Logging</strong>Có log row count và trạng thái batch.</div>
+        <div class="summary-item"><strong>Portfolio</strong>Dễ demo trong CV và phỏng vấn.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1: Hoàn thiện README cho artifact</div>
+        <div class="practice-task-body">
+          <p>Viết README gồm: mục tiêu, input/output, cách chạy postgres/oracle, expected log, cách kiểm tra SQL.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>README nên có mục <code>Runbook</code>: nếu batch fail thì kiểm tra log nào, query nào và cách chạy lại theo ngày.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(6)">← Module trước</button>
+    <button class="nav-btn primary" onclick="goNext(6)">Module tiếp theo →</button>
+  </div>
+</div>
+
+<div class="module" id="m7">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · W2.08</div>
+    <div class="module-title">Mini Test Tổng Kết</div>
+    <div class="module-subtitle">Ôn tập nhanh + bài test cuối tuần để tự đánh giá mức sẵn sàng</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Phần</th><th>Nội dung</th></tr>
+        <tr><td>Ôn tập nhanh</td><td>10 câu quiz tương tác</td></tr>
+        <tr><td>Mini test cuối tuần</td><td>20 câu trắc nghiệm bao phủ toàn bộ W2.01-W2.07</td></tr>
+        <tr><td>Đánh giá</td><td>Phân mức điểm và gợi ý học tiếp</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Tự kiểm tra mức nắm vững Python cho DE.</li>
+        <li>Đánh giá kiến thức pandas, SQLAlchemy, API, logging, ETL architecture.</li>
+        <li>Xác định phần còn yếu trước khi sang tuần 3 Data Cleaning.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Mini test mô phỏng cách tự review trước khi chuyển tuần. Nếu điểm dưới 10/20, hãy ôn lại W2.02, W2.03 và W2.06 trước.</p>
+      <div class="info-box note">📌 <span>Mục tiêu tuần 2 không phải viết code dài, mà là viết pipeline có thể chạy lặp lại, có log, có kiểm soát lỗi và hỗ trợ nhiều database backend.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div id="quiz-w2-08"></div>
+
+      <h3>Mini test cuối tuần (20 câu)</h3>
+      <div id="final-test">
+        <div class="test-question" data-q="1" data-correct="B">
+          <div class="test-question-title">Q1. Vai trò chính của pandas trong tuần 2 là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q1" value="A"> A. Huấn luyện deep learning</label>
+            <label class="test-option"><input type="radio" name="q1" value="B"> B. Xử lý bảng dữ liệu và transform</label>
+            <label class="test-option"><input type="radio" name="q1" value="C"> C. Thay thế database</label>
+            <label class="test-option"><input type="radio" name="q1" value="D"> D. Vẽ dashboard production</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="2" data-correct="C">
+          <div class="test-question-title">Q2. Cách an toàn để truyền tham số vào SQL là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q2" value="A"> A. Nối chuỗi trực tiếp</label>
+            <label class="test-option"><input type="radio" name="q2" value="B"> B. f-string với input người dùng</label>
+            <label class="test-option"><input type="radio" name="q2" value="C"> C. Parameterized query</label>
+            <label class="test-option"><input type="radio" name="q2" value="D"> D. eval SQL text</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="3" data-correct="A">
+          <div class="test-question-title">Q3. Để đọc dữ liệu API nhiều trang, bạn dùng gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q3" value="A"> A. Pagination loop</label>
+            <label class="test-option"><input type="radio" name="q3" value="B"> B. One-shot request duy nhất</label>
+            <label class="test-option"><input type="radio" name="q3" value="C"> C. Chỉ đọc trang cuối</label>
+            <label class="test-option"><input type="radio" name="q3" value="D"> D. Random page</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="4" data-correct="D">
+          <div class="test-question-title">Q4. HTTP status nào thường cần retry với backoff?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q4" value="A"> A. 200</label>
+            <label class="test-option"><input type="radio" name="q4" value="B"> B. 201</label>
+            <label class="test-option"><input type="radio" name="q4" value="C"> C. 204</label>
+            <label class="test-option"><input type="radio" name="q4" value="D"> D. 429</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="5" data-correct="B">
+          <div class="test-question-title">Q5. Trong PostgreSQL, upsert phổ biến là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q5" value="A"> A. MERGE only</label>
+            <label class="test-option"><input type="radio" name="q5" value="B"> B. INSERT ... ON CONFLICT</label>
+            <label class="test-option"><input type="radio" name="q5" value="C"> C. TRUNCATE + INSERT</label>
+            <label class="test-option"><input type="radio" name="q5" value="D"> D. DELETE + INSERT always</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="6" data-correct="A">
+          <div class="test-question-title">Q6. Trong Oracle SQL, upsert phổ biến là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q6" value="A"> A. MERGE INTO</label>
+            <label class="test-option"><input type="radio" name="q6" value="B"> B. ON CONFLICT</label>
+            <label class="test-option"><input type="radio" name="q6" value="C"> C. COPY INTO</label>
+            <label class="test-option"><input type="radio" name="q6" value="D"> D. VACUUM</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="7" data-correct="C">
+          <div class="test-question-title">Q7. Lợi ích chính của logging JSON là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q7" value="A"> A. Log ngắn hơn mọi trường hợp</label>
+            <label class="test-option"><input type="radio" name="q7" value="B"> B. Không cần parse</label>
+            <label class="test-option"><input type="radio" name="q7" value="C"> C. Dễ query và phân tích máy đọc</label>
+            <label class="test-option"><input type="radio" name="q7" value="D"> D. Không cần level log</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="8" data-correct="B">
+          <div class="test-question-title">Q8. Vì sao cần main guard trong pipeline.py?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q8" value="A"> A. Để tăng tốc CPU</label>
+            <label class="test-option"><input type="radio" name="q8" value="B"> B. Tránh chạy code khi import module</label>
+            <label class="test-option"><input type="radio" name="q8" value="C"> C. Bắt buộc của pandas</label>
+            <label class="test-option"><input type="radio" name="q8" value="D"> D. Để không cần argparse</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="9" data-correct="A">
+          <div class="test-question-title">Q9. Kỹ thuật nào giúp đọc file lớn ổn định hơn?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q9" value="A"> A. chunksize</label>
+            <label class="test-option"><input type="radio" name="q9" value="B"> B. read all và print toàn bộ</label>
+            <label class="test-option"><input type="radio" name="q9" value="C"> C. dtype object cho mọi cột</label>
+            <label class="test-option"><input type="radio" name="q9" value="D"> D. tolist() ngay sau khi đọc</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="10" data-correct="D">
+          <div class="test-question-title">Q10. Bước nào thuộc Transform?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q10" value="A"> A. Gọi API</label>
+            <label class="test-option"><input type="radio" name="q10" value="B"> B. Kết nối DB</label>
+            <label class="test-option"><input type="radio" name="q10" value="C"> C. Mở file cấu hình</label>
+            <label class="test-option"><input type="radio" name="q10" value="D"> D. Chuẩn hóa kiểu dữ liệu</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="11" data-correct="C">
+          <div class="test-question-title">Q11. Retry nên dùng cho trường hợp nào?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q11" value="A"> A. Lỗi schema cố định</label>
+            <label class="test-option"><input type="radio" name="q11" value="B"> B. Lỗi logic code chắc chắn</label>
+            <label class="test-option"><input type="radio" name="q11" value="C"> C. Lỗi tạm thời network/API</label>
+            <label class="test-option"><input type="radio" name="q11" value="D"> D. Mọi lỗi đều retry vô hạn</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="12" data-correct="B">
+          <div class="test-question-title">Q12. to_sql mode nào để append dữ liệu mới?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q12" value="A"> A. fail</label>
+            <label class="test-option"><input type="radio" name="q12" value="B"> B. append</label>
+            <label class="test-option"><input type="radio" name="q12" value="C"> C. replace luôn</label>
+            <label class="test-option"><input type="radio" name="q12" value="D"> D. delete</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="13" data-correct="A">
+          <div class="test-question-title">Q13. Vì sao cần tách extract.py và transform.py?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q13" value="A"> A. Dễ test và bảo trì</label>
+            <label class="test-option"><input type="radio" name="q13" value="B"> B. Để tăng số file cho đẹp</label>
+            <label class="test-option"><input type="radio" name="q13" value="C"> C. Vì Python không cho file dài</label>
+            <label class="test-option"><input type="radio" name="q13" value="D"> D. Không có lý do kỹ thuật</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="14" data-correct="D">
+          <div class="test-question-title">Q14. Biến môi trường nên lưu gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q14" value="A"> A. Business logic SQL</label>
+            <label class="test-option"><input type="radio" name="q14" value="B"> B. Mọi dữ liệu đầu vào</label>
+            <label class="test-option"><input type="radio" name="q14" value="C"> C. Unit test expected output</label>
+            <label class="test-option"><input type="radio" name="q14" value="D"> D. Credential và URL kết nối</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="15" data-correct="A">
+          <div class="test-question-title">Q15. Điều nào là anti-pattern?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q15" value="A"> A. except: pass</label>
+            <label class="test-option"><input type="radio" name="q15" value="B"> B. log error + raise</label>
+            <label class="test-option"><input type="radio" name="q15" value="C"> C. custom exception</label>
+            <label class="test-option"><input type="radio" name="q15" value="D"> D. timeout cho request</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="16" data-correct="C">
+          <div class="test-question-title">Q16. Vì sao cần row_count sau mỗi bước?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q16" value="A"> A. Cho code dài hơn</label>
+            <label class="test-option"><input type="radio" name="q16" value="B"> B. Thay thế hoàn toàn unit test</label>
+            <label class="test-option"><input type="radio" name="q16" value="C"> C. Phát hiện mất dữ liệu sớm</label>
+            <label class="test-option"><input type="radio" name="q16" value="D"> D. Không có tác dụng</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="17" data-correct="B">
+          <div class="test-question-title">Q17. Command nào đúng để chạy pipeline theo ngày?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q17" value="A"> A. python pipeline.py</label>
+            <label class="test-option"><input type="radio" name="q17" value="B"> B. python pipeline.py --date 2024-01-01</label>
+            <label class="test-option"><input type="radio" name="q17" value="C"> C. pandas run --date</label>
+            <label class="test-option"><input type="radio" name="q17" value="D"> D. sql run pipeline.py</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="18" data-correct="A">
+          <div class="test-question-title">Q18. Mục tiêu chính của artifact tuần 2 là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q18" value="A"> A. Pipeline ETL Python chạy được thực tế</label>
+            <label class="test-option"><input type="radio" name="q18" value="B"> B. Dashboard hoàn chỉnh</label>
+            <label class="test-option"><input type="radio" name="q18" value="C"> C. Spark optimization</label>
+            <label class="test-option"><input type="radio" name="q18" value="D"> D. Streaming Flink</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="19" data-correct="D">
+          <div class="test-question-title">Q19. Khi nào nên dùng Oracle SQL trong tuần 2?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q19" value="A"> A. Không bao giờ dùng</label>
+            <label class="test-option"><input type="radio" name="q19" value="B"> B. Chỉ khi vẽ biểu đồ</label>
+            <label class="test-option"><input type="radio" name="q19" value="C"> C. Chỉ khi đọc CSV</label>
+            <label class="test-option"><input type="radio" name="q19" value="D"> D. Khi hệ thống đích hoặc source dùng Oracle</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="20" data-correct="C">
+          <div class="test-question-title">Q20. Điều kiện tốt nhất để sang tuần 3 là?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q20" value="A"> A. Đọc xong tài liệu nhưng chưa chạy code</label>
+            <label class="test-option"><input type="radio" name="q20" value="B"> B. Chỉ pass mini test</label>
+            <label class="test-option"><input type="radio" name="q20" value="C"> C. Artifact chạy được và hiểu log/kết quả</label>
+            <label class="test-option"><input type="radio" name="q20" value="D"> D. Chỉ viết README</label>
+          </div>
+        </div>
+
+        <div class="test-actions">
+          <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+          <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+        </div>
+        <div class="test-result" id="final-test-result" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Coverage</strong>Đã ôn tập toàn bộ W2.01-W2.07.</div>
+        <div class="summary-item"><strong>Checkpoint</strong>Mini test giúp xác định điểm yếu.</div>
+        <div class="summary-item"><strong>Target</strong>Mục tiêu tốt: đạt từ 14/20 trở lên.</div>
+        <div class="summary-item"><strong>Action</strong>Ôn lại module điểm thấp trước khi qua tuần 3.</div>
+        <div class="summary-item"><strong>Practice</strong>Ưu tiên chạy lại artifact thay vì chỉ đọc.</div>
+        <div class="summary-item"><strong>Readiness</strong>Sẵn sàng cho Data Cleaning khi pipeline chạy ổn.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▶</span>
+    </div>
+    <div class="section-content" style="display:none">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1: Tự đánh giá và lập kế hoạch tuần 3</div>
+        <div class="practice-task-body">
+          <p>Liệt kê 3 điểm yếu từ mini test, gắn mỗi điểm yếu với 1 hành động cụ thể để cải thiện trong 3 ngày tới.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Ví dụ: nếu sai phần SQLAlchemy, viết lại 1 script query tham số hóa cho cả PostgreSQL và Oracle rồi chạy thử end-to-end.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goPrev(7)">← Module trước</button>
+    <div style="text-align:center;color:var(--accent2);font-weight:700">Hoàn thành Tuần 2! Sẵn sàng sang Tuần 3 Data Cleaning.</div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('data-correct') === 'true') {
+        o.classList.add('correct');
+      }
+    });
+  }
+  explain.textContent = (correct ? '✓ Chính xác! ' : '✗ Sai. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? '🔼 Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (correctCount >= 18) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn đã sẵn sàng cho tuần 3 Data Cleaning.'; }
+  else if (correctCount >= 14) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Nền tảng tốt, tiếp tục thực hành artifact thêm 1-2 lần.'; }
+  else if (correctCount >= 10) { levelText = 'Đạt'; chipClass = 'warn'; guidance = 'Nên ôn lại pandas, SQLAlchemy và ETL structure trước khi sang tuần 3.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Làm lại W2.02 đến W2.07 và chạy lại mini test.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đúng là <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng. Rất tốt.</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+
+function renderQuizBank(targetId, questions) {
+  const host = document.getElementById(targetId);
+  if (!host) return;
+  const letters = ['A', 'B', 'C', 'D'];
+  questions.forEach((item) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'quiz-item';
+
+    const q = document.createElement('div');
+    q.className = 'quiz-q';
+    q.textContent = item.q;
+
+    const options = document.createElement('div');
+    options.className = 'quiz-options';
+
+    item.options.forEach((opt, idx) => {
+      const o = document.createElement('div');
+      o.className = 'quiz-opt';
+      o.setAttribute('data-correct', opt.correct ? 'true' : 'false');
+      o.textContent = `${letters[idx]}. ${opt.text}`;
+      o.onclick = () => answerQuiz(o, opt.correct, opt.explanation);
+      options.appendChild(o);
+    });
+
+    const explain = document.createElement('div');
+    explain.className = 'quiz-explain';
+
+    wrap.appendChild(q);
+    wrap.appendChild(options);
+    wrap.appendChild(explain);
+    host.appendChild(wrap);
+  });
+}
+
+const quizBanks = {
+  'quiz-w2-01': [
+    { q: 'Python trong DE thường dùng để làm gì?', options: [
+      { text: 'Thay toàn bộ SQL', correct: false, explanation: 'DE vẫn cần SQL cho xử lý set-based trong database.' },
+      { text: 'Điều phối pipeline ETL', correct: true, explanation: 'Đúng, Python mạnh ở orchestration, tích hợp API/file/DB.' },
+      { text: 'Chỉ để vẽ biểu đồ', correct: false, explanation: 'Visualization chỉ là phần nhỏ, không phải mục tiêu tuần 2.' },
+      { text: 'Chỉ để train model', correct: false, explanation: 'Tuần này tập trung data engineering, không phải ML training.' }
+    ]},
+    { q: 'Phân vai đúng giữa Python và SQL là gì?', options: [
+      { text: 'Python join lớn, SQL gọi API', correct: false, explanation: 'API gọi bằng Python; join lớn nên để database làm.' },
+      { text: 'Python orchestration, SQL xử lý dữ liệu trong DB', correct: true, explanation: 'Đúng, đây là cách phân vai hiệu quả nhất.' },
+      { text: 'SQL thay logging', correct: false, explanation: 'Logging thuộc lớp ứng dụng Python.' },
+      { text: 'Python thay transaction DB', correct: false, explanation: 'Transaction vẫn do database quản lý.' }
+    ]},
+    { q: 'Tính chất quan trọng khi pipeline chạy lại là?', options: [
+      { text: 'Idempotent', correct: true, explanation: 'Đúng, chạy lại không làm sai kết quả.' },
+      { text: 'Randomized', correct: false, explanation: 'Randomized làm khó kiểm soát dữ liệu.' },
+      { text: 'Best effort', correct: false, explanation: 'Best effort không đủ cho dữ liệu production.' },
+      { text: 'Manual only', correct: false, explanation: 'Pipeline cần tự động hóa và có khả năng chạy lại.' }
+    ]},
+    { q: 'Vì sao cần logging ngay từ tuần 2?', options: [
+      { text: 'Để thay unit test', correct: false, explanation: 'Log không thay thế test.' },
+      { text: 'Để giảm dung lượng data', correct: false, explanation: 'Logging không nhằm mục tiêu này.' },
+      { text: 'Để truy vết lỗi và theo dõi batch', correct: true, explanation: 'Đúng, log giúp debug vận hành nhanh hơn.' },
+      { text: 'Để không cần monitoring', correct: false, explanation: 'Monitoring vẫn cần.' }
+    ]},
+    { q: 'Artifact tuần 2 yêu cầu gì?', options: [
+      { text: 'Một notebook duy nhất', correct: false, explanation: 'Yêu cầu là bộ file ETL rõ ràng.' },
+      { text: '4 file Python + README chạy được', correct: true, explanation: 'Đúng theo scope tuần 2.' },
+      { text: 'Dashboard production', correct: false, explanation: 'Dashboard chưa phải mục tiêu tuần này.' },
+      { text: 'Spark cluster', correct: false, explanation: 'Spark học ở giai đoạn sau.' }
+    ]},
+    { q: 'Nguồn dữ liệu nào Python thường tích hợp trong DE?', options: [
+      { text: 'Chỉ CSV', correct: false, explanation: 'DE thường làm với nhiều nguồn.' },
+      { text: 'API, file, và database', correct: true, explanation: 'Đúng, Python giúp gom đa nguồn.' },
+      { text: 'Chỉ Oracle', correct: false, explanation: 'Tuần này dùng cả PostgreSQL và Oracle.' },
+      { text: 'Chỉ message queue', correct: false, explanation: 'Có thể dùng nhưng không giới hạn ở đó.' }
+    ]},
+    { q: 'Vì sao phải tránh hard-code credential?', options: [
+      { text: 'Vì code chạy chậm', correct: false, explanation: 'Vấn đề chính là bảo mật và vận hành.' },
+      { text: 'Vì khó bảo trì, dễ lộ bí mật', correct: true, explanation: 'Đúng, nên dùng env/secret manager.' },
+      { text: 'Vì Python không hỗ trợ string', correct: false, explanation: 'Không đúng.' },
+      { text: 'Vì SQLAlchemy cấm', correct: false, explanation: 'Không cấm tuyệt đối, nhưng là bad practice.' }
+    ]},
+    { q: 'Khi chuyển môi trường dev -> prod, cách tốt là?', options: [
+      { text: 'Sửa trực tiếp trong code', correct: false, explanation: 'Dễ lỗi và khó kiểm soát.' },
+      { text: 'Dùng cấu hình theo biến môi trường', correct: true, explanation: 'Đúng, giúp deploy linh hoạt.' },
+      { text: 'Copy/paste project mới', correct: false, explanation: 'Không bền vững.' },
+      { text: 'Đổi branch là đủ', correct: false, explanation: 'Branch không thay config runtime.' }
+    ]},
+    { q: 'Mục tiêu học tuần 2 phù hợp nhất là?', options: [
+      { text: 'Deep learning model', correct: false, explanation: 'Không phải trọng tâm tuần này.' },
+      { text: 'ETL Python có log và retry cơ bản', correct: true, explanation: 'Đúng mục tiêu practical cho DE.' },
+      { text: 'Distributed streaming nâng cao', correct: false, explanation: 'Streaming học sau.' },
+      { text: 'Database internals', correct: false, explanation: 'Không phải mục tiêu chính tuần 2.' }
+    ]},
+    { q: 'Khi logic transform chưa chắc chắn, bước đúng là?', options: [
+      { text: 'Đẩy production ngay', correct: false, explanation: 'Rủi ro cao.' },
+      { text: 'Test bằng dữ liệu mẫu và kiểm tra output', correct: true, explanation: 'Đúng, giúp bắt lỗi sớm.' },
+      { text: 'Tắt toàn bộ logging', correct: false, explanation: 'Sẽ khó debug.' },
+      { text: 'Bỏ qua exception', correct: false, explanation: 'Làm pipeline fail ngầm.' }
+    ]}
+  ],
+
+  'quiz-w2-02': [
+    { q: 'Hàm pandas nào dùng để đọc file Parquet?', options: [
+      { text: 'read_parquet', correct: true, explanation: 'Đúng, đây là API chuẩn cho Parquet.' },
+      { text: 'read_yaml', correct: false, explanation: 'Không dùng cho Parquet.' },
+      { text: 'read_pickle_csv', correct: false, explanation: 'Không tồn tại.' },
+      { text: 'open_table', correct: false, explanation: 'Không phải API pandas chuẩn.' }
+    ]},
+    { q: 'Khi cột revenue bị null, lựa chọn phù hợp là?', options: [
+      { text: 'fillna(0) nếu nghiệp vụ cho phép', correct: true, explanation: 'Đúng cho nhiều bài toán doanh thu thiếu giá trị.' },
+      { text: 'Ép thành string luôn', correct: false, explanation: 'Sẽ phá kiểu dữ liệu số.' },
+      { text: 'Xóa cả bảng', correct: false, explanation: 'Quá cực đoan.' },
+      { text: 'Bỏ qua không xử lý', correct: false, explanation: 'Dễ gây sai KPI.' }
+    ]},
+    { q: 'Đọc file lớn nên ưu tiên gì?', options: [
+      { text: 'chunksize và chọn cột cần thiết', correct: true, explanation: 'Đúng, giảm áp lực RAM.' },
+      { text: 'read toàn bộ rồi xử lý sau', correct: false, explanation: 'Dễ tràn bộ nhớ.' },
+      { text: 'Dùng dtype object cho mọi cột', correct: false, explanation: 'Không tối ưu memory.' },
+      { text: 'Không cần schema', correct: false, explanation: 'Schema quan trọng cho tính nhất quán.' }
+    ]},
+    { q: 'merge trong pandas tương đương phép gì trong SQL?', options: [
+      { text: 'JOIN', correct: true, explanation: 'Đúng, merge là join theo key.' },
+      { text: 'VACUUM', correct: false, explanation: 'Không liên quan.' },
+      { text: 'GRANT', correct: false, explanation: 'Không liên quan.' },
+      { text: 'ANALYZE', correct: false, explanation: 'Không liên quan.' }
+    ]},
+    { q: 'Dùng groupby().agg() để làm gì?', options: [
+      { text: 'Tính tổng hợp theo nhóm', correct: true, explanation: 'Đúng, dùng cho KPI và thống kê nhóm.' },
+      { text: 'Tạo connection DB', correct: false, explanation: 'Không đúng.' },
+      { text: 'Gọi API', correct: false, explanation: 'Không đúng.' },
+      { text: 'Cài package', correct: false, explanation: 'Không đúng.' }
+    ]},
+    { q: 'Khi đọc nhiều file cùng schema, pattern tốt là?', options: [
+      { text: 'glob + concat', correct: true, explanation: 'Đúng và phổ biến trong DE.' },
+      { text: 'Copy thủ công từng file', correct: false, explanation: 'Không hiệu quả.' },
+      { text: 'Bỏ qua file lỗi', correct: false, explanation: 'Nên log và xử lý rõ.' },
+      { text: 'Join bằng vòng for không concat', correct: false, explanation: 'Thường kém rõ ràng và khó bảo trì.' }
+    ]},
+    { q: 'to_sql trong pandas thường cần gì?', options: [
+      { text: 'SQLAlchemy engine', correct: true, explanation: 'Đúng, đây là cách chuẩn để ghi DB.' },
+      { text: 'SparkSession', correct: false, explanation: 'Không bắt buộc cho pandas.' },
+      { text: 'Docker compose', correct: false, explanation: 'Không phải tham số hàm.' },
+      { text: 'Kafka topic', correct: false, explanation: 'Không liên quan.' }
+    ]},
+    { q: 'Lợi ích của astype() đúng kiểu là?', options: [
+      { text: 'Giảm lỗi transform và tối ưu memory', correct: true, explanation: 'Đúng, đặc biệt với cột category/int.' },
+      { text: 'Tăng số dòng dữ liệu', correct: false, explanation: 'Không đúng.' },
+      { text: 'Thay thế hoàn toàn validation', correct: false, explanation: 'Vẫn cần validation nghiệp vụ.' },
+      { text: 'Tăng tốc mạng', correct: false, explanation: 'Không liên quan.' }
+    ]},
+    { q: 'Đọc SQL từ PostgreSQL và Oracle bằng pandas cần gì chung?', options: [
+      { text: 'read_sql_query + engine phù hợp', correct: true, explanation: 'Đúng, điểm khác nằm ở connection URL và SQL dialect.' },
+      { text: 'Cùng một câu SQL 100%', correct: false, explanation: 'Có khác biệt cú pháp theo DB.' },
+      { text: 'Không cần driver', correct: false, explanation: 'Cần driver tương ứng.' },
+      { text: 'Chỉ dùng sqlite', correct: false, explanation: 'Không đúng phạm vi bài.' }
+    ]},
+    { q: 'Khi phát hiện duplicate order_id, cách xử lý phổ biến là?', options: [
+      { text: 'drop_duplicates theo khóa nghiệp vụ', correct: true, explanation: 'Đúng, giảm trùng lặp trước load.' },
+      { text: 'Nhân đôi thêm', correct: false, explanation: 'Sai mục tiêu.' },
+      { text: 'Bỏ toàn bộ data', correct: false, explanation: 'Không hợp lý.' },
+      { text: 'Không cần xử lý', correct: false, explanation: 'Sẽ gây sai số liệu.' }
+    ]}
+  ],
+
+  'quiz-w2-03': [
+    { q: 'create_engine dùng để làm gì?', options: [
+      { text: 'Tạo kết nối/engine đến database', correct: true, explanation: 'Đúng, đây là điểm vào của SQLAlchemy.' },
+      { text: 'Tạo DataFrame', correct: false, explanation: 'DataFrame là của pandas.' },
+      { text: 'Gọi API', correct: false, explanation: 'Không đúng.' },
+      { text: 'Tạo dashboard', correct: false, explanation: 'Không đúng.' }
+    ]},
+    { q: 'Cách chống SQL injection đúng là?', options: [
+      { text: 'Nối chuỗi từ input', correct: false, explanation: 'Nguy hiểm.' },
+      { text: 'Parameterized query', correct: true, explanation: 'Đúng, dùng bind params.' },
+      { text: 'Chỉ dùng uppercase SQL', correct: false, explanation: 'Không liên quan bảo mật.' },
+      { text: 'Ẩn SQL trong comment', correct: false, explanation: 'Không hiệu quả.' }
+    ]},
+    { q: 'Khác biệt upsert chính giữa PG và Oracle?', options: [
+      { text: 'PG dùng ON CONFLICT, Oracle thường dùng MERGE', correct: true, explanation: 'Đúng theo thực hành phổ biến.' },
+      { text: 'Cả hai chỉ dùng TRUNCATE', correct: false, explanation: 'Sai.' },
+      { text: 'Oracle không hỗ trợ update', correct: false, explanation: 'Sai.' },
+      { text: 'PG không hỗ trợ insert', correct: false, explanation: 'Sai.' }
+    ]},
+    { q: 'Khối engine.begin() có ý nghĩa gì?', options: [
+      { text: 'Quản lý transaction tự động', correct: true, explanation: 'Đúng, commit/rollback rõ ràng.' },
+      { text: 'Tăng tốc network', correct: false, explanation: 'Không trực tiếp.' },
+      { text: 'Tắt autocommit toàn hệ thống', correct: false, explanation: 'Không chính xác như vậy.' },
+      { text: 'Chỉ để đọc log', correct: false, explanation: 'Không đúng.' }
+    ]},
+    { q: 'pool_size trong create_engine giúp gì?', options: [
+      { text: 'Quản lý số connection mở đồng thời', correct: true, explanation: 'Đúng, giảm overhead mở kết nối liên tục.' },
+      { text: 'Tăng số cột bảng', correct: false, explanation: 'Không liên quan.' },
+      { text: 'Tăng số query trong file', correct: false, explanation: 'Không liên quan.' },
+      { text: 'Đổi SQL dialect', correct: false, explanation: 'Không liên quan.' }
+    ]},
+    { q: 'Driver PostgreSQL phổ biến với SQLAlchemy là?', options: [
+      { text: 'psycopg2', correct: true, explanation: 'Đúng, dùng rộng rãi.' },
+      { text: 'oracledb', correct: false, explanation: 'Driver này cho Oracle.' },
+      { text: 'duckdb', correct: false, explanation: 'Không phải DBAPI PostgreSQL.' },
+      { text: 'sqlite3pg', correct: false, explanation: 'Không tồn tại chuẩn đó.' }
+    ]},
+    { q: 'Driver Oracle phổ biến với SQLAlchemy hiện nay là?', options: [
+      { text: 'oracledb', correct: true, explanation: 'Đúng, thay thế cx_Oracle ở nhiều dự án mới.' },
+      { text: 'psycopg2', correct: false, explanation: 'Driver PostgreSQL.' },
+      { text: 'mysqlclient', correct: false, explanation: 'Driver MySQL.' },
+      { text: 'httpx', correct: false, explanation: 'Thư viện HTTP.' }
+    ]},
+    { q: 'Tại sao không nên giữ connection mở toàn chương trình?', options: [
+      { text: 'Dễ rò rỉ tài nguyên và khó kiểm soát', correct: true, explanation: 'Đúng, nên dùng context manager.' },
+      { text: 'Vì Python không hỗ trợ', correct: false, explanation: 'Python vẫn hỗ trợ, nhưng không phải best practice.' },
+      { text: 'Vì DB không cho phép', correct: false, explanation: 'DB cho phép nhưng cần quản lý đúng.' },
+      { text: 'Vì làm query sai cú pháp', correct: false, explanation: 'Không liên quan.' }
+    ]},
+    { q: 'Khi viết SQL multi-dialect, cách tốt là?', options: [
+      { text: 'Hard-code 1 SQL cho mọi DB', correct: false, explanation: 'Dễ lỗi cú pháp khi đổi backend.' },
+      { text: 'Tách SQL theo dialect', correct: true, explanation: 'Đúng, rõ ràng và dễ maintain.' },
+      { text: 'Chỉ dùng ORM tự sinh mọi SQL', correct: false, explanation: 'Không phải lúc nào phù hợp cho DE.' },
+      { text: 'Bỏ qua test', correct: false, explanation: 'Cần test cho cả hai DB.' }
+    ]},
+    { q: 'Output nào nên log sau bước load?', options: [
+      { text: 'row_count và thời gian chạy', correct: true, explanation: 'Đúng, giúp theo dõi chất lượng và hiệu năng.' },
+      { text: 'Password DB', correct: false, explanation: 'Không được log bí mật.' },
+      { text: 'Toàn bộ dữ liệu thô', correct: false, explanation: 'Tốn tài nguyên và có thể lộ dữ liệu nhạy cảm.' },
+      { text: 'Không log gì', correct: false, explanation: 'Khó vận hành.' }
+    ]}
+  ],
+
+  'quiz-w2-04': [
+    { q: 'Lý do cần timeout khi gọi requests là?', options: [
+      { text: 'Tránh treo vô hạn khi API chậm', correct: true, explanation: 'Đúng, timeout bảo vệ pipeline.' },
+      { text: 'Để tăng tốc CPU', correct: false, explanation: 'Không trực tiếp.' },
+      { text: 'Để bỏ qua auth', correct: false, explanation: 'Không liên quan.' },
+      { text: 'Để thay retry', correct: false, explanation: 'Retry vẫn có vai trò riêng.' }
+    ]},
+    { q: 'Status code nào thường retry?', options: [
+      { text: '200', correct: false, explanation: 'Đây là thành công.' },
+      { text: '201', correct: false, explanation: 'Đây là thành công tạo mới.' },
+      { text: '429 và 5xx', correct: true, explanation: 'Đúng, thường là lỗi tạm thời.' },
+      { text: '404 cố định', correct: false, explanation: '404 thường không nên retry vô hạn.' }
+    ]},
+    { q: 'Pagination bằng page number cần gì?', options: [
+      { text: 'Tăng page đến khi hết dữ liệu', correct: true, explanation: 'Đúng, dựa trên has_more hoặc count.' },
+      { text: 'Chỉ lấy page=1', correct: false, explanation: 'Sẽ thiếu dữ liệu.' },
+      { text: 'Random page', correct: false, explanation: 'Không đúng logic.' },
+      { text: 'Không cần vòng lặp', correct: false, explanation: 'Pagination cần lặp.' }
+    ]},
+    { q: 'Bearer token nên đặt ở đâu?', options: [
+      { text: 'Query string công khai', correct: false, explanation: 'Không an toàn.' },
+      { text: 'Authorization header', correct: true, explanation: 'Đúng theo chuẩn phổ biến.' },
+      { text: 'Tên file output', correct: false, explanation: 'Không liên quan.' },
+      { text: 'Log file', correct: false, explanation: 'Không nên log token.' }
+    ]},
+    { q: 'Exponential backoff có tác dụng gì?', options: [
+      { text: 'Giảm áp lực khi API đang quá tải', correct: true, explanation: 'Đúng, giúp hệ thống ổn định hơn.' },
+      { text: 'Luôn nhanh hơn retry thường', correct: false, explanation: 'Mục tiêu là ổn định, không phải luôn nhanh.' },
+      { text: 'Thay cho mọi loại xử lý lỗi', correct: false, explanation: 'Không thay được validation/data error handling.' },
+      { text: 'Không cần limit số lần thử', correct: false, explanation: 'Nên có max attempts.' }
+    ]},
+    { q: 'Khi parse JSON nested, bước quan trọng là?', options: [
+      { text: 'Chuẩn hóa schema đầu ra', correct: true, explanation: 'Đúng để transform downstream ổn định.' },
+      { text: 'Giữ nguyên mọi field không kiểm tra', correct: false, explanation: 'Dễ lỗi schema drift.' },
+      { text: 'Đổi tất cả sang string', correct: false, explanation: 'Mất ý nghĩa kiểu dữ liệu.' },
+      { text: 'Bỏ qua null', correct: false, explanation: 'Cần có chính sách null rõ.' }
+    ]},
+    { q: 'Lỗi nào nên fail fast thay vì retry?', options: [
+      { text: '401 do token sai', correct: true, explanation: 'Đúng, retry không giải quyết được credential sai.' },
+      { text: '503 tạm thời', correct: false, explanation: '503 thường nên retry có backoff.' },
+      { text: '429', correct: false, explanation: 'Nên retry với delay.' },
+      { text: '502', correct: false, explanation: 'Thường là lỗi tạm thời.' }
+    ]},
+    { q: 'Thông tin nào nên log mỗi request?', options: [
+      { text: 'endpoint, status code, duration', correct: true, explanation: 'Đúng, đủ để theo dõi và debug.' },
+      { text: 'Password API', correct: false, explanation: 'Không log bí mật.' },
+      { text: 'Toàn bộ payload nhạy cảm', correct: false, explanation: 'Cần hạn chế theo chính sách bảo mật.' },
+      { text: 'Không log gì', correct: false, explanation: 'Thiếu observability.' }
+    ]},
+    { q: 'Vì sao cần kiểm tra has_more/next_token?', options: [
+      { text: 'Để biết khi nào dừng vòng lặp', correct: true, explanation: 'Đúng, tránh loop vô hạn hoặc thiếu dữ liệu.' },
+      { text: 'Để đổi sang SQL', correct: false, explanation: 'Không liên quan.' },
+      { text: 'Để tăng memory', correct: false, explanation: 'Không đúng.' },
+      { text: 'Để bỏ qua trang đầu', correct: false, explanation: 'Không đúng.' }
+    ]},
+    { q: 'Sau khi fetch API, bước kế tiếp thường là?', options: [
+      { text: 'Chuẩn hóa và validate dữ liệu', correct: true, explanation: 'Đúng trước khi load vào DB.' },
+      { text: 'Drop toàn bộ cột', correct: false, explanation: 'Không hợp lý.' },
+      { text: 'Commit lên git ngay', correct: false, explanation: 'Không phải bước dữ liệu.' },
+      { text: 'Tạo dashboard ngay', correct: false, explanation: 'Cần pipeline hoàn chỉnh trước.' }
+    ]}
+  ],
+
+  'quiz-w2-05': [
+    { q: 'Mẫu xử lý lỗi tốt nhất là?', options: [
+      { text: 'except: pass', correct: false, explanation: 'Nuốt lỗi là anti-pattern.' },
+      { text: 'try/except có log + raise khi cần', correct: true, explanation: 'Đúng, vừa quan sát được vừa giữ tính đúng đắn.' },
+      { text: 'Không dùng try/except', correct: false, explanation: 'Khó kiểm soát lỗi vận hành.' },
+      { text: 'Bắt mọi lỗi và luôn tiếp tục', correct: false, explanation: 'Có thể gây sai dữ liệu.' }
+    ]},
+    { q: 'finally trong Python hữu ích khi nào?', options: [
+      { text: 'Cleanup tài nguyên dù thành công hay lỗi', correct: true, explanation: 'Đúng, luôn chạy.' },
+      { text: 'Tăng tốc query', correct: false, explanation: 'Không liên quan.' },
+      { text: 'Thay thế logger', correct: false, explanation: 'Không đúng.' },
+      { text: 'Bỏ qua exception', correct: false, explanation: 'Không đúng.' }
+    ]},
+    { q: 'Custom exception giúp gì?', options: [
+      { text: 'Phân loại lỗi theo nghiệp vụ', correct: true, explanation: 'Đúng, dễ xử lý theo loại lỗi.' },
+      { text: 'Làm code ngắn hơn mọi trường hợp', correct: false, explanation: 'Không phải lúc nào.' },
+      { text: 'Không cần log nữa', correct: false, explanation: 'Vẫn cần log.' },
+      { text: 'Tự sửa lỗi data', correct: false, explanation: 'Không đúng.' }
+    ]},
+    { q: 'Structured logging thường có format gì?', options: [
+      { text: 'JSON', correct: true, explanation: 'Đúng, máy đọc và query tốt.' },
+      { text: 'Ảnh PNG', correct: false, explanation: 'Không đúng.' },
+      { text: 'Excel', correct: false, explanation: 'Không phải format log runtime.' },
+      { text: 'Binary custom', correct: false, explanation: 'Không phổ biến cho logging app.' }
+    ]},
+    { q: 'Log level WARNING dùng khi nào?', options: [
+      { text: 'Sự kiện cần chú ý nhưng chưa fail pipeline', correct: true, explanation: 'Đúng, ví dụ retry lần 1.' },
+      { text: 'Bắt buộc khi job thành công', correct: false, explanation: 'Thành công thường dùng INFO.' },
+      { text: 'Khi debug local chi tiết', correct: false, explanation: 'Chi tiết hơn thường là DEBUG.' },
+      { text: 'Khi không có gì xảy ra', correct: false, explanation: 'Không cần log vô nghĩa.' }
+    ]},
+    { q: 'Retry decorator nên có gì?', options: [
+      { text: 'max_attempts và delay/backoff', correct: true, explanation: 'Đúng để kiểm soát số lần thử.' },
+      { text: 'Retry vô hạn', correct: false, explanation: 'Dễ treo job.' },
+      { text: 'Bỏ qua mọi exception', correct: false, explanation: 'Nguy hiểm cho dữ liệu.' },
+      { text: 'Không log retry', correct: false, explanation: 'Cần log để theo dõi.' }
+    ]},
+    { q: 'Dữ liệu nào KHÔNG nên log?', options: [
+      { text: 'API token/password', correct: true, explanation: 'Đúng, vi phạm bảo mật.' },
+      { text: 'row_count', correct: false, explanation: 'Nên log row_count.' },
+      { text: 'batch_id', correct: false, explanation: 'Nên log để trace.' },
+      { text: 'duration_ms', correct: false, explanation: 'Nên log để theo dõi hiệu năng.' }
+    ]},
+    { q: 'Mục tiêu chính của logging trong DE là?', options: [
+      { text: 'Dễ vận hành và điều tra sự cố', correct: true, explanation: 'Đúng, rút ngắn MTTR.' },
+      { text: 'Thay dữ liệu đầu vào', correct: false, explanation: 'Không đúng.' },
+      { text: 'Tăng số bản ghi DB', correct: false, explanation: 'Không đúng.' },
+      { text: 'Giảm nhu cầu test', correct: false, explanation: 'Không thay test.' }
+    ]},
+    { q: 'Khi lỗi data quality nghiêm trọng, nên?', options: [
+      { text: 'Fail step và raise rõ lỗi', correct: true, explanation: 'Đúng để tránh lan truyền dữ liệu sai.' },
+      { text: 'Im lặng bỏ qua', correct: false, explanation: 'Sai thực hành.' },
+      { text: 'Đổi sang WARNING rồi tiếp tục', correct: false, explanation: 'Có thể gây sai output downstream.' },
+      { text: 'Xóa log', correct: false, explanation: 'Mất dấu vết lỗi.' }
+    ]},
+    { q: 'Vì sao cần timestamp trong log?', options: [
+      { text: 'Theo dõi thứ tự sự kiện và độ trễ', correct: true, explanation: 'Đúng, quan trọng cho incident timeline.' },
+      { text: 'Trang trí log', correct: false, explanation: 'Không phải mục tiêu.' },
+      { text: 'Thay thế batch_id', correct: false, explanation: 'Cần cả hai.' },
+      { text: 'Tăng tốc Python', correct: false, explanation: 'Không liên quan.' }
+    ]}
+  ],
+
+  'quiz-w2-06': [
+    { q: 'Lợi ích của class-based ETL là gì?', options: [
+      { text: 'Dễ tách extract/transform/load và test', correct: true, explanation: 'Đúng, code rõ trách nhiệm hơn.' },
+      { text: 'Bắt buộc của Python', correct: false, explanation: 'Không bắt buộc, nhưng thường hữu ích.' },
+      { text: 'Không cần function', correct: false, explanation: 'Vẫn dùng method/function.' },
+      { text: 'Tự động tối ưu SQL', correct: false, explanation: 'Không tự động.' }
+    ]},
+    { q: 'argparse dùng để làm gì?', options: [
+      { text: 'Nhận tham số CLI như --date', correct: true, explanation: 'Đúng, giúp chạy pipeline linh hoạt.' },
+      { text: 'Kết nối DB', correct: false, explanation: 'Không trực tiếp.' },
+      { text: 'Gọi API', correct: false, explanation: 'Không trực tiếp.' },
+      { text: 'Tạo dashboard', correct: false, explanation: 'Không liên quan.' }
+    ]},
+    { q: 'Main guard có dạng nào?', options: [
+      { text: 'if __name__ == "__main__"', correct: true, explanation: 'Đúng, chuẩn Python.' },
+      { text: 'if main:', correct: false, explanation: 'Không chuẩn.' },
+      { text: 'if __run__:', correct: false, explanation: 'Không tồn tại chuẩn đó.' },
+      { text: 'if execute:', correct: false, explanation: 'Không đúng.' }
+    ]},
+    { q: 'Nơi nên chứa thông tin kết nối DB?', options: [
+      { text: '.env / biến môi trường', correct: true, explanation: 'Đúng để tách config khỏi code.' },
+      { text: 'Hard-code trong pipeline.py', correct: false, explanation: 'Không an toàn, khó deploy.' },
+      { text: 'Trong comment', correct: false, explanation: 'Không đúng.' },
+      { text: 'Trong log runtime', correct: false, explanation: 'Không được lộ bí mật.' }
+    ]},
+    { q: 'Khi hỗ trợ postgres/oracle, chiến lược tốt là?', options: [
+      { text: 'Tách SQL theo dialect', correct: true, explanation: 'Đúng, tránh lỗi cú pháp chéo.' },
+      { text: 'Dùng một SQL cho mọi DB', correct: false, explanation: 'Dễ fail.' },
+      { text: 'Không test backend phụ', correct: false, explanation: 'Rủi ro cao.' },
+      { text: 'Chỉ support một DB', correct: false, explanation: 'Không đúng yêu cầu tuần này.' }
+    ]},
+    { q: 'Type hints mang lại lợi ích gì?', options: [
+      { text: 'Dễ đọc code và bắt lỗi sớm qua static check', correct: true, explanation: 'Đúng trong project production.' },
+      { text: 'Tăng tốc query DB', correct: false, explanation: 'Không trực tiếp.' },
+      { text: 'Thay unit test', correct: false, explanation: 'Không thay thế test.' },
+      { text: 'Bắt buộc để chạy Python', correct: false, explanation: 'Không bắt buộc.' }
+    ]},
+    { q: 'Pipeline production nên log gì tối thiểu?', options: [
+      { text: 'batch date, step, row_count, status', correct: true, explanation: 'Đúng để vận hành.' },
+      { text: 'Chỉ print hello', correct: false, explanation: 'Không đủ thông tin.' },
+      { text: 'Password DB', correct: false, explanation: 'Không được log bí mật.' },
+      { text: 'Không log', correct: false, explanation: 'Khó debug sự cố.' }
+    ]},
+    { q: 'Nên làm gì khi load fail ở bước cuối?', options: [
+      { text: 'Ghi log lỗi rõ, raise exception, rollback transaction', correct: true, explanation: 'Đúng để đảm bảo nhất quán dữ liệu.' },
+      { text: 'Bỏ qua và báo SUCCESS', correct: false, explanation: 'Sai nghiêm trọng.' },
+      { text: 'Xóa bảng ngay', correct: false, explanation: 'Hành động phá hủy không cần thiết.' },
+      { text: 'Tắt alert', correct: false, explanation: 'Không đúng vận hành.' }
+    ]},
+    { q: 'Chạy pipeline theo ngày có ý nghĩa gì?', options: [
+      { text: 'Hỗ trợ incremental load và backfill', correct: true, explanation: 'Đúng, đây là pattern DE quan trọng.' },
+      { text: 'Để đổi theme', correct: false, explanation: 'Không liên quan.' },
+      { text: 'Để bỏ qua logging', correct: false, explanation: 'Không đúng.' },
+      { text: 'Để không cần SQL', correct: false, explanation: 'Không đúng.' }
+    ]},
+    { q: 'Lệnh CLI nào phù hợp?', options: [
+      { text: 'python pipeline.py --date 2024-01-01 --dialect postgres', correct: true, explanation: 'Đúng theo thiết kế tuần 2.' },
+      { text: 'python pipeline.py --all', correct: false, explanation: 'Không có tham số này trong ví dụ.' },
+      { text: 'sql run pipeline', correct: false, explanation: 'Không phải lệnh Python.' },
+      { text: 'pandas pipeline.py', correct: false, explanation: 'Không phải command hợp lệ.' }
+    ]}
+  ],
+
+  'quiz-w2-07': [
+    { q: 'Artifact tuần 2 tối thiểu gồm gì?', options: [
+      { text: 'extract.py, transform.py, load.py, pipeline.py, README', correct: true, explanation: 'Đúng theo yêu cầu tuần 2.' },
+      { text: 'Chỉ một notebook', correct: false, explanation: 'Không đủ cấu trúc pipeline.' },
+      { text: 'Chỉ SQL file', correct: false, explanation: 'Thiếu phần orchestration Python.' },
+      { text: 'Chỉ Dockerfile', correct: false, explanation: 'Không đủ yêu cầu.' }
+    ]},
+    { q: 'README artifact nên có gì?', options: [
+      { text: 'Mục tiêu, input/output, cách chạy, kiểm tra kết quả', correct: true, explanation: 'Đúng để người khác chạy lại được.' },
+      { text: 'Chỉ ảnh screenshot', correct: false, explanation: 'Không đủ thông tin thực thi.' },
+      { text: 'Chỉ commit hash', correct: false, explanation: 'Không đủ.' },
+      { text: 'Không cần README', correct: false, explanation: 'Không phù hợp portfolio.' }
+    ]},
+    { q: 'Lệnh chạy chuẩn được yêu cầu là?', options: [
+      { text: 'python pipeline.py --date 2024-01-01', correct: true, explanation: 'Đúng lệnh cốt lõi cần hỗ trợ.' },
+      { text: 'python extract.py only', correct: false, explanation: 'Thiếu orchestration đầy đủ.' },
+      { text: 'run pipeline.yaml', correct: false, explanation: 'Không thuộc scope tuần này.' },
+      { text: 'dbt run', correct: false, explanation: 'dbt học ở giai đoạn sau.' }
+    ]},
+    { q: 'Vì sao cần SQL kiểm tra hậu load?', options: [
+      { text: 'Xác nhận row_count và tính nhất quán', correct: true, explanation: 'Đúng, giúp kiểm soát chất lượng.' },
+      { text: 'Để thay retry', correct: false, explanation: 'Không thay được.' },
+      { text: 'Để tạo API key', correct: false, explanation: 'Không liên quan.' },
+      { text: 'Để đổi timezone', correct: false, explanation: 'Không phải mục đích chính.' }
+    ]},
+    { q: 'Hỗ trợ cả PostgreSQL và Oracle mang lại gì?', options: [
+      { text: 'Thể hiện kỹ năng multi-dialect thực chiến', correct: true, explanation: 'Đúng, rất giá trị khi phỏng vấn DE.' },
+      { text: 'Không cần test nữa', correct: false, explanation: 'Vẫn phải test cả hai.' },
+      { text: 'Tự động tăng lương', correct: false, explanation: 'Không liên quan kỹ thuật.' },
+      { text: 'Không cần logging', correct: false, explanation: 'Vẫn cần logging.' }
+    ]},
+    { q: 'Nếu row_count sau load thấp bất thường, nên làm gì?', options: [
+      { text: 'Kiểm tra log extract/transform trước', correct: true, explanation: 'Đúng để tìm điểm mất dữ liệu.' },
+      { text: 'Xóa toàn bộ bảng', correct: false, explanation: 'Hành động phá hủy.' },
+      { text: 'Bỏ qua vì có thể bình thường', correct: false, explanation: 'Cần điều tra rõ.' },
+      { text: 'Tắt cảnh báo', correct: false, explanation: 'Không đúng vận hành.' }
+    ]},
+    { q: 'File nào điều phối các bước ETL?', options: [
+      { text: 'pipeline.py', correct: true, explanation: 'Đúng, nơi gọi extract->transform->load.' },
+      { text: 'README.md', correct: false, explanation: 'README chỉ là tài liệu.' },
+      { text: 'requirements.txt', correct: false, explanation: 'File dependency, không orchestration.' },
+      { text: 'setup.cfg', correct: false, explanation: 'Không thuộc luồng ETL.' }
+    ]},
+    { q: 'Kỹ năng nào artifact chứng minh tốt nhất?', options: [
+      { text: 'Xây pipeline data end-to-end ở mức nền tảng', correct: true, explanation: 'Đúng trọng tâm tuần 2.' },
+      { text: 'Xây mô hình ML production', correct: false, explanation: 'Không phải scope.' },
+      { text: 'Thiết kế streaming latency thấp', correct: false, explanation: 'Không phải scope tuần này.' },
+      { text: 'Tối ưu Spark shuffle', correct: false, explanation: 'Spark học sau.' }
+    ]},
+    { q: 'Vì sao command phải reproducible?', options: [
+      { text: 'Để chạy lại, debug và handover dễ', correct: true, explanation: 'Đúng tinh thần production.' },
+      { text: 'Để code trông dài hơn', correct: false, explanation: 'Không đúng.' },
+      { text: 'Để bỏ test', correct: false, explanation: 'Không đúng.' },
+      { text: 'Để không cần config', correct: false, explanation: 'Vẫn cần config rõ.' }
+    ]},
+    { q: 'Sau khi hoàn tất artifact, bước tốt tiếp theo là?', options: [
+      { text: 'Chạy test mini + update README lessons learned', correct: true, explanation: 'Đúng để chốt tuần học chất lượng.' },
+      { text: 'Xóa log vì rác', correct: false, explanation: 'Log cần cho audit/runbook.' },
+      { text: 'Ẩn toàn bộ code', correct: false, explanation: 'Không phù hợp portfolio học tập.' },
+      { text: 'Bỏ qua review', correct: false, explanation: 'Review giúp cải thiện chất lượng.' }
+    ]}
+  ],
+
+  'quiz-w2-08': [
+    { q: 'Mục tiêu của mini test tuần 2 là gì?', options: [
+      { text: 'Đánh giá mức nắm kiến thức trước tuần 3', correct: true, explanation: 'Đúng, giúp quyết định phần cần ôn lại.' },
+      { text: 'Thay hoàn toàn thực hành', correct: false, explanation: 'Không thay được thực hành artifact.' },
+      { text: 'Chỉ để lấy điểm', correct: false, explanation: 'Điểm chỉ là chỉ báo.' },
+      { text: 'Không liên quan roadmap', correct: false, explanation: 'Có liên quan trực tiếp.' }
+    ]},
+    { q: 'Điểm thấp thường nên làm gì?', options: [
+      { text: 'Ôn lại module yếu và chạy lại artifact', correct: true, explanation: 'Đúng cách cải thiện thực chất.' },
+      { text: 'Bỏ qua và sang tuần mới', correct: false, explanation: 'Dễ hổng nền tảng.' },
+      { text: 'Chỉ đọc đáp án', correct: false, explanation: 'Nên thực hành lại.' },
+      { text: 'Tắt mini test', correct: false, explanation: 'Không giải quyết vấn đề.' }
+    ]},
+    { q: 'Nội dung cần tự tin trước tuần 3 gồm?', options: [
+      { text: 'pandas, SQLAlchemy, API, logging, ETL structure', correct: true, explanation: 'Đúng toàn bộ scope tuần 2.' },
+      { text: 'Flink và Kafka', correct: false, explanation: 'Học ở giai đoạn sau.' },
+      { text: 'Spark optimization', correct: false, explanation: 'Không phải tuần này.' },
+      { text: 'Dashboard BI', correct: false, explanation: 'Không phải trọng tâm tuần 2.' }
+    ]},
+    { q: 'Review quiz và mini test khác nhau thế nào?', options: [
+      { text: 'Review quiz theo module, mini test bao phủ toàn tuần', correct: true, explanation: 'Đúng về phạm vi.' },
+      { text: 'Hai phần hoàn toàn giống nhau', correct: false, explanation: 'Không đúng.' },
+      { text: 'Mini test chỉ có 1 câu', correct: false, explanation: 'Không đúng.' },
+      { text: 'Review quiz không cần đáp án', correct: false, explanation: 'Cần phản hồi để học.' }
+    ]},
+    { q: 'Khi đạt điểm tốt, hành động hợp lý là?', options: [
+      { text: 'Chuẩn bị dữ liệu để bước vào tuần 3', correct: true, explanation: 'Đúng, giữ nhịp học liên tục.' },
+      { text: 'Bỏ hẳn artifact', correct: false, explanation: 'Artifact vẫn cần lưu và review.' },
+      { text: 'Xóa toàn bộ file tuần 2', correct: false, explanation: 'Không hợp lý.' },
+      { text: 'Không cần commit', correct: false, explanation: 'Nên commit kết quả học tập.' }
+    ]},
+    { q: 'Điều nào phản ánh readiness tốt nhất?', options: [
+      { text: 'Artifact chạy được + hiểu kết quả log', correct: true, explanation: 'Đúng về năng lực thực hành.' },
+      { text: 'Chỉ nhớ lý thuyết', correct: false, explanation: 'Chưa đủ cho DE thực chiến.' },
+      { text: 'Chỉ làm quiz', correct: false, explanation: 'Cần kết hợp thực hành.' },
+      { text: 'Không cần SQL', correct: false, explanation: 'SQL vẫn là nền tảng.' }
+    ]},
+    { q: 'Vì sao vẫn cần PostgreSQL và Oracle trong tuần 2?', options: [
+      { text: 'Để quen multi-dialect trong môi trường doanh nghiệp', correct: true, explanation: 'Đúng theo yêu cầu và thực tế công việc.' },
+      { text: 'Để bỏ qua SQLAlchemy', correct: false, explanation: 'Không đúng.' },
+      { text: 'Để giảm số file', correct: false, explanation: 'Không liên quan.' },
+      { text: 'Để tránh logging', correct: false, explanation: 'Không đúng.' }
+    ]},
+    { q: 'Nếu sai nhiều câu về API, bạn nên làm gì đầu tiên?', options: [
+      { text: 'Làm lại W2.04 và viết script pagination nhỏ', correct: true, explanation: 'Đúng, học qua thực hành ngắn.' },
+      { text: 'Bỏ qua API vì khó', correct: false, explanation: 'API là nguồn dữ liệu phổ biến.' },
+      { text: 'Chuyển sang Spark ngay', correct: false, explanation: 'Không đúng thứ tự roadmap.' },
+      { text: 'Xóa requests', correct: false, explanation: 'Không hợp lý.' }
+    ]},
+    { q: 'Thói quen tốt sau mini test là?', options: [
+      { text: 'Ghi 3 điểm mạnh/3 điểm yếu vào note học tập', correct: true, explanation: 'Đúng, giúp cải thiện có kế hoạch.' },
+      { text: 'Không ghi gì', correct: false, explanation: 'Dễ quên bài học.' },
+      { text: 'Chỉ chụp điểm', correct: false, explanation: 'Thiếu hành động follow-up.' },
+      { text: 'Reset và không xem lại', correct: false, explanation: 'Không học được từ lỗi.' }
+    ]},
+    { q: 'Kết thúc tuần 2 tốt nhất khi nào?', options: [
+      { text: 'Khi artifact chạy được và mini test đạt mức mục tiêu', correct: true, explanation: 'Đúng tiêu chí hoàn thành cân bằng lý thuyết + thực hành.' },
+      { text: 'Khi chỉ hoàn thành quiz', correct: false, explanation: 'Thiếu thực hành.' },
+      { text: 'Khi chỉ viết README', correct: false, explanation: 'Thiếu chạy thực tế.' },
+      { text: 'Khi bỏ qua module khó', correct: false, explanation: 'Không nên.' }
+    ]}
+  ]
+};
+
+Object.entries(quizBanks).forEach(([id, questions]) => renderQuizBank(id, questions));
+</script>
+</body>
+</html>

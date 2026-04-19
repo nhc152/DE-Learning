@@ -1,0 +1,213 @@
+Dưới đây là **3 prompt chuẩn siêu tối ưu** cho riêng file `Week02_Python_DE.html` theo workflow nhanh nhất:
+
+# Tư duy đúng
+
+Thay vì 1 prompt khổng lồ chạy 30 phút+, ta chia thành:
+
+1. **Draft** → dựng khung + nội dung chuẩn nhanh
+2. **Refine** → nâng chất lượng
+3. **QA** → rà lỗi cuối
+
+=> Nhanh hơn, ổn định hơn, ít treo hơn.
+
+---
+
+# PROMPT 1 — DRAFT NHANH
+
+Dùng prompt này đầu tiên:
+
+```text
+Use project rules from .claude.
+
+Current task:
+Create Week02_Python_DE.html
+
+Allowed sources only:
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+
+Do not read any other files.
+
+Requirements:
+- Build a fast first draft of Week02_Python_DE.html
+- Follow the structure, layout, CSS style, and JS interaction logic of Week00_Setup.html
+- Follow Week 03 topic scope from roadmap: data cleaning, profiling, missing values, duplicates, outliers, schema validation, tidy data, defensive programming
+- Use Vietnamese explanations like Week00_Setup.html
+- Keep content concise but technically correct
+- Include PostgreSQL and Oracle SQL where relevant
+- Keep all required 6 sections in each module
+- Use 5 review questions per module for this first draft
+- Include practical exercises with short solutions
+- Prioritize speed, structure correctness, and completeness
+- Output only Week02_Python_DE.html
+
+Do not over-optimize. Do not spend time polishing minor details in this draft.
+```
+
+---
+
+# Khi nào dùng Prompt 2?
+
+Sau khi file đã được tạo xong bản đầu.
+
+---
+
+# PROMPT 2 — REFINE NÂNG CẤP
+
+```text
+Use project rules from .claude.
+
+Current task:
+Revise Week02_Python_DE.html
+
+Allowed sources only:
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+
+Do not read any other files.
+
+Requirements:
+- Improve Week02_Python_DE.html without changing its overall structure
+- Expand all review sections from 5 to exactly 10 questions per module
+- Improve explanations to be clearer, more practical, and more beginner-friendly
+- Improve PostgreSQL and Oracle SQL examples where relevant
+- Improve practical exercises and solution quality
+- Add useful tip / warn / note boxes where helpful
+- Improve consistency of titles, labels, and section flow
+- Keep Vietnamese output
+- Keep existing layout, CSS style, and JS interactions working
+- Keep the file clean and professional
+
+Do not rebuild from scratch. Improve the current file only.
+```
+
+---
+
+# Khi nào dùng Prompt 3?
+
+Sau khi refine xong.
+
+---
+
+# PROMPT 3 — QA / FINAL CHECK
+
+
+Use project rules from .claude.
+
+Current task:
+Quality check Week02_Python_DE.html
+
+Allowed sources only:
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+
+Do not read any other files.
+
+Requirements:
+Review Week02_Python_DE.html and fix any issues related to:
+
+1. Structure consistency with Week00_Setup.html
+2. Missing sections or broken section order
+3. Broken HTML tags
+4. Broken JavaScript interactions
+5. Inconsistent Vietnamese wording
+6. Weak or unclear explanations
+7. Wrong or unclear PostgreSQL / Oracle SQL examples
+8. Missing quiz explanations
+9. Visual inconsistency in cards, buttons, spacing, labels
+10. Any unfinished placeholders or duplicated content
+
+Keep the same file name.
+Do not redesign.
+Do not expand scope unnecessarily.
+Make only high-value fixes.
+
+
+---
+
+# Cách dùng tối ưu nhất ngày mai
+
+## Bước 1
+
+Paste Prompt 1
+
+⏱ Thường nhanh hơn nhiều so với full prompt
+
+---
+
+## Bước 2
+
+Khi xong:
+
+```text
+/clear
+```
+
+hoặc prompt tiếp luôn
+
+Paste Prompt 2
+
+---
+
+## Bước 3
+
+Sau refine xong:
+
+Paste Prompt 3
+
+---
+
+# Nếu Prompt 1 bị dừng giữa chừng
+
+Dùng prompt cứu file:
+
+```text
+Continue Week02_Python_DE.html from current progress.
+Do not restart.
+Complete unfinished modules only.
+Keep current structure and style.
+```
+
+---
+
+# Vì sao bộ này mạnh
+
+## Prompt 1
+
+Tối ưu tốc độ
+
+## Prompt 2
+
+Tối ưu chất lượng
+
+## Prompt 3
+
+Tối ưu độ sạch / ổn định
+
+---
+
+# Mentor tip cực quan trọng
+
+Với series dài như của bạn, từ giờ **mọi tuần đều dùng 3 bước này**:
+
+* Draft
+* Refine
+* QA
+
+Thay vì one-shot prompt rất chậm.
+
+---
+
+# Nếu bạn muốn, mình có thể build luôn bộ 3 prompt cho:
+
+* Week04_Pipeline_Design.html
+* Week05_Dimensional_Modeling.html
+* Week08_dbt.html
+* Week10_Airflow.html
+* Full auto next week mode
