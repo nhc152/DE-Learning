@@ -339,6 +339,124 @@
         <div class="quiz-explain"></div>
       </div>
 
+      <div class="quiz-item">
+        <div class="quiz-q">Trong lộ trình thiết kế Kimball tuần này, bước nào cần chốt trước khi viết DDL?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Bạn có thể viết DDL trước, nhưng rất dễ sai cấu trúc nếu grain chưa khóa.')">A. Chọn index strategy cho mọi bảng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Phải chốt grain trước để biết mỗi row đại diện cho gì, từ đó mới chọn được PK/FK và cách tách fact-dimension đúng.')">B. Declare grain cho từng bảng chính</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là bước sau khi đã có mô hình và dữ liệu.')">C. Viết dashboard KPI trong BI tool</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đặt lịch Airflow là bước orchestration, không phải bước thiết kế modeling đầu tiên.')">D. Tạo DAG incremental hằng ngày</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Nếu learner chỉ nhớ 1 nguyên tắc cốt lõi của module W5.01, nên là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Tool không thay thế design decision đúng.')">A. Chọn đúng BI tool sẽ tự sửa được schema</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SCD1 không luôn tốt hơn; phụ thuộc yêu cầu lịch sử.')">B. Luôn dùng SCD Type 1 để đơn giản pipeline</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Grain + mục tiêu phân tích quyết định toàn bộ fact/dimension, SCD, cumulative và cách backfill.')">C. Grain và mục tiêu phân tích phải rõ trước khi modeling</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Backfill không thay thế được logic modeling ban đầu.')">D. Cứ backfill lại là giải quyết được mọi sai thiết kế</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Vì sao module này yêu cầu cả PostgreSQL và Oracle SQL song song?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải để ghi nhớ cú pháp máy móc.')">A. Để học thuộc toàn bộ syntax khác biệt</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Mục tiêu là giữ nguyên tư duy modeling, nhưng biết triển khai theo dialect khác nhau khi vào môi trường enterprise.')">B. Giữ nguyên tư duy modeling, đổi cú pháp theo từng hệ CSDL</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không có chuyện Oracle không dùng cho DWH.')">C. Vì Oracle không phù hợp data warehouse</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không bắt buộc chọn một hệ duy nhất ở giai đoạn học nền tảng.')">D. Vì sau tuần này chỉ được dùng Oracle</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Kết quả học tập nào phản ánh đúng exit criteria của W5.01?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây chỉ là một kỹ năng nhỏ, chưa đủ exit criteria.')">A. Chỉ viết được 1 query SELECT từ fact table</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Thuộc định nghĩa nhưng không áp dụng thực hành thì chưa đạt.')">B. Nhớ định nghĩa SCD nhưng chưa làm bài thực hành</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Exit criteria là có thể thiết kế schema, làm SCD2/backfill/incremental, và giải thích trade-off rõ ràng.')">C. Thiết kế được mô hình + triển khai SQL + giải thích trade-off thiết kế</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là kỹ năng vận hành, không phải tiêu chí học modeling tuần này.')">D. Chỉ cần tối ưu query latency dưới 1 giây</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Nếu bỏ qua bước xác định artifact đầu ra từ đầu tuần, rủi ro lớn nhất là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dễ học lan man, thiếu deliverable cụ thể, đến cuối tuần không có gì để chứng minh năng lực thực hành.')">A. Không có deliverable rõ ràng để kiểm chứng năng lực</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Storage không phải rủi ro trực tiếp của việc không xác định artifact.')">B. Tăng ngay chi phí lưu trữ cloud</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan trực tiếp.')">C. Mất quyền truy cập database</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây không phải hệ quả tất yếu.')">D. Toàn bộ fact table tự động bị trùng key</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Kimball approach trong bối cảnh bài actors giúp điều gì cho người mới?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Kimball không bắt buộc phải bắt đầu từ hạ tầng.')">A. Bắt đầu từ hạ tầng rồi mới nghĩ business process</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nó biến bài toán mơ hồ thành chuỗi bước rõ: process → grain → dimensions → facts, giúp tránh làm SQL rời rạc.')">B. Chuyển bài toán thành quy trình thiết kế rõ ràng, giảm làm sai từ đầu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải mục tiêu chính của phương pháp.')">C. Loại bỏ hoàn toàn nhu cầu backfill</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Kimball vẫn phù hợp cả batch và near-real-time marts.')">D. Chỉ phù hợp cho hệ thống real-time streaming</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">🧩</div>
+      4. Tổng Kết — Trước Khi Sang Module Kế
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Điểm chốt 1</strong>Modeling tốt bắt đầu từ grain đúng, không bắt đầu từ câu SQL.</div>
+        <div class="summary-item"><strong>Điểm chốt 2</strong>Artifact tuần này phải gắn với actors cumulative + actors_history_scd + star schema.</div>
+        <div class="summary-item"><strong>Điểm chốt 3</strong>PG và Oracle khác cú pháp nhưng giữ cùng logic dữ liệu.</div>
+        <div class="summary-item"><strong>Điểm chốt 4</strong>Từ W5.02 trở đi bạn đi sâu vào thiết kế bảng và query production-like.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🛠️</div>
+      5. Bài Tập Thực Hành Nhanh — Khóa Mục Tiêu Học
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài tập 10 phút</div>
+        <div class="practice-task-body">
+          <p>Viết 5 dòng mô tả ngắn cho project cá nhân: business process, grain dự kiến, 2 dimension chính, 2 measure chính, và lý do cần/không cần SCD2.</p>
+          <p>Dùng checklist này để tự soát trước khi code SQL ở W5.02:</p>
+          <ul class="checklist">
+            <li>Grain đã mô tả bằng câu “1 row = …” rõ ràng</li>
+            <li>Có phân biệt được fact vs dimension</li>
+            <li>Có lý do chọn surrogate key hay natural key</li>
+            <li>Biết thuộc tính nào cần lịch sử (SCD2)</li>
+            <li>Định nghĩa được artifact đầu ra để tự kiểm chứng</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🧭</div>
+      6. Menu Chuyển Tiếp Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Hoàn tất W5.01 nếu bạn đã: (1) nắm mục tiêu tuần, (2) biết artifact bắt buộc, (3) định nghĩa được grain cho case của mình.</p>
+      <div class="info-box tip">✅ <span>Khi sẵn sàng, sang W5.02 để thiết kế Fact/Dimension cụ thể bằng PostgreSQL và Oracle.</span></div>
     </div>
   </div>
 
@@ -360,11 +478,12 @@
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-purpose">📖</div>
-      1. Grain — Nền Tảng Của Mọi Fact Table
+      1. Menu Tổng Thể — Grain, Fact & Dimension
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
       <p><strong>Grain</strong> = định nghĩa chính xác "1 row trong fact table đại diện cho cái gì". Đây là quyết định quan trọng nhất trong data modeling — sai grain = toàn bộ schema sai.</p>
+      <div class="info-box note">📌 <span><strong>Mục đích module:</strong> Sau phần này bạn phải tự mô tả được grain, tách fact/dimension đúng, và giải thích vì sao chọn surrogate key hay natural key.</span></div>
       <h3 class="blue">Ví dụ định nghĩa Grain</h3>
       <table>
         <tr><th>Domain</th><th>Grain (đúng)</th><th>Grain (sai — quá thô)</th></tr>
@@ -402,8 +521,24 @@
 
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Sau module này, bạn cần tự tin định nghĩa grain đúng, phân biệt được fact/dimension, và chọn key strategy phù hợp cho data warehouse thực tế.</p>
+      <ul>
+        <li>Viết câu grain rõ ràng cho 1 fact table bất kỳ</li>
+        <li>Chọn đúng loại fact (transaction/periodic/accumulating)</li>
+        <li>Giải thích khi nào dùng surrogate key cùng natural key</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-detail">💻</div>
-      2. DDL Fact & Dimension Tables
+      3. Giải Thích Chi Tiết — DDL Fact & Dimension
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
@@ -498,7 +633,7 @@
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-quiz">❓</div>
-      3. Câu Hỏi Ôn Tập — Grain, Fact & Dimension
+      4. Câu Hỏi Ôn Tập — Grain, Fact & Dimension
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
@@ -616,6 +751,44 @@
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">🧩</div>
+      5. Tổng Kết — Grain, Fact & Dimension
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Grain trước</strong>Luôn khóa câu “1 row = …” trước khi tạo bảng.</div>
+        <div class="summary-item"><strong>Fact đúng loại</strong>Chọn transaction, periodic snapshot, hay accumulating theo câu hỏi phân tích.</div>
+        <div class="summary-item"><strong>Key strategy</strong>Natural key để trace, surrogate key để join ổn định và hỗ trợ SCD2.</div>
+        <div class="summary-item"><strong>Cross-DB</strong>PG và Oracle khác syntax nhưng cùng tư duy mô hình.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🛠️</div>
+      6. Bài Tập Thực Hành — Grain Declaration Drill
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài tập 12 phút</div>
+        <div class="practice-task-body">
+          <p>Chọn một domain (e-commerce/fintech/streaming) và viết:</p>
+          <ul class="checklist">
+            <li>1 câu grain cho fact table chính</li>
+            <li>3 dimension cần có và business key tương ứng</li>
+            <li>2 measure additive và 1 measure semi-additive</li>
+            <li>Quyết định key strategy (surrogate + natural) và lý do</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="nav-buttons">
     <button class="nav-btn" onclick="showModule(0,document.querySelectorAll('.nav-item')[0])">← Tổng Quan</button>
     <button class="nav-btn primary" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">W5.03 Star Schema →</button>
@@ -634,10 +807,11 @@
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-purpose">📖</div>
-      1. Star Schema vs Snowflake Schema
+      1. Menu Tổng Thể — Star vs Snowflake
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
+      <div class="info-box note">📌 <span><strong>Mục đích module:</strong> Biết khi nào ưu tiên Star Schema, khi nào Snowflake hợp lý, và hiểu vai trò của <code>dim_date</code> trong query phân tích.</span></div>
       <table>
         <tr><th></th><th>Star Schema</th><th>Snowflake Schema</th></tr>
         <tr><td><strong>Cấu trúc</strong></td><td>Fact ở trung tâm, dim denormalized xung quanh</td><td>Dim được normalize thêm thành nhiều table</td></tr>
@@ -701,8 +875,24 @@
 
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Module này giúp bạn ra quyết định kiến trúc schema theo yêu cầu BI thực tế, thay vì chọn theo cảm tính.</p>
+      <ul>
+        <li>Ưu tiên Star Schema cho phần lớn use-case analytics</li>
+        <li>Biết trường hợp Snowflake hợp lý khi dimension rất lớn</li>
+        <li>Chuẩn hóa tư duy dùng <code>dim_date</code> trên cả PostgreSQL và Oracle</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-detail">💻</div>
-      2. dim_date — The Most Important Dimension
+      3. Giải Thích Chi Tiết — dim_date và khác biệt PostgreSQL/Oracle
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
@@ -787,7 +977,7 @@
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-quiz">❓</div>
-      3. Câu Hỏi Ôn Tập — Star Schema vs Snowflake
+      4. Câu Hỏi Ôn Tập — Star Schema vs Snowflake
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
@@ -905,6 +1095,44 @@
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">🧩</div>
+      5. Tổng Kết — Star vs Snowflake
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Mặc định thực chiến</strong>Star Schema thường là lựa chọn đầu tiên cho analytics/BI.</div>
+        <div class="summary-item"><strong>Snowflake hợp lý khi</strong>Dimension cực lớn và chi phí lưu trữ/chuẩn hóa là ràng buộc thật.</div>
+        <div class="summary-item"><strong>dim_date bắt buộc</strong>Giúp truy vấn theo calendar/fiscal logic ổn định, dễ tái sử dụng.</div>
+        <div class="summary-item"><strong>Khác biệt PG/Oracle</strong><code>generate_series</code> vs <code>CONNECT BY LEVEL</code> chỉ là khác cú pháp.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🛠️</div>
+      6. Bài Tập Thực Hành — Schema Decision Note
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài tập 10 phút</div>
+        <div class="practice-task-body">
+          <p>Viết một decision note ngắn (6-8 dòng) cho domain bạn chọn:</p>
+          <ul class="checklist">
+            <li>Chọn Star hay Snowflake và nêu 2 trade-off</li>
+            <li>Xác định 1 fact chính và tối thiểu 3 dimension</li>
+            <li>Mô tả 2 cột quan trọng cần có trong <code>dim_date</code></li>
+            <li>Nêu cách generate date range trên PG và Oracle</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="nav-buttons">
     <button class="nav-btn" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">← Grain, Fact & Dim</button>
     <button class="nav-btn primary" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">W5.04 SCD Types →</button>
@@ -945,6 +1173,7 @@
     <div class="section-content">
       <p>Phần này bám trực tiếp homework <code>intermediate-bootcamp/materials/1-dimensional-data-modeling/homework/homework.md</code> và pattern SQL trong <code>lecture-lab/scd_generation_query.sql</code>, <code>lecture-lab/incremental_scd_query.sql</code>. Mấu chốt là phát hiện thay đổi bằng <code>LAG</code>, gom streak bằng running <code>SUM(is_change)</code>, rồi tạo khoảng hiệu lực <code>start_date/end_date</code>.</p>
       <div class="info-box note">📌 <span>Trong lecture-lab, bảng mẫu còn thêm <code>current_season</code> để dễ chạy incremental theo năm; ý tưởng tương tự khi bạn vận hành SCD2 production.</span></div>
+      <div class="info-box warn">⚠️ <span><strong>Phân biệt rõ:</strong> backfill one-shot dùng khi dựng lại toàn bộ lịch sử (thường TRUNCATE + INSERT), còn incremental chỉ xử lý năm mới (expire record cũ rồi insert record mới). Không trộn 2 cơ chế trong cùng một run production.</span></div>
 
       <div class="tab-group" id="scd-tabs">
         <div class="tab active" onclick="switchTab('scd-tabs','scd-pg')">🐘 PostgreSQL</div>
@@ -1242,6 +1471,55 @@ groups <span class="kw">AS</span> (
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">🧩</div>
+      4. Tổng Kết — SCD Type 1/2/3
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>SCD1</strong>Dùng khi không cần lịch sử business (sửa lỗi dữ liệu).</div>
+        <div class="summary-item"><strong>SCD2</strong>Chuẩn cho phân tích lịch sử; bắt buộc kiểm tra no-overlap + đúng 1 current row.</div>
+        <div class="summary-item"><strong>SCD3</strong>Chỉ giữ lịch sử ngắn, phù hợp số ít use-case.</div>
+        <div class="summary-item"><strong>Vận hành</strong>Tách rõ backfill one-shot và incremental hằng năm để tránh lỗi dữ liệu.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🛠️</div>
+      5. Bài Tập Thực Hành — SCD2 Incremental Safety
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài tập nhanh 15 phút</div>
+        <div class="practice-task-body">
+          <p>Viết 2 query kiểm tra sau khi chạy incremental năm mới:</p>
+          <ul class="checklist">
+            <li>Không có actor nào có hơn 1 record <code>is_current=TRUE</code></li>
+            <li>Không có overlap interval cho cùng <code>actor_id</code></li>
+            <li>Số record sau incremental không giảm bất thường</li>
+          </ul>
+          <div class="info-box tip">✅ <span>Nếu cả 3 kiểm tra đều pass, bạn mới coi pipeline incremental là an toàn.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🧭</div>
+      6. Menu Chuyển Tiếp Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Sang W5.05 khi bạn đã nắm vững: cách detect change bằng <code>LAG</code>, grouping bằng running sum, và logic expire-before-insert trong incremental.</p>
+    </div>
+  </div>
+
   <div class="nav-buttons">
     <button class="nav-btn" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">← Star Schema</button>
     <button class="nav-btn primary" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">W5.05 Cumulative Table →</button>
@@ -1260,7 +1538,7 @@ groups <span class="kw">AS</span> (
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-purpose">📖</div>
-      1. Cumulative Table Là Gì Và Tại Sao Cần?
+      1. Menu Tổng Thể — Cumulative Table Design
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
@@ -1306,8 +1584,35 @@ today_films <span class="kw">AS</span> (
 
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Module này tập trung vào tư duy incremental computation: mỗi lần chạy chỉ xử lý dữ liệu mới nhưng vẫn giữ được toàn bộ lịch sử tích lũy.</p>
+      <ul>
+        <li>Áp dụng merge logic <code>yesterday_state + today_data</code> chính xác</li>
+        <li>Đảm bảo không mất actor cũ và vẫn tiếp nhận actor mới</li>
+        <li>Duy trì hiệu năng ổn định khi dữ liệu lịch sử tăng mạnh</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">💻</div>
+      3. Giải Thích Chi Tiết — Pattern merge cumulative
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Mẫu SQL ở trên thể hiện rõ anti-pattern (full scan event log) so với cumulative pattern (merge state theo năm). Đây là nền cho bài actors cumulative và bài fact modeling tuần tiếp theo.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-quiz">❓</div>
-      2. Câu Hỏi Ôn Tập — Cumulative Table Design
+      4. Câu Hỏi Ôn Tập — Cumulative Table Design
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
@@ -1425,6 +1730,43 @@ today_films <span class="kw">AS</span> (
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">🧩</div>
+      5. Tổng Kết — Cumulative Pattern
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Giá trị cốt lõi</strong>Tránh full scan lịch sử bằng cách lưu trạng thái tích lũy.</div>
+        <div class="summary-item"><strong>Merge logic</strong><code>FULL OUTER JOIN</code> giúp cover actor cũ, actor mới, và actor không active năm hiện tại.</div>
+        <div class="summary-item"><strong>Hiệu năng</strong>Chi phí xử lý tăng theo dữ liệu mới, không tăng theo toàn bộ lịch sử.</div>
+        <div class="summary-item"><strong>Tương thích DB</strong>PG mạnh về array/JSONB; Oracle dùng JSON/CLOB với cùng tư duy merge state.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🛠️</div>
+      6. Bài Tập Thực Hành — Cumulative Sanity Check
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài tập 15 phút</div>
+        <div class="practice-task-body">
+          <p>Viết 3 query tự kiểm tra cho bảng cumulative:</p>
+          <ul class="checklist">
+            <li>Không mất actor cũ sau khi chạy year mới</li>
+            <li>Actor mới trong năm hiện tại phải xuất hiện đúng 1 record</li>
+            <li>Tổng số phần tử film của actor chỉ tăng hoặc giữ nguyên theo thời gian</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="nav-buttons">
     <button class="nav-btn" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">← SCD Types</button>
     <button class="nav-btn primary" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">W5.06 Backfill Strategy →</button>
@@ -1443,11 +1785,13 @@ today_films <span class="kw">AS</span> (
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-purpose">📖</div>
-      1. Backfill Strategy Cho Dimensional Modeling
+      1. Menu Tổng Thể — Backfill Strategy
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
       <p>Backfill trong context Dimensional Modeling = reprocess toàn bộ lịch sử để populate lại dimension hoặc sửa logic SCD sai. Theo homework tuần 1, bạn cần backfill <code>actors_history_scd</code> trong 1 query; theo week 2, bạn cũng cần incremental/backfill cho bảng cumulative/reduced facts.</p>
+      <div class="info-box note">📌 <span><strong>Mục đích module:</strong> Biết khi nào chạy full backfill, khi nào chạy incremental, và luôn kiểm tra idempotency + validation sau load.</span></div>
+      <h3 class="blue">2. Giải Thích Chi Tiết — PostgreSQL & Oracle backfill</h3>
       <div class="info-box warn">⚠️ <span>Backfill phải <strong>idempotent</strong>: chạy lại cùng input không tạo duplicate. Luôn tách rõ phạm vi năm chạy, checkpoint, và validation sau load.</span></div>
       <div class="tab-group" id="bf-tabs">
         <div class="tab active" onclick="switchTab('bf-tabs','bf-pg')">🐘 PostgreSQL</div>
@@ -1576,8 +1920,35 @@ changes <span class="kw">AS</span> (
 
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Bạn cần phân biệt rạch ròi full historical backfill và incremental run để tránh gây hỏng SCD history trong production.</p>
+      <ul>
+        <li>Backfill one-shot để dựng lại toàn bộ lịch sử</li>
+        <li>Incremental theo năm để cập nhật dữ liệu mới</li>
+        <li>Bắt buộc validation sau mỗi lần chạy</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">💻</div>
+      3. Giải Thích Chi Tiết — Quy trình backfill an toàn
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Thực hành tốt gồm: chạy ngoài giờ cao điểm, đảm bảo idempotent, lưu checkpoint, soát row-count và rule no-overlap trước khi mở dữ liệu cho downstream.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-quiz">❓</div>
-      2. Câu Hỏi Ôn Tập — Backfill Strategy
+      4. Câu Hỏi Ôn Tập — Backfill Strategy
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
@@ -1695,6 +2066,44 @@ changes <span class="kw">AS</span> (
     </div>
   </div>
 
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">🧩</div>
+      5. Tổng Kết — Backfill Strategy
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Tách cơ chế</strong>Backfill và incremental không chạy lẫn trong cùng logic production.</div>
+        <div class="summary-item"><strong>Idempotency</strong>Chạy lại cùng input phải cho cùng kết quả, không duplicate record.</div>
+        <div class="summary-item"><strong>Validation bắt buộc</strong>No-overlap, đúng 1 current row, và count consistency.</div>
+        <div class="summary-item"><strong>Vận hành an toàn</strong>Chạy ngoài giờ cao điểm, có rollback plan, theo dõi lock/IO.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🛠️</div>
+      6. Bài Tập Thực Hành — Backfill Runbook
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài tập 15 phút</div>
+        <div class="practice-task-body">
+          <p>Tạo runbook ngắn cho 1 lần backfill thật:</p>
+          <ul class="checklist">
+            <li>Phạm vi năm và điều kiện chạy</li>
+            <li>Cách rollback nếu validation fail</li>
+            <li>3 query kiểm tra bắt buộc sau load</li>
+            <li>Điều kiện mở dữ liệu cho downstream team</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="nav-buttons">
     <button class="nav-btn" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">← Cumulative Table</button>
     <button class="nav-btn primary" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">W5.07 Thực Hành & Artifact →</button>
@@ -1712,11 +2121,12 @@ changes <span class="kw">AS</span> (
 
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
-      <div class="section-icon icon-practice">🔨</div>
-      Bài 1 — Thiết kế Star Schema cho E-commerce
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể — Bài Thực Hành & Artifact
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
+      <div class="info-box note">📌 <span><strong>Mục đích module:</strong> Tổng hợp toàn bộ kỹ năng tuần 5–6 thành artifact có thể chạy, kiểm thử và bàn giao.</span></div>
       <div class="practice-task">
         <div class="practice-task-header">📝 Yêu cầu</div>
         <div class="practice-task-body">
@@ -1796,8 +2206,23 @@ changes <span class="kw">AS</span> (
 
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
-      <div class="section-icon icon-practice">🔨</div>
-      Bài 2 — actors cumulative table (homework)
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Chuẩn hóa artifact đầu ra theo đúng tiêu chí review của team DE.</li>
+        <li>Viết SQL có thể chạy được trên PostgreSQL và Oracle cho cùng business logic.</li>
+        <li>Kiểm chứng được pipeline bằng validation query trước khi bàn giao.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">💻</div>
+      3. Giải Thích Chi Tiết — actors cumulative table (homework)
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
@@ -1845,9 +2270,56 @@ today <span class="kw">AS</span> (
             <div id="p2-oracle" class="tab-content">
               <span class="db-tag db-oracle">Oracle</span>
               <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>actors_cumulative_incremental_oracle.sql</span></div>
-              <div class="cmd-body"><pre><span class="comment">-- Oracle tương tự: FULL OUTER JOIN state năm trước + dữ liệu năm hiện tại</span>
-<span class="comment">-- Dùng JSON_ARRAYAGG/JSON_OBJECT hoặc CLOB JSON tùy version Oracle</span>
-<span class="kw">SELECT</span> <span class="str">'Giữ cùng logic với PostgreSQL: merge state + classify quality + is_active'</span> <span class="kw">AS</span> note <span class="kw">FROM</span> dual;</pre></div></div>
+              <div class="cmd-body"><pre><span class="comment">-- Idempotent run cho target_year</span>
+<span class="kw">DELETE FROM</span> actors <span class="kw">WHERE</span> current_year = :<span class="str">target_year</span>;
+
+<span class="kw">INSERT INTO</span> actors (actor_id, actor, films, quality_class, is_active, current_year)
+<span class="kw">WITH</span> yesterday <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> actor_id, actor, films, quality_class
+    <span class="kw">FROM</span> actors
+    <span class="kw">WHERE</span> current_year = :<span class="str">target_year</span> - <span class="num">1</span>
+),
+today <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        actorid <span class="kw">AS</span> actor_id,
+        <span class="fn">MAX</span>(actor) <span class="kw">AS</span> actor,
+        <span class="fn">JSON_ARRAYAGG</span>(
+            <span class="fn">JSON_OBJECT</span>(
+                <span class="str">'film'</span>    <span class="kw">VALUE</span> film,
+                <span class="str">'votes'</span>   <span class="kw">VALUE</span> votes,
+                <span class="str">'rating'</span>  <span class="kw">VALUE</span> rating,
+                <span class="str">'filmid'</span>  <span class="kw">VALUE</span> filmid,
+                <span class="str">'year'</span>    <span class="kw">VALUE</span> year
+            ) <span class="kw">RETURNING CLOB</span>
+        ) <span class="kw">AS</span> films_new,
+        <span class="fn">AVG</span>(rating) <span class="kw">AS</span> avg_rating
+    <span class="kw">FROM</span> actor_films
+    <span class="kw">WHERE</span> year = :<span class="str">target_year</span>
+    <span class="kw">GROUP BY</span> actorid
+)
+<span class="kw">SELECT</span>
+    <span class="fn">COALESCE</span>(t.actor_id, y.actor_id) <span class="kw">AS</span> actor_id,
+    <span class="fn">COALESCE</span>(t.actor, y.actor)       <span class="kw">AS</span> actor,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> t.actor_id <span class="kw">IS NULL</span> <span class="kw">THEN</span> y.films
+        <span class="kw">WHEN</span> y.actor_id <span class="kw">IS NULL</span> <span class="kw">THEN</span> t.films_new
+        <span class="kw">WHEN</span> y.films = <span class="str">'[]'</span> <span class="kw">THEN</span> t.films_new
+        <span class="kw">ELSE</span> <span class="fn">REGEXP_REPLACE</span>(y.films, <span class="str">'\]$'</span>, <span class="str">''</span>)
+             || <span class="str">','</span> || <span class="fn">REGEXP_REPLACE</span>(t.films_new, <span class="str">'^\['</span>, <span class="str">''</span>)
+    <span class="kw">END</span>                               <span class="kw">AS</span> films,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> t.actor_id <span class="kw">IS NULL</span> <span class="kw">THEN</span> y.quality_class
+        <span class="kw">WHEN</span> t.avg_rating &gt; <span class="num">8</span> <span class="kw">THEN</span> <span class="str">'star'</span>
+        <span class="kw">WHEN</span> t.avg_rating &gt; <span class="num">7</span> <span class="kw">THEN</span> <span class="str">'good'</span>
+        <span class="kw">WHEN</span> t.avg_rating &gt; <span class="num">6</span> <span class="kw">THEN</span> <span class="str">'average'</span>
+        <span class="kw">ELSE</span> <span class="str">'bad'</span>
+    <span class="kw">END</span>                               <span class="kw">AS</span> quality_class,
+    <span class="kw">CASE WHEN</span> t.actor_id <span class="kw">IS NOT NULL</span> <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span> <span class="kw">AS</span> is_active,
+    :<span class="str">target_year</span>                         <span class="kw">AS</span> current_year
+<span class="kw">FROM</span> yesterday y
+<span class="kw">FULL OUTER JOIN</span> today t
+    <span class="kw">ON</span> y.actor_id = t.actor_id;
+<span class="kw">COMMIT</span>;</pre></div></div>
             </div>
           </div>
         </div>
@@ -1857,8 +2329,152 @@ today <span class="kw">AS</span> (
 
   <div class="section">
     <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập — Ôn tập artifact cuối tuần
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-grid">
+        <div class="quiz-item">
+          <div class="quiz-q">1) Grain đúng của <code>actors</code> trong bài cumulative là gì?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Row theo film là grain của source actor_films, không phải bảng cumulative.')">A. 1 row = 1 actor-film</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. actors cumulative thường có grain 1 row = 1 actor tại 1 năm current_year.')">B. 1 row = 1 actor tại 1 năm</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Quý không phải grain đã thiết kế trong bài homework này.')">C. 1 row = 1 actor tại 1 quý</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Version là logic của SCD2 history table, không phải bảng actors cumulative cơ bản.')">D. 1 row = 1 actor-version</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+
+        <div class="quiz-item">
+          <div class="quiz-q">2) Vì sao SCD2 cần surrogate key ở dimension?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Tăng tốc join có thể là lợi ích phụ, nhưng không phải lý do cốt lõi.')">A. Chỉ để join nhanh hơn</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Surrogate key giúp mỗi version của cùng entity có khóa riêng để fact join đúng theo thời điểm.')">B. Mỗi version có khóa riêng, join fact đúng theo thời điểm</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'SCD2 vẫn cần natural key lineage để nhận diện cùng thực thể.')">C. Thay thế hoàn toàn natural key</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'SCD2 vẫn có thể dùng partition theo date nếu cần.')">D. Vì SCD2 không thể partition theo date</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+
+        <div class="quiz-item">
+          <div class="quiz-q">3) Điều kiện nào thể hiện current row hợp lệ trong SCD2?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải mọi row đều current.')">A. Mọi row đều is_current = true</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Nếu end_date có giá trị thì row đã hết hiệu lực.')">B. end_date luôn khác NULL</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Current row thường có is_current=true và end_date NULL (open-ended interval).')">C. is_current=true và end_date NULL</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'start_date chỉ biểu diễn thời điểm bắt đầu hiệu lực.')">D. start_date NULL để biểu diễn hiện tại</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+
+        <div class="quiz-item">
+          <div class="quiz-q">4) Query validation overlap interval nhằm phát hiện gì?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải kiểm tra duplicate key vật lý.')">A. Trùng primary key</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cùng actor nhưng nhiều khoảng thời gian hiệu lực giao nhau, làm lịch sử mâu thuẫn.')">B. Nhiều khoảng hiệu lực giao nhau của cùng actor</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Quality class đổi là hợp lệ nếu có mốc thời gian rõ.')">C. Thay đổi quality_class theo thời gian</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'NULL không luôn là lỗi trong SCD2.')">D. end_date NULL</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+
+        <div class="quiz-item">
+          <div class="quiz-q">5) Khi nào nên chạy backfill thay vì incremental?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Incremental không hợp để rebuild toàn lịch sử khi đổi logic cốt lõi.')">A. Mỗi ngày đều chạy backfill để chắc chắn</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Backfill dùng khi đổi logic nền tảng hoặc cần dựng lại lịch sử đầy đủ từ đầu.')">B. Khi đổi logic nền tảng và cần rebuild lịch sử</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Một bản ghi mới là case điển hình của incremental.')">C. Khi chỉ có dữ liệu năm mới</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan trực tiếp đến SELECT query.')">D. Khi cần tăng tốc BI query</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+
+        <div class="quiz-item">
+          <div class="quiz-q">6) FULL OUTER JOIN trong cumulative merge xử lý tốt nhất case nào?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'LEFT JOIN từ yesterday có thể bỏ sót actor mới nếu không có yesterday row.')">A. Chỉ actor có ở yesterday</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nó giữ cả actor cũ không có phim mới lẫn actor mới xuất hiện năm hiện tại.')">B. Đồng thời actor cũ inactive và actor mới xuất hiện</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'INNER JOIN sẽ bỏ mất các case thiếu một phía.')">C. Chỉ actor có mặt cả hai phía</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan trực tiếp đến sort.')">D. Chỉ để ORDER BY ổn định</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+
+        <div class="quiz-item">
+          <div class="quiz-q">7) Invariant count trước/sau incremental dùng để làm gì?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nó giúp phát hiện pipeline làm mất dữ liệu lịch sử ngoài ý muốn.')">A. Phát hiện mất dữ liệu ngoài ý muốn sau lần chạy mới</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Không thay thế kiểm thử hiệu năng.')">B. Đo tốc độ query</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Không thay thế business validation metric.')">C. Tự động xác nhận business KPI đúng</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan cảnh báo deadlock trực tiếp.')">D. Dự đoán deadlock của DB</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+
+        <div class="quiz-item">
+          <div class="quiz-q">8) Lỗi phổ biến khi update quality_class theo năm là gì?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Đổi tên cột không phải lỗi logic chính trong bài.')">A. Đổi tên cột actor_id</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng ngưỡng phân loại không nhất quán giữa backfill và incremental sẽ gây lệch lịch sử.')">B. Ngưỡng phân loại không nhất quán giữa các job</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'PRIMARY KEY không phụ thuộc trực tiếp vào quality class logic.')">C. Không tạo PRIMARY KEY</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Timezone thường không phải nguyên nhân chính của quality bucket.')">D. Không set timezone UTC</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+
+        <div class="quiz-item">
+          <div class="quiz-q">9) Với Oracle SQL trong module này, boolean thường biểu diễn thế nào?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Oracle SQL DDL không có BOOLEAN native cho table column như PostgreSQL.')">A. BOOLEAN TRUE/FALSE native</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Quy ước phổ biến là NUMBER(1), 1=true và 0=false.')">B. NUMBER(1) với 1/0</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'VARCHAR là tùy chọn nhưng không phải chuẩn nhất cho cờ logic.')">C. VARCHAR2(5) với TRUE/FALSE</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'DATE không phù hợp để biểu diễn cờ boolean.')">D. DATE với NULL/NON-NULL</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+
+        <div class="quiz-item">
+          <div class="quiz-q">10) Artifact checklist cuối tuần cần ưu tiên tiêu chí nào trước khi nộp?</div>
+          <div class="quiz-options">
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Số lượng file không phản ánh chất lượng kỹ thuật.')">A. Có càng nhiều file càng tốt</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SQL phải chạy được, grain rõ, và có validation chứng minh dữ liệu nhất quán.')">B. Chạy được end-to-end + grain rõ + validation pass</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Màu dashboard không phải tiêu chí modeling.')">C. Dashboard có màu đẹp</div>
+            <div class="quiz-opt" onclick="answerQuiz(this,false,'Độ dài README không phải tiêu chí chính.')">D. README trên 2.000 từ</div>
+          </div>
+          <div class="quiz-explain"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📦</div>
+      5. Tổng Kết — checklist trước khi nộp
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Commit tất cả vào <code>de-roadmap-artifacts/week05_dimensional_modeling/</code>:</p>
+      <ul class="checklist">
+        <li>DDL <code>actors</code> table (source) — PostgreSQL + Oracle</li>
+        <li>Cumulative query populate <code>actors</code> table từng năm (1 year at a time)</li>
+        <li>DDL <code>actors_history_scd</code> table (SCD Type 2) — PostgreSQL + Oracle</li>
+        <li>Backfill query: populate toàn bộ <code>actors_history_scd</code> trong 1 query</li>
+        <li>Incremental SCD2 query: thêm 1 năm mới (UPDATE expire + INSERT new)</li>
+        <li>Star Schema DDL cho 1 domain tự chọn (e-commerce / streaming / fintech)</li>
+        <li><code>dim_date</code> DDL + populate query — PostgreSQL (generate_series) + Oracle (CONNECT BY)</li>
+        <li>Analytics query: JOIN fact với ≥3 dims, GROUP BY với hierarchy (year → quarter → month)</li>
+        <li>Validation queries: no-overlap interval, exactly-one-current-row, count check trước/sau incremental</li>
+        <li><code>README.md</code>: design decisions, grain declaration, và tại sao chọn SCD2 cho từng attribute</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
       <div class="section-icon icon-practice">🔨</div>
-      Bài 3 — actors_history_scd validation
+      6. Bài Tập Thực Hành — validation + incremental rerun
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-content">
@@ -1891,29 +2507,6 @@ today <span class="kw">AS</span> (
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header" onclick="toggleSection(this)">
-      <div class="section-icon icon-summary">📦</div>
-      Artifact Checklist — Tuần 5–6
-      <span class="section-toggle">▼</span>
-    </div>
-    <div class="section-content">
-      <p>Commit tất cả vào <code>de-roadmap-artifacts/week05_dimensional_modeling/</code>:</p>
-      <ul class="checklist">
-        <li>DDL <code>actors</code> table (source) — PostgreSQL + Oracle</li>
-        <li>Cumulative query populate <code>actors</code> table từng năm (1 year at a time)</li>
-        <li>DDL <code>actors_history_scd</code> table (SCD Type 2) — PostgreSQL + Oracle</li>
-        <li>Backfill query: populate toàn bộ <code>actors_history_scd</code> trong 1 query</li>
-        <li>Incremental SCD2 query: thêm 1 năm mới (UPDATE expire + INSERT new)</li>
-        <li>Star Schema DDL cho 1 domain tự chọn (e-commerce / streaming / fintech)</li>
-        <li><code>dim_date</code> DDL + populate query — PostgreSQL (generate_series) + Oracle (CONNECT BY)</li>
-        <li>Analytics query: JOIN fact với ≥3 dims, GROUP BY với hierarchy (year → quarter → month)</li>
-        <li>Validation queries: no-overlap interval, exactly-one-current-row, count check trước/sau incremental</li>
-        <li><code>README.md</code>: design decisions, grain declaration, và tại sao chọn SCD2 cho từng attribute</li>
-      </ul>
     </div>
   </div>
 
