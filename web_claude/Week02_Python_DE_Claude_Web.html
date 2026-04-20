@@ -1,0 +1,2582 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 2 · Python cho Data Engineering</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 290px; min-width: 290px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--text-muted); }
+  .level-label.l1 { color: var(--accent); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 44px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 960px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+  .kw { color: var(--accent); }
+  .str { color: var(--accent5); }
+  .fn { color: var(--accent4); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '□'; color: var(--accent5); font-size: 1.1rem; flex-shrink: 0; margin-top: -1px; }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  .tab-group { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 18px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🐍 Data Engineering Handbook Tutorial</h1>
+  <p>Giai đoạn 1 · Tuần 2 · Python cho Data Engineering</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 1 · Foundation</span>
+    <span class="badge badge-orange">Module 102 · Python DE</span>
+    <span class="badge badge-blue">Artifact: week2_python_etl/</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương Trình Học</div>
+    <div class="level-label l1">▶ TUẦN 2 · PYTHON DE</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W2.01</span>Tổng Quan & Mục Tiêu</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W2.02</span>pandas cho Data Engineering</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W2.03</span>SQLAlchemy & Kết Nối Database</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W2.04</span>Gọi REST API & Xử Lý Response</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W2.05</span>Error Handling & Logging</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W2.06</span>Cấu Trúc ETL Script Production</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W2.07</span>Artifact: week2_python_etl/</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W2.08</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+<!-- ═══════════════ MODULE 0: TỔNG QUAN ═══════════════ -->
+<div class="module active" id="m0">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · Giai đoạn 1 · Foundation</div>
+    <div class="module-title">📋 Tổng Quan & Mục Tiêu Tuần 2</div>
+    <div class="module-subtitle">Python DE là gì · Công cụ cốt lõi · Artifact cần build · Exit criteria</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Module</th><th>Nội dung</th><th>Thời gian ước tính</th></tr>
+        <tr><td>W2.01</td><td>Tổng quan Python DE, checklist, artifact mục tiêu</td><td>20 phút</td></tr>
+        <tr><td>W2.02</td><td>pandas: đọc/ghi file, xử lý null, merge, groupby</td><td>90 phút</td></tr>
+        <tr><td>W2.03</td><td>SQLAlchemy: kết nối DB, bulk insert, incremental load</td><td>60 phút</td></tr>
+        <tr><td>W2.04</td><td>requests: gọi API, pagination, rate limit, retry</td><td>60 phút</td></tr>
+        <tr><td>W2.05</td><td>Error handling, structured logging, retry decorator</td><td>60 phút</td></tr>
+        <tr><td>W2.06</td><td>Cấu trúc ETL production: class-based, config, CLI</td><td>60 phút</td></tr>
+        <tr><td>W2.07</td><td>Build và commit artifact week2_python_etl/</td><td>90 phút</td></tr>
+        <tr><td>W2.08</td><td>Mini test 20 câu tổng kết</td><td>25 phút</td></tr>
+      </table>
+      <div class="info-box tip">✅ <span><strong>Tổng thời gian ước tính: 8–10 giờ.</strong> Chia đều trong 7 ngày, khoảng 1–1.5h/ngày. Ưu tiên build code thực tế hơn là đọc lý thuyết.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>🐍 Python trong vai trò Data Engineer</h3>
+      <p>Python là ngôn ngữ "keo dán" của DE. Bạn không dùng Python để viết web hay machine learning — bạn dùng nó để <strong>orchestrate dữ liệu</strong>: kéo từ nguồn, biến đổi, đẩy vào destination.</p>
+      <ul>
+        <li><strong>Extract:</strong> đọc CSV, JSON, Parquet; gọi REST API; query database</li>
+        <li><strong>Transform:</strong> clean null, merge bảng, aggregate, validate schema</li>
+        <li><strong>Load:</strong> ghi vào PostgreSQL, Parquet, S3 — incremental hoặc full load</li>
+        <li><strong>Orchestrate:</strong> chạy theo thứ tự, retry khi fail, log mọi bước</li>
+      </ul>
+
+      <h3>🎯 Sau tuần này bạn có thể</h3>
+      <ul>
+        <li>Đọc và ghi mọi format file phổ biến (CSV, JSON, Parquet) bằng pandas</li>
+        <li>Kết nối PostgreSQL từ Python, thực hiện bulk insert và incremental load an toàn</li>
+        <li>Gọi REST API có pagination và xử lý rate limit không bị block</li>
+        <li>Viết code có error handling chuẩn, không crash khi gặp dữ liệu xấu</li>
+        <li>Tổ chức ETL thành module có thể tái sử dụng, test được</li>
+        <li>Commit artifact <code>week2_python_etl/</code> hoàn chỉnh lên GitHub</li>
+      </ul>
+
+      <div class="info-box note">📌 <span><strong>Tư duy quan trọng nhất tuần này:</strong> Code phải chạy được ở lần thứ 2, 3, 10 với cùng kết quả. Đây là nguyên tắc <strong>idempotency</strong> — tư duy nền tảng của mọi DE production.</span></div>
+
+      <h3>📦 Thư viện cần cài trước</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>bash · cài dependencies</span></div>
+        <div class="cmd-body"><pre><span class="prompt">$</span> pip install pandas sqlalchemy psycopg2-binary requests python-dotenv
+<span class="prompt">$</span> pip install pyarrow  <span class="comment"># để đọc/ghi Parquet</span>
+<span class="prompt">$</span> pip freeze | grep -E <span class="str">"pandas|sqlalchemy|requests"</span>
+<span class="output">pandas==2.2.1
+psycopg2-binary==2.9.9
+requests==2.31.0
+SQLAlchemy==2.0.29</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết — Python DE vs Python thông thường
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>🔍 Điểm khác biệt giữa Python DE và Python thông thường</h3>
+      <table>
+        <tr><th>Python thông thường</th><th>Python Data Engineering</th></tr>
+        <tr><td>Script chạy 1 lần, dừng</td><td>Chạy định kỳ, nhiều lần, kết quả phải nhất quán</td></tr>
+        <tr><td>Fail thì fix và chạy lại tay</td><td>Fail thì auto retry, log lỗi, alert team</td></tr>
+        <tr><td>Hardcode config trong code</td><td>Config từ .env, không commit secret lên Git</td></tr>
+        <tr><td>Không cần logging</td><td>Mọi bước đều log với timestamp và context</td></tr>
+        <tr><td>Đọc file, in ra màn hình</td><td>Đọc source → transform → ghi vào database/storage</td></tr>
+        <tr><td>Không test được</td><td>Functions thuần, có thể unit test dễ dàng</td></tr>
+      </table>
+
+      <div class="info-box warn">⚠️ <span><strong>Sai lầm phổ biến nhất:</strong> Viết toàn bộ pipeline trong 1 file dài, không có function, không có logging. Khi fail không biết fail ở đâu. Code không thể test. Tuần này học đúng ngay từ đầu.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Trong ETL pipeline bằng Python, vai trò của pandas chủ yếu là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'pandas không dùng để kết nối và query database trực tiếp. SQLAlchemy mới là thư viện đảm nhiệm phần đó.')">A. Kết nối và query database như PostgreSQL</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. pandas là công cụ transform: đọc nhiều format file, làm sạch null, merge, groupby, sau đó đẩy vào destination. Đây là bước T trong ETL.')">B. Transform dữ liệu: đọc file, làm sạch, aggregate, merge</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'requests mới là thư viện để gọi REST API. pandas không có tính năng này.')">C. Gọi REST API và xử lý pagination</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Logging được xử lý bởi module logging của Python, không phải pandas.')">D. Log lỗi khi pipeline fail</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao phải tách code ETL thành extract.py, transform.py, load.py riêng biệt thay vì 1 file?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Python không chậm hơn khi code trong 1 file lớn. Đây không phải lý do tách file.')">A. Python chạy chậm hơn nếu code trong 1 file quá dài</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL không quan tâm đến cấu trúc code Python. Đây không phải lý do.')">B. PostgreSQL chỉ nhận data từ Python script riêng biệt</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách module giúp test từng phần độc lập (unit test), thay thế 1 phần mà không ảnh hưởng phần khác (ví dụ: đổi source từ CSV sang API chỉ cần sửa extract.py), và debug dễ hơn.')">C. Dễ test độc lập, thay thế từng phần không ảnh hưởng phần còn lại</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Git không yêu cầu tách file theo cách này để track changes.')">D. Git chỉ track được changes trong file nhỏ hơn 100 dòng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Idempotency trong pipeline ETL có nghĩa là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là mô tả incremental load, không phải idempotency. Idempotency liên quan đến việc chạy nhiều lần.')">A. Pipeline chỉ load dữ liệu mới, không load lại dữ liệu cũ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Idempotency nghĩa là chạy pipeline 1 lần hay 10 lần với cùng input đều cho cùng kết quả — không bị duplicate, không mất data. Đây là tính chất bắt buộc của production pipeline.')">B. Chạy pipeline nhiều lần với cùng input luôn cho cùng kết quả</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Parallel processing là khái niệm khác, không liên quan đến idempotency.')">C. Pipeline chạy song song nhiều task cùng lúc để nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là mô tả của error handling/retry, không phải idempotency.')">D. Pipeline tự động retry khi gặp lỗi network</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao phải dùng python-dotenv và file .env thay vì hardcode database password trong code?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'python-dotenv không làm code chạy nhanh hơn. Đây không phải lý do.')">A. python-dotenv giúp kết nối database nhanh hơn 10x</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu hardcode password vào code và push lên GitHub (dù là private repo), secret có thể bị lộ trong git history, bị scrape bởi bots, hoặc vô tình bị chia sẻ. .env không bao giờ commit lên Git.')">B. Tránh lộ secret/password khi push code lên GitHub</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'python-dotenv không liên quan đến việc deploy lên cloud hay Docker.')">C. Bắt buộc khi deploy lên Docker hoặc cloud</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'psycopg2 không yêu cầu .env để kết nối. Đây là thông tin sai.')">D. psycopg2 không đọc được password nếu không dùng .env</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Thư viện nào trong bộ tuần 2 chịu trách nhiệm chính cho phần Load (ghi vào database)?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'pandas có thể gọi to_sql() nhưng vẫn cần SQLAlchemy engine ở dưới. pandas không tự mình kết nối database.')">A. pandas — vì có method to_sql()</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'requests dùng để gọi HTTP API, không dùng để ghi vào database.')">B. requests — vì dùng HTTP protocol để ghi data</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SQLAlchemy là ORM và connection library chính. Nó tạo engine, manage connection pool, thực hiện parameterized query an toàn. pandas.to_sql() cũng dùng SQLAlchemy engine phía dưới.')">C. SQLAlchemy — tạo engine, manage connections, thực hiện query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'python-dotenv chỉ đọc biến môi trường, không có chức năng kết nối database.')">D. python-dotenv — vì nó cấu hình connection string</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Format file nào được ưu tiên dùng trong DE pipelines để lưu trữ dữ liệu trung gian và tại sao?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CSV không có schema, không nén tốt, không hỗ trợ nested data. Chỉ dùng khi cần trao đổi với người không phải kỹ sư.')">A. CSV — vì mọi tool đều đọc được và con người đọc được</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JSON tốt cho API response nhưng không hiệu quả cho lưu trữ lượng lớn — không nén tốt, không columnar.')">B. JSON — vì linh hoạt với nested structure</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Parquet là columnar format, nén rất tốt (5-10x nhỏ hơn CSV), có schema, đọc cực nhanh với Spark/pandas. Đây là format chuẩn trong data lake và DE pipelines hiện đại.')">C. Parquet — columnar, nén tốt, có schema, Spark và pandas đọc nhanh</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Excel không phải format chuẩn trong DE pipeline. Không scale, không efficient.')">D. Excel — vì stakeholder đọc được và share dễ</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>🐍 Python DE</strong>Dùng để orchestrate: extract từ source, transform data, load vào destination. Không phải web, không phải ML.</div>
+        <div class="summary-item"><strong>📦 4 thư viện cốt lõi</strong>pandas (transform), SQLAlchemy (load DB), requests (extract API), logging (observability).</div>
+        <div class="summary-item"><strong>🔁 Idempotency</strong>Pipeline chạy 1 lần hay 10 lần với cùng input = cùng kết quả. Nguyên tắc bắt buộc của production.</div>
+        <div class="summary-item"><strong>🏗️ Module hóa code</strong>extract.py / transform.py / load.py / pipeline.py. Mỗi file 1 trách nhiệm, dễ test, dễ thay thế.</div>
+        <div class="summary-item"><strong>🔐 Config từ .env</strong>Không bao giờ hardcode password/API key trong code. Dùng python-dotenv, add .env vào .gitignore.</div>
+        <div class="summary-item"><strong>📁 Format Parquet</strong>Columnar, nén tốt, có schema — format chuẩn DE cho lưu trữ trung gian và data lake.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <div></div>
+    <button class="nav-btn primary" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">W2.02 pandas →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 1: PANDAS ═══════════════ -->
+<div class="module" id="m1">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · Module W2.02</div>
+    <div class="module-title">🐼 pandas cho Data Engineering</div>
+    <div class="module-subtitle">Đọc/ghi mọi format · Xử lý null · Merge & groupby · Memory efficient</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Kỹ năng</th><th>Method / Pattern</th><th>Dùng khi nào</th></tr>
+        <tr><td>Đọc CSV</td><td><code>pd.read_csv()</code></td><td>Nhận file từ source system, report</td></tr>
+        <tr><td>Đọc JSON</td><td><code>pd.read_json()</code> / <code>pd.json_normalize()</code></td><td>API response, log file</td></tr>
+        <tr><td>Đọc/ghi Parquet</td><td><code>pd.read_parquet()</code> / <code>df.to_parquet()</code></td><td>Lưu trữ trung gian, data lake</td></tr>
+        <tr><td>Xử lý null</td><td><code>dropna()</code>, <code>fillna()</code>, <code>isna()</code></td><td>Luôn luôn cần trong transform</td></tr>
+        <tr><td>Merge bảng</td><td><code>pd.merge()</code>, <code>df.join()</code></td><td>Khi data từ nhiều source</td></tr>
+        <tr><td>Aggregate</td><td><code>groupby().agg()</code></td><td>Tạo summary, fact table</td></tr>
+        <tr><td>Đọc nhiều file</td><td><code>glob</code> + <code>pd.concat()</code></td><td>Xử lý batch file hàng ngày</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>Đọc CSV/JSON/Parquet và kiểm tra schema ngay sau khi đọc</li>
+        <li>Phát hiện và xử lý null values — biết khi nào drop, khi nào fill</li>
+        <li>Merge 2 DataFrame với các loại join khác nhau (inner, left, outer)</li>
+        <li>Dùng <code>groupby().agg()</code> để tổng hợp dữ liệu theo nhiều chiều</li>
+        <li>Đọc nhiều file CSV cùng lúc bằng glob pattern</li>
+        <li>Ghi kết quả ra Parquet với compression phù hợp</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>📂 Đọc CSV và kiểm tra ngay</h3>
+      <p>Ngay sau khi đọc file, luôn kiểm tra shape, dtypes và null count. Đừng assume dữ liệu sạch.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>extract.py · đọc CSV chuẩn DE</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> logging
+
+<span class="fn">logger</span> = logging.<span class="fn">getLogger</span>(__name__)
+
+<span class="kw">def</span> <span class="fn">read_csv_safe</span>(filepath: str) -> pd.DataFrame:
+    <span class="str">"""Đọc CSV với schema check và null report."""</span>
+    <span class="kw">try</span>:
+        df = pd.<span class="fn">read_csv</span>(
+            filepath,
+            dtype_backend=<span class="str">"numpy_nullable"</span>,  <span class="comment"># handle NA tốt hơn</span>
+            parse_dates=[<span class="str">"created_at"</span>, <span class="str">"updated_at"</span>]
+        )
+        logger.<span class="fn">info</span>(<span class="str">f"Đọc {filepath}: {df.shape[0]} rows, {df.shape[1]} cols"</span>)
+
+        <span class="comment"># Báo cáo null ngay sau khi đọc</span>
+        null_report = df.<span class="fn">isna</span>().<span class="fn">sum</span>()
+        null_cols = null_report[null_report > <span class="fn">0</span>]
+        <span class="kw">if not</span> null_cols.<span class="fn">empty</span>:
+            logger.<span class="fn">warning</span>(<span class="str">f"Columns có null: {null_cols.to_dict()}"</span>)
+
+        <span class="kw">return</span> df
+    <span class="kw">except</span> FileNotFoundError:
+        logger.<span class="fn">error</span>(<span class="str">f"File không tồn tại: {filepath}"</span>)
+        <span class="kw">raise</span>
+
+<span class="comment"># Đọc nhiều file cùng lúc</span>
+<span class="kw">import</span> glob
+
+<span class="kw">def</span> <span class="fn">read_daily_files</span>(pattern: str) -> pd.DataFrame:
+    <span class="str">"""Đọc tất cả file khớp pattern, ghép lại thành 1 DataFrame."""</span>
+    files = <span class="fn">glob</span>.<span class="fn">glob</span>(pattern)
+    <span class="kw">if not</span> files:
+        <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="str">f"Không tìm thấy file nào khớp: {pattern}"</span>)
+    logger.<span class="fn">info</span>(<span class="str">f"Tìm thấy {len(files)} file: {files}"</span>)
+    dfs = [pd.<span class="fn">read_csv</span>(f) <span class="kw">for</span> f <span class="kw">in</span> files]
+    combined = pd.<span class="fn">concat</span>(dfs, ignore_index=<span class="kw">True</span>)
+    logger.<span class="fn">info</span>(<span class="str">f"Sau concat: {combined.shape[0]} rows tổng"</span>)
+    <span class="kw">return</span> combined</pre></div>
+      </div>
+
+      <h3>🧹 Xử lý null — khi nào drop, khi nào fill</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>transform.py · xử lý null</span></div>
+        <div class="cmd-body"><pre><span class="kw">def</span> <span class="fn">clean_orders</span>(df: pd.DataFrame) -> pd.DataFrame:
+    <span class="str">"""Làm sạch bảng orders với strategy rõ ràng."""</span>
+    original_len = <span class="fn">len</span>(df)
+
+    <span class="comment"># Drop row nếu thiếu key business columns</span>
+    df = df.<span class="fn">dropna</span>(subset=[<span class="str">"order_id"</span>, <span class="str">"user_id"</span>, <span class="str">"amount"</span>])
+    logger.<span class="fn">info</span>(<span class="str">f"Dropped {original_len - len(df)} rows thiếu key columns"</span>)
+
+    <span class="comment"># Fill null cho optional columns với giá trị mặc định</span>
+    df[<span class="str">"discount_amount"</span>] = df[<span class="str">"discount_amount"</span>].<span class="fn">fillna</span>(<span class="fn">0.0</span>)
+    df[<span class="str">"notes"</span>] = df[<span class="str">"notes"</span>].<span class="fn">fillna</span>(<span class="str">""</span>)
+    df[<span class="str">"channel"</span>] = df[<span class="str">"channel"</span>].<span class="fn">fillna</span>(<span class="str">"unknown"</span>)
+
+    <span class="comment"># Normalize dtype</span>
+    df[<span class="str">"amount"</span>] = df[<span class="str">"amount"</span>].<span class="fn">astype</span>(<span class="fn">float</span>)
+    df[<span class="str">"order_id"</span>] = df[<span class="str">"order_id"</span>].<span class="fn">astype</span>(<span class="fn">str</span>)
+    df[<span class="str">"created_at"</span>] = pd.<span class="fn">to_datetime</span>(df[<span class="str">"created_at"</span>])
+
+    <span class="kw">return</span> df</pre></div>
+      </div>
+
+      <h3>🔗 Merge DataFrame — join đúng cách</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>transform.py · merge</span></div>
+        <div class="cmd-body"><pre><span class="kw">def</span> <span class="fn">enrich_orders</span>(orders: pd.DataFrame, users: pd.DataFrame) -> pd.DataFrame:
+    <span class="str">"""Enrich orders với user info. Left join để giữ tất cả orders."""</span>
+    before = <span class="fn">len</span>(orders)
+
+    merged = pd.<span class="fn">merge</span>(
+        orders,
+        users[[<span class="str">"user_id"</span>, <span class="str">"email"</span>, <span class="str">"country"</span>, <span class="str">"tier"</span>]],
+        on=<span class="str">"user_id"</span>,
+        how=<span class="str">"left"</span>  <span class="comment"># giữ tất cả orders dù không tìm thấy user</span>
+    )
+
+    after = <span class="fn">len</span>(merged)
+    <span class="kw">if</span> after != before:
+        <span class="comment"># Nếu count thay đổi → có duplicate key trong users</span>
+        logger.<span class="fn">warning</span>(<span class="str">f"Row count thay đổi sau merge: {before} → {after}"</span>)
+
+    <span class="comment"># Kiểm tra unmatched orders</span>
+    unmatched = merged[merged[<span class="str">"email"</span>].<span class="fn">isna</span>()].<span class="fn">shape</span>[<span class="fn">0</span>]
+    <span class="kw">if</span> unmatched > <span class="fn">0</span>:
+        logger.<span class="fn">warning</span>(<span class="str">f"{unmatched} orders không tìm thấy user tương ứng"</span>)
+
+    <span class="kw">return</span> merged</pre></div>
+      </div>
+
+      <h3>📊 Groupby & Aggregate — tạo summary table</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>transform.py · aggregate</span></div>
+        <div class="cmd-body"><pre><span class="kw">def</span> <span class="fn">create_daily_summary</span>(orders: pd.DataFrame) -> pd.DataFrame:
+    <span class="str">"""Tổng hợp orders theo ngày và channel."""</span>
+    orders[<span class="str">"date"</span>] = orders[<span class="str">"created_at"</span>].<span class="fn">dt.date</span>
+
+    summary = orders.<span class="fn">groupby</span>([<span class="str">"date"</span>, <span class="str">"channel"</span>, <span class="str">"country"</span>]).<span class="fn">agg</span>(
+        total_orders=(<span class="str">"order_id"</span>, <span class="str">"count"</span>),
+        total_revenue=(<span class="str">"amount"</span>, <span class="str">"sum"</span>),
+        avg_order_value=(<span class="str">"amount"</span>, <span class="str">"mean"</span>),
+        unique_users=(<span class="str">"user_id"</span>, <span class="str">"nunique"</span>)
+    ).<span class="fn">reset_index</span>()
+
+    logger.<span class="fn">info</span>(<span class="str">f"Daily summary: {summary.shape[0]} rows"</span>)
+    <span class="kw">return</span> summary</pre></div>
+      </div>
+
+      <h3>💾 Ghi Parquet — format chuẩn DE</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>load.py · ghi parquet</span></div>
+        <div class="cmd-body"><pre><span class="kw">def</span> <span class="fn">save_to_parquet</span>(df: pd.DataFrame, output_path: str) -> <span class="fn">None</span>:
+    <span class="str">"""Ghi DataFrame ra Parquet với snappy compression."""</span>
+    <span class="kw">import</span> os
+    os.makedirs(os.path.<span class="fn">dirname</span>(output_path), exist_ok=<span class="kw">True</span>)
+
+    df.<span class="fn">to_parquet</span>(
+        output_path,
+        compression=<span class="str">"snappy"</span>,  <span class="comment"># balance giữa speed và size</span>
+        index=<span class="kw">False</span>
+    )
+    size_kb = os.path.<span class="fn">getsize</span>(output_path) / <span class="fn">1024</span>
+    logger.<span class="fn">info</span>(<span class="str">f"Đã ghi {output_path}: {len(df)} rows, {size_kb:.1f} KB"</span>)
+
+<span class="comment"># Đọc lại để verify</span>
+df_verify = pd.<span class="fn">read_parquet</span>(output_path)
+<span class="output">>>> df_verify.shape
+(1250, 8)</span></pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span><strong>Best practice:</strong> Luôn verify sau khi ghi — đọc lại file và kiểm tra row count khớp với DataFrame gốc. Catch lỗi file corrupt sớm hơn khi dữ liệu đã vào production.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Khi merge 2 DataFrame với <code>how="left"</code>, điều gì xảy ra với các row bên trái không có match bên phải?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'inner join mới bỏ unmatched rows. left join giữ tất cả rows bên trái.')">A. Chúng bị bỏ đi, chỉ giữ rows khớp nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Left join giữ tất cả rows bên trái. Các cột từ bảng phải sẽ là NaN cho những rows không có match. Dùng khi bảng trái là fact table và không muốn mất bất kỳ row nào.')">B. Chúng được giữ, với NaN ở các cột từ bảng phải</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không có Exception nào khi có unmatched rows trong left join.')">C. Pandas raise Exception vì có unmatched keys</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'left join không duplicate rows bên phải để fill.')">D. Chúng được duplicate từ row khớp gần nhất bên phải</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao cần kiểm tra row count trước và sau khi merge?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'merge không ảnh hưởng memory trong trường hợp này. Đây không phải lý do kiểm tra count.')">A. Để đảm bảo không vượt quá giới hạn memory của pandas</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu bảng join key có duplicate (ví dụ user_id không unique trong bảng users), merge sẽ tạo cartesian product và làm row count tăng đột biến. Đây là bug phổ biến rất khó phát hiện nếu không check count.')">B. Phát hiện duplicate key gây row explosion (fan-out problem)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'merge không thay đổi dtype của các cột. Đây không phải lý do.')">C. Đảm bảo dtype của các cột không bị thay đổi sau merge</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'GitHub không quan tâm đến row count trong code.')">D. Để GitHub Actions không reject code có DataFrame quá lớn</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Sự khác biệt giữa <code>dropna(subset=["col"])</code> và <code>dropna()</code> không có subset là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả 2 đều dropna, chỉ khác phạm vi áp dụng.')">A. dropna() bỏ cả DataFrame, subset chỉ bỏ row đó</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. dropna() không có subset sẽ drop mọi row có bất kỳ NaN nào ở bất kỳ cột nào — rất nguy hiểm nếu có cột optional thường xuyên null. dropna(subset=[...]) chỉ drop khi NaN ở cột chỉ định — an toàn hơn và có chủ đích.')">B. dropna() không có subset drop row nếu có NaN ở BẤT KỲ cột nào; subset chỉ check cột chỉ định</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'dropna() không tạo copy riêng. Cả 2 trả về DataFrame mới.')">C. dropna() tạo deep copy còn dropna(subset) modify in-place</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'dropna() không fill NaN, chỉ drop.')">D. dropna() fill NaN bằng 0, subset fill bằng giá trị trung bình</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Compression nào được dùng trong Parquet cho trường hợp cân bằng speed và size?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'gzip nén tốt hơn nhưng chậm hơn snappy. Thường dùng khi cần minimize storage, không cần speed.')">A. gzip — nén mạnh nhất</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. snappy được thiết kế cho DE workload: nén nhanh, đọc nhanh, size khá tốt. Là lựa chọn mặc định cho Parquet trong data lake. Spark mặc định cũng dùng snappy.')">B. snappy — balance giữa speed và size, default trong DE</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'lz4 nhanh hơn snappy nhưng size lớn hơn. Dùng khi cần tốc độ đọc tối đa.')">C. lz4 — nhanh nhất, không nén</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'brotli compress rất mạnh nhưng chậm. Thường dùng cho web, không phải DE pipeline.')">D. brotli — mạnh nhất, dùng cho production</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi dùng <code>glob.glob("data/sales_*.csv")</code>, list trả về có thứ tự không?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'glob không đảm bảo thứ tự theo tên file. Kết quả phụ thuộc filesystem và OS.')">A. Có, luôn theo thứ tự alphabet</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'glob không sort theo ngày tạo file.')">B. Có, theo ngày tạo file từ cũ đến mới</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. glob không đảm bảo thứ tự. Nếu cần xử lý file theo thứ tự (ví dụ: ngày tăng dần), phải sort() sau khi glob: sorted(glob.glob(pattern)). Quan trọng khi pipeline phụ thuộc vào thứ tự ngày.')">C. Không, phải sort() thủ công sau khi glob</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'glob không random hóa, nhưng thứ tự không được đảm bảo.')">D. Random mỗi lần chạy — phải seed random state</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Phương thức nào dùng để tổng hợp với nhiều aggregation function khác nhau trong 1 lần groupby?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'groupby().sum() chỉ tính tổng, không kết hợp được nhiều hàm tổng hợp.')">A. <code>groupby().sum()</code></div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'groupby().apply() có thể dùng nhưng chậm hơn và phức tạp hơn agg(). Không phải cách ưu tiên.')">B. <code>groupby().apply()</code></div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. groupby().agg() nhận dict hoặc named aggregations để kết hợp nhiều hàm: count, sum, mean, nunique, min, max... trong 1 lần group. Hiệu quả và readable nhất.')">C. <code>groupby().agg()</code> với named aggregations</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'groupby().transform() trả về DataFrame cùng shape, không phải aggregated result. Dùng để tính feature mà không collapse rows.')">D. <code>groupby().transform()</code></div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>📂 Đọc file an toàn</strong>Luôn log row count và null report ngay sau read. Đừng assume dữ liệu sạch.</div>
+        <div class="summary-item"><strong>🧹 Null strategy</strong>dropna(subset=[key_cols]) cho key columns. fillna() cho optional columns. Ghi rõ lý do trong code.</div>
+        <div class="summary-item"><strong>🔗 Merge cẩn thận</strong>Check row count trước và sau merge. Left join để không mất fact rows. Cảnh báo khi có unmatched.</div>
+        <div class="summary-item"><strong>📊 groupby().agg()</strong>Named aggregations để tổng hợp nhiều chiều. reset_index() để flatten result về dạng table.</div>
+        <div class="summary-item"><strong>📁 Parquet + snappy</strong>Format chuẩn cho lưu trữ trung gian. Verify bằng cách đọc lại sau khi ghi.</div>
+        <div class="summary-item"><strong>🗂️ glob + sort</strong>Đọc nhiều file bằng glob, luôn sorted() để đảm bảo thứ tự xác định.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Bài 1: Đọc và làm sạch CSV orders</div>
+        <div class="practice-task-body">
+          <p>Viết function <code>clean_orders(filepath)</code> nhận đường dẫn CSV, đọc file, log null report, drop rows thiếu order_id hoặc amount, fill discount_amount=0 nếu null, trả về DataFrame sạch.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution · clean_orders.py</span></div>
+              <div class="cmd-body"><pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> logging
+
+logger = logging.<span class="fn">getLogger</span>(__name__)
+
+<span class="kw">def</span> <span class="fn">clean_orders</span>(filepath: str) -> pd.DataFrame:
+    df = pd.<span class="fn">read_csv</span>(filepath)
+    logger.<span class="fn">info</span>(<span class="str">f"Đọc {len(df)} rows từ {filepath}"</span>)
+
+    <span class="comment"># Null report</span>
+    nulls = df.<span class="fn">isna</span>().<span class="fn">sum</span>()
+    <span class="kw">for</span> col, cnt <span class="kw">in</span> nulls[nulls > <span class="fn">0</span>].<span class="fn">items</span>():
+        logger.<span class="fn">warning</span>(<span class="str">f"  {col}: {cnt} nulls"</span>)
+
+    before = <span class="fn">len</span>(df)
+    df = df.<span class="fn">dropna</span>(subset=[<span class="str">"order_id"</span>, <span class="str">"amount"</span>])
+    logger.<span class="fn">info</span>(<span class="str">f"Dropped {before - len(df)} rows"</span>)
+
+    df[<span class="str">"discount_amount"</span>] = df[<span class="str">"discount_amount"</span>].<span class="fn">fillna</span>(<span class="fn">0.0</span>)
+    <span class="kw">return</span> df</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Bài 2: Tạo daily revenue summary</div>
+        <div class="practice-task-body">
+          <p>Từ DataFrame orders có cột <code>created_at</code> (datetime), <code>amount</code>, <code>channel</code>, <code>order_id</code>: tạo summary theo ngày và channel với total_orders, total_revenue, avg_order_value. Ghi kết quả ra Parquet.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution · daily_summary.py</span></div>
+              <div class="cmd-body"><pre>df[<span class="str">"date"</span>] = pd.<span class="fn">to_datetime</span>(df[<span class="str">"created_at"</span>]).<span class="fn">dt.date</span>
+
+summary = df.<span class="fn">groupby</span>([<span class="str">"date"</span>, <span class="str">"channel"</span>]).<span class="fn">agg</span>(
+    total_orders=(<span class="str">"order_id"</span>, <span class="str">"count"</span>),
+    total_revenue=(<span class="str">"amount"</span>, <span class="str">"sum"</span>),
+    avg_order_value=(<span class="str">"amount"</span>, <span class="str">"mean"</span>)
+).<span class="fn">reset_index</span>()
+
+summary.<span class="fn">to_parquet</span>(<span class="str">"output/daily_summary.parquet"</span>,
+                    compression=<span class="str">"snappy"</span>, index=<span class="kw">False</span>)
+
+<span class="comment"># Verify</span>
+verify = pd.<span class="fn">read_parquet</span>(<span class="str">"output/daily_summary.parquet"</span>)
+<span class="kw">assert</span> <span class="fn">len</span>(verify) == <span class="fn">len</span>(summary), <span class="str">"Row count mismatch!"</span>
+logger.<span class="fn">info</span>(<span class="str">f"Ghi thành công: {len(summary)} rows"</span>)</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(0,document.querySelectorAll('.nav-item')[0])">← W2.01 Tổng Quan</button>
+    <button class="nav-btn primary" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">W2.03 SQLAlchemy →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 2: SQLALCHEMY ═══════════════ -->
+<div class="module" id="m2">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · Module W2.03</div>
+    <div class="module-title">🗄️ SQLAlchemy & Kết Nối Database</div>
+    <div class="module-subtitle">Engine · Connection pool · Bulk insert · Incremental load · SQL injection safe</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:37%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Kỹ năng</th><th>SQLAlchemy API</th><th>Ghi chú</th></tr>
+        <tr><td>Tạo engine</td><td><code>create_engine()</code></td><td>1 engine dùng lại, có connection pool</td></tr>
+        <tr><td>Execute query</td><td><code>conn.execute(text())</code></td><td>Dùng text() để tránh SQL injection</td></tr>
+        <tr><td>Đọc vào pandas</td><td><code>pd.read_sql_query()</code></td><td>Trả về DataFrame trực tiếp</td></tr>
+        <tr><td>Ghi DataFrame</td><td><code>df.to_sql()</code></td><td>append/replace/fail</td></tr>
+        <tr><td>Context manager</td><td><code>with engine.connect() as conn</code></td><td>Tự đóng connection khi xong</td></tr>
+        <tr><td>Parameterized query</td><td><code>text("... WHERE id = :id")</code></td><td>Bắt buộc để tránh injection</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>Tạo <code>engine</code> dùng lại được, có connection pool — không tạo mới mỗi query</li>
+        <li>Đọc kết quả SQL trực tiếp thành DataFrame bằng <code>pd.read_sql_query()</code></li>
+        <li>Ghi DataFrame vào PostgreSQL với strategy phù hợp (append vs replace)</li>
+        <li>Viết parameterized query để chống SQL injection</li>
+        <li>Implement incremental load: chỉ insert rows chưa có trong DB</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>⚙️ Tạo Engine đúng cách</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div></div><span>load.py · setup engine</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> os
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine, text
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> logging
+
+<span class="fn">load_dotenv</span>()  <span class="comment"># đọc từ .env file</span>
+
+logger = logging.<span class="fn">getLogger</span>(__name__)
+
+<span class="kw">def</span> <span class="fn">get_engine</span>():
+    <span class="str">"""Tạo SQLAlchemy engine từ biến môi trường."""</span>
+    db_url = (
+        <span class="str">f"postgresql+psycopg2://"</span>
+        <span class="str">f"{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"</span>
+        <span class="str">f"@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '5432')}"</span>
+        <span class="str">f"/{os.getenv('DB_NAME')}"</span>
+    )
+    <span class="comment"># pool_size: số connection giữ sẵn</span>
+    <span class="comment"># pool_pre_ping: test connection còn sống không trước khi dùng</span>
+    engine = <span class="fn">create_engine</span>(
+        db_url,
+        pool_size=<span class="fn">5</span>,
+        max_overflow=<span class="fn">10</span>,
+        pool_pre_ping=<span class="kw">True</span>
+    )
+    logger.<span class="fn">info</span>(<span class="str">"Engine created với connection pool"</span>)
+    <span class="kw">return</span> engine
+
+<span class="comment"># Dùng 1 engine cho toàn bộ app, không tạo mới mỗi lần</span>
+engine = <span class="fn">get_engine</span>()</pre></div>
+      </div>
+
+      <h3>📥 Đọc từ DB thành DataFrame</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>extract.py · read from DB</span></div>
+        <div class="cmd-body"><pre><span class="kw">def</span> <span class="fn">read_orders_from_db</span>(engine, start_date: str, end_date: str) -> pd.DataFrame:
+    <span class="str">"""Đọc orders trong khoảng thời gian. Parameterized để tránh injection."""</span>
+    query = text(<span class="str">"""
+        SELECT order_id, user_id, amount, channel, created_at
+        FROM orders
+        WHERE created_at >= :start_date
+          AND created_at < :end_date
+        ORDER BY created_at
+    """</span>)
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        df = pd.<span class="fn">read_sql_query</span>(
+            query,
+            conn,
+            params={<span class="str">"start_date"</span>: start_date, <span class="str">"end_date"</span>: end_date}
+        )
+    logger.<span class="fn">info</span>(<span class="str">f"Đọc {len(df)} orders từ {start_date} đến {end_date}"</span>)
+    <span class="kw">return</span> df</pre></div>
+      </div>
+
+      <div class="info-box warn">⚠️ <span><strong>KHÔNG BAO GIỜ</strong> dùng f-string để build SQL: <code>f"WHERE id = {user_input}"</code>. Đây là SQL injection vulnerability. Luôn dùng <code>text()</code> với parameterized values <code>:param_name</code>.</span></div>
+
+      <h3>📤 Ghi DataFrame vào DB — 3 strategy</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>load.py · to_sql strategies</span></div>
+        <div class="cmd-body"><pre><span class="kw">def</span> <span class="fn">load_to_db</span>(df: pd.DataFrame, engine, table_name: str, if_exists: str = <span class="str">"append"</span>):
+    <span class="str">"""
+    if_exists options:
+    - "append": thêm vào cuối — dùng cho incremental load
+    - "replace": xóa bảng cũ và tạo lại — dùng cho full refresh
+    - "fail": báo lỗi nếu bảng đã tồn tại — dùng để bảo vệ data
+    """</span>
+    df.<span class="fn">to_sql</span>(
+        table_name,
+        engine,
+        if_exists=if_exists,
+        index=<span class="kw">False</span>,
+        chunksize=<span class="fn">1000</span>,   <span class="comment"># batch insert để không timeout</span>
+        method=<span class="str">"multi"</span>    <span class="comment"># INSERT nhiều rows 1 lần, nhanh hơn</span>
+    )
+    logger.<span class="fn">info</span>(<span class="str">f"Ghi {len(df)} rows vào {table_name} (mode={if_exists})"</span>)</pre></div>
+      </div>
+
+      <h3>🔄 Incremental Load — chỉ insert rows mới</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>load.py · incremental insert</span></div>
+        <div class="cmd-body"><pre><span class="kw">def</span> <span class="fn">incremental_load</span>(df: pd.DataFrame, engine, table_name: str, key_col: str):
+    <span class="str">"""Chỉ insert rows có key_col chưa tồn tại trong DB."""</span>
+    <span class="comment"># Lấy danh sách keys đã có trong DB</span>
+    existing_query = text(<span class="str">f"SELECT {key_col} FROM {table_name}"</span>)
+    <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+        existing_keys = pd.<span class="fn">read_sql_query</span>(existing_query, conn)[key_col].<span class="fn">tolist</span>()
+
+    <span class="comment"># Lọc chỉ rows chưa có</span>
+    new_rows = df[~df[key_col].<span class="fn">isin</span>(existing_keys)]
+
+    logger.<span class="fn">info</span>(<span class="str">f"Tổng: {len(df)} rows · Đã có: {len(existing_keys)} · Mới: {len(new_rows)}"</span>)
+
+    <span class="kw">if</span> <span class="fn">len</span>(new_rows) > <span class="fn">0</span>:
+        new_rows.<span class="fn">to_sql</span>(table_name, engine, if_exists=<span class="str">"append"</span>, index=<span class="kw">False</span>)
+        logger.<span class="fn">info</span>(<span class="str">f"Inserted {len(new_rows)} rows mới"</span>)
+    <span class="kw">else</span>:
+        logger.<span class="fn">info</span>(<span class="str">"Không có rows mới để insert"</span>)
+
+    <span class="kw">return</span> <span class="fn">len</span>(new_rows)</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao nên tạo 1 engine và dùng lại thay vì tạo mới mỗi lần query?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SQLAlchemy không có rate limit liên quan đến số engine. Đây không phải lý do.')">A. SQLAlchemy giới hạn số engine tối đa 1 per process</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Engine quản lý connection pool — pool giữ các connection sẵn sàng để tái sử dụng. Nếu tạo engine mới mỗi lần, bạn không tận dụng được pool, mỗi query phải overhead TCP handshake và auth với PostgreSQL.')">B. Engine giữ connection pool — tái sử dụng connection tránh overhead mỗi query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL không limit số connection từ code, limit từ cấu hình server. Đây không phải lý do chính.')">C. PostgreSQL giới hạn 1 connection per Python process</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'psycopg2 không yêu cầu 1 engine. Đây là thông tin sai.')">D. psycopg2 driver yêu cầu singleton engine để hoạt động đúng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi dùng <code>df.to_sql(if_exists="replace")</code>, điều gì xảy ra với dữ liệu cũ trong bảng?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'append thêm vào cuối. replace hoàn toàn xóa và tạo lại.')">A. Dữ liệu cũ được giữ, chỉ thêm dữ liệu mới vào cuối</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. replace thực hiện DROP TABLE rồi CREATE TABLE mới. Toàn bộ dữ liệu cũ bị xóa. Dùng cho full refresh — khi source of truth là file/DataFrame hiện tại, không phải data trong DB.')">B. Bảng cũ bị DROP và tạo lại — mất toàn bộ data cũ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'replace không MERGE — nó DROP và CREATE, không update từng row.')">C. Dữ liệu cũ được MERGE với dữ liệu mới theo primary key</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'if_exists="fail" mới báo lỗi khi bảng tồn tại, không phải replace.')">D. Pandas báo lỗi vì bảng đã tồn tại</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Lý do chính để dùng <code>text()</code> và parameterized query thay vì f-string trong SQL là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'text() không làm query nhanh hơn. Performance không phải lý do chính.')">A. text() làm query chạy nhanh hơn vì PostgreSQL cache execution plan</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SQL injection là lỗ hổng bảo mật nguy hiểm nhất trong database. Nếu user input được đưa trực tiếp vào query qua f-string, attacker có thể inject SQL tùy ý: xóa bảng, đọc mật khẩu, bypass authentication.')">B. Tránh SQL injection — không cho phép user input ảnh hưởng đến cấu trúc query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'text() hoạt động với mọi database, không phải yêu cầu của PostgreSQL riêng.')">C. PostgreSQL chỉ chấp nhận query qua text() wrapper</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'f-string cho SQL không có giới hạn ký tự đặc biệt. Đây là thông tin sai.')">D. f-string không hỗ trợ ký tự đặc biệt như dấu nháy đơn trong string</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tham số <code>chunksize=1000</code> trong <code>to_sql()</code> làm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'chunksize không giới hạn số columns. Đây là thông tin sai.')">A. Giới hạn số columns tối đa trong mỗi INSERT statement</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Thay vì INSERT 1 row/lần (chậm) hoặc INSERT tất cả cùng lúc (có thể timeout/OOM với dữ liệu lớn), chunksize chia thành batch INSERT 1000 rows/lần — balance giữa speed và memory.')">B. Chia DataFrame thành batch, mỗi batch INSERT 1000 rows vào DB</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'chunksize không ảnh hưởng đến cách pandas đọc data từ DataFrame.')">C. Số rows pandas đọc từ DataFrame mỗi lần trước khi ghi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'chunksize trong to_sql không liên quan đến connection pool size.')">D. Kích thước connection pool SQLAlchemy tạo khi ghi</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong pattern incremental load, tại sao phải kiểm tra existing keys trong DB trước khi insert?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL không tự deduplicate theo business key — chỉ theo PRIMARY KEY constraint nếu có.')">A. PostgreSQL tự động deduplicate, nên cần biết để tắt tính năng đó</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu pipeline chạy lại (do fail và retry, hoặc backfill), sẽ có cùng data được insert nhiều lần tạo duplicate. Kiểm tra existing keys trước đảm bảo idempotency: chỉ insert rows thực sự mới.')">B. Tránh duplicate khi pipeline chạy lại — đảm bảo idempotency</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'to_sql không raise Exception khi có duplicate (trừ khi có unique constraint ở DB).')">C. to_sql raise Exception khi insert duplicate, nên phải filter trước</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'existing keys query không dùng để optimize performance của to_sql.')">D. SQLAlchemy yêu cầu biết số rows để allocate connection pool phù hợp</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao cần dùng <code>with engine.connect() as conn</code> thay vì <code>conn = engine.connect()</code>?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Context manager không tăng tốc độ query. Performance không phải lý do.')">A. Context manager tự động cache kết quả query cho lần sau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. with statement (context manager) đảm bảo connection được trả về pool khi xong hoặc khi có exception. Nếu không dùng with, phải gọi conn.close() thủ công — nếu quên hoặc có exception trước đó, connection leak xảy ra và pool cạn kiệt.')">B. Đảm bảo connection tự động trả về pool dù có exception — tránh connection leak</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Python không yêu cầu context manager cho SQLAlchemy. Đây là best practice, không phải requirement.')">C. SQLAlchemy yêu cầu bắt buộc dùng context manager để hoạt động</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Context manager không commit transaction tự động trong SQLAlchemy 2.0.')">D. Context manager tự động commit transaction sau khi execute</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>⚙️ 1 Engine, dùng lại</strong>Tạo engine 1 lần với connection pool. Không tạo mới mỗi query — tránh overhead TCP handshake.</div>
+        <div class="summary-item"><strong>🔐 Parameterized query</strong>Luôn dùng text() với :param_name. Không bao giờ f-string SQL. SQL injection = bảo mật nghiêm trọng.</div>
+        <div class="summary-item"><strong>📥 read_sql_query()</strong>Đọc kết quả query trực tiếp thành DataFrame. Truyền engine hoặc connection qua context manager.</div>
+        <div class="summary-item"><strong>📤 to_sql() strategies</strong>append cho incremental, replace cho full refresh, fail để bảo vệ. chunksize=1000 để batch insert.</div>
+        <div class="summary-item"><strong>🔄 Incremental Load</strong>Lấy existing keys → filter rows mới → insert only. Đảm bảo idempotency khi retry.</div>
+        <div class="summary-item"><strong>🏊 Context Manager</strong>with engine.connect() as conn: tự trả connection về pool. Tránh connection leak khi có exception.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Bài 1: Viết incremental_insert() hoàn chỉnh</div>
+        <div class="practice-task-body">
+          <p>Viết function nhận DataFrame, engine, table_name, và date_col (tên cột ngày). Function query DB để lấy max date hiện có, sau đó chỉ insert rows có date > max_date.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution · incremental_by_date.py</span></div>
+              <div class="cmd-body"><pre><span class="kw">def</span> <span class="fn">incremental_insert_by_date</span>(
+    df: pd.DataFrame, engine, table_name: str, date_col: str
+) -> <span class="fn">int</span>:
+    <span class="comment"># Lấy max date trong DB</span>
+    <span class="kw">try</span>:
+        q = text(<span class="str">f"SELECT MAX({date_col}) FROM {table_name}"</span>)
+        <span class="kw">with</span> engine.<span class="fn">connect</span>() <span class="kw">as</span> conn:
+            result = conn.<span class="fn">execute</span>(q)
+            max_date = result.<span class="fn">scalar</span>()
+    <span class="kw">except</span> Exception:
+        max_date = <span class="kw">None</span>  <span class="comment"># bảng chưa tồn tại</span>
+
+    <span class="kw">if</span> max_date:
+        new_rows = df[df[date_col] > pd.<span class="fn">Timestamp</span>(max_date)]
+    <span class="kw">else</span>:
+        new_rows = df  <span class="comment"># first load</span>
+
+    logger.<span class="fn">info</span>(<span class="str">f"Max date in DB: {max_date} | New rows: {len(new_rows)}"</span>)
+
+    <span class="kw">if</span> <span class="fn">len</span>(new_rows) > <span class="fn">0</span>:
+        new_rows.<span class="fn">to_sql</span>(table_name, engine,
+                         if_exists=<span class="str">"append"</span>, index=<span class="kw">False</span>, chunksize=<span class="fn">1000</span>)
+    <span class="kw">return</span> <span class="fn">len</span>(new_rows)</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">← W2.02 pandas</button>
+    <button class="nav-btn primary" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">W2.04 REST API →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 3: REST API ═══════════════ -->
+<div class="module" id="m3">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · Module W2.04</div>
+    <div class="module-title">🌐 Gọi REST API & Xử Lý Response</div>
+    <div class="module-subtitle">requests · Pagination · Rate limit · Exponential backoff · Auth headers</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Kỹ năng</th><th>Pattern</th><th>Vấn đề giải quyết</th></tr>
+        <tr><td>GET request</td><td><code>requests.get(url, headers=, params=)</code></td><td>Gọi API lấy data</td></tr>
+        <tr><td>Auth</td><td>Bearer token / API key trong header</td><td>Xác thực với API</td></tr>
+        <tr><td>Pagination (offset)</td><td>Loop với page/offset, dừng khi empty</td><td>Lấy hết dữ liệu nhiều trang</td></tr>
+        <tr><td>Pagination (cursor)</td><td>Follow next_cursor token</td><td>API kiểu Slack, Stripe</td></tr>
+        <tr><td>Rate limit</td><td>Check 429, sleep với exponential backoff</td><td>Không bị API block</td></tr>
+        <tr><td>Error handling</td><td><code>response.raise_for_status()</code></td><td>Catch HTTP errors sớm</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>Gọi REST API với authentication header đúng cách (Bearer token, API key)</li>
+        <li>Implement pagination để lấy hết dữ liệu từ API nhiều trang</li>
+        <li>Xử lý rate limit (HTTP 429) bằng exponential backoff không bị block</li>
+        <li>Parse JSON response và normalize thành DataFrame</li>
+        <li>Wrap trong retry decorator để tự động retry khi gặp lỗi tạm thời</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>🔑 Authentication header</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>extract.py · auth setup</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> requests
+<span class="kw">import</span> os
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+
+<span class="fn">load_dotenv</span>()
+
+<span class="kw">class</span> <span class="fn">APIClient</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.base_url = os.<span class="fn">getenv</span>(<span class="str">"API_BASE_URL"</span>)
+        self.session = requests.<span class="fn">Session</span>()
+        <span class="comment"># Session giữ headers cho mọi request</span>
+        self.session.headers.<span class="fn">update</span>({
+            <span class="str">"Authorization"</span>: <span class="str">f"Bearer {os.getenv('API_TOKEN')}"</span>,
+            <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span>,
+            <span class="str">"Accept"</span>: <span class="str">"application/json"</span>
+        })
+
+    <span class="kw">def</span> <span class="fn">get</span>(self, endpoint: str, params: dict = <span class="kw">None</span>):
+        url = <span class="str">f"{self.base_url}/{endpoint}"</span>
+        response = self.session.<span class="fn">get</span>(url, params=params, timeout=<span class="fn">30</span>)
+        response.<span class="fn">raise_for_status</span>()  <span class="comment"># raise nếu 4xx/5xx</span>
+        <span class="kw">return</span> response.<span class="fn">json</span>()</pre></div>
+      </div>
+
+      <h3>📄 Pagination — lấy hết data</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>extract.py · offset pagination</span></div>
+        <div class="cmd-body"><pre><span class="kw">def</span> <span class="fn">fetch_all_orders</span>(client: APIClient, date: str) -> list:
+    <span class="str">"""Fetch all orders cho 1 ngày, dùng offset pagination."""</span>
+    all_records = []
+    page = <span class="fn">1</span>
+    page_size = <span class="fn">100</span>
+
+    <span class="kw">while</span> <span class="kw">True</span>:
+        params = {<span class="str">"date"</span>: date, <span class="str">"page"</span>: page, <span class="str">"per_page"</span>: page_size}
+        data = client.<span class="fn">get</span>(<span class="str">"orders"</span>, params=params)
+
+        records = data.<span class="fn">get</span>(<span class="str">"items"</span>, [])
+        <span class="kw">if not</span> records:
+            <span class="kw">break</span>  <span class="comment"># hết dữ liệu</span>
+
+        all_records.<span class="fn">extend</span>(records)
+        logger.<span class="fn">info</span>(<span class="str">f"Page {page}: {len(records)} records (tổng: {len(all_records)})"</span>)
+
+        <span class="kw">if</span> <span class="fn">len</span>(records) < page_size:
+            <span class="kw">break</span>  <span class="comment"># trang cuối (ít hơn page_size)</span>
+        page += <span class="fn">1</span>
+
+    <span class="kw">return</span> all_records
+
+<span class="comment"># Cursor-based pagination (Stripe, Slack style)</span>
+<span class="kw">def</span> <span class="fn">fetch_with_cursor</span>(client: APIClient) -> list:
+    all_records = []
+    cursor = <span class="kw">None</span>
+
+    <span class="kw">while</span> <span class="kw">True</span>:
+        params = {<span class="str">"limit"</span>: <span class="fn">100</span>}
+        <span class="kw">if</span> cursor:
+            params[<span class="str">"starting_after"</span>] = cursor
+
+        data = client.<span class="fn">get</span>(<span class="str">"events"</span>, params=params)
+        records = data[<span class="str">"data"</span>]
+        all_records.<span class="fn">extend</span>(records)
+
+        <span class="kw">if not</span> data.<span class="fn">get</span>(<span class="str">"has_more"</span>):
+            <span class="kw">break</span>
+        cursor = records[-<span class="fn">1</span>][<span class="str">"id"</span>]  <span class="comment"># id của record cuối làm cursor</span>
+
+    <span class="kw">return</span> all_records</pre></div>
+      </div>
+
+      <h3>⏱️ Rate Limit — Exponential Backoff</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>extract.py · rate limit handler</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> time
+<span class="kw">import</span> random
+
+<span class="kw">def</span> <span class="fn">request_with_retry</span>(session, url: str, params: dict = <span class="kw">None</span>,
+                        max_retries: <span class="fn">int</span> = <span class="fn">5</span>) -> dict:
+    <span class="str">"""Gọi API với exponential backoff khi gặp 429 hoặc 5xx."""</span>
+    <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(max_retries):
+        <span class="kw">try</span>:
+            response = session.<span class="fn">get</span>(url, params=params, timeout=<span class="fn">30</span>)
+
+            <span class="kw">if</span> response.status_code == <span class="fn">429</span>:
+                <span class="comment"># Rate limit hit — đọc Retry-After header nếu có</span>
+                retry_after = <span class="fn">int</span>(response.headers.<span class="fn">get</span>(<span class="str">"Retry-After"</span>, <span class="fn">60</span>))
+                logger.<span class="fn">warning</span>(<span class="str">f"Rate limited. Chờ {retry_after}s..."</span>)
+                time.<span class="fn">sleep</span>(retry_after)
+                <span class="kw">continue</span>
+
+            response.<span class="fn">raise_for_status</span>()
+            <span class="kw">return</span> response.<span class="fn">json</span>()
+
+        <span class="kw">except</span> requests.exceptions.<span class="fn">RequestException</span> <span class="kw">as</span> e:
+            <span class="kw">if</span> attempt == max_retries - <span class="fn">1</span>:
+                <span class="kw">raise</span>
+            <span class="comment"># Exponential backoff: 1s, 2s, 4s, 8s, 16s + jitter</span>
+            wait = (<span class="fn">2</span> ** attempt) + random.<span class="fn">uniform</span>(<span class="fn">0</span>, <span class="fn">1</span>)
+            logger.<span class="fn">warning</span>(<span class="str">f"Attempt {attempt+1} failed: {e}. Retry sau {wait:.1f}s"</span>)
+            time.<span class="fn">sleep</span>(wait)</pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span><strong>Jitter (random delay):</strong> Thêm random.uniform(0,1) vào wait time để tránh "thundering herd" — khi nhiều client cùng retry đúng một lúc sau đó làm server càng quá tải hơn.</span></div>
+
+      <h3>📊 Parse JSON thành DataFrame</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>transform.py · json normalize</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="comment"># JSON phẳng</span>
+records = [{<span class="str">"id"</span>: <span class="fn">1</span>, <span class="str">"name"</span>: <span class="str">"Alice"</span>, <span class="str">"amount"</span>: <span class="fn">100</span>}, ...]
+df = pd.<span class="fn">DataFrame</span>(records)
+
+<span class="comment"># JSON lồng nhau (nested)</span>
+nested = [{
+    <span class="str">"id"</span>: <span class="fn">1</span>,
+    <span class="str">"user"</span>: {<span class="str">"id"</span>: <span class="fn">42</span>, <span class="str">"email"</span>: <span class="str">"alice@example.com"</span>},
+    <span class="str">"amount"</span>: <span class="fn">100</span>
+}]
+<span class="comment"># json_normalize flatten nested dict với separator</span>
+df = pd.<span class="fn">json_normalize</span>(nested, sep=<span class="str">"_"</span>)
+<span class="output"># Kết quả: columns = [id, user_id, user_email, amount]</span>
+
+<span class="comment"># JSON có array trong field</span>
+orders = [{<span class="str">"order_id"</span>: <span class="fn">1</span>, <span class="str">"items"</span>: [{<span class="str">"sku"</span>: <span class="str">"A"</span>}, {<span class="str">"sku"</span>: <span class="str">"B"</span>}]}]
+df = pd.<span class="fn">json_normalize</span>(
+    orders,
+    record_path=<span class="str">"items"</span>,     <span class="comment"># explode array field</span>
+    meta=[<span class="str">"order_id"</span>]        <span class="comment"># giữ parent field</span>
+)</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">HTTP status code 429 có nghĩa là gì trong context gọi API?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'404 là Not Found. 429 là rate limit exceeded.')">A. API endpoint không tồn tại (Not Found)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'500 là Internal Server Error. 429 là do client gọi quá nhiều.')">B. Server lỗi nội bộ, cần thử lại sau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. 429 Too Many Requests nghĩa là client gọi quá nhiều request trong thời gian ngắn, vượt quá rate limit của API. Cần chờ theo Retry-After header hoặc backoff trước khi gọi lại.')">C. Client gọi quá nhiều request — rate limit exceeded</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'401 là Unauthorized (auth failed). 403 là Forbidden. 429 là rate limit.')">D. Token xác thực không hợp lệ (Unauthorized)</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Sự khác biệt giữa offset pagination và cursor-based pagination là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cursor-based không chậm hơn. Thực ra nhanh hơn và ổn định hơn cho dữ liệu lớn.')">A. Offset pagination nhanh hơn vì không cần lưu cursor state</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Offset dùng page number (page=1, 2, 3...) — dễ implement nhưng có vấn đề khi data thay đổi giữa các page (skip/duplicate). Cursor dùng ID của item cuối làm bookmark — đảm bảo không miss và không duplicate dù data thay đổi.')">B. Offset dùng page number, cursor dùng ID của item cuối — cursor ổn định hơn khi data thay đổi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả 2 đều có thể làm pagination, không phải thay thế nhau hoàn toàn.')">C. Cursor chỉ dùng được với databases, không dùng được với REST API</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cursor không cần authentication đặc biệt hơn offset.')">D. Cursor-based yêu cầu token xác thực đặc biệt từ API provider</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao thêm random jitter vào exponential backoff?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Jitter không giúp tuân thủ GDPR. Đây là thông tin không liên quan.')">A. Để tuân thủ GDPR — random delay ẩn danh hóa request timing</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Thundering herd problem: nếu 100 clients cùng nhận 429 và cùng retry sau đúng 2 giây, server lại bị overload đúng vào lúc đó. Jitter làm các client retry ở thời điểm khác nhau, phân tán tải đều hơn.')">B. Tránh thundering herd — nhiều client không retry đúng cùng lúc làm server càng quá tải</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Jitter không liên quan đến encryption. Đây là thông tin sai.')">C. Để encrypt request timing, tránh bị tracking bởi API provider</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'requests.Session không cần jitter để giữ session alive.')">D. requests.Session yêu cầu random delay để maintain session</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào nên dùng <code>requests.Session()</code> thay vì <code>requests.get()</code> trực tiếp?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Session không bắt buộc cho HTTPS. Đây là thông tin sai.')">A. Chỉ khi gọi HTTPS — HTTP không cần Session</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Session tái sử dụng TCP connection (keep-alive), giữ headers/auth chung cho mọi request, giữ cookies. Khi gọi cùng 1 API nhiều lần (pagination, polling), Session tiết kiệm overhead đáng kể.')">B. Khi gọi cùng 1 API nhiều lần — Session tái sử dụng connection và giữ headers chung</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Session và requests.get() đều hỗ trợ POST. Session không giới hạn phương thức.')">C. Chỉ khi dùng GET — POST không dùng được với Session</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Session không liên quan đến rate limit. Server vẫn đếm request bất kể Session hay không.')">D. Khi cần bypass rate limit — Session có whitelist đặc biệt</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><code>response.raise_for_status()</code> làm gì khi server trả về HTTP 500?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'raise_for_status() không tự retry. Nó chỉ raise exception.')">A. Tự động retry request 3 lần trước khi báo lỗi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'raise_for_status() không log ra console. Nó raise exception.')">B. In thông báo lỗi ra console và tiếp tục chạy</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. raise_for_status() raise requests.exceptions.HTTPError với thông tin status code và URL nếu response là 4xx hoặc 5xx. Không làm gì nếu 2xx. Giúp fail fast thay vì tiếp tục xử lý response lỗi.')">C. Raise HTTPError exception để code có thể catch và xử lý</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'raise_for_status() không gửi email. Đây là thông tin sai.')">D. Gửi email alert đến admin và dừng pipeline</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Hàm <code>pd.json_normalize()</code> giải quyết vấn đề gì so với <code>pd.DataFrame(records)</code>?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'pd.DataFrame cũng xử lý được list of dicts. Đây không phải điểm khác biệt chính.')">A. json_normalize xử lý list of dicts còn pd.DataFrame thì không</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. pd.DataFrame để nested dict như một object trong 1 cell. json_normalize tự động flatten nested dict thành các cột riêng biệt với separator: {"user": {"id": 1}} → column user_id = 1.')">B. json_normalize tự động flatten nested dict thành các cột riêng biệt</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả 2 đều có thể xử lý JSON có unicode. Đây không phải điểm khác biệt.')">C. json_normalize xử lý được unicode trong JSON còn pd.DataFrame thì không</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'json_normalize không nhanh hơn pd.DataFrame. Thực ra chậm hơn một chút vì phải flatten.')">D. json_normalize nhanh hơn 10x khi data lớn hơn 1MB</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>🔑 Session + headers</strong>requests.Session() giữ auth header và tái sử dụng connection. Không hardcode token — đọc từ .env.</div>
+        <div class="summary-item"><strong>📄 Pagination</strong>Offset: loop theo page, dừng khi empty. Cursor: follow next_cursor/has_more. Luôn log số records mỗi page.</div>
+        <div class="summary-item"><strong>⏱️ Rate limit 429</strong>Đọc Retry-After header. Backoff: 2^attempt + random jitter. Max retries để không loop vô hạn.</div>
+        <div class="summary-item"><strong>✅ raise_for_status()</strong>Gọi sau mỗi request để fail fast khi 4xx/5xx thay vì tiếp tục xử lý response lỗi.</div>
+        <div class="summary-item"><strong>📊 json_normalize</strong>Flatten nested JSON thành DataFrame. record_path để explode array field. meta để giữ parent fields.</div>
+        <div class="summary-item"><strong>🛡️ Thundering herd</strong>Jitter phân tán retry của nhiều clients, tránh overload server đúng lúc backoff period kết thúc.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Bài 1: Fetch all pages từ JSONPlaceholder API</div>
+        <div class="practice-task-body">
+          <p>Gọi API công khai <code>https://jsonplaceholder.typicode.com/posts</code> — API này trả về 100 posts trong 1 lần. Viết function <code>fetch_posts()</code> gọi API, parse response, trả về DataFrame. Thêm retry nếu gặp exception.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution · fetch_posts.py</span></div>
+              <div class="cmd-body"><pre><span class="kw">import</span> requests
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> time, logging
+
+logger = logging.<span class="fn">getLogger</span>(__name__)
+
+<span class="kw">def</span> <span class="fn">fetch_posts</span>(max_retries: <span class="fn">int</span> = <span class="fn">3</span>) -> pd.DataFrame:
+    url = <span class="str">"https://jsonplaceholder.typicode.com/posts"</span>
+    session = requests.<span class="fn">Session</span>()
+    session.headers.<span class="fn">update</span>({<span class="str">"Accept"</span>: <span class="str">"application/json"</span>})
+
+    <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(max_retries):
+        <span class="kw">try</span>:
+            response = session.<span class="fn">get</span>(url, timeout=<span class="fn">10</span>)
+            response.<span class="fn">raise_for_status</span>()
+            data = response.<span class="fn">json</span>()
+            df = pd.<span class="fn">DataFrame</span>(data)
+            logger.<span class="fn">info</span>(<span class="str">f"Fetched {len(df)} posts"</span>)
+            <span class="kw">return</span> df
+        <span class="kw">except</span> Exception <span class="kw">as</span> e:
+            wait = <span class="fn">2</span> ** attempt
+            logger.<span class="fn">warning</span>(<span class="str">f"Attempt {attempt+1}: {e}. Retry sau {wait}s"</span>)
+            time.<span class="fn">sleep</span>(wait)
+    <span class="kw">raise</span> <span class="fn">RuntimeError</span>(<span class="str">"Failed sau tất cả retries"</span>)</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">← W2.03 SQLAlchemy</button>
+    <button class="nav-btn primary" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">W2.05 Error Handling →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 4: ERROR HANDLING & LOGGING ═══════════════ -->
+<div class="module" id="m4">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · Module W2.05</div>
+    <div class="module-title">🛡️ Error Handling & Logging</div>
+    <div class="module-subtitle">try/except · Custom exceptions · Structured logging · Log levels · Retry decorator</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:62%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Kỹ năng</th><th>Python construct</th><th>Vai trò</th></tr>
+        <tr><td>Basic handling</td><td><code>try/except/finally</code></td><td>Catch và xử lý exception, cleanup</td></tr>
+        <tr><td>Custom exception</td><td><code>class MyError(Exception)</code></td><td>Phân loại lỗi domain-specific</td></tr>
+        <tr><td>Logging setup</td><td><code>logging.basicConfig()</code></td><td>Cấu hình format, level, file</td></tr>
+        <tr><td>Log levels</td><td>DEBUG/INFO/WARNING/ERROR/CRITICAL</td><td>Lọc theo severity</td></tr>
+        <tr><td>Structured logging</td><td>JSON format</td><td>Dễ parse bởi log aggregator</td></tr>
+        <tr><td>Retry decorator</td><td><code>@retry</code> pattern</td><td>Auto retry cho transient errors</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>Phân biệt khi nào nên catch exception, khi nào nên let it propagate</li>
+        <li>Setup logging với format chuẩn: timestamp + level + logger name + message</li>
+        <li>Hiểu từng log level và dùng đúng — không log tất cả ở INFO</li>
+        <li>Viết structured logging (JSON) để log collector (Datadog, Grafana Loki) parse được</li>
+        <li>Implement retry decorator tái sử dụng cho mọi function cần retry</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>🛡️ try/except đúng cách</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>error_handling.py · patterns</span></div>
+        <div class="cmd-body"><pre><span class="comment"># ❌ SAI — catch tất cả Exception là bad practice</span>
+<span class="kw">try</span>:
+    result = <span class="fn">process_data</span>(df)
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">"Lỗi rồi"</span>)  <span class="comment"># mất thông tin lỗi, không biết làm gì tiếp</span>
+
+<span class="comment"># ✅ ĐÚNG — catch specific exceptions, xử lý đúng cách</span>
+<span class="kw">try</span>:
+    df = pd.<span class="fn">read_csv</span>(filepath)
+<span class="kw">except</span> FileNotFoundError:
+    logger.<span class="fn">error</span>(<span class="str">f"File không tồn tại: {filepath}"</span>)
+    <span class="kw">raise</span>  <span class="comment"># re-raise để caller xử lý</span>
+<span class="kw">except</span> pd.errors.<span class="fn">ParserError</span> <span class="kw">as</span> e:
+    logger.<span class="fn">error</span>(<span class="str">f"CSV parse error: {e}"</span>)
+    <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="str">f"File CSV không hợp lệ: {filepath}"</span>) <span class="kw">from</span> e
+<span class="kw">finally</span>:
+    logger.<span class="fn">debug</span>(<span class="str">f"Kết thúc đọc file {filepath}"</span>)  <span class="comment"># luôn chạy</span>
+
+<span class="comment"># Custom exceptions để phân loại lỗi rõ ràng</span>
+<span class="kw">class</span> <span class="fn">ExtractError</span>(Exception):
+    <span class="str">"""Raised khi extract bước thất bại."""</span>
+    <span class="kw">pass</span>
+
+<span class="kw">class</span> <span class="fn">ValidationError</span>(Exception):
+    <span class="str">"""Raised khi data không pass validation rules."""</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, message: str, failed_rows: <span class="fn">int</span>):
+        super().<span class="fn">__init__</span>(message)
+        self.failed_rows = failed_rows</pre></div>
+      </div>
+
+      <h3>📋 Logging setup chuẩn</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>pipeline.py · logging config</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> logging
+<span class="kw">import</span> sys
+
+<span class="kw">def</span> <span class="fn">setup_logging</span>(level: str = <span class="str">"INFO"</span>):
+    <span class="str">"""Configure logging cho toàn bộ pipeline."""</span>
+    logging.<span class="fn">basicConfig</span>(
+        level=<span class="fn">getattr</span>(logging, level),
+        format=<span class="str">"%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"</span>,
+        datefmt=<span class="str">"%Y-%m-%d %H:%M:%S"</span>,
+        handlers=[
+            logging.<span class="fn">StreamHandler</span>(sys.stdout),           <span class="comment"># in ra console</span>
+            logging.<span class="fn">FileHandler</span>(<span class="str">"logs/pipeline.log"</span>)    <span class="comment"># ghi ra file</span>
+        ]
+    )
+
+<span class="comment"># Trong mỗi module, lấy logger theo tên module</span>
+logger = logging.<span class="fn">getLogger</span>(__name__)
+<span class="comment"># → logger name sẽ là "extract", "transform", "load" etc.</span>
+
+<span class="comment"># Dùng đúng log level</span>
+logger.<span class="fn">debug</span>(<span class="str">"Chi tiết kỹ thuật — chỉ xem khi debug"</span>)
+logger.<span class="fn">info</span>(<span class="str">"Trạng thái pipeline: started, completed, row count"</span>)
+logger.<span class="fn">warning</span>(<span class="str">"Cảnh báo: null values, rate limit hit, data quality issue"</span>)
+logger.<span class="fn">error</span>(<span class="str">"Lỗi xảy ra nhưng pipeline vẫn tiếp tục được"</span>)
+logger.<span class="fn">critical</span>(<span class="str">"Pipeline phải dừng ngay — data corruption, auth fail"</span>)</pre></div>
+      </div>
+
+      <h3>📊 Structured Logging (JSON format)</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>pipeline.py · structured logging</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> json
+<span class="kw">import</span> logging
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="kw">class</span> <span class="fn">JSONFormatter</span>(logging.Formatter):
+    <span class="str">"""Custom formatter ghi log dạng JSON — dễ parse bởi Datadog/Grafana."""</span>
+    <span class="kw">def</span> <span class="fn">format</span>(self, record):
+        log_entry = {
+            <span class="str">"timestamp"</span>: datetime.<span class="fn">utcnow</span>().<span class="fn">isoformat</span>() + <span class="str">"Z"</span>,
+            <span class="str">"level"</span>: record.levelname,
+            <span class="str">"logger"</span>: record.name,
+            <span class="str">"message"</span>: record.<span class="fn">getMessage</span>(),
+            <span class="str">"module"</span>: record.module
+        }
+        <span class="kw">if</span> record.exc_info:
+            log_entry[<span class="str">"exception"</span>] = self.<span class="fn">formatException</span>(record.exc_info)
+        <span class="kw">return</span> json.<span class="fn">dumps</span>(log_entry)
+
+<span class="comment"># Ví dụ log output:</span>
+<span class="output">{"timestamp": "2024-01-15T08:30:00Z", "level": "INFO",
+ "logger": "extract", "message": "Fetched 1250 orders", "module": "extract"}</span></pre></div>
+      </div>
+
+      <h3>🔁 Retry Decorator tái sử dụng</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>utils.py · retry decorator</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> functools
+<span class="kw">import</span> time
+<span class="kw">import</span> logging
+
+logger = logging.<span class="fn">getLogger</span>(__name__)
+
+<span class="kw">def</span> <span class="fn">retry</span>(max_attempts: <span class="fn">int</span> = <span class="fn">3</span>, delay: <span class="fn">float</span> = <span class="fn">1.0</span>,
+          exceptions: tuple = (Exception,)):
+    <span class="str">"""Decorator retry với exponential backoff."""</span>
+    <span class="kw">def</span> <span class="fn">decorator</span>(func):
+        @functools.<span class="fn">wraps</span>(func)
+        <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+            <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(max_attempts):
+                <span class="kw">try</span>:
+                    <span class="kw">return</span> <span class="fn">func</span>(*args, **kwargs)
+                <span class="kw">except</span> exceptions <span class="kw">as</span> e:
+                    <span class="kw">if</span> attempt == max_attempts - <span class="fn">1</span>:
+                        logger.<span class="fn">error</span>(<span class="str">f"{func.__name__} failed sau {max_attempts} lần: {e}"</span>)
+                        <span class="kw">raise</span>
+                    wait = delay * (<span class="fn">2</span> ** attempt)
+                    logger.<span class="fn">warning</span>(<span class="str">f"Attempt {attempt+1}/{max_attempts} failed. Retry sau {wait}s"</span>)
+                    time.<span class="fn">sleep</span>(wait)
+        <span class="kw">return</span> wrapper
+    <span class="kw">return</span> decorator
+
+<span class="comment"># Sử dụng:</span>
+@<span class="fn">retry</span>(max_attempts=<span class="fn">3</span>, delay=<span class="fn">2.0</span>, exceptions=(requests.exceptions.RequestException,))
+<span class="kw">def</span> <span class="fn">fetch_data_from_api</span>(url: str) -> dict:
+    response = requests.<span class="fn">get</span>(url, timeout=<span class="fn">10</span>)
+    response.<span class="fn">raise_for_status</span>()
+    <span class="kw">return</span> response.<span class="fn">json</span>()</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào nên dùng <code>except Exception as e: raise</code> thay vì chỉ <code>except Exception as e: pass</code>?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không có quy tắc về performance. Cả 2 cùng tốc độ.')">A. Khi code chạy trong production cần tốc độ cao hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. pass sau catch exception là "swallowing exception" — lỗi bị ẩn đi, code tiếp tục chạy với data sai hoặc state sai. raise để exception propagate lên caller, buộc ai đó xử lý. Trong DE, ẩn lỗi rất nguy hiểm vì pipeline có thể hoàn thành nhưng data trong DB sai.')">B. Khi không muốn ẩn lỗi — raise buộc caller xử lý thay vì silently continue</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'raise không liên quan đến logging. Cả 2 đều có thể log trước khi raise hay pass.')">C. Khi muốn log lỗi ra file — pass thì không log được</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'finally block luôn chạy dù raise hay pass.')">D. Khi cần finally block chạy sau đó</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Log level nào phù hợp nhất để log "Đã extract 1250 rows từ API trong 3.2 giây"?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DEBUG dành cho chi tiết kỹ thuật chỉ cần khi debug: giá trị biến, bước trong loop. Status pipeline là quan trọng hơn và cần luôn thấy.')">A. DEBUG — đây là thông tin kỹ thuật chi tiết</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. INFO dành cho các sự kiện bình thường quan trọng: pipeline started, completed, số rows, thời gian. Đây là thông tin luôn muốn xem trong log kể cả khi không debug.')">B. INFO — đây là trạng thái bình thường cần track</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WARNING cho các tình huống bất thường: null nhiều hơn expected, rate limit hit, data quality issue. 1250 rows thành công không phải warning.')">C. WARNING — để phân biệt với các log khác</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ERROR chỉ khi có lỗi thực sự. Extract thành công không phải ERROR.')">D. ERROR — để đảm bảo không bị bỏ qua trong log</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao trong mỗi module nên dùng <code>logger = logging.getLogger(__name__)</code> thay vì 1 global logger?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Python threading không yêu cầu logger riêng. Logging module là thread-safe.')">A. Python yêu cầu 1 logger per thread để thread-safe</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. __name__ cho mỗi module sẽ tạo logger với tên module: "extract", "transform", "load". Khi đọc log, bạn biết ngay message đến từ module nào — critical để debug khi pipeline có nhiều bước.')">B. Logger name __name__ cho biết message đến từ module nào — critical khi debug multi-module pipeline</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'logging không giới hạn số global logger. Đây là thông tin sai.')">C. Python chỉ cho phép 1 global logger, nếu có 2 sẽ raise error</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'getLogger(__name__) không nhanh hơn global logger. Performance không phải lý do.')">D. getLogger(__name__) nhanh hơn 5x vì không có global lock</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Structured logging dạng JSON giúp gì so với logging text thông thường?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JSON log không nhanh hơn text log để ghi. Thực ra chậm hơn một chút vì phải serialize.')">A. JSON format nhanh hơn text vì ít bytes hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Log aggregators (Datadog, Grafana Loki, ELK Stack) có thể parse JSON log tự động, filter theo field, build dashboard, alert khi error_count tăng. Text log phải regex parse phức tạp. Trong production, JSON log là chuẩn công nghiệp.')">B. Dễ parse tự động bởi log aggregator — filter, alert, và dashboard theo field cụ thể</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JSON log không tự encrypt. Đây là thông tin sai.')">C. JSON format tự động encrypt sensitive data như password</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JSON log không đảm bảo không mất khi crash. Đây phụ thuộc vào cấu hình logging handler.')">D. JSON log không bao giờ bị mất khi process crash</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><code>@functools.wraps(func)</code> trong retry decorator làm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'wraps không thêm retry logic. wraps là metadata preservation, không phải retry mechanism.')">A. Thêm logic retry vào function được decorate</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không có @wraps, function được wrap sẽ mất __name__, __doc__, __module__ — bị thay bằng "wrapper". Điều này làm debugging và introspection khó hơn. @wraps copy metadata từ original function sang wrapper.')">B. Giữ __name__, __doc__ của function gốc — tránh metadata bị mất sau khi wrap</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'wraps không liên quan đến locking hay thread-safety.')">C. Lock function để thread-safe trong môi trường concurrent</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'wraps không cache kết quả. functools.lru_cache mới cache.')">D. Cache kết quả function để không cần retry nếu đã gọi trước đó</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong DE pipeline, khi nào nên dùng <code>logger.warning()</code> thay vì <code>logger.error()</code>?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'cả 2 đều ghi ra file. Không có sự khác biệt về destination.')">A. warning chỉ ghi ra console, error ghi ra file log</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. WARNING: tình huống đáng chú ý nhưng pipeline vẫn tiếp tục OK — null nhiều hơn expected, rate limit hit, 1 file trong batch bị skip. ERROR: lỗi thực sự khiến 1 phần pipeline thất bại nhưng có thể recover. CRITICAL: pipeline phải dừng hoàn toàn.')">B. warning khi pipeline vẫn tiếp tục OK nhưng có điều bất thường; error khi 1 phần thất bại</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không có quy tắc về lần đầu/lần sau. Phụ thuộc severity.')">C. warning cho lần lỗi đầu tiên, error cho lần lỗi thứ 2 trở đi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'warning và error không phân biệt theo loại exception. Phụ thuộc vào impact.')">D. warning cho exceptions từ requests, error cho exceptions từ pandas</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>🛡️ Specific exceptions</strong>Catch từng loại exception cụ thể. Không bao giờ catch tất cả rồi pass — "swallowing errors" nguy hiểm trong DE.</div>
+        <div class="summary-item"><strong>📋 5 Log levels</strong>DEBUG (dev), INFO (normal ops), WARNING (anomaly), ERROR (partial fail), CRITICAL (pipeline stop).</div>
+        <div class="summary-item"><strong>📊 getLogger(__name__)</strong>Mỗi module có logger riêng với tên module. Dễ tìm source của log message khi debug.</div>
+        <div class="summary-item"><strong>📝 JSON structured log</strong>Format cho production: dễ parse bởi Datadog/Grafana, filter theo field, build alert rules.</div>
+        <div class="summary-item"><strong>🔁 @retry decorator</strong>Tái sử dụng retry logic qua decorator. Specify exception types cần retry, max_attempts, delay.</div>
+        <div class="summary-item"><strong>@functools.wraps</strong>Giữ metadata của original function sau khi wrap. Quan trọng cho debuggability và tooling.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Bài 1: Tạo setup_logging() hoàn chỉnh</div>
+        <div class="practice-task-body">
+          <p>Viết function <code>setup_logging(level="INFO", log_file=None)</code> cấu hình logging với format chuẩn. Nếu log_file được truyền vào thì ghi ra file, nếu không thì chỉ stdout. Test bằng cách gọi từng level và xem output.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution · logging_setup.py</span></div>
+              <div class="cmd-body"><pre><span class="kw">import</span> logging, sys, os
+
+<span class="kw">def</span> <span class="fn">setup_logging</span>(level: str = <span class="str">"INFO"</span>, log_file: str = <span class="kw">None</span>):
+    handlers = [logging.<span class="fn">StreamHandler</span>(sys.stdout)]
+    <span class="kw">if</span> log_file:
+        os.makedirs(os.path.<span class="fn">dirname</span>(log_file), exist_ok=<span class="kw">True</span>)
+        handlers.<span class="fn">append</span>(logging.<span class="fn">FileHandler</span>(log_file))
+
+    logging.<span class="fn">basicConfig</span>(
+        level=<span class="fn">getattr</span>(logging, level.<span class="fn">upper</span>()),
+        format=<span class="str">"%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"</span>,
+        datefmt=<span class="str">"%Y-%m-%d %H:%M:%S"</span>,
+        handlers=handlers
+    )
+
+<span class="comment"># Test</span>
+<span class="fn">setup_logging</span>(<span class="str">"DEBUG"</span>, <span class="str">"logs/test.log"</span>)
+logger = logging.<span class="fn">getLogger</span>(__name__)
+logger.<span class="fn">debug</span>(<span class="str">"Debug message"</span>)
+logger.<span class="fn">info</span>(<span class="str">"Pipeline started"</span>)
+logger.<span class="fn">warning</span>(<span class="str">"Found 10 null values"</span>)
+logger.<span class="fn">error</span>(<span class="str">"DB connection failed"</span>)</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">← W2.04 REST API</button>
+    <button class="nav-btn primary" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">W2.06 ETL Production →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 5: ETL PRODUCTION STRUCTURE ═══════════════ -->
+<div class="module" id="m5">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · Module W2.06</div>
+    <div class="module-title">🏗️ Cấu Trúc ETL Script Production</div>
+    <div class="module-subtitle">Class-based ETL · Config từ .env · argparse CLI · Type hints · pipeline.py</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Pattern</th><th>Tool</th><th>Lý do quan trọng</th></tr>
+        <tr><td>Config từ env</td><td>python-dotenv + os.getenv</td><td>Không hardcode secret, dễ deploy</td></tr>
+        <tr><td>CLI arguments</td><td>argparse</td><td>Chạy với --date khác nhau, tái sử dụng</td></tr>
+        <tr><td>Type hints</td><td>def func(x: str) -> pd.DataFrame</td><td>IDE support, tự document, mypy check</td></tr>
+        <tr><td>Class-based ETL</td><td>class Pipeline:</td><td>Nhóm state và behavior, testable</td></tr>
+        <tr><td>__main__ guard</td><td>if __name__ == "__main__":</td><td>Import được mà không chạy side-effect</td></tr>
+        <tr><td>Docstrings</td><td>"""Description."""</td><td>Tự tạo documentation, help text</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>Tổ chức ETL thành class với methods riêng cho extract, transform, load</li>
+        <li>Viết <code>pipeline.py</code> chạy được bằng CLI: <code>python pipeline.py --date 2024-01-15</code></li>
+        <li>Config hoàn toàn từ .env — không có giá trị nào hardcode trong code</li>
+        <li>Type hints cho mọi function signature — self-documenting code</li>
+        <li><code>__main__</code> guard để module import được bởi test mà không chạy pipeline</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>⚙️ Config từ .env</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>.env · không commit lên Git!</span></div>
+        <div class="cmd-body"><pre><span class="comment"># .env — add vào .gitignore ngay</span>
+<span class="output">DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=etl_db
+DB_USER=postgres
+DB_PASSWORD=supersecret123
+API_BASE_URL=https://api.example.com/v1
+API_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+LOG_LEVEL=INFO</span></pre></div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>config.py · đọc config an toàn</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> os
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+
+<span class="fn">load_dotenv</span>()
+
+@dataclass
+<span class="kw">class</span> <span class="fn">Config</span>:
+    db_host: str = os.<span class="fn">getenv</span>(<span class="str">"DB_HOST"</span>, <span class="str">"localhost"</span>)
+    db_port: <span class="fn">int</span> = <span class="fn">int</span>(os.<span class="fn">getenv</span>(<span class="str">"DB_PORT"</span>, <span class="str">"5432"</span>))
+    db_name: str = os.<span class="fn">getenv</span>(<span class="str">"DB_NAME"</span>, <span class="str">""</span>)
+    db_user: str = os.<span class="fn">getenv</span>(<span class="str">"DB_USER"</span>, <span class="str">""</span>)
+    db_password: str = os.<span class="fn">getenv</span>(<span class="str">"DB_PASSWORD"</span>, <span class="str">""</span>)
+    api_base_url: str = os.<span class="fn">getenv</span>(<span class="str">"API_BASE_URL"</span>, <span class="str">""</span>)
+    api_token: str = os.<span class="fn">getenv</span>(<span class="str">"API_TOKEN"</span>, <span class="str">""</span>)
+    log_level: str = os.<span class="fn">getenv</span>(<span class="str">"LOG_LEVEL"</span>, <span class="str">"INFO"</span>)
+
+    <span class="kw">def</span> <span class="fn">validate</span>(self):
+        <span class="str">"""Fail fast nếu thiếu config bắt buộc."""</span>
+        required = [<span class="str">"db_name"</span>, <span class="str">"db_user"</span>, <span class="str">"db_password"</span>, <span class="str">"api_token"</span>]
+        missing = [f <span class="kw">for</span> f <span class="kw">in</span> required <span class="kw">if not</span> <span class="fn">getattr</span>(self, f)]
+        <span class="kw">if</span> missing:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="str">f"Thiếu config bắt buộc: {missing}"</span>)</pre></div>
+      </div>
+
+      <h3>🏗️ Class-based ETL Pipeline</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>pipeline.py · full structure</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> argparse
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> logging
+<span class="kw">from</span> datetime <span class="kw">import</span> date
+<span class="kw">from</span> sqlalchemy <span class="kw">import</span> create_engine
+
+<span class="kw">from</span> config <span class="kw">import</span> Config
+<span class="kw">from</span> extract <span class="kw">import</span> read_csv_safe, fetch_all_orders
+<span class="kw">from</span> transform <span class="kw">import</span> clean_orders, create_daily_summary
+<span class="kw">from</span> load <span class="kw">import</span> incremental_load
+
+logger = logging.<span class="fn">getLogger</span>(__name__)
+
+<span class="kw">class</span> <span class="fn">OrderPipeline</span>:
+    <span class="str">"""Pipeline ETL cho orders data: API → transform → PostgreSQL."""</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, config: <span class="fn">Config</span>):
+        self.config = config
+        self.engine = <span class="fn">create_engine</span>(
+            <span class="str">f"postgresql+psycopg2://{config.db_user}:{config.db_password}"</span>
+            <span class="str">f"@{config.db_host}:{config.db_port}/{config.db_name}"</span>
+        )
+
+    <span class="kw">def</span> <span class="fn">extract</span>(self, run_date: str) -> pd.DataFrame:
+        <span class="str">"""Extract orders từ API cho ngày chỉ định."""</span>
+        logger.<span class="fn">info</span>(<span class="str">f"[EXTRACT] Bắt đầu cho ngày {run_date}"</span>)
+        <span class="comment"># Gọi API với pagination</span>
+        records = <span class="fn">fetch_all_orders</span>(self.config, run_date)
+        df = pd.<span class="fn">DataFrame</span>(records)
+        logger.<span class="fn">info</span>(<span class="str">f"[EXTRACT] Xong: {len(df)} rows"</span>)
+        <span class="kw">return</span> df
+
+    <span class="kw">def</span> <span class="fn">transform</span>(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+        <span class="str">"""Clean và tạo summary. Trả về (clean_orders, daily_summary)."""</span>
+        logger.<span class="fn">info</span>(<span class="str">"[TRANSFORM] Bắt đầu"</span>)
+        clean = <span class="fn">clean_orders</span>(df)
+        summary = <span class="fn">create_daily_summary</span>(clean)
+        logger.<span class="fn">info</span>(<span class="str">f"[TRANSFORM] Clean: {len(clean)} rows | Summary: {len(summary)} rows"</span>)
+        <span class="kw">return</span> clean, summary
+
+    <span class="kw">def</span> <span class="fn">load</span>(self, clean: pd.DataFrame, summary: pd.DataFrame) -> <span class="kw">None</span>:
+        <span class="str">"""Load vào PostgreSQL (incremental)."""</span>
+        logger.<span class="fn">info</span>(<span class="str">"[LOAD] Bắt đầu"</span>)
+        inserted = <span class="fn">incremental_load</span>(clean, self.engine, <span class="str">"orders"</span>, <span class="str">"order_id"</span>)
+        summary.<span class="fn">to_sql</span>(<span class="str">"daily_summary"</span>, self.engine, if_exists=<span class="str">"append"</span>, index=<span class="kw">False</span>)
+        logger.<span class="fn">info</span>(<span class="str">f"[LOAD] Xong: {inserted} orders mới, {len(summary)} summary rows"</span>)
+
+    <span class="kw">def</span> <span class="fn">run</span>(self, run_date: str) -> <span class="kw">None</span>:
+        <span class="str">"""Chạy toàn bộ pipeline E → T → L."""</span>
+        logger.<span class="fn">info</span>(<span class="str">f"=== Pipeline bắt đầu: {run_date} ==="</span>)
+        raw = self.<span class="fn">extract</span>(run_date)
+        clean, summary = self.<span class="fn">transform</span>(raw)
+        self.<span class="fn">load</span>(clean, summary)
+        logger.<span class="fn">info</span>(<span class="str">f"=== Pipeline hoàn thành: {run_date} ==="</span>)
+
+<span class="kw">def</span> <span class="fn">parse_args</span>():
+    parser = argparse.<span class="fn">ArgumentParser</span>(description=<span class="str">"Order ETL Pipeline"</span>)
+    parser.<span class="fn">add_argument</span>(
+        <span class="str">"--date"</span>, type=str,
+        default=str(date.<span class="fn">today</span>()),
+        help=<span class="str">"Ngày chạy pipeline (YYYY-MM-DD), mặc định: hôm nay"</span>
+    )
+    parser.<span class="fn">add_argument</span>(
+        <span class="str">"--log-level"</span>, type=str, default=<span class="str">"INFO"</span>,
+        choices=[<span class="str">"DEBUG"</span>, <span class="str">"INFO"</span>, <span class="str">"WARNING"</span>, <span class="str">"ERROR"</span>]
+    )
+    <span class="kw">return</span> parser.<span class="fn">parse_args</span>()
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    args = <span class="fn">parse_args</span>()
+    <span class="fn">setup_logging</span>(args.log_level, <span class="str">"logs/pipeline.log"</span>)
+
+    config = <span class="fn">Config</span>()
+    config.<span class="fn">validate</span>()
+
+    pipeline = <span class="fn">OrderPipeline</span>(config)
+    pipeline.<span class="fn">run</span>(args.date)</pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span><strong>Chạy pipeline:</strong> <code>python pipeline.py --date 2024-01-15</code> hoặc <code>python pipeline.py --date 2024-01-15 --log-level DEBUG</code></span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao cần có <code>if __name__ == "__main__":</code> trong pipeline.py?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Python không yêu cầu guard này để chạy. Script chạy bình thường không có guard.')">A. Python yêu cầu guard này để script có thể chạy từ terminal</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi file được import (ví dụ: test file import pipeline để test class OrderPipeline), code trong if __name__ == "__main__" không chạy. Nếu không có guard, mọi lần import pipeline.py sẽ tự động chạy pipeline — rất nguy hiểm trong test môi trường.')">B. Khi file bị import bởi test/module khác, pipeline không tự chạy</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'__main__ guard không liên quan đến performance. Đây là thông tin sai.')">C. Tối ưu performance — Python compile nhanh hơn khi có guard</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'argparse không yêu cầu __main__ guard. Đây là thông tin sai.')">D. argparse chỉ hoạt động trong __main__ block</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Type hints trong Python có enforce không? Nếu truyền sai type, điều gì xảy ra?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Python runtime không enforce type hints. Không có TypeError tự động.')">A. Python runtime raise TypeError ngay khi gọi với sai type</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Type hints trong Python là hints, không phải enforcement. Runtime bỏ qua chúng hoàn toàn. Để enforce, cần dùng mypy (static type checker) hoặc runtime validator như pydantic. Giá trị của type hints là: IDE autocomplete, documentation, và mypy check trong CI/CD.')">B. Không — type hints chỉ là documentation. mypy mới enforce ở static analysis</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Type hints không tự động convert type. Đây là thông tin sai.')">C. Python tự động convert sang đúng type (coercion)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Type hints không in warning ra console. Đây là thông tin sai.')">D. Python in warning ra console nhưng vẫn tiếp tục chạy</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Lợi ích của việc tổ chức pipeline thành class với methods extract/transform/load thay vì functions độc lập?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Class không chạy nhanh hơn functions. Performance không phải lý do.')">A. Class-based pipeline chạy nhanh hơn 2x so với functional approach</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Class nhóm shared state (engine, config) và behavior (extract/transform/load) lại với nhau. Dễ test từng method độc lập bằng mock. Dễ subclass nếu muốn override 1 bước. Dễ inject dependencies qua __init__.')">B. Nhóm shared state và behavior, dễ test từng method, dễ subclass và inject dependency</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'argparse hoạt động tốt với cả functions và classes. Đây không phải lý do.')">C. argparse chỉ hoạt động với class-based code</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Class không tự parallel. Parallel cần concurrent.futures hay multiprocessing.')">D. Python tự động chạy parallel các methods của class</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao nên gọi <code>config.validate()</code> ngay khi khởi động, trước khi làm bất cứ việc gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'validate không liên quan đến encryption hay security theo cách này.')">A. Để encrypt config trước khi truyền vào pipeline</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Fail fast principle: phát hiện config thiếu (ví dụ: DB_PASSWORD chưa set) ngay khi start, không phải sau 20 phút extract và transform xong mới fail ở bước load. Tiết kiệm thời gian và tránh mất dữ liệu đã transform.')">B. Fail fast — phát hiện config thiếu ngay khi start, không phải sau 20 phút xử lý</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'validate không kết nối DB để test. Nó chỉ check required fields có giá trị hay không.')">C. Test kết nối DB trước khi chạy để đảm bảo network OK</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Python không yêu cầu validate trước khi tạo dataclass. Đây là thông tin sai.')">D. Python yêu cầu validate dataclass trước khi dùng, nếu không raise error</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Lý do thêm tham số <code>--log-level</code> vào argparse là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'log level không ảnh hưởng đến performance đáng kể. Đây không phải lý do.')">A. Để tối ưu performance — DEBUG mode chạy chậm hơn INFO</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Trong production, chạy INFO để log gọn. Khi debug incident, chạy lại với --log-level DEBUG để thấy chi tiết hơn mà không cần sửa code. Environment-specific logging level không cần thay đổi source code.')">B. Linh hoạt thay đổi log verbosity mà không sửa code — DEBUG khi debug, INFO khi production</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Airflow có cách cấu hình riêng, không yêu cầu argparse --log-level.')">C. Airflow yêu cầu --log-level để chạy task đúng cách</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'--log-level không giới hạn file size. Đây là cấu hình RotatingFileHandler riêng.')">D. Giới hạn kích thước file log để không đầy disk</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào nên log ở level INFO với prefix như <code>[EXTRACT]</code>, <code>[TRANSFORM]</code>, <code>[LOAD]</code>?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Chỉ log lỗi thiếu ngữ cảnh quan trọng. Cần biết đang ở bước nào.')">A. Chỉ khi có lỗi — để biết lỗi ở bước nào</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Prefix stage giúp khi đọc log biết ngay pipeline đang ở bước nào và đã qua đến đâu. Đặc biệt quan trọng khi pipeline chạy 30 phút và fail — xác định ngay "fail ở giữa Transform, không phải Load". Best practice cho multi-stage pipeline.')">B. Ở mỗi bước bắt đầu và kết thúc — dễ track progress khi đọc log</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Log prefix không liên quan đến monitoring tools. Đây là best practice manual.')">C. Chỉ khi pipeline chạy trong Airflow — Airflow yêu cầu format này</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Log prefix không ảnh hưởng đến JSON logging hay text logging. Đây là thông tin sai.')">D. Chỉ khi dùng JSON logging — text logging không cần prefix</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>⚙️ Config từ .env</strong>Dataclass với os.getenv và default. validate() fail fast nếu thiếu required config. .env trong .gitignore.</div>
+        <div class="summary-item"><strong>🏗️ Class-based Pipeline</strong>__init__ nhận config và tạo engine. extract/transform/load methods riêng. run() orchestrate toàn bộ.</div>
+        <div class="summary-item"><strong>🔧 argparse CLI</strong>--date cho ngày chạy, --log-level cho verbosity. Mặc định là hôm nay, INFO. Tái sử dụng cho backfill.</div>
+        <div class="summary-item"><strong>📝 Type hints</strong>Annotation cho mọi function. Documentation tự động, IDE support. mypy check trong CI/CD.</div>
+        <div class="summary-item"><strong>🛡️ __main__ guard</strong>if __name__ == "__main__": để import được mà không trigger pipeline. Cần thiết cho unit testing.</div>
+        <div class="summary-item"><strong>📋 Stage logging</strong>[EXTRACT] / [TRANSFORM] / [LOAD] prefix. Biết ngay pipeline đang ở đâu khi đọc log.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Bài 1: Tạo config.validate() với required fields</div>
+        <div class="practice-task-body">
+          <p>Viết class <code>Config</code> với dataclass đọc từ .env. Thêm method <code>validate()</code> kiểm tra các field bắt buộc. Test bằng cách xóa 1 biến trong .env và xem exception.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution · config.py</span></div>
+              <div class="cmd-body"><pre><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field
+<span class="kw">import</span> os
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+
+<span class="fn">load_dotenv</span>()
+
+@dataclass
+<span class="kw">class</span> <span class="fn">Config</span>:
+    db_host: str = os.<span class="fn">getenv</span>(<span class="str">"DB_HOST"</span>, <span class="str">"localhost"</span>)
+    db_port: <span class="fn">int</span> = <span class="fn">int</span>(os.<span class="fn">getenv</span>(<span class="str">"DB_PORT"</span>, <span class="str">"5432"</span>))
+    db_name: str = os.<span class="fn">getenv</span>(<span class="str">"DB_NAME"</span>, <span class="str">""</span>)
+    db_user: str = os.<span class="fn">getenv</span>(<span class="str">"DB_USER"</span>, <span class="str">""</span>)
+    db_password: str = os.<span class="fn">getenv</span>(<span class="str">"DB_PASSWORD"</span>, <span class="str">""</span>)
+
+    <span class="kw">def</span> <span class="fn">validate</span>(self):
+        required = {
+            <span class="str">"db_name"</span>: self.db_name,
+            <span class="str">"db_user"</span>: self.db_user,
+            <span class="str">"db_password"</span>: self.db_password
+        }
+        missing = [k <span class="kw">for</span> k, v <span class="kw">in</span> required.<span class="fn">items</span>() <span class="kw">if not</span> v]
+        <span class="kw">if</span> missing:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="str">f"Config bắt buộc chưa set: {missing}"</span>)
+        <span class="kw">return</span> self</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">← W2.05 Error Handling</button>
+    <button class="nav-btn primary" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">W2.07 Artifact →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 6: ARTIFACT ═══════════════ -->
+<div class="module" id="m6">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · Module W2.07</div>
+    <div class="module-title">📦 Artifact: week2_python_etl/</div>
+    <div class="module-subtitle">Cấu trúc thư mục · README · Hướng dẫn commit · Exit criteria</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Cấu Trúc Artifact Bắt Buộc
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>de-roadmap-artifacts/ · cấu trúc thư mục</span></div>
+        <div class="cmd-body"><pre><span class="output">week2_python_etl/
+├── .env.example          ← template config, không có giá trị thật
+├── .gitignore            ← ignore: .env, __pycache__, *.pyc, logs/
+├── README.md             ← mô tả pipeline, cách chạy, kết quả
+├── requirements.txt      ← pandas, sqlalchemy, requests, python-dotenv, pyarrow
+│
+├── config.py             ← Config dataclass + validate()
+├── extract.py            ← read_csv_safe(), fetch_all_orders(), pagination
+├── transform.py          ← clean_orders(), create_daily_summary()
+├── load.py               ← get_engine(), incremental_load(), save_to_parquet()
+├── pipeline.py           ← OrderPipeline class + argparse + __main__
+│
+├── data/
+│   ├── sample_orders.csv ← 100-200 rows sample data để demo
+│   └── sample_users.csv
+│
+├── output/
+│   └── .gitkeep          ← giữ thư mục trong git nhưng không track contents
+│
+└── logs/
+    └── .gitkeep</span></pre></div>
+      </div>
+
+      <div class="info-box warn">⚠️ <span><strong>Quan trọng:</strong> Add <code>.env</code> vào <code>.gitignore</code> TRƯỚC KHI tạo file .env. Sau khi đã commit .env lên GitHub thì dù xóa đi cũng còn trong git history — phải rotate secret ngay.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. README.md Chuẩn
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div></div><span>README.md · template</span></div>
+        <div class="cmd-body"><pre><span class="kw"># Week 2 — Python ETL Pipeline</span>
+
+<span class="comment">## Mục tiêu</span>
+Pipeline ETL đọc orders từ CSV và REST API, làm sạch data,
+tính daily summary, và load vào PostgreSQL incremental.
+
+<span class="comment">## Input</span>
+- CSV: `data/sample_orders.csv` (từ source system)
+- API: JSONPlaceholder (demo endpoint)
+
+<span class="comment">## Output</span>
+- Table `orders` trong PostgreSQL (incremental insert)
+- Table `daily_summary` theo ngày + channel
+- Parquet file tại `output/daily_summary.parquet`
+
+<span class="comment">## Cách chạy</span>
+```bash
+pip install -r requirements.txt
+cp .env.example .env  # edit với giá trị thật
+docker compose up -d  # start PostgreSQL (từ tuần 0)
+python pipeline.py --date 2024-01-15
+python pipeline.py  # mặc định: hôm nay
+```
+
+<span class="comment">## Design Decisions</span>
+- **Incremental load**: chỉ insert orders mới để idempotent
+- **Left join** khi merge orders với users: không bỏ orders dù thiếu user
+- **snappy compression**: balance speed/size cho Parquet
+- **JSON logging**: dễ parse khi deploy lên production log system
+
+<span class="comment">## Kết quả chạy thử</span>
+```
+2024-01-15 08:30:01 | INFO | pipeline | === Pipeline bắt đầu: 2024-01-15 ===
+2024-01-15 08:30:02 | INFO | extract  | Fetched 1250 orders
+2024-01-15 08:30:03 | INFO | transform| Clean: 1230 rows | Summary: 18 rows
+2024-01-15 08:30:04 | INFO | load     | Inserted 1230 orders mới, 18 summary rows
+2024-01-15 08:30:04 | INFO | pipeline | === Pipeline hoàn thành: 2024-01-15 ===
+```</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Checklist Trước Khi Commit
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>✅ Checklist kỹ thuật</h3>
+      <ul class="checklist">
+        <li>pipeline.py chạy được: <code>python pipeline.py --date 2024-01-15</code> không có error</li>
+        <li>extract.py, transform.py, load.py có thể import riêng không có side effect</li>
+        <li>Mọi function có type hints và docstring tối thiểu 1 dòng</li>
+        <li>.env không có trong git: <code>git status</code> không thấy .env</li>
+        <li>.env.example có đủ tất cả keys nhưng không có giá trị thật</li>
+        <li>requirements.txt có đủ: pandas, sqlalchemy, psycopg2-binary, requests, python-dotenv, pyarrow</li>
+        <li>Chạy pipeline 2 lần với cùng --date → không duplicate data trong DB (idempotent)</li>
+        <li>Log output có timestamp, level, module name và message rõ ràng</li>
+      </ul>
+
+      <h3>📝 Commit message chuẩn</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>bash · commit artifact</span></div>
+        <div class="cmd-body"><pre><span class="prompt">$</span> cd de-roadmap-artifacts
+<span class="prompt">$</span> git add week2_python_etl/
+<span class="prompt">$</span> git commit -m <span class="str">"feat(week2): add Python ETL pipeline
+
+- extract.py: CSV + API với pagination và retry
+- transform.py: null handling, merge, groupby agg
+- load.py: incremental insert vào PostgreSQL
+- pipeline.py: class-based với argparse CLI
+- README: design decisions + kết quả chạy thử"</span>
+<span class="prompt">$</span> git push origin main
+<span class="output">Enumerating objects: 12, done.
+Counting objects: 100% (12/12), done.
+To github.com:username/de-roadmap-artifacts.git
+   abc1234..def5678  main -> main</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      4. Tổng Kết Tuần 2
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>🐼 pandas</strong>Đọc mọi format, xử lý null có strategy, merge với fan-out check, groupby agg, ghi Parquet.</div>
+        <div class="summary-item"><strong>🗄️ SQLAlchemy</strong>1 engine có pool, parameterized query, incremental load, context manager để tránh leak.</div>
+        <div class="summary-item"><strong>🌐 requests</strong>Session với auth header, pagination (offset + cursor), exponential backoff với jitter cho 429.</div>
+        <div class="summary-item"><strong>🛡️ Error Handling</strong>Specific exceptions, không swallow errors, structured logging JSON, retry decorator tái sử dụng.</div>
+        <div class="summary-item"><strong>🏗️ Production Structure</strong>Config từ .env, class-based Pipeline, argparse CLI, type hints, __main__ guard.</div>
+        <div class="summary-item"><strong>📦 Artifact Committed</strong>5 Python files + README + sample data. Idempotent khi chạy nhiều lần. Evidence trên GitHub.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      5. Bài Tập Thực Hành — Build Artifact
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Build toàn bộ artifact week2_python_etl/</div>
+        <div class="practice-task-body">
+          <p>Build từng file theo thứ tự sau, chạy test sau mỗi file:</p>
+          <ol>
+            <li>Tạo <code>config.py</code> + <code>.env.example</code> + <code>.gitignore</code></li>
+            <li>Tạo <code>extract.py</code> với <code>read_csv_safe()</code> và <code>fetch_posts()</code> từ JSONPlaceholder</li>
+            <li>Tạo <code>transform.py</code> với <code>clean_orders()</code> và <code>create_daily_summary()</code></li>
+            <li>Tạo <code>load.py</code> với <code>get_engine()</code> và <code>incremental_load()</code></li>
+            <li>Tạo <code>pipeline.py</code> với <code>OrderPipeline</code> class và argparse</li>
+            <li>Test: chạy <code>python pipeline.py</code> 2 lần với cùng date → verify không duplicate</li>
+            <li>Viết <code>README.md</code> với design decisions và sample output</li>
+            <li>Commit lên GitHub</li>
+          </ol>
+          <div class="info-box tip">✅ <span>Với sample data: tạo file CSV nhỏ 50-100 rows thủ công hoặc generate bằng <code>pd.DataFrame(...).to_csv()</code>. Không cần API thật — JSONPlaceholder đủ để demo pattern.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">← W2.06 ETL Production</button>
+    <button class="nav-btn primary" onclick="showModule(7,document.querySelectorAll('.nav-item')[7])">W2.08 Mini Test →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 7: MINI TEST ═══════════════ -->
+<div class="module" id="m7">
+  <div class="module-header">
+    <div class="module-tag">Tuần 2 · Module W2.08</div>
+    <div class="module-title">🧪 Mini Test Tổng Kết Tuần 2</div>
+    <div class="module-subtitle">20 câu · pandas · SQLAlchemy · REST API · Error handling · ETL structure</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">🧪</div>
+      Mini Test — 20 Câu Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div id="final-test">
+
+        <div class="test-question" data-q="1" data-correct="B">
+          <div class="test-question-title">Q1. Thư viện nào trong Python DE dùng để biến đổi và làm sạch dữ liệu?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q1" value="A"> A. requests</label>
+            <label class="test-option"><input type="radio" name="q1" value="B"> B. pandas</label>
+            <label class="test-option"><input type="radio" name="q1" value="C"> C. sqlalchemy</label>
+            <label class="test-option"><input type="radio" name="q1" value="D"> D. logging</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="2" data-correct="C">
+          <div class="test-question-title">Q2. Format file nào tốt nhất để lưu trữ dữ liệu trung gian trong DE pipeline?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q2" value="A"> A. CSV</label>
+            <label class="test-option"><input type="radio" name="q2" value="B"> B. JSON</label>
+            <label class="test-option"><input type="radio" name="q2" value="C"> C. Parquet</label>
+            <label class="test-option"><input type="radio" name="q2" value="D"> D. Excel</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="3" data-correct="B">
+          <div class="test-question-title">Q3. <code>dropna(subset=["order_id", "amount"])</code> sẽ drop row nào?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q3" value="A"> A. Row có null ở bất kỳ cột nào</label>
+            <label class="test-option"><input type="radio" name="q3" value="B"> B. Row có null ở order_id hoặc amount</label>
+            <label class="test-option"><input type="radio" name="q3" value="C"> C. Row có null ở cả order_id VÀ amount cùng lúc</label>
+            <label class="test-option"><input type="radio" name="q3" value="D"> D. Không drop row nào — subset chỉ fill null</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="4" data-correct="A">
+          <div class="test-question-title">Q4. Trong pandas merge, tham số <code>how="left"</code> có nghĩa là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q4" value="A"> A. Giữ tất cả rows bên trái, fill NaN cho unmatched bên phải</label>
+            <label class="test-option"><input type="radio" name="q4" value="B"> B. Chỉ giữ rows khớp ở cả hai bên</label>
+            <label class="test-option"><input type="radio" name="q4" value="C"> C. Giữ tất cả rows ở cả hai bên</label>
+            <label class="test-option"><input type="radio" name="q4" value="D"> D. Bỏ rows bên trái không có match bên phải</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="5" data-correct="C">
+          <div class="test-question-title">Q5. Tại sao phải check row count trước và sau khi merge?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q5" value="A"> A. Để đảm bảo merge không vượt memory giới hạn</label>
+            <label class="test-option"><input type="radio" name="q5" value="B"> B. Để đảm bảo tất cả rows được join thành công</label>
+            <label class="test-option"><input type="radio" name="q5" value="C"> C. Phát hiện row explosion do duplicate join key</label>
+            <label class="test-option"><input type="radio" name="q5" value="D"> D. pandas yêu cầu kiểm tra trước khi cho phép merge</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="6" data-correct="D">
+          <div class="test-question-title">Q6. Method nào trong pandas dùng để tổng hợp với nhiều aggregation function cùng lúc?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q6" value="A"> A. groupby().sum()</label>
+            <label class="test-option"><input type="radio" name="q6" value="B"> B. groupby().apply()</label>
+            <label class="test-option"><input type="radio" name="q6" value="C"> C. groupby().transform()</label>
+            <label class="test-option"><input type="radio" name="q6" value="D"> D. groupby().agg()</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="7" data-correct="B">
+          <div class="test-question-title">Q7. Tại sao không bao giờ dùng f-string để build SQL query?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q7" value="A"> A. f-string không hỗ trợ special characters trong SQL</label>
+            <label class="test-option"><input type="radio" name="q7" value="B"> B. Dễ bị SQL injection khi user input đi thẳng vào query</label>
+            <label class="test-option"><input type="radio" name="q7" value="C"> C. PostgreSQL không nhận query dạng f-string</label>
+            <label class="test-option"><input type="radio" name="q7" value="D"> D. f-string chậm hơn text() của SQLAlchemy</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="8" data-correct="A">
+          <div class="test-question-title">Q8. <code>if_exists="append"</code> trong <code>df.to_sql()</code> làm gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q8" value="A"> A. Thêm rows mới vào cuối bảng hiện có</label>
+            <label class="test-option"><input type="radio" name="q8" value="B"> B. Xóa bảng cũ và tạo lại với data mới</label>
+            <label class="test-option"><input type="radio" name="q8" value="C"> C. Merge rows theo primary key</label>
+            <label class="test-option"><input type="radio" name="q8" value="D"> D. Báo lỗi vì bảng đã tồn tại</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="9" data-correct="C">
+          <div class="test-question-title">Q9. HTTP status code 429 trong REST API có nghĩa là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q9" value="A"> A. Server lỗi nội bộ</label>
+            <label class="test-option"><input type="radio" name="q9" value="B"> B. Endpoint không tồn tại</label>
+            <label class="test-option"><input type="radio" name="q9" value="C"> C. Rate limit exceeded — quá nhiều request</label>
+            <label class="test-option"><input type="radio" name="q9" value="D"> D. Token xác thực hết hạn</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="10" data-correct="B">
+          <div class="test-question-title">Q10. Tại sao thêm random jitter vào exponential backoff?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q10" value="A"> A. Để tuân thủ GDPR về request timing</label>
+            <label class="test-option"><input type="radio" name="q10" value="B"> B. Tránh thundering herd — nhiều client không retry cùng lúc</label>
+            <label class="test-option"><input type="radio" name="q10" value="C"> C. Để encrypt request timing</label>
+            <label class="test-option"><input type="radio" name="q10" value="D"> D. requests.Session yêu cầu jitter để maintain session</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="11" data-correct="A">
+          <div class="test-question-title">Q11. Cursor-based pagination khác offset pagination như thế nào?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q11" value="A"> A. Cursor dùng ID của item cuối làm bookmark — ổn định khi data thay đổi</label>
+            <label class="test-option"><input type="radio" name="q11" value="B"> B. Offset nhanh hơn cursor trong mọi trường hợp</label>
+            <label class="test-option"><input type="radio" name="q11" value="C"> C. Cursor chỉ dùng được với database, không phải REST API</label>
+            <label class="test-option"><input type="radio" name="q11" value="D"> D. Offset dùng token còn cursor dùng page number</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="12" data-correct="D">
+          <div class="test-question-title">Q12. Trong Python logging, log level nào phù hợp để log "Đã extract 1250 rows thành công"?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q12" value="A"> A. DEBUG</label>
+            <label class="test-option"><input type="radio" name="q12" value="B"> B. WARNING</label>
+            <label class="test-option"><input type="radio" name="q12" value="C"> C. ERROR</label>
+            <label class="test-option"><input type="radio" name="q12" value="D"> D. INFO</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="13" data-correct="C">
+          <div class="test-question-title">Q13. Tại sao nên dùng <code>logger = logging.getLogger(__name__)</code> trong mỗi module?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q13" value="A"> A. Python yêu cầu 1 logger per thread</label>
+            <label class="test-option"><input type="radio" name="q13" value="B"> B. Global logger không ghi được ra file</label>
+            <label class="test-option"><input type="radio" name="q13" value="C"> C. Logger name __name__ cho biết message đến từ module nào</label>
+            <label class="test-option"><input type="radio" name="q13" value="D"> D. getLogger(__name__) nhanh hơn global logger</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="14" data-correct="B">
+          <div class="test-question-title">Q14. <code>if __name__ == "__main__":</code> giải quyết vấn đề gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q14" value="A"> A. Cho phép script chạy từ terminal</label>
+            <label class="test-option"><input type="radio" name="q14" value="B"> B. Khi import, pipeline không tự chạy — cần thiết cho unit test</label>
+            <label class="test-option"><input type="radio" name="q14" value="C"> C. Tối ưu compile time của Python</label>
+            <label class="test-option"><input type="radio" name="q14" value="D"> D. argparse chỉ hoạt động trong __main__ block</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="15" data-correct="A">
+          <div class="test-question-title">Q15. Idempotency trong ETL pipeline có nghĩa là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q15" value="A"> A. Chạy pipeline nhiều lần với cùng input cho cùng kết quả</label>
+            <label class="test-option"><input type="radio" name="q15" value="B"> B. Pipeline chỉ load data mới</label>
+            <label class="test-option"><input type="radio" name="q15" value="C"> C. Pipeline tự retry khi fail</label>
+            <label class="test-option"><input type="radio" name="q15" value="D"> D. Pipeline chạy song song nhiều task cùng lúc</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="16" data-correct="C">
+          <div class="test-question-title">Q16. Tại sao dùng <code>with engine.connect() as conn</code> thay vì <code>conn = engine.connect()</code>?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q16" value="A"> A. Context manager cache kết quả query</label>
+            <label class="test-option"><input type="radio" name="q16" value="B"> B. SQLAlchemy bắt buộc context manager</label>
+            <label class="test-option"><input type="radio" name="q16" value="C"> C. Đảm bảo connection trả về pool dù có exception — tránh leak</label>
+            <label class="test-option"><input type="radio" name="q16" value="D"> D. Context manager tự commit transaction</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="17" data-correct="D">
+          <div class="test-question-title">Q17. <code>pd.json_normalize()</code> giải quyết vấn đề gì so với <code>pd.DataFrame(records)</code>?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q17" value="A"> A. pd.DataFrame không xử lý được list of dicts</label>
+            <label class="test-option"><input type="radio" name="q17" value="B"> B. json_normalize nhanh hơn 10x</label>
+            <label class="test-option"><input type="radio" name="q17" value="C"> C. json_normalize xử lý được unicode</label>
+            <label class="test-option"><input type="radio" name="q17" value="D"> D. json_normalize tự động flatten nested dict thành các cột riêng</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="18" data-correct="B">
+          <div class="test-question-title">Q18. Tại sao lưu secret trong .env thay vì hardcode trong code?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q18" value="A"> A. .env file nhanh hơn hardcode khi đọc</label>
+            <label class="test-option"><input type="radio" name="q18" value="B"> B. Tránh lộ secret khi push code lên GitHub</label>
+            <label class="test-option"><input type="radio" name="q18" value="C"> C. psycopg2 chỉ đọc được từ .env</label>
+            <label class="test-option"><input type="radio" name="q18" value="D"> D. Docker yêu cầu .env file để build image</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="19" data-correct="A">
+          <div class="test-question-title">Q19. Structured logging dạng JSON giúp gì trong production?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q19" value="A"> A. Dễ parse tự động bởi log aggregator — filter, alert theo field</label>
+            <label class="test-option"><input type="radio" name="q19" value="B"> B. JSON log nhanh hơn text log</label>
+            <label class="test-option"><input type="radio" name="q19" value="C"> C. JSON tự động encrypt sensitive data</label>
+            <label class="test-option"><input type="radio" name="q19" value="D"> D. JSON log không bao giờ bị mất khi crash</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="20" data-correct="C">
+          <div class="test-question-title">Q20. Khi incremental load, tại sao phải lấy existing keys trong DB trước khi insert?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q20" value="A"> A. PostgreSQL tự deduplicate, cần tắt tính năng đó</label>
+            <label class="test-option"><input type="radio" name="q20" value="B"> B. to_sql() raise exception khi có duplicate</label>
+            <label class="test-option"><input type="radio" name="q20" value="C"> C. Tránh duplicate khi pipeline chạy lại — đảm bảo idempotency</label>
+            <label class="test-option"><input type="radio" name="q20" value="D"> D. SQLAlchemy yêu cầu biết tổng số rows để allocate pool</label>
+          </div>
+        </div>
+
+        <div class="test-actions">
+          <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+          <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+        </div>
+        <div class="test-result" id="final-test-result" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">← W2.07 Artifact</button>
+    <div style="text-align:center;color:var(--accent2);font-weight:700">🎉 Hoàn thành Tuần 2! Tiếp tục Tuần 3 — Data Cleaning →</div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+  explain.textContent = (correct ? '✓ Chính xác! ' : '✗ Sai. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? '🔼 Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (correctCount >= 19) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn nắm chắc toàn bộ Python DE. Commit artifact và bắt đầu Tuần 3 — Data Cleaning ngay!'; }
+  else if (correctCount >= 16) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Sẵn sàng cho Tuần 3. Ôn lại vài câu sai trước khi sang Data Cleaning.'; }
+  else if (correctCount >= 12) { levelText = 'Đạt'; chipClass = 'warn'; guidance = 'Nền tảng ổn, nên review lại các module còn yếu và chạy thử artifact trước khi sang tuần 3.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Ôn lại W2.02–W2.06, build artifact và chạy thử pipeline.py trước khi sang Tuần 3.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đúng là <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng! 🎉</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+</body>
+</html>

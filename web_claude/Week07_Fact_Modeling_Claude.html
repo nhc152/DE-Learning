@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 7 · Fact Data Modeling</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero { background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%); border-bottom: 2px solid var(--accent); padding: 40px 24px 30px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+  .badge-purple { color: var(--accent4); border-color: var(--accent4); background: #6e40c926; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+  .sidebar { width: 290px; min-width: 290px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--accent4); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 44px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 960px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent4); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent4); margin-bottom: 8px; }
+  .module-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent4); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+  .kw { color: var(--accent); }
+  .str { color: var(--accent5); }
+  .fn { color: var(--accent4); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent4); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent4); color: var(--accent4); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent4); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent4); background: #6e40c915; color: var(--accent4); }
+
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent4), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent4); color: var(--accent4); }
+  .nav-btn.primary { background: var(--accent4); color: #000; border-color: var(--accent4); }
+  .nav-btn.primary:hover { background: #e0c0ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent4); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .fact-type-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; background: var(--surface2); }
+  .fact-type-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+  .fact-type-card.transaction h4 { color: var(--accent); }
+  .fact-type-card.snapshot h4 { color: var(--accent2); }
+  .fact-type-card.accumulating h4 { color: var(--accent5); }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>📊 Data Engineering Handbook Tutorial</h1>
+  <p>Giai đoạn 2 · Tuần 7 · Fact Data Modeling</p>
+  <div class="badge-row">
+    <span class="badge badge-purple">Giai đoạn 2 · Core Skills</span>
+    <span class="badge badge-orange">Module 202 · Fact Modeling</span>
+    <span class="badge badge-blue">Artifact: week7_fact_modeling.sql</span>
+    <span class="badge badge-green">Prerequisite: Tuần 5–6 xong</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương Trình Học</div>
+    <div class="level-label">▶ TUẦN 7 · FACT MODELING</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W7.01</span>Tổng Quan Fact Tables</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W7.02</span>3 Loại Fact Table</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W7.03</span>Deduplication: ROW_NUMBER & Microbatch</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W7.04</span>Reduced Fact Tables</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W7.05</span>Incremental Load: MERGE & UPSERT</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W7.06</span>Homework: user_devices & hosts</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W7.07</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+<!-- ══════════════ MODULE 0: TỔNG QUAN ══════════════ -->
+<div class="module active" id="m0">
+  <div class="module-header">
+    <div class="module-tag">Tuần 7 · Giai đoạn 2 · Core Skills</div>
+    <div class="module-title">📊 Tổng Quan Fact Tables</div>
+    <div class="module-subtitle">Fact table là gì · Vai trò trong Data Warehouse · Grain của fact table</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:14%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Module</th><th>Nội dung</th><th>Thời gian</th></tr>
+        <tr><td>W7.01</td><td>Fact table là gì, grain, types of facts, vai trò trong DWH</td><td>30 phút</td></tr>
+        <tr><td>W7.02</td><td>Transaction fact vs Periodic snapshot vs Accumulating snapshot</td><td>60 phút</td></tr>
+        <tr><td>W7.03</td><td>Deduplication: ROW_NUMBER pattern + Microbatch hourly dedup</td><td>75 phút</td></tr>
+        <tr><td>W7.04</td><td>Reduced fact tables: bit array, array compression, tiết kiệm storage</td><td>60 phút</td></tr>
+        <tr><td>W7.05</td><td>Incremental load: MERGE, UPSERT, INSERT-only với dedup</td><td>60 phút</td></tr>
+        <tr><td>W7.06</td><td>Homework: user_devices_cumulated, hosts_cumulated, host_activity_reduced</td><td>120 phút</td></tr>
+        <tr><td>W7.07</td><td>Mini test 20 câu tổng kết</td><td>25 phút</td></tr>
+      </table>
+      <div class="info-box tip">✅ <span><strong>Prerequisite:</strong> Bạn cần hoàn thành Tuần 5–6 (Dimensional Modeling) trước — hiểu grain, dimension table, surrogate key là nền tảng để học fact table.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>📊 Fact Table là gì?</h3>
+      <p>Fact table là bảng trung tâm trong Star Schema — nơi lưu trữ <strong>các sự kiện nghiệp vụ đã xảy ra</strong>. Mỗi row trong fact table đại diện cho 1 sự kiện có thể đo lường được.</p>
+      <ul>
+        <li><strong>Dimension table:</strong> lưu <em>context</em> (ai, cái gì, ở đâu, khi nào)</li>
+        <li><strong>Fact table:</strong> lưu <em>measurements</em> (bao nhiêu, bao lâu, số lần)</li>
+        <li>Fact table kết nối với dimension tables qua foreign keys</li>
+        <li>Thường là bảng lớn nhất trong DWH — có thể hàng tỷ rows</li>
+      </ul>
+
+      <h3>🎯 Sau tuần này bạn có thể</h3>
+      <ul>
+        <li>Phân biệt và chọn đúng loại fact table cho từng use case</li>
+        <li>Viết query deduplication chuẩn production bằng ROW_NUMBER</li>
+        <li>Implement Microbatch deduplication cho data stream hourly</li>
+        <li>Thiết kế reduced fact table với bit array để tiết kiệm storage</li>
+        <li>Viết MERGE statement idempotent cho incremental load</li>
+        <li>Commit artifact homework lên GitHub</li>
+      </ul>
+
+      <h3>🌾 Nhắc lại: Grain của Fact Table</h3>
+      <p><strong>Grain</strong> = định nghĩa "1 row trong bảng này đại diện cho cái gì". Đây là quyết định quan trọng nhất khi thiết kế fact table.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>grain examples</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- GRAIN TỐT — cụ thể, không mơ hồ:</span>
+<span class="output">"1 row = 1 giao dịch bán hàng từ 1 khách hàng tại 1 cửa hàng vào 1 thời điểm"
+"1 row = 1 page view từ 1 user trên 1 device vào 1 session"
+"1 row = snapshot tồn kho của 1 sản phẩm tại 1 kho vào 1 ngày"</span>
+
+<span class="comment">-- GRAIN TỆ — quá mơ hồ:</span>
+<span class="output">"1 row = thông tin về orders" ← orders gì? của ai? tổng hay từng line?
+"1 row = user activity"     ← activity loại nào? daily? hourly? per event?</span></pre></div>
+      </div>
+
+      <div class="info-box warn">⚠️ <span><strong>Nguyên tắc vàng:</strong> Xác định grain TRƯỚC KHI thiết kế bất kỳ cột nào. Grain sai → model sai → query sai → business report sai → mất niềm tin của stakeholder.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết — Anatomy của Fact Table
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>🔬 Cấu trúc điển hình</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · fact_sales DDL</span></div>
+        <div class="cmd-body"><pre><span class="kw">CREATE TABLE</span> fact_sales (
+    <span class="comment">-- Surrogate key (optional, dùng cho SCD join)</span>
+    sale_sk         BIGSERIAL,
+
+    <span class="comment">-- Degenerate dimension key (từ source, không có dim table)</span>
+    order_id        VARCHAR(50)   <span class="kw">NOT NULL</span>,
+    order_line_num  INT           <span class="kw">NOT NULL</span>,
+
+    <span class="comment">-- Foreign keys → dimension tables</span>
+    date_sk         INT           <span class="kw">NOT NULL</span>,   <span class="comment">-- → dim_date</span>
+    customer_sk     INT           <span class="kw">NOT NULL</span>,   <span class="comment">-- → dim_customer</span>
+    product_sk      INT           <span class="kw">NOT NULL</span>,   <span class="comment">-- → dim_product</span>
+    store_sk        INT           <span class="kw">NOT NULL</span>,   <span class="comment">-- → dim_store</span>
+
+    <span class="comment">-- Additive facts (có thể SUM theo mọi dimension)</span>
+    quantity_sold   INT           <span class="kw">NOT NULL</span>,
+    gross_amount    NUMERIC(12,2) <span class="kw">NOT NULL</span>,
+    discount_amount NUMERIC(12,2) <span class="kw">NOT NULL DEFAULT</span> 0,
+    net_amount      NUMERIC(12,2) <span class="kw">NOT NULL</span>,   <span class="comment">-- gross - discount</span>
+    cost_amount     NUMERIC(12,2) <span class="kw">NOT NULL</span>,
+
+    <span class="comment">-- Semi-additive fact (chỉ SUM theo 1 số dimension)</span>
+    <span class="comment">-- (không dùng ở đây, dùng trong snapshot tables)</span>
+
+    <span class="comment">-- Non-additive fact (không SUM được — chỉ AVG, MIN, MAX)</span>
+    unit_price      NUMERIC(10,2) <span class="kw">NOT NULL</span>,
+    discount_pct    NUMERIC(5,2),
+
+    <span class="comment">-- Audit columns</span>
+    loaded_at       TIMESTAMP     <span class="kw">DEFAULT NOW</span>()
+);</pre></div>
+      </div>
+
+      <h3>📐 3 Loại Facts</h3>
+      <table>
+        <tr><th>Loại</th><th>Định nghĩa</th><th>Ví dụ</th><th>Aggregation</th></tr>
+        <tr><td><strong>Additive</strong></td><td>SUM được theo mọi dimension</td><td>revenue, quantity, cost</td><td>SUM luôn có nghĩa</td></tr>
+        <tr><td><strong>Semi-additive</strong></td><td>SUM được theo 1 số dimension, không phải tất cả</td><td>account_balance, inventory_qty</td><td>SUM theo product OK, SUM theo time thì KHÔNG (sẽ overcount)</td></tr>
+        <tr><td><strong>Non-additive</strong></td><td>Không SUM được theo bất kỳ dimension nào</td><td>unit_price, discount_pct, ratio</td><td>Dùng AVG, MIN, MAX</td></tr>
+      </table>
+
+      <div class="info-box note">📌 <span><strong>Semi-additive trap:</strong> Tổng <code>account_balance</code> theo ngày = vô nghĩa (đếm double). Đúng là lấy MAX hoặc balance cuối kỳ (last snapshot per period). Đây là lỗi phổ biến trong reporting.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Grain của fact table là gì và tại sao phải xác định trước tiên?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Primary key là kỹ thuật implement, grain là business definition — khác nhau. Grain xác định trước, PK sau.')">A. Grain là tên primary key của fact table</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Grain định nghĩa "1 row = cái gì" theo business meaning. Phải xác định trước vì grain quyết định: cột nào được thêm vào, join với dimension nào, và query aggregation nào có nghĩa.')">B. Grain định nghĩa "1 row đại diện cho cái gì" — xác định trước để tránh model sai</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Số rows không phải grain. Một fact table grain tốt có thể có hàng tỷ rows.')">C. Grain là số lượng rows tối đa fact table có thể chứa</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Partition key là kỹ thuật storage, không liên quan đến grain business definition.')">D. Grain là cột dùng để partition fact table theo thời gian</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao <code>account_balance</code> là semi-additive fact?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'account_balance không liên quan đến currency conversion.')">A. Vì có thể bị âm, SUM của số âm không có nghĩa</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SUM account_balance theo customer hoặc region có nghĩa (tổng balance của nhiều tài khoản). Nhưng SUM account_balance theo time = overcount vì cùng 1 tài khoản được đếm nhiều lần (Monday balance + Tuesday balance + ... = vô nghĩa).')">B. SUM theo customer/region có nghĩa nhưng SUM theo time thì overcount cùng 1 tài khoản</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Semi-additive không liên quan đến DECIMAL precision.')">C. Vì là số thập phân — SUM DECIMAL không chính xác trong SQL</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'account_balance SUM được theo nhiều dimension, chỉ không phải TIME.')">D. Không SUM được theo bất kỳ dimension nào — chỉ dùng AVG</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Degenerate dimension key là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Surrogate key là key tổng hợp thay thế natural key trong dimension table.')">A. Surrogate key trong dimension table thay thế natural key</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Degenerate dimension là dimension key (như order_id, invoice_number) nằm trực tiếp trong fact table mà không có dimension table riêng. Nó mang context nhưng không đủ attributes để tạo dimension riêng.')">B. Key từ source (như order_id) nằm trong fact table mà không có dimension table riêng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Foreign key đến dimension table không phải degenerate dimension.')">C. Foreign key trỏ đến bảng dimension bị xóa (degenerate)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'NULL foreign key là khi không có dimension match, không phải degenerate.')">D. NULL foreign key khi không có dimension tương ứng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><code>discount_pct</code> (tỷ lệ giảm giá %) là loại fact nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Additive nghĩa là SUM có ý nghĩa. Tổng discount_pct của nhiều orders = vô nghĩa.')">A. Additive — có thể SUM theo mọi dimension</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Semi-additive nghĩa là SUM OK theo một số dimension. Với ratio, không SUM được theo dimension nào.')">B. Semi-additive — SUM theo customer OK, theo time thì không</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Non-additive fact là ratio, percentage, price per unit — không có ý nghĩa khi SUM. Chỉ dùng AVG, MIN, MAX, hoặc tính lại từ các additive facts (total_discount / total_gross).')">C. Non-additive — không SUM được, chỉ dùng AVG/MIN/MAX</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Percentage không phải boolean. Boolean thường dùng trong bit array, không phải fact.')">D. Boolean fact — chỉ có 0 hoặc 1</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Fact table thường là bảng lớn nhất trong DWH. Cách tối ưu phổ biến nhất là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'VARCHAR(MAX) không giúp tối ưu. Thực ra cần dùng kiểu dữ liệu nhỏ nhất phù hợp.')">A. Dùng VARCHAR(MAX) cho mọi cột để linh hoạt</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Partition theo thời gian (date, month) giúp query chỉ scan partition liên quan thay vì toàn bảng. Kết hợp với columnar storage (Parquet/ORC) và proper indexing cho dramatic performance improvement.')">B. Partition theo thời gian để query chỉ scan data liên quan</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JSONB chậm hơn columnar và không thể aggregate hiệu quả.')">C. Lưu toàn bộ row dưới dạng JSONB để linh hoạt schema</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Xóa historical data không phải optimization — là data loss.')">D. Xóa data cũ hơn 30 ngày để giảm size bảng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong Star Schema, fact table kết nối với dimension tables như thế nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Dimension tables không chứa fact data. Chúng chứa context/attribute.')">A. Dimension tables chứa foreign keys trỏ vào fact table</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Fact table chứa foreign keys (thường là surrogate keys) trỏ đến primary key của từng dimension table. Pattern này tạo "star" shape khi vẽ diagram — fact ở giữa, dimensions ở xung quanh.')">B. Fact table chứa foreign keys trỏ đến primary key của từng dimension table</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Materialized views không phải cách kết nối fact và dimension.')">C. Kết nối qua materialized views chứa pre-joined data</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Fact và dimension không chia sẻ partition key để kết nối.')">D. Kết nối qua partition key giống nhau giữa 2 bảng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>📊 Fact Table</strong>Lưu sự kiện đo lường được. Bảng lớn nhất DWH. Kết nối với dimensions qua FK.</div>
+        <div class="summary-item"><strong>🌾 Grain</strong>Định nghĩa "1 row = cái gì". Xác định trước tiên, quyết định mọi thứ còn lại.</div>
+        <div class="summary-item"><strong>➕ Additive</strong>SUM được theo mọi dimension: revenue, quantity, cost. An toàn để aggregate.</div>
+        <div class="summary-item"><strong>⚖️ Semi-additive</strong>SUM OK theo entity, không OK theo time. Ví dụ: balance, inventory level.</div>
+        <div class="summary-item"><strong>🚫 Non-additive</strong>Ratio, percentage, unit price. Chỉ dùng AVG/MIN/MAX hoặc tính lại từ additive facts.</div>
+        <div class="summary-item"><strong>🔑 Degenerate Dim</strong>Key từ source (order_id) trong fact table — không có dimension table riêng.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <div></div>
+    <button class="nav-btn primary" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">W7.02 3 Loại Fact Table →</button>
+  </div>
+</div>
+
+<!-- ══════════════ MODULE 1: 3 LOẠI FACT TABLE ══════════════ -->
+<div class="module" id="m1">
+  <div class="module-header">
+    <div class="module-tag">Tuần 7 · Module W7.02</div>
+    <div class="module-title">🔱 3 Loại Fact Table</div>
+    <div class="module-subtitle">Transaction · Periodic Snapshot · Accumulating Snapshot — khi nào dùng gì</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:28%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Loại</th><th>Grain</th><th>Rows tăng thế nào</th><th>Dùng khi nào</th></tr>
+        <tr><td><strong>Transaction Fact</strong></td><td>1 event / 1 transaction</td><td>INSERT only, không update</td><td>Khi cần audit trail, event history</td></tr>
+        <tr><td><strong>Periodic Snapshot</strong></td><td>1 entity vào 1 thời điểm cố định</td><td>INSERT mỗi period (ngày/tuần/tháng)</td><td>Khi cần trend over time</td></tr>
+        <tr><td><strong>Accumulating Snapshot</strong></td><td>1 process lifecycle</td><td>UPDATE khi milestone thay đổi</td><td>Khi cần track pipeline/workflow</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+
+      <div class="fact-type-card transaction">
+        <h4>⚡ 1. Transaction Fact Table</h4>
+        <p><strong>Grain:</strong> 1 event xảy ra tại 1 thời điểm. Mỗi lần user mua hàng, click, login → 1 row mới. Không bao giờ update row cũ.</p>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · transaction fact example</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Grain: 1 row = 1 line item trong 1 đơn hàng</span>
+<span class="kw">CREATE TABLE</span> fact_order_items (
+    order_id        VARCHAR(50)   <span class="kw">NOT NULL</span>,
+    order_line_num  SMALLINT      <span class="kw">NOT NULL</span>,
+    date_sk         INT           <span class="kw">NOT NULL</span>,
+    customer_sk     INT           <span class="kw">NOT NULL</span>,
+    product_sk      INT           <span class="kw">NOT NULL</span>,
+    quantity        INT           <span class="kw">NOT NULL</span>,
+    unit_price      NUMERIC(10,2) <span class="kw">NOT NULL</span>,
+    net_amount      NUMERIC(12,2) <span class="kw">NOT NULL</span>,
+    loaded_at       TIMESTAMP     <span class="kw">DEFAULT NOW</span>()
+);
+
+<span class="comment">-- ✅ Chỉ INSERT, không UPDATE bao giờ</span>
+<span class="comment">-- Query: doanh thu theo ngày và category</span>
+<span class="kw">SELECT</span>
+    d.full_date,
+    p.category,
+    <span class="fn">SUM</span>(f.net_amount)  <span class="kw">AS</span> revenue,
+    <span class="fn">COUNT</span>(*)           <span class="kw">AS</span> transactions
+<span class="kw">FROM</span> fact_order_items f
+<span class="kw">JOIN</span> dim_date d     <span class="kw">ON</span> f.date_sk = d.date_sk
+<span class="kw">JOIN</span> dim_product p  <span class="kw">ON</span> f.product_sk = p.product_sk
+<span class="kw">GROUP BY</span> d.full_date, p.category
+<span class="kw">ORDER BY</span> d.full_date;</pre></div>
+        </div>
+      </div>
+
+      <div class="fact-type-card snapshot">
+        <h4>📸 2. Periodic Snapshot Fact Table</h4>
+        <p><strong>Grain:</strong> 1 entity tại 1 thời điểm cố định (cuối ngày, cuối tuần, cuối tháng). INSERT thêm 1 row mỗi period — không xóa row cũ. Dùng cho semi-additive facts.</p>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div></div><span>PostgreSQL · periodic snapshot</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Grain: 1 row = balance của 1 tài khoản vào cuối 1 ngày</span>
+<span class="kw">CREATE TABLE</span> fact_account_daily_snapshot (
+    snapshot_date   DATE          <span class="kw">NOT NULL</span>,
+    account_sk      INT           <span class="kw">NOT NULL</span>,
+    customer_sk     INT           <span class="kw">NOT NULL</span>,
+    closing_balance NUMERIC(15,2) <span class="kw">NOT NULL</span>, <span class="comment">-- semi-additive!</span>
+    transaction_cnt INT           <span class="kw">NOT NULL</span>, <span class="comment">-- additive</span>
+    debit_total     NUMERIC(15,2) <span class="kw">NOT NULL</span>, <span class="comment">-- additive</span>
+    credit_total    NUMERIC(15,2) <span class="kw">NOT NULL</span>, <span class="comment">-- additive</span>
+    <span class="kw">PRIMARY KEY</span> (snapshot_date, account_sk)
+);
+
+<span class="comment">-- ✅ Trend analysis: balance trung bình theo tháng</span>
+<span class="kw">SELECT</span>
+    DATE_TRUNC(<span class="str">'month'</span>, snapshot_date) <span class="kw">AS</span> month,
+    <span class="fn">AVG</span>(closing_balance)               <span class="kw">AS</span> avg_balance,  <span class="comment">-- AVG, không SUM!</span>
+    <span class="fn">SUM</span>(transaction_cnt)               <span class="kw">AS</span> total_txns    <span class="comment">-- SUM OK</span>
+<span class="kw">FROM</span> fact_account_daily_snapshot
+<span class="kw">GROUP BY</span> DATE_TRUNC(<span class="str">'month'</span>, snapshot_date);</pre></div>
+        </div>
+      </div>
+
+      <div class="fact-type-card accumulating">
+        <h4>🔄 3. Accumulating Snapshot Fact Table</h4>
+        <p><strong>Grain:</strong> 1 row = 1 process lifecycle (đơn hàng từ lúc đặt đến lúc giao). Row được <strong>UPDATE</strong> mỗi khi có milestone mới. Phù hợp để track lead time, pipeline velocity.</p>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · accumulating snapshot</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Grain: 1 row = 1 đơn hàng từ lúc đặt → giao → hoàn thành</span>
+<span class="kw">CREATE TABLE</span> fact_order_fulfillment (
+    order_sk            INT        <span class="kw">NOT NULL PRIMARY KEY</span>,
+    order_id            VARCHAR(50) <span class="kw">NOT NULL</span>,
+    customer_sk         INT,
+
+    <span class="comment">-- Milestone date keys (NULL nếu chưa đến milestone)</span>
+    ordered_date_sk     INT,    <span class="comment">-- bao giờ cũng có</span>
+    confirmed_date_sk   INT,    <span class="comment">-- NULL cho đến khi confirmed</span>
+    shipped_date_sk     INT,    <span class="comment">-- NULL cho đến khi shipped</span>
+    delivered_date_sk   INT,    <span class="comment">-- NULL cho đến khi delivered</span>
+    returned_date_sk    INT,    <span class="comment">-- NULL nếu không return</span>
+
+    <span class="comment">-- Lag facts (tính từ milestone trước)</span>
+    days_to_confirm     INT,    <span class="comment">-- confirmed_date - ordered_date</span>
+    days_to_ship        INT,    <span class="comment">-- shipped_date - confirmed_date</span>
+    days_to_deliver     INT,    <span class="comment">-- delivered_date - shipped_date</span>
+    total_lead_days     INT,    <span class="comment">-- delivered_date - ordered_date</span>
+
+    order_total         NUMERIC(12,2),
+    current_status      VARCHAR(20),
+    last_updated_at     TIMESTAMP <span class="kw">DEFAULT NOW</span>()
+);
+
+<span class="comment">-- ✅ UPDATE khi có milestone mới</span>
+<span class="kw">UPDATE</span> fact_order_fulfillment
+<span class="kw">SET</span>
+    shipped_date_sk = :new_date_sk,
+    days_to_ship    = :new_date_sk - confirmed_date_sk,
+    current_status  = <span class="str">'SHIPPED'</span>,
+    last_updated_at = <span class="fn">NOW</span>()
+<span class="kw">WHERE</span> order_id = :order_id;
+
+<span class="comment">-- Query: avg lead time theo tháng đặt hàng</span>
+<span class="kw">SELECT</span>
+    d.year_month,
+    <span class="fn">AVG</span>(total_lead_days) <span class="kw">AS</span> avg_lead_days,
+    <span class="fn">COUNT</span>(*) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> delivered_date_sk <span class="kw">IS NOT NULL</span>) <span class="kw">AS</span> delivered_cnt
+<span class="kw">FROM</span> fact_order_fulfillment f
+<span class="kw">JOIN</span> dim_date d <span class="kw">ON</span> f.ordered_date_sk = d.date_sk
+<span class="kw">GROUP BY</span> d.year_month;</pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Bạn cần track "số tồn kho của từng SKU cuối mỗi ngày" để phân tích trend. Loại fact table nào phù hợp?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Transaction fact ghi từng inventory movement, không ghi trạng thái cuối ngày.')">A. Transaction Fact — ghi mỗi inventory movement</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Periodic Snapshot: grain = 1 SKU × 1 ngày, INSERT mỗi ngày. Dùng AVG để trend inventory level, không SUM theo time. Đây là use case điển hình cho periodic snapshot.')">B. Periodic Snapshot — 1 row = 1 SKU × 1 ngày, INSERT mỗi ngày</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Accumulating snapshot dùng cho workflow lifecycle với milestones, không phải daily trend.')">C. Accumulating Snapshot — UPDATE khi inventory thay đổi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Dimension table lưu attribute, không lưu metric như tồn kho.')">D. Dimension table — vì SKU là entity có attributes</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao Accumulating Snapshot sử dụng UPDATE thay vì INSERT cho mỗi milestone mới?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'UPDATE không nhất thiết nhanh hơn INSERT. Đây không phải lý do.')">A. UPDATE nhanh hơn INSERT trong PostgreSQL</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Accumulating snapshot mô hình hóa 1 lifecycle = 1 row. Mỗi milestone chỉ làm row đó "tiến thêm" — không tạo ra sự kiện mới. Nếu INSERT, bạn sẽ có nhiều rows cho cùng 1 order, phá vỡ grain.')">B. Vì 1 lifecycle = 1 row — milestone chỉ cập nhật trạng thái, không tạo sự kiện mới</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SQL không có giới hạn số INSERT trên 1 table.')">C. SQL không cho phép INSERT nhiều hơn 1 row cho cùng 1 entity</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL WAL ghi cả INSERT và UPDATE. Đây không phải lý do.')">D. INSERT tạo WAL log, UPDATE thì không — tiết kiệm disk</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Transaction fact table KHÔNG nên làm gì với row đã insert?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Aggregate và report là mục đích chính của fact table.')">A. Aggregate và report theo nhiều dimensions</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Transaction fact là immutable — ghi nhận event đã xảy ra. UPDATE hoặc DELETE sẽ phá vỡ audit trail. Nếu có correction, insert "correction event" mới thay vì sửa row cũ.')">B. UPDATE hoặc DELETE row đã insert — phá vỡ audit trail</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Partition theo thời gian là best practice cho performance.')">C. Partition theo thời gian để tối ưu query performance</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JOIN với dimension là mục đích chính trong Star Schema.')">D. JOIN với dimension tables để enrich data</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Loại fact table nào phù hợp để track "thời gian từ lúc lead vào CRM đến lúc deal closed"?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Transaction fact sẽ tạo nhiều rows cho cùng 1 deal — khó tính lead time.')">A. Transaction Fact — ghi mỗi touchpoint của lead</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Periodic snapshot ghi trạng thái theo kỳ — không track milestone rõ ràng.')">B. Periodic Snapshot — snapshot trạng thái lead mỗi ngày</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Accumulating snapshot: grain = 1 lead deal, có các milestone date fields: lead_created, qualified_date, proposal_date, closed_date. Lag facts như days_to_close được tính từ các milestone. Điển hình cho sales funnel analytics.')">C. Accumulating Snapshot — 1 row per deal, milestone dates cập nhật khi tiến triển</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Dimension table không phù hợp để track metrics như lead time.')">D. Dimension table — lead là entity cần attributes</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong Periodic Snapshot, khi nào dùng AVG thay vì SUM cho <code>inventory_qty</code>?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không có quy tắc như vậy. Cần hiểu business meaning.')">A. Luôn dùng AVG — SUM không bao giờ có nghĩa với snapshot</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SUM inventory_qty THEO PRODUCT có nghĩa (tổng tồn kho của nhiều sản phẩm tại 1 thời điểm). SUM THEO THỜI GIAN thì vô nghĩa vì cùng 1 item được đếm nhiều lần. Khi aggregate theo time, dùng AVG (average daily inventory) hoặc lấy end-of-period value.')">B. SUM theo product/store OK, SUM theo time thì dùng AVG (semi-additive)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COUNT không thay thế được SUM cho quantity.')">C. Không dùng SUM hay AVG — chỉ COUNT là đúng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SUM theo time overcount — không phải cách đúng.')">D. SUM theo time OK vì snapshot ghi đúng tồn kho thực tế</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><code>days_to_deliver</code> trong Accumulating Snapshot được tính thế nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'days_to_deliver là khoảng từ shipped đến delivered, không phải toàn bộ lifecycle.')">A. delivered_date - ordered_date (toàn bộ lead time)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. days_to_deliver = delivered_date - shipped_date: thời gian vận chuyển. Đây là "lag" giữa 2 milestone liên tiếp. Tách từng lag riêng giúp phân tích bottleneck: khâu nào chậm nhất trong pipeline.')">B. delivered_date - shipped_date (lag giữa 2 milestone liên tiếp)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'confirmed_date là milestone trước shipped, không liên quan đến delivery time.')">C. delivered_date - confirmed_date</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'NOW() không phù hợp cho lag fact — cần milestone dates cụ thể.')">D. NOW() - shipped_date (real-time calculation)</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>⚡ Transaction Fact</strong>1 event = 1 row. INSERT only, không update. Immutable. Dùng cho audit trail, event history.</div>
+        <div class="summary-item"><strong>📸 Periodic Snapshot</strong>1 entity × 1 period = 1 row. INSERT mỗi kỳ. Dùng AVG cho semi-additive khi aggregate theo time.</div>
+        <div class="summary-item"><strong>🔄 Accumulating Snapshot</strong>1 lifecycle = 1 row. UPDATE khi có milestone mới. Dùng cho pipeline, workflow, funnel tracking.</div>
+        <div class="summary-item"><strong>📅 Milestone Date Keys</strong>NULL cho đến khi milestone xảy ra. Lag facts tính từ milestone trước — đo bottleneck.</div>
+        <div class="summary-item"><strong>⚠️ Semi-additive Trap</strong>inventory_qty, balance: SUM theo entity OK, SUM theo time = overcount. Luôn dùng AVG hoặc end-of-period.</div>
+        <div class="summary-item"><strong>🔍 Chọn đúng loại</strong>Hỏi: "Cần lịch sử event?" → Transaction. "Cần trend theo time?" → Snapshot. "Cần track pipeline?" → Accumulating.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(0,document.querySelectorAll('.nav-item')[0])">← W7.01 Tổng Quan</button>
+    <button class="nav-btn primary" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">W7.03 Deduplication →</button>
+  </div>
+</div>
+
+<!-- ══════════════ MODULE 2: DEDUPLICATION ══════════════ -->
+<div class="module" id="m2">
+  <div class="module-header">
+    <div class="module-tag">Tuần 7 · Module W7.03</div>
+    <div class="module-title">🔍 Deduplication: ROW_NUMBER & Microbatch</div>
+    <div class="module-subtitle">ROW_NUMBER pattern · Microbatch hourly dedup · Production-grade dedup query</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:42%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Kỹ thuật</th><th>Use case</th><th>Cách hoạt động</th></tr>
+        <tr><td>ROW_NUMBER() OVER PARTITION</td><td>Dedup batch data với business key</td><td>Rank rows cùng key, lấy rank=1</td></tr>
+        <tr><td>DISTINCT ON (PostgreSQL)</td><td>Simple dedup theo 1 key + sort</td><td>Syntax ngắn hơn ROW_NUMBER</td></tr>
+        <tr><td>Microbatch Deduplication</td><td>High-volume stream data theo giờ</td><td>Dedup trong từng giờ, merge lại</td></tr>
+        <tr><td>CTE + EXCEPT</td><td>Chỉ load rows chưa có trong target</td><td>EXCEPT loại rows đã tồn tại</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>Hiểu tại sao duplicate xuất hiện trong data pipeline</li>
+        <li>Viết ROW_NUMBER() dedup query production-grade cho batch data</li>
+        <li>Implement Microbatch deduplication cho data stream cao tần</li>
+        <li>Biết khi nào dùng ROW_NUMBER vs DISTINCT ON vs CTE EXCEPT</li>
+        <li>Viết dedup idempotent — chạy nhiều lần vẫn cho kết quả đúng</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>🔴 Tại sao duplicate xảy ra?</h3>
+      <ul>
+        <li><strong>Source system retry:</strong> API timeout → retry → 2 lần ghi cùng 1 event</li>
+        <li><strong>Pipeline retry:</strong> Airflow task fail giữa chừng, chạy lại từ đầu → double insert</li>
+        <li><strong>Multiple producers:</strong> Nhiều service cùng ghi event cho cùng 1 action</li>
+        <li><strong>CDC (Change Data Capture):</strong> Binlog có thể deliver same event nhiều lần</li>
+        <li><strong>Backfill overlap:</strong> Backfill historical data trùng với data đã load</li>
+      </ul>
+
+      <div class="info-box warn">⚠️ <span><strong>Nguyên tắc:</strong> Không bao giờ assume source data sạch. Luôn dedup trước khi load vào fact table production. Duplicate trong fact table = revenue metric sai = business quyết định sai.</span></div>
+
+      <h3>✅ ROW_NUMBER() Deduplication Pattern</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · ROW_NUMBER dedup — production standard</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Bảng staging có duplicate event_id</span>
+<span class="comment">-- Lấy row "đúng nhất" theo business rule: mới nhất (updated_at DESC)</span>
+
+<span class="kw">WITH</span> deduped <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        *,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> event_id          <span class="comment">-- business key</span>
+            <span class="kw">ORDER BY</span> updated_at <span class="kw">DESC</span>,    <span class="comment">-- lấy bản mới nhất</span>
+                     created_at  <span class="kw">DESC</span>    <span class="comment">-- tiebreaker</span>
+        ) <span class="kw">AS</span> rn
+    <span class="kw">FROM</span> stg_events
+    <span class="kw">WHERE</span> event_date = <span class="str">'2024-01-15'</span>       <span class="comment">-- filter partition hôm nay</span>
+)
+<span class="kw">SELECT</span>
+    event_id, user_id, event_type,
+    event_properties, occurred_at
+<span class="kw">FROM</span> deduped
+<span class="kw">WHERE</span> rn = 1;                             <span class="comment">-- chỉ lấy row rank 1</span>
+
+<span class="comment">-- Verify: số rows trước và sau dedup</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_raw,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> event_id) <span class="kw">AS</span> unique_events,
+    <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> event_id) <span class="kw">AS</span> duplicate_count
+<span class="kw">FROM</span> stg_events
+<span class="kw">WHERE</span> event_date = <span class="str">'2024-01-15'</span>;</pre></div>
+      </div>
+
+      <h3>⚡ DISTINCT ON — Syntax ngắn hơn (PostgreSQL only)</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · DISTINCT ON</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Tương đương ROW_NUMBER với partition + order</span>
+<span class="comment">-- DISTINCT ON (key) + ORDER BY key, tiebreaker</span>
+<span class="kw">SELECT DISTINCT ON</span> (event_id)
+    event_id, user_id, event_type, occurred_at
+<span class="kw">FROM</span> stg_events
+<span class="kw">WHERE</span> event_date = <span class="str">'2024-01-15'</span>
+<span class="kw">ORDER BY</span>
+    event_id,
+    updated_at <span class="kw">DESC</span>;   <span class="comment">-- lấy bản mới nhất cho mỗi event_id</span>
+
+<span class="comment">-- ⚠️ Giới hạn: ORDER BY phải bắt đầu bằng cùng columns trong DISTINCT ON</span>
+<span class="comment">-- ROW_NUMBER linh hoạt hơn và portable hơn (Spark SQL, BigQuery, Snowflake)</span></pre></div>
+      </div>
+
+      <h3>🔄 Microbatch Deduplication — Pattern cho high-volume stream</h3>
+      <p>Khi data volume lớn (hàng triệu events/ngày), dedup toàn bộ cùng lúc tốn RAM và slow. Microbatch chia nhỏ theo giờ, dedup từng batch, rồi merge.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · Microbatch hourly dedup pattern</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Bước 1: Tạo bảng hourly deduped (chạy mỗi giờ)</span>
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> stg_events_hourly_deduped (
+    event_id     VARCHAR(50) <span class="kw">NOT NULL</span>,
+    user_id      BIGINT,
+    event_type   VARCHAR(50),
+    occurred_at  TIMESTAMP,
+    event_hour   TIMESTAMP,           <span class="comment">-- DATE_TRUNC('hour', occurred_at)</span>
+    <span class="kw">PRIMARY KEY</span> (event_id, event_hour) <span class="comment">-- PK ngăn duplicate trong cùng giờ</span>
+);
+
+<span class="comment">-- Bước 2: INSERT deduped rows cho giờ hiện tại (upsert)</span>
+<span class="kw">INSERT INTO</span> stg_events_hourly_deduped
+<span class="kw">WITH</span> hourly_deduped <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        *,
+        DATE_TRUNC(<span class="str">'hour'</span>, occurred_at) <span class="kw">AS</span> event_hour,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> event_id, DATE_TRUNC(<span class="str">'hour'</span>, occurred_at)
+            <span class="kw">ORDER BY</span> updated_at <span class="kw">DESC</span>
+        ) <span class="kw">AS</span> rn
+    <span class="kw">FROM</span> raw_events
+    <span class="kw">WHERE</span> occurred_at >= DATE_TRUNC(<span class="str">'hour'</span>, <span class="fn">NOW</span>())
+      <span class="kw">AND</span> occurred_at <  DATE_TRUNC(<span class="str">'hour'</span>, <span class="fn">NOW</span>()) + <span class="kw">INTERVAL</span> <span class="str">'1 hour'</span>
+)
+<span class="kw">SELECT</span> event_id, user_id, event_type, occurred_at, event_hour
+<span class="kw">FROM</span>  hourly_deduped
+<span class="kw">WHERE</span> rn = 1
+<span class="kw">ON CONFLICT</span> (event_id, event_hour) <span class="kw">DO UPDATE SET</span>
+    updated_at = <span class="fn">NOW</span>();   <span class="comment">-- idempotent: chạy nhiều lần không tăng rows</span>
+
+<span class="comment">-- Bước 3: Cross-hour dedup (1 event có thể span nhiều giờ do late arrival)</span>
+<span class="kw">WITH</span> cross_hour_deduped <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        *,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> event_id
+            <span class="kw">ORDER BY</span> occurred_at <span class="kw">DESC</span>
+        ) <span class="kw">AS</span> rn
+    <span class="kw">FROM</span> stg_events_hourly_deduped
+    <span class="kw">WHERE</span> event_hour >= CURRENT_DATE  <span class="comment">-- full day merge</span>
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> cross_hour_deduped <span class="kw">WHERE</span> rn = 1;</pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span><strong>Microbatch reference:</strong> Pattern này dựa trên <a href="https://github.com/EcZachly/microbatch-hourly-deduped-tutorial" style="color:var(--accent4)">EcZachly/microbatch-hourly-deduped-tutorial</a> — repo của Zach Wilson. Đây là chuẩn được dùng tại nhiều công ty DE lớn.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Trong ROW_NUMBER() dedup, <code>PARTITION BY event_id ORDER BY updated_at DESC</code> làm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ROW_NUMBER không sort toàn bảng mà sort trong từng partition.')">A. Sort toàn bảng theo updated_at và gán số thứ tự</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. PARTITION BY event_id tạo "nhóm" cho mỗi event_id. Trong mỗi nhóm, ORDER BY updated_at DESC sort mới nhất lên đầu và gán rn=1. WHERE rn=1 sau đó chỉ giữ row mới nhất cho mỗi event_id.')">B. Trong mỗi nhóm event_id, gán rank 1 cho row có updated_at mới nhất</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ROW_NUMBER không xóa duplicate — nó chỉ đánh rank. Filter WHERE rn=1 mới loại bỏ.')">C. Tự động xóa duplicate và giữ lại row mới nhất</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ROW_NUMBER không update bất kỳ row nào.')">D. Update tất cả rows cùng event_id thành giá trị mới nhất</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao Microbatch deduplication chia theo giờ thay vì dedup toàn bộ ngày cùng lúc?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Giờ không phải đơn vị chuẩn trong SQL. Đây không phải lý do.')">A. SQL chỉ hỗ trợ window function theo giờ, không theo ngày</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Với hàng triệu events/ngày, dedup 1 batch cần load tất cả vào memory cùng lúc. Chia theo giờ: memory usage = 1/24, mỗi batch xong có thể flush. Ngoài ra, data mỗi giờ có thể dedup độc lập và song song.')">B. Chia nhỏ giảm memory cần thiết — mỗi batch 1/24 data, xử lý được song song</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Partitioning không yêu cầu Microbatch. Đây là optimization riêng.')">C. PostgreSQL yêu cầu partition theo giờ để dùng ROW_NUMBER</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Airflow scheduling không bắt buộc hourly — daily cũng OK.')">D. Airflow chỉ schedule được pipeline hourly, không phải daily</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao phải dedup cross-hour sau khi đã dedup từng giờ?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Duplicate theo user_id không liên quan đến cross-hour dedup.')">A. Để loại bỏ duplicate user_id giữa các giờ khác nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Late arrival: event xảy ra lúc 14:55 có thể arrive lúc 15:05 do network delay → cùng event_id xuất hiện trong bucket giờ 14 và giờ 15. Trong-giờ dedup không catch được case này. Cross-hour dedup thứ hai giải quyết late arrival.')">B. Late arrival: event arrive muộn có thể xuất hiện trong 2 bucket giờ khác nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ROW_NUMBER không bị giới hạn 1 giờ.')">C. ROW_NUMBER chỉ hoạt động trong 1 giờ — cần chạy lại sau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Timezone conversion không phải lý do cần cross-hour dedup.')">D. Để convert timezone từ UTC sang local time sau khi dedup</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Sự khác biệt chính giữa DISTINCT ON và ROW_NUMBER() là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều có thể dùng ORDER BY. Đây không phải điểm khác biệt chính.')">A. DISTINCT ON không dùng ORDER BY, ROW_NUMBER thì có</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. DISTINCT ON là PostgreSQL-specific syntax. ROW_NUMBER() là ANSI SQL, chạy được trên Spark SQL, BigQuery, Snowflake, Redshift. Trong DE, thường dùng ROW_NUMBER để code portable hơn.')">B. DISTINCT ON chỉ chạy trên PostgreSQL; ROW_NUMBER() là ANSI SQL, portable qua mọi engine</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều nhanh với index phù hợp. Không có quy tắc cứng nhắc về performance.')">C. DISTINCT ON luôn nhanh hơn ROW_NUMBER</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ROW_NUMBER() chạy tốt với nhiều PARTITION BY columns.')">D. ROW_NUMBER() chỉ hoạt động với 1 PARTITION BY column</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi dedup, tại sao nên kiểm tra <code>COUNT(*) - COUNT(DISTINCT event_id)</code> trước khi load?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COUNT không liên quan đến performance optimization.')">A. Để estimate runtime của query deduplication</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là "duplicate check" trước khi chạy dedup. Nếu kết quả = 0: không có duplicate, load thẳng nhanh hơn. Nếu > 0: cần dedup. Logging số duplicate giúp monitor data quality over time — nếu đột nhiên tăng cao là signal có vấn đề ở upstream.')">B. Đo lường số duplicate để monitor data quality và quyết định có cần dedup không</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COUNT không block/lock table trong PostgreSQL khi đọc.')">C. Lock table trước khi insert để tránh concurrent duplicate</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COUNT không liên quan đến memory usage trong PostgreSQL.')">D. Kiểm tra PostgreSQL có đủ RAM để chạy ROW_NUMBER không</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><code>ON CONFLICT (event_id, event_hour) DO UPDATE SET updated_at = NOW()</code> đảm bảo tính chất gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ON CONFLICT không tăng performance của INSERT.')">A. Performance — INSERT nhanh hơn khi có conflict handler</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Idempotency: chạy cùng INSERT lần 2, lần 3 không tạo thêm row mới mà chỉ update updated_at. Row count không thay đổi. Pipeline có thể retry an toàn mà không cần lo về duplicate.')">B. Idempotency — chạy lại không tăng rows, chỉ update timestamp</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ON CONFLICT không phải referential integrity. Đó là FOREIGN KEY constraint.')">C. Referential integrity — đảm bảo FK hợp lệ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ON CONFLICT không liên quan đến transaction isolation level.')">D. Transaction isolation — tránh dirty reads khi concurrent insert</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>🔴 Nguồn gốc duplicate</strong>Retry, pipeline rerun, multiple producers, CDC at-least-once, backfill overlap. Luôn dedup trước khi load.</div>
+        <div class="summary-item"><strong>✅ ROW_NUMBER pattern</strong>PARTITION BY business_key ORDER BY updated_at DESC → WHERE rn=1. Portable, production-grade, linh hoạt.</div>
+        <div class="summary-item"><strong>⚡ DISTINCT ON</strong>PostgreSQL-only, syntax ngắn hơn. ORDER BY phải bắt đầu bằng DISTINCT ON columns.</div>
+        <div class="summary-item"><strong>🔄 Microbatch Hourly</strong>Dedup từng giờ → reduce memory. Cross-hour dedup thứ hai xử lý late arrival events.</div>
+        <div class="summary-item"><strong>🔁 Idempotency</strong>ON CONFLICT DO UPDATE — chạy lại không tăng rows. Bắt buộc cho production pipeline.</div>
+        <div class="summary-item"><strong>📊 Duplicate Monitor</strong>COUNT(*) - COUNT(DISTINCT key) = duplicate count. Log hàng ngày để phát hiện anomaly sớm.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Bài 1: Viết dedup query production cho stg_web_events</div>
+        <div class="practice-task-body">
+          <p>Bảng <code>stg_web_events</code> có columns: <code>event_id, user_id, page_url, event_type, occurred_at, ingested_at</code>. Viết query dedup lấy row mới nhất (<code>ingested_at</code> lớn nhất) cho mỗi <code>event_id</code>. Bao gồm duplicate count report.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution · web_events_dedup.sql</span></div>
+              <div class="cmd-body"><pre><span class="comment">-- Step 1: Duplicate report</span>
+<span class="kw">SELECT</span>
+    event_date,
+    <span class="fn">COUNT</span>(*)                              <span class="kw">AS</span> total_raw,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> event_id)               <span class="kw">AS</span> unique_events,
+    <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> event_id)  <span class="kw">AS</span> duplicates
+<span class="kw">FROM</span> stg_web_events
+<span class="kw">GROUP BY</span> event_date
+<span class="kw">ORDER BY</span> event_date <span class="kw">DESC</span>;
+
+<span class="comment">-- Step 2: Dedup CTE</span>
+<span class="kw">WITH</span> deduped <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        event_id, user_id, page_url,
+        event_type, occurred_at, ingested_at,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> event_id
+            <span class="kw">ORDER BY</span>    ingested_at <span class="kw">DESC</span>
+        ) <span class="kw">AS</span> rn
+    <span class="kw">FROM</span> stg_web_events
+    <span class="kw">WHERE</span> event_date = CURRENT_DATE
+)
+<span class="kw">INSERT INTO</span> fact_web_events
+    (event_id, user_id, page_url, event_type, occurred_at)
+<span class="kw">SELECT</span>
+    event_id, user_id, page_url, event_type, occurred_at
+<span class="kw">FROM</span>  deduped
+<span class="kw">WHERE</span> rn = 1
+<span class="kw">ON CONFLICT</span> (event_id) <span class="kw">DO NOTHING</span>;</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">← W7.02 3 Loại Fact</button>
+    <button class="nav-btn primary" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">W7.04 Reduced Fact →</button>
+  </div>
+</div>
+
+<!-- ══════════════ MODULE 3: REDUCED FACT TABLES ══════════════ -->
+<div class="module" id="m3">
+  <div class="module-header">
+    <div class="module-tag">Tuần 7 · Module W7.04</div>
+    <div class="module-title">🗜️ Reduced Fact Tables</div>
+    <div class="module-subtitle">Bit array · Array compression · Tiết kiệm storage 10–50x · host_activity_reduced</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:57%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Kỹ thuật</th><th>Use case</th><th>Storage saving</th></tr>
+        <tr><td>Bit array (BIT/VARBIT)</td><td>"User active vào ngày nào trong tháng"</td><td>31 booleans → 4 bytes thay vì 31 rows</td></tr>
+        <tr><td>PostgreSQL ARRAY</td><td>Danh sách metric per period</td><td>1 row thay vì N rows per entity</td></tr>
+        <tr><td>JSONB compressed</td><td>Sparse metric — nhiều null</td><td>Chỉ lưu keys có giá trị</td></tr>
+      </table>
+      <div class="info-box note">📌 <span><strong>Khi nào dùng reduced fact:</strong> Khi bảng fact có hàng tỷ rows boolean/low-cardinality, và query chủ yếu là "user này active trong khoảng nào?" chứ không phải full row scan.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>🧮 Vấn đề: fact table activity quá lớn</h3>
+      <p>Giả sử bạn track xem user có active trên website vào mỗi ngày không. Với 10M users × 365 ngày = <strong>3.65 tỷ rows</strong>, mỗi row chỉ lưu <code>TRUE/FALSE</code>. Lãng phí cực kỳ.</p>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · naive approach vs reduced</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- ❌ NAIVE: 1 row per user per day — 3.65 tỷ rows cho 10M users × 365 ngày</span>
+<span class="kw">CREATE TABLE</span> fact_user_activity_naive (
+    user_id     BIGINT,
+    activity_date DATE,
+    is_active   BOOLEAN,
+    <span class="kw">PRIMARY KEY</span> (user_id, activity_date)
+);
+<span class="comment">-- Storage: 10M × 365 × ~30 bytes ≈ 100 GB</span>
+
+<span class="comment">-- ✅ REDUCED: 1 row per user per month — bit array cho 31 ngày</span>
+<span class="kw">CREATE TABLE</span> fact_user_activity_reduced (
+    user_id       BIGINT        <span class="kw">NOT NULL</span>,
+    month_start   DATE          <span class="kw">NOT NULL</span>,   <span class="comment">-- first day of month</span>
+    active_days   BIT(31)       <span class="kw">NOT NULL</span>,   <span class="comment">-- bit 1=active, 0=inactive</span>
+    active_count  SMALLINT      <span class="kw">NOT NULL</span>,   <span class="comment">-- precomputed count of 1-bits</span>
+    <span class="kw">PRIMARY KEY</span> (user_id, month_start)
+);
+<span class="comment">-- Storage: 10M × 12 × ~20 bytes ≈ 2.4 GB — tiết kiệm 40x!</span>
+
+<span class="comment">-- Ý nghĩa của bit array:</span>
+<span class="comment">-- active_days = '1010100110000000000000000000000' nghĩa là:</span>
+<span class="comment">-- Ngày 1=active, ngày 2=inactive, ngày 3=active, ngày 4=inactive, ngày 5=active...</span>
+<span class="comment">-- Bit thứ N tương ứng với ngày N trong tháng</span></pre></div>
+      </div>
+
+      <h3>📝 Build reduced fact từ activity data</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · build bit array per user per month</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Tạo bit array cho tháng 2024-01</span>
+<span class="kw">INSERT INTO</span> fact_user_activity_reduced
+<span class="kw">WITH</span> daily_activity <span class="kw">AS</span> (
+    <span class="comment">-- Step 1: Aggregate — user nào active vào ngày nào?</span>
+    <span class="kw">SELECT</span>
+        user_id,
+        DATE_TRUNC(<span class="str">'month'</span>, event_date)  <span class="kw">AS</span> month_start,
+        EXTRACT(<span class="kw">DAY FROM</span> event_date)::INT <span class="kw">AS</span> day_of_month
+    <span class="kw">FROM</span> fact_web_events
+    <span class="kw">WHERE</span> event_date >= <span class="str">'2024-01-01'</span>
+      <span class="kw">AND</span> event_date <  <span class="str">'2024-02-01'</span>
+    <span class="kw">GROUP BY</span> user_id, DATE_TRUNC(<span class="str">'month'</span>, event_date), EXTRACT(<span class="kw">DAY FROM</span> event_date)
+),
+bit_builder <span class="kw">AS</span> (
+    <span class="comment">-- Step 2: Build bit string per user per month</span>
+    <span class="kw">SELECT</span>
+        user_id,
+        month_start,
+        <span class="comment">-- Tạo string 31 ký tự '0'/'1', rồi cast sang BIT(31)</span>
+        <span class="fn">STRING_AGG</span>(
+            <span class="kw">CASE WHEN</span> da.day_of_month = d.day
+                 <span class="kw">THEN</span> <span class="str">'1'</span> <span class="kw">ELSE</span> <span class="str">'0'</span>
+            <span class="kw">END</span>,
+            <span class="str">''</span> <span class="kw">ORDER BY</span> d.day
+        )::<span class="fn">BIT</span>(31) <span class="kw">AS</span> active_days
+    <span class="kw">FROM</span> (
+        <span class="kw">SELECT DISTINCT</span> user_id, month_start <span class="kw">FROM</span> daily_activity
+    ) users
+    <span class="kw">CROSS JOIN</span> <span class="fn">generate_series</span>(1,31) d(day)
+    <span class="kw">LEFT JOIN</span>  daily_activity da <span class="kw">USING</span> (user_id, month_start)
+        <span class="kw">AND</span> da.day_of_month = d.day
+    <span class="kw">GROUP BY</span> user_id, month_start
+)
+<span class="kw">SELECT</span>
+    user_id,
+    month_start,
+    active_days,
+    <span class="fn">LENGTH</span>(REPLACE(active_days::TEXT, <span class="str">'0'</span>, <span class="str">''</span>)) <span class="kw">AS</span> active_count
+<span class="kw">FROM</span> bit_builder
+<span class="kw">ON CONFLICT</span> (user_id, month_start) <span class="kw">DO UPDATE SET</span>
+    active_days  = EXCLUDED.active_days,
+    active_count = EXCLUDED.active_count;</pre></div>
+      </div>
+
+      <h3>🔎 Query trên reduced fact</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · query bit array</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Hỏi: user nào active ít nhất 20 ngày trong tháng 1/2024?</span>
+<span class="kw">SELECT</span> user_id, active_count
+<span class="kw">FROM</span> fact_user_activity_reduced
+<span class="kw">WHERE</span> month_start  = <span class="str">'2024-01-01'</span>
+  <span class="kw">AND</span> active_count >= 20
+<span class="kw">ORDER BY</span> active_count <span class="kw">DESC</span>;
+
+<span class="comment">-- Hỏi: user có active vào ngày 15 không? (bit position 15)</span>
+<span class="kw">SELECT</span> user_id
+<span class="kw">FROM</span> fact_user_activity_reduced
+<span class="kw">WHERE</span> month_start = <span class="str">'2024-01-01'</span>
+  <span class="kw">AND</span> <span class="fn">SUBSTRING</span>(active_days <span class="kw">FROM</span> 15 <span class="kw">FOR</span> 1) = <span class="str">B'1'</span>;
+
+<span class="comment">-- Hỏi: active consecutive 7 ngày trong tháng?</span>
+<span class="comment">-- Dùng bitwise shift và AND pattern (complex, nhưng possible)</span>
+<span class="kw">SELECT</span> user_id
+<span class="kw">FROM</span> fact_user_activity_reduced
+<span class="kw">WHERE</span> month_start = <span class="str">'2024-01-01'</span>
+  <span class="kw">AND</span> (
+    active_days & <span class="str">B'1111111000000000000000000000000'</span> = <span class="str">B'1111111000000000000000000000000'</span>
+    <span class="kw">OR</span> active_days & <span class="str">B'0111111100000000000000000000000'</span> = <span class="str">B'0111111100000000000000000000000'</span>
+    <span class="comment">-- ... thêm shifts cho từng window...</span>
+  );</pre></div>
+      </div>
+
+      <h3>📦 Alternative: PostgreSQL ARRAY</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · array-based reduced fact</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Lưu metric per day dưới dạng array — flexible hơn BIT</span>
+<span class="kw">CREATE TABLE</span> fact_host_activity_reduced (
+    host            VARCHAR(255)      <span class="kw">NOT NULL</span>,
+    month_start     DATE              <span class="kw">NOT NULL</span>,
+    hit_array       BIGINT[]          <span class="kw">NOT NULL</span>,   <span class="comment">-- hit count per day [1..31]</span>
+    unique_visitors INTEGER[]         <span class="kw">NOT NULL</span>,   <span class="comment">-- unique visitors per day</span>
+    <span class="kw">PRIMARY KEY</span> (host, month_start)
+);
+
+<span class="comment">-- Insert: aggregate hits per day → store as array</span>
+<span class="kw">INSERT INTO</span> fact_host_activity_reduced
+<span class="kw">SELECT</span>
+    host,
+    DATE_TRUNC(<span class="str">'month'</span>, event_date) <span class="kw">AS</span> month_start,
+    <span class="fn">ARRAY_AGG</span>(daily_hits    <span class="kw">ORDER BY</span> day_of_month)  <span class="kw">AS</span> hit_array,
+    <span class="fn">ARRAY_AGG</span>(unique_visits <span class="kw">ORDER BY</span> day_of_month)  <span class="kw">AS</span> unique_visitors
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span>
+        host,
+        event_date,
+        EXTRACT(<span class="kw">DAY FROM</span> event_date)::INT <span class="kw">AS</span> day_of_month,
+        <span class="fn">COUNT</span>(*)               <span class="kw">AS</span> daily_hits,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> user_id) <span class="kw">AS</span> unique_visits
+    <span class="kw">FROM</span> fact_web_events
+    <span class="kw">WHERE</span> event_date >= <span class="str">'2024-01-01'</span>
+    <span class="kw">GROUP BY</span> host, event_date
+) daily
+<span class="kw">GROUP BY</span> host, DATE_TRUNC(<span class="str">'month'</span>, event_date)
+<span class="kw">ON CONFLICT</span> (host, month_start) <span class="kw">DO UPDATE SET</span>
+    hit_array       = EXCLUDED.hit_array,
+    unique_visitors = EXCLUDED.unique_visitors;
+
+<span class="comment">-- Query: tổng hits tháng 1 của host 'example.com'</span>
+<span class="kw">SELECT</span>
+    host,
+    (
+        <span class="kw">SELECT</span> <span class="fn">SUM</span>(v)
+        <span class="kw">FROM</span> <span class="fn">UNNEST</span>(hit_array) v
+    ) <span class="kw">AS</span> total_hits_jan
+<span class="kw">FROM</span> fact_host_activity_reduced
+<span class="kw">WHERE</span> host = <span class="str">'example.com'</span>
+  <span class="kw">AND</span> month_start = <span class="str">'2024-01-01'</span>;</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Bit array trong reduced fact table tiết kiệm storage như thế nào so với naive approach?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Compression không phải cơ chế chính của bit array. Cơ chế là collapses N rows thành 1 row.')">A. Dùng compression algorithm để shrink data</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Naive: 1 user × 31 ngày = 31 rows, mỗi row ~30 bytes → 930 bytes. Reduced: 1 user × 1 tháng = 1 row, BIT(31) = 4 bytes → 4 bytes + overhead. Tiết kiệm ~40x. Quan trọng hơn: 10M users × 12 tháng = 120M rows thay vì 3.65 tỷ rows.')">B. Collapses N rows per entity per period thành 1 row với bit per day</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Bit array không dùng columnar storage — đó là Parquet/ORC.')">C. Lưu ở columnar format thay vì row-based</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Bit array không xóa NULL columns — nó encode boolean thành bit.')">D. Bỏ NULL columns không cần thiết</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào nên dùng ARRAY thay vì BIT trong reduced fact table?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ARRAY không phải lúc nào cũng nhỏ hơn BIT. BIT nhỏ hơn nhiều cho boolean.')">A. ARRAY luôn nhỏ hơn BIT về storage</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. BIT dùng cho boolean "có/không" (active/inactive). ARRAY dùng khi metric là số (hit_count, unique_visitors) — BIT không lưu số được. Khi metric là numeric, ARRAY là lựa chọn duy nhất để collapses N rows thành 1.')">B. Khi metric là số (count, sum) chứ không phải boolean có/không</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả BIT và ARRAY đều hoạt động với 31 ngày.')">C. Khi có nhiều hơn 64 ngày — BIT giới hạn 64 bits</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ARRAY không tốt hơn BIT về query performance trong mọi trường hợp.')">D. Khi cần query nhanh — ARRAY có index tốt hơn BIT</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Truy vấn "user active ít nhất 20 ngày trong tháng" trên reduced fact table dùng column nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'active_days là BIT(31) — cần parse từng bit để đếm. Chậm hơn nhiều so với precomputed count.')">A. active_days — đếm số bit 1 trong BIT(31)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. active_count là precomputed số ngày active (số bit 1 trong active_days). WHERE active_count >= 20 là simple integer comparison — cực nhanh. Đây là lý do precompute count khi build reduced table.')">B. active_count — integer precomputed sẵn, WHERE active_count >= 20</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'month_start chỉ dùng để filter tháng, không dùng để đếm ngày active.')">C. month_start — đếm số tháng user active</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'user_id không chứa thông tin về số ngày active.')">D. user_id — GROUP BY rồi COUNT</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trade-off chính khi dùng reduced fact table so với full normalized fact table là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Reduced fact không tự động encrypt data.')">A. Reduced fact mất khả năng encrypt individual rows</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Reduced fact: storage nhỏ, query "summary per entity per period" cực nhanh. Nhưng khó query chi tiết từng event (phải decode bit/array), khó add cột mới (BIT size cố định), và không phù hợp nếu cần row-level audit.')">B. Storage nhỏ hơn nhiều nhưng khó query chi tiết per event và khó thay đổi schema</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Reduced fact không mất ACID. Đây là đặc tính của PostgreSQL transaction.')">C. Mất ACID properties — không dùng được transaction</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Reduced fact chạy tốt trên PostgreSQL. Không cần NoSQL.')">D. Chỉ chạy được trên NoSQL database, không phải PostgreSQL</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao precompute <code>active_count</code> khi build reduced fact thay vì tính on-the-fly?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL hoàn toàn có thể đếm bit 1 trong BIT type — nhưng chậm hơn integer compare.')">A. PostgreSQL không hỗ trợ đếm bit 1 trong BIT type</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đếm số bit 1 trong BIT(31) là O(31) per row — khi full scan 120M rows là tốn kém. Integer comparison (active_count >= 20) là O(1) per row và tận dụng B-tree index. Precompute một lần khi build, benefit mọi query sau đó.')">B. Integer comparison O(1) nhanh hơn bit counting O(31) per row — benefit index</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'active_count không liên quan đến BIT(31) size giới hạn.')">C. BIT(31) không cho phép arithmetic — phải precompute</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây không phải lý do kỹ thuật để precompute.')">D. Để report dễ hiểu hơn cho non-technical stakeholders</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><code>UNNEST(hit_array)</code> dùng để làm gì khi query ARRAY-based reduced fact?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'UNNEST không sort array. Để sort cần ARRAY_AGG với ORDER BY khi build.')">A. Sort các phần tử trong array theo giá trị</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. UNNEST mở rộng array thành nhiều rows — 1 value per row. Sau đó có thể dùng SUM, AVG, MAX trên các rows đó. Đây là cách aggregate trên ARRAY column trong PostgreSQL.')">B. Mở rộng array thành nhiều rows để có thể SUM, AVG, MAX</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'UNNEST không xóa NULL — nó mở rộng tất cả phần tử bao gồm NULL.')">C. Xóa NULL values trong array trước khi aggregate</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'UNNEST không encrypt hay compress data.')">D. Compress array trước khi lưu vào disk</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>🎯 Khi nào dùng</strong>Boolean activity hàng tỷ rows → bit array. Numeric per period → ARRAY. Cần tiết kiệm 10–50x storage.</div>
+        <div class="summary-item"><strong>🔡 BIT(31)</strong>Encode 31 ngày boolean vào 4 bytes. Bit thứ N = ngày N. Precompute active_count cho query nhanh.</div>
+        <div class="summary-item"><strong>📦 ARRAY[]</strong>1 row per entity per month, array chứa metric mỗi ngày. UNNEST để aggregate. Flexible cho numeric metrics.</div>
+        <div class="summary-item"><strong>⚡ Performance</strong>active_count >= 20 là integer compare O(1), có index. Bit count O(31) per row — chậm hơn nhiều khi full scan.</div>
+        <div class="summary-item"><strong>⚖️ Trade-off</strong>Storage nhỏ, summary query nhanh. Nhưng khó query per-event detail, schema cứng (BIT size fixed).</div>
+        <div class="summary-item"><strong>🔁 Idempotent</strong>ON CONFLICT DO UPDATE khi build reduced table. Chạy lại rebuild cho cùng month → kết quả giống nhau.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">← W7.03 Deduplication</button>
+    <button class="nav-btn primary" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">W7.05 Incremental Load →</button>
+  </div>
+</div>
+
+<!-- ══════════════ MODULE 4: INCREMENTAL LOAD ══════════════ -->
+<div class="module" id="m4">
+  <div class="module-header">
+    <div class="module-tag">Tuần 7 · Module W7.05</div>
+    <div class="module-title">🔄 Incremental Load: MERGE & UPSERT</div>
+    <div class="module-subtitle">MERGE statement · INSERT ON CONFLICT · INSERT-only pattern · Idempotent load</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Pattern</th><th>SQL</th><th>Dùng khi nào</th></tr>
+        <tr><td>INSERT-only</td><td><code>INSERT INTO fact SELECT ... WHERE date = X</code></td><td>Transaction fact — không bao giờ update row</td></tr>
+        <tr><td>UPSERT</td><td><code>INSERT ... ON CONFLICT DO UPDATE</code></td><td>Reduced fact, snapshot — cần refresh khi rebuild</td></tr>
+        <tr><td>MERGE (SQL standard)</td><td><code>MERGE INTO target USING source ON key</code></td><td>Accumulating snapshot — update milestones</td></tr>
+        <tr><td>Truncate + Insert</td><td><code>TRUNCATE TABLE; INSERT INTO ...</code></td><td>Full refresh nhỏ — simple và đảm bảo clean</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>1️⃣ INSERT-only cho Transaction Fact</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · INSERT-only pattern</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Pattern: delete partition rồi re-insert (idempotent)</span>
+<span class="comment">-- Safe để retry — luôn cho cùng kết quả</span>
+
+<span class="kw">BEGIN</span>;
+
+<span class="comment">-- Step 1: Xóa data của ngày đang load (nếu có từ retry trước)</span>
+<span class="kw">DELETE FROM</span> fact_web_events
+<span class="kw">WHERE</span> event_date = <span class="str">'2024-01-15'</span>;
+
+<span class="comment">-- Step 2: Insert deduped data cho ngày đó</span>
+<span class="kw">INSERT INTO</span> fact_web_events
+    (event_id, user_id, host, event_type, event_date, occurred_at)
+<span class="kw">WITH</span> deduped <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        *,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> event_id
+            <span class="kw">ORDER BY</span> ingested_at <span class="kw">DESC</span>
+        ) <span class="kw">AS</span> rn
+    <span class="kw">FROM</span> stg_web_events
+    <span class="kw">WHERE</span> event_date = <span class="str">'2024-01-15'</span>
+)
+<span class="kw">SELECT</span> event_id, user_id, host, event_type, event_date, occurred_at
+<span class="kw">FROM</span>   deduped
+<span class="kw">WHERE</span>  rn = 1;
+
+<span class="kw">COMMIT</span>;
+
+<span class="comment">-- Kết quả: idempotent — chạy lần 2, 3 vẫn cho cùng row count</span>
+<span class="comment">-- Vì DELETE trước đảm bảo clean slate mỗi lần</span></pre></div>
+      </div>
+
+      <h3>2️⃣ UPSERT với ON CONFLICT cho Reduced Fact</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · UPSERT pattern</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- ON CONFLICT DO UPDATE — chuẩn PostgreSQL UPSERT</span>
+<span class="comment">-- Dùng cho reduced fact và periodic snapshot</span>
+
+<span class="kw">INSERT INTO</span> fact_user_activity_reduced
+    (user_id, month_start, active_days, active_count)
+<span class="kw">SELECT</span>
+    user_id,
+    <span class="str">'2024-01-01'</span>::DATE <span class="kw">AS</span> month_start,
+    build_bit_array(user_id, <span class="str">'2024-01-01'</span>) <span class="kw">AS</span> active_days,
+    count_active_days(user_id, <span class="str">'2024-01-01'</span>) <span class="kw">AS</span> active_count
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT DISTINCT</span> user_id
+    <span class="kw">FROM</span> fact_web_events
+    <span class="kw">WHERE</span> event_date >= <span class="str">'2024-01-01'</span>
+      <span class="kw">AND</span> event_date <  <span class="str">'2024-02-01'</span>
+) u
+<span class="kw">ON CONFLICT</span> (user_id, month_start) <span class="kw">DO UPDATE SET</span>
+    <span class="comment">-- Refresh nếu chạy lại (backfill, late data)</span>
+    active_days  = EXCLUDED.active_days,
+    active_count = EXCLUDED.active_count,
+    updated_at   = <span class="fn">NOW</span>();</pre></div>
+      </div>
+
+      <h3>3️⃣ MERGE cho Accumulating Snapshot</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL 15+ · MERGE statement</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- MERGE: ANSI SQL standard — PostgreSQL 15+ support</span>
+<span class="comment">-- Dùng cho accumulating snapshot khi có milestone update</span>
+
+<span class="kw">MERGE INTO</span> fact_order_fulfillment target
+<span class="kw">USING</span> (
+    <span class="comment">-- Source: new/updated orders từ staging</span>
+    <span class="kw">SELECT</span>
+        s.order_id,
+        s.customer_sk,
+        s.ordered_date_sk,
+        s.confirmed_date_sk,
+        s.shipped_date_sk,
+        s.delivered_date_sk,
+        s.order_total,
+        s.current_status,
+        <span class="comment">-- Tính lag facts</span>
+        s.confirmed_date_sk - s.ordered_date_sk   <span class="kw">AS</span> days_to_confirm,
+        s.shipped_date_sk   - s.confirmed_date_sk <span class="kw">AS</span> days_to_ship,
+        s.delivered_date_sk - s.shipped_date_sk   <span class="kw">AS</span> days_to_deliver,
+        s.delivered_date_sk - s.ordered_date_sk   <span class="kw">AS</span> total_lead_days
+    <span class="kw">FROM</span> stg_orders s
+    <span class="kw">WHERE</span> s.updated_date = CURRENT_DATE
+) source
+<span class="kw">ON</span> (target.order_id = source.order_id)
+<span class="kw">WHEN MATCHED THEN</span>
+    <span class="comment">-- Order đã tồn tại → UPDATE milestones mới</span>
+    <span class="kw">UPDATE SET</span>
+        confirmed_date_sk  = source.confirmed_date_sk,
+        shipped_date_sk    = source.shipped_date_sk,
+        delivered_date_sk  = source.delivered_date_sk,
+        days_to_confirm    = source.days_to_confirm,
+        days_to_ship       = source.days_to_ship,
+        days_to_deliver    = source.days_to_deliver,
+        total_lead_days    = source.total_lead_days,
+        current_status     = source.current_status,
+        last_updated_at    = <span class="fn">NOW</span>()
+<span class="kw">WHEN NOT MATCHED THEN</span>
+    <span class="comment">-- Order mới → INSERT row đầu tiên</span>
+    <span class="kw">INSERT</span> (order_id, customer_sk, ordered_date_sk,
+             confirmed_date_sk, order_total, current_status, last_updated_at)
+    <span class="kw">VALUES</span> (source.order_id, source.customer_sk, source.ordered_date_sk,
+             source.confirmed_date_sk, source.order_total,
+             source.current_status, <span class="fn">NOW</span>());</pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span><strong>PostgreSQL &lt; 15:</strong> Dùng INSERT ON CONFLICT DO UPDATE thay thế MERGE. Hoặc dùng 2 statement riêng: UPDATE where exists + INSERT where not exists trong 1 transaction.</span></div>
+
+      <h3>⚖️ So sánh 4 patterns</h3>
+      <table>
+        <tr><th>Pattern</th><th>Idempotent?</th><th>Lock table?</th><th>Late data?</th><th>Best for</th></tr>
+        <tr><td>DELETE + INSERT</td><td>✅ Có</td><td>Ngắn</td><td>✅ OK (rebuild)</td><td>Transaction fact, partition</td></tr>
+        <tr><td>ON CONFLICT UPSERT</td><td>✅ Có</td><td>Row-level</td><td>✅ OK</td><td>Reduced fact, snapshot</td></tr>
+        <tr><td>MERGE</td><td>✅ Có</td><td>Row-level</td><td>✅ OK</td><td>Accumulating snapshot</td></tr>
+        <tr><td>TRUNCATE + INSERT</td><td>✅ Có</td><td>Table-level lock!</td><td>✅ OK</td><td>Full refresh nhỏ (cẩn thận)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Pattern DELETE partition + INSERT đảm bảo idempotency như thế nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL không auto-detect duplicate. DELETE + INSERT mới đảm bảo clean state.')">A. PostgreSQL tự detect và skip duplicate khi INSERT</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Xóa toàn bộ data của ngày đó trước (clean slate), sau đó insert lại từ staging. Dù chạy lần 1 hay lần 10, kết quả cuối cùng luôn là data của ngày đó từ staging — không có duplicate, không thiếu row.')">B. Delete trước tạo clean slate — chạy lại bao nhiêu lần kết quả vẫn như nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Transaction không đảm bảo idempotency. Transaction đảm bảo atomicity — all or nothing.')">C. Dùng transaction ACID — PostgreSQL tự rollback nếu chạy 2 lần</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Primary key constraint ngăn duplicate key nhưng không đảm bảo idempotency business logic.')">D. Primary key constraint ngăn INSERT duplicate tự động</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong MERGE statement, <code>WHEN MATCHED</code> và <code>WHEN NOT MATCHED</code> kiểm tra điều kiện gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'MATCHED không dựa trên cột NULL. Dựa trên ON condition.')">A. MATCHED khi target có NULL values, NOT MATCHED khi không có</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. MERGE ON (target.key = source.key) kiểm tra join condition. WHEN MATCHED = row tồn tại trong cả target và source → thường UPDATE. WHEN NOT MATCHED = row chỉ có trong source, chưa có trong target → INSERT.')">B. MATCHED khi ON condition khớp (row tồn tại trong target), NOT MATCHED khi chưa có</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'MATCHED không liên quan đến date/timestamp comparison.')">C. MATCHED khi updated_at của source mới hơn target</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'MATCHED dựa trên ON condition, không phải số rows.')">D. MATCHED khi source có nhiều rows hơn target</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao TRUNCATE + INSERT nguy hiểm hơn DELETE partition + INSERT?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'TRUNCATE thực ra nhanh hơn DELETE. Đây không phải vấn đề chính.')">A. TRUNCATE chậm hơn DELETE — tốn nhiều disk I/O hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. TRUNCATE cần ACCESS EXCLUSIVE LOCK — không ai đọc hoặc ghi table trong thời gian này. Với fact table lớn, data unavailable trong nhiều phút. DELETE partition chỉ lock rows của ngày đó, queries cho ngày khác vẫn chạy bình thường.')">B. TRUNCATE lock toàn bộ table — queries khác không đọc được trong thời gian load</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'TRUNCATE có thể rollback trong transaction. Đây là thông tin sai.')">C. TRUNCATE không thể rollback nếu có lỗi giữa chừng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'TRUNCATE không liên quan đến foreign key validation.')">D. TRUNCATE bỏ qua foreign key constraints</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi có late arrival data (data của ngày 14 arrive vào ngày 16), pattern nào xử lý tốt nhất?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'INSERT-only không backfill. Nếu không DELETE partition trước, data của ngày 14 sẽ duplicate.')">A. INSERT-only — chỉ append, late data tự được thêm vào</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. DELETE partition ngày 14 + re-INSERT (bao gồm late data) là pattern clean nhất. Hoặc UPSERT với ON CONFLICT. Quan trọng là pipeline phải cho phép re-run cho ngày cụ thể: python pipeline.py --date 2024-01-14')">B. DELETE partition ngày 14 + re-INSERT (backfill) — rebuild partition với data đầy đủ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Bỏ qua late data là data loss — không chấp nhận được trong production.')">C. Bỏ qua late data — không xử lý để tránh phức tạp</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Adjust threshold không phải solution cho late arrival.')">D. Tăng partition size để chứa thêm ngày trễ</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q"><code>ON CONFLICT (user_id, month_start) DO UPDATE SET active_days = EXCLUDED.active_days</code> — <code>EXCLUDED</code> là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'EXCLUDED không phải rows bị xóa. Đó là cú pháp của DELETE statement.')">A. Rows bị xóa khỏi target table khi có conflict</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. EXCLUDED là built-in pseudo-table trong ON CONFLICT clause — chứa giá trị của row đang bị conflict (tức là row mới từ INSERT). EXCLUDED.active_days = giá trị mới muốn set. Cú pháp PostgreSQL-specific.')">B. Pseudo-table chứa giá trị mới từ INSERT statement đang bị conflict</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'EXCLUDED không phải snapshot của target. Đó là giá trị mới từ INSERT.')">C. Snapshot của target table trước khi conflict xảy ra</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'EXCLUDED không phải error object. Đây là thông tin sai.')">D. Error object chứa thông tin về constraint violation</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào nên wrap DELETE + INSERT trong 1 transaction?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Transaction không tự detect late data.')">A. Khi có late arrival data để tự động handle</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu DELETE thành công nhưng INSERT fail (network, disk, memory), table bị empty cho ngày đó. Wrap trong transaction: nếu INSERT fail → cả DELETE cũng rollback → table vẫn có data cũ thay vì empty. Atomic — all or nothing.')">B. Luôn luôn — để nếu INSERT fail, DELETE cũng rollback → table không bị empty</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Transaction không liên quan đến performance. Thực ra transaction có overhead nhỏ.')">C. Chỉ khi table lớn hơn 1GB — transaction tối ưu I/O</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Transaction không bắt buộc với Airflow. Đây là best practice chung.')">D. Chỉ khi chạy trong Airflow — Airflow yêu cầu transaction</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>🗑️ DELETE + INSERT</strong>Idempotent, row-level lock, xử lý late data bằng backfill. Wrap trong transaction. Tốt cho transaction fact.</div>
+        <div class="summary-item"><strong>🔀 UPSERT</strong>ON CONFLICT DO UPDATE. EXCLUDED chứa giá trị mới. Idempotent. Tốt cho reduced fact, periodic snapshot.</div>
+        <div class="summary-item"><strong>🔃 MERGE</strong>ANSI SQL (PostgreSQL 15+). WHEN MATCHED → UPDATE. WHEN NOT MATCHED → INSERT. Tốt cho accumulating snapshot.</div>
+        <div class="summary-item"><strong>⚠️ TRUNCATE caution</strong>Table-level lock — block reads trong thời gian load. Chỉ dùng cho full refresh nhỏ không có concurrent queries.</div>
+        <div class="summary-item"><strong>🔁 Late Arrival</strong>Backfill = re-run pipeline cho ngày cụ thể. DELETE + INSERT rebuild clean. UPSERT auto refresh.</div>
+        <div class="summary-item"><strong>💥 Transaction</strong>DELETE + INSERT trong 1 BEGIN/COMMIT. INSERT fail → DELETE rollback → table không empty. Atomic.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">← W7.04 Reduced Fact</button>
+    <button class="nav-btn primary" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">W7.06 Homework →</button>
+  </div>
+</div>
+
+<!-- ══════════════ MODULE 5: HOMEWORK ══════════════ -->
+<div class="module" id="m5">
+  <div class="module-header">
+    <div class="module-tag">Tuần 7 · Module W7.06</div>
+    <div class="module-title">📝 Homework: user_devices & hosts</div>
+    <div class="module-subtitle">user_devices_cumulated · hosts_cumulated · host_activity_reduced · Commit artifact</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Cấu Trúc Artifact Bắt Buộc
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>de-roadmap-artifacts/ · week7</span></div>
+        <div class="cmd-body"><pre><span class="output">week7_fact_modeling/
+├── README.md                      ← design decisions + kết quả
+├── ddl/
+│   ├── 01_user_devices_cumulated.sql    ← DDL + incremental load
+│   ├── 02_hosts_cumulated.sql           ← DDL + incremental load
+│   └── 03_host_activity_reduced.sql     ← DDL + bit array build
+├── queries/
+│   ├── dedup_web_events.sql             ← dedup query production
+│   └── analysis_queries.sql             ← sample queries trên artifact
+└── evidence/
+    └── query_results.md                 ← screenshot / output sample</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Hướng Dẫn Từng Artifact
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>📦 Artifact 1: user_devices_cumulated</h3>
+      <p>Cumulative table track device history của mỗi user. Dùng ARRAY để accumulate device list theo thời gian.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>01_user_devices_cumulated.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- DDL</span>
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> user_devices_cumulated (
+    user_id         BIGINT         <span class="kw">NOT NULL</span>,
+    device_activity_datelist DATE[] <span class="kw">NOT NULL</span>,  <span class="comment">-- array ngày dùng device</span>
+    browser_type    VARCHAR(100),
+    date            DATE           <span class="kw">NOT NULL</span>,   <span class="comment">-- snapshot date</span>
+    <span class="kw">PRIMARY KEY</span> (user_id, browser_type, date)
+);
+
+<span class="comment">-- Incremental load: mỗi ngày append ngày mới vào array</span>
+<span class="kw">INSERT INTO</span> user_devices_cumulated
+<span class="kw">WITH</span>
+<span class="comment">-- Lấy data hôm qua từ cumulated table</span>
+yesterday <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *
+    <span class="kw">FROM</span>  user_devices_cumulated
+    <span class="kw">WHERE</span> date = CURRENT_DATE - <span class="kw">INTERVAL</span> <span class="str">'1 day'</span>
+),
+<span class="comment">-- Lấy activity hôm nay từ staging</span>
+today_activity <span class="kw">AS</span> (
+    <span class="kw">SELECT DISTINCT</span>
+        user_id,
+        browser_type,
+        CURRENT_DATE <span class="kw">AS</span> activity_date
+    <span class="kw">FROM</span> stg_web_events
+    <span class="kw">WHERE</span> event_date = CURRENT_DATE
+)
+<span class="kw">SELECT</span>
+    <span class="fn">COALESCE</span>(t.user_id, y.user_id)           <span class="kw">AS</span> user_id,
+    <span class="fn">COALESCE</span>(t.browser_type, y.browser_type) <span class="kw">AS</span> browser_type,
+    <span class="kw">CASE</span>
+        <span class="comment">-- Nếu hôm nay active: append ngày hôm nay vào array</span>
+        <span class="kw">WHEN</span> t.activity_date <span class="kw">IS NOT NULL</span>
+          <span class="kw">AND</span> y.device_activity_datelist <span class="kw">IS NOT NULL</span>
+        <span class="kw">THEN</span> y.device_activity_datelist || ARRAY[t.activity_date]
+        <span class="comment">-- User mới: tạo array với ngày hôm nay</span>
+        <span class="kw">WHEN</span> t.activity_date <span class="kw">IS NOT NULL</span>
+        <span class="kw">THEN</span> ARRAY[t.activity_date]
+        <span class="comment">-- User không active hôm nay: giữ array cũ</span>
+        <span class="kw">ELSE</span> y.device_activity_datelist
+    <span class="kw">END</span>                                       <span class="kw">AS</span> device_activity_datelist,
+    CURRENT_DATE                              <span class="kw">AS</span> date
+<span class="kw">FROM</span> today_activity t
+<span class="kw">FULL OUTER JOIN</span> yesterday y
+    <span class="kw">ON</span> t.user_id      = y.user_id
+   <span class="kw">AND</span> t.browser_type = y.browser_type
+<span class="kw">ON CONFLICT</span> (user_id, browser_type, date) <span class="kw">DO UPDATE SET</span>
+    device_activity_datelist = EXCLUDED.device_activity_datelist;</pre></div>
+      </div>
+
+      <h3>📦 Artifact 2: hosts_cumulated</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>02_hosts_cumulated.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- DDL: track host activity history</span>
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> hosts_cumulated (
+    host                    VARCHAR(255)  <span class="kw">NOT NULL</span>,
+    host_activity_datelist  DATE[]        <span class="kw">NOT NULL</span>,
+    date                    DATE          <span class="kw">NOT NULL</span>,
+    <span class="kw">PRIMARY KEY</span> (host, date)
+);
+
+<span class="comment">-- Incremental load pattern giống user_devices_cumulated</span>
+<span class="kw">INSERT INTO</span> hosts_cumulated
+<span class="kw">WITH</span>
+yesterday <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> host, host_activity_datelist, date
+    <span class="kw">FROM</span>   hosts_cumulated
+    <span class="kw">WHERE</span>  date = CURRENT_DATE - <span class="kw">INTERVAL</span> <span class="str">'1 day'</span>
+),
+today_hosts <span class="kw">AS</span> (
+    <span class="kw">SELECT DISTINCT</span>
+        host,
+        CURRENT_DATE <span class="kw">AS</span> activity_date
+    <span class="kw">FROM</span> stg_web_events
+    <span class="kw">WHERE</span> event_date = CURRENT_DATE
+)
+<span class="kw">SELECT</span>
+    <span class="fn">COALESCE</span>(t.host, y.host)       <span class="kw">AS</span> host,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> t.activity_date <span class="kw">IS NOT NULL</span> <span class="kw">AND</span> y.host_activity_datelist <span class="kw">IS NOT NULL</span>
+        <span class="kw">THEN</span> y.host_activity_datelist || ARRAY[t.activity_date]
+        <span class="kw">WHEN</span> t.activity_date <span class="kw">IS NOT NULL</span>
+        <span class="kw">THEN</span> ARRAY[t.activity_date]
+        <span class="kw">ELSE</span> y.host_activity_datelist
+    <span class="kw">END</span>                            <span class="kw">AS</span> host_activity_datelist,
+    CURRENT_DATE                   <span class="kw">AS</span> date
+<span class="kw">FROM</span> today_hosts t
+<span class="kw">FULL OUTER JOIN</span> yesterday y <span class="kw">ON</span> t.host = y.host
+<span class="kw">ON CONFLICT</span> (host, date) <span class="kw">DO UPDATE SET</span>
+    host_activity_datelist = EXCLUDED.host_activity_datelist;</pre></div>
+      </div>
+
+      <h3>📦 Artifact 3: host_activity_reduced</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>03_host_activity_reduced.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- DDL: reduced fact với bit array (1 month per host)</span>
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> host_activity_reduced (
+    host            VARCHAR(255)  <span class="kw">NOT NULL</span>,
+    month_start     DATE          <span class="kw">NOT NULL</span>,
+    hit_array       BIGINT[]      <span class="kw">NOT NULL</span>,  <span class="comment">-- hits per day [1..31]</span>
+    unique_visitors INTEGER[]     <span class="kw">NOT NULL</span>,  <span class="comment">-- unique users per day</span>
+    total_hits      BIGINT        <span class="kw">NOT NULL</span>,  <span class="comment">-- precomputed monthly total</span>
+    active_days     SMALLINT      <span class="kw">NOT NULL</span>,  <span class="comment">-- days with any activity</span>
+    <span class="kw">PRIMARY KEY</span> (host, month_start)
+);
+
+<span class="comment">-- Build từ hosts_cumulated + stg_web_events</span>
+<span class="kw">INSERT INTO</span> host_activity_reduced
+<span class="kw">WITH</span> daily_metrics <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        host,
+        event_date,
+        EXTRACT(<span class="kw">DAY FROM</span> event_date)::INT  <span class="kw">AS</span> day_num,
+        <span class="fn">COUNT</span>(*)                           <span class="kw">AS</span> daily_hits,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> user_id)            <span class="kw">AS</span> daily_unique
+    <span class="kw">FROM</span> stg_web_events
+    <span class="kw">WHERE</span> event_date >= DATE_TRUNC(<span class="str">'month'</span>, CURRENT_DATE)
+      <span class="kw">AND</span> event_date <  DATE_TRUNC(<span class="str">'month'</span>, CURRENT_DATE) + <span class="kw">INTERVAL</span> <span class="str">'1 month'</span>
+    <span class="kw">GROUP BY</span> host, event_date
+),
+aggregated <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        host,
+        DATE_TRUNC(<span class="str">'month'</span>, event_date)::DATE            <span class="kw">AS</span> month_start,
+        <span class="fn">ARRAY_AGG</span>(daily_hits   <span class="kw">ORDER BY</span> day_num)         <span class="kw">AS</span> hit_array,
+        <span class="fn">ARRAY_AGG</span>(daily_unique <span class="kw">ORDER BY</span> day_num)         <span class="kw">AS</span> unique_visitors,
+        <span class="fn">SUM</span>(daily_hits)                                   <span class="kw">AS</span> total_hits,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> event_date)                        <span class="kw">AS</span> active_days
+    <span class="kw">FROM</span> daily_metrics
+    <span class="kw">GROUP BY</span> host, DATE_TRUNC(<span class="str">'month'</span>, event_date)
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> aggregated
+<span class="kw">ON CONFLICT</span> (host, month_start) <span class="kw">DO UPDATE SET</span>
+    hit_array       = EXCLUDED.hit_array,
+    unique_visitors = EXCLUDED.unique_visitors,
+    total_hits      = EXCLUDED.total_hits,
+    active_days     = EXCLUDED.active_days;
+
+<span class="comment">-- Verify: top 5 hosts theo total_hits tháng này</span>
+<span class="kw">SELECT</span> host, month_start, total_hits, active_days
+<span class="kw">FROM</span>   host_activity_reduced
+<span class="kw">WHERE</span>  month_start = DATE_TRUNC(<span class="str">'month'</span>, CURRENT_DATE)
+<span class="kw">ORDER BY</span> total_hits <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> 5;</pre></div>
+      </div>
+
+      <h3>📋 README Design Decisions</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>README.md · week7_fact_modeling</span></div>
+        <div class="cmd-body"><pre><span class="kw"># Week 7 — Fact Data Modeling</span>
+
+<span class="comment">## Artifacts</span>
+1. user_devices_cumulated — cumulative device activity per user
+2. hosts_cumulated — cumulative host activity
+3. host_activity_reduced — monthly reduced fact với ARRAY
+
+<span class="comment">## Design Decisions</span>
+- **Cumulative với ARRAY**: Chọn ARRAY[] thay vì BIT vì
+  date_list cần truy vấn cụ thể từng ngày, không chỉ count
+- **FULL OUTER JOIN cho incremental**: Đảm bảo không mất
+  user đã có history nhưng không active hôm nay
+- **UPSERT thay vì INSERT-only**: Cumulated table cần
+  rebuild được khi backfill historical data
+- **Precompute total_hits**: Integer query nhanh hơn
+  SUM(UNNEST(array)) khi full scan millions of hosts
+
+<span class="comment">## Kết quả chạy thử</span>
+- user_devices_cumulated: 45,230 users tracked
+- hosts_cumulated: 1,892 unique hosts
+- host_activity_reduced: 156 host-months, avg 18.3 active days</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      5. Bài Tập Thực Hành
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Bài 1: Viết query phân tích trên host_activity_reduced</div>
+        <div class="practice-task-body">
+          <p>Từ bảng <code>host_activity_reduced</code>, viết query trả về: top 10 hosts theo <code>total_hits</code>, kèm <code>avg hits per active day</code> = <code>total_hits / active_days</code>, filter chỉ hosts có <code>active_days >= 15</code>.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution · top_hosts.sql</span></div>
+              <div class="cmd-body"><pre><span class="kw">SELECT</span>
+    host,
+    month_start,
+    total_hits,
+    active_days,
+    <span class="fn">ROUND</span>(total_hits::NUMERIC / NULLIF(active_days, 0), 1)
+        <span class="kw">AS</span> avg_hits_per_active_day
+<span class="kw">FROM</span> host_activity_reduced
+<span class="kw">WHERE</span> month_start  = DATE_TRUNC(<span class="str">'month'</span>, CURRENT_DATE)
+  <span class="kw">AND</span> active_days >= 15
+<span class="kw">ORDER BY</span> total_hits <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> 10;</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">🔬 Bài 2: Commit artifact lên GitHub</div>
+        <div class="practice-task-body">
+          <p>Commit toàn bộ <code>week7_fact_modeling/</code> với commit message chuẩn. Verify bằng cách xem GitHub repo.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>bash · commit</span></div>
+              <div class="cmd-body"><pre><span class="prompt">$</span> cd de-roadmap-artifacts
+<span class="prompt">$</span> git add week7_fact_modeling/
+<span class="prompt">$</span> git commit -m <span class="str">"feat(week7): fact data modeling artifacts
+
+- user_devices_cumulated: cumulative DATE[] per user+browser
+- hosts_cumulated: cumulative DATE[] per host
+- host_activity_reduced: monthly ARRAY reduced fact
+- dedup_web_events.sql: ROW_NUMBER production dedup query
+- README: design decisions + query results"</span>
+<span class="prompt">$</span> git push origin main</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      4. Checklist Exit Criteria
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>✅ <code>user_devices_cumulated</code>: DDL + incremental load chạy được</li>
+        <li>✅ <code>hosts_cumulated</code>: DDL + incremental load chạy được</li>
+        <li>✅ <code>host_activity_reduced</code>: DDL + build query với ARRAY</li>
+        <li>✅ <code>dedup_web_events.sql</code>: ROW_NUMBER dedup query có duplicate count report</li>
+        <li>✅ Chạy incremental load 2 lần cho cùng ngày → row count không tăng (idempotent)</li>
+        <li>✅ README có design decisions cho từng lựa chọn kỹ thuật</li>
+        <li>✅ Commit lên GitHub với message rõ ràng</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">← W7.05 Incremental Load</button>
+    <button class="nav-btn primary" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">W7.07 Mini Test →</button>
+  </div>
+</div>
+
+<!-- ══════════════ MODULE 6: MINI TEST ══════════════ -->
+<div class="module" id="m6">
+  <div class="module-header">
+    <div class="module-tag">Tuần 7 · Module W7.07</div>
+    <div class="module-title">🧪 Mini Test Tổng Kết Tuần 7</div>
+    <div class="module-subtitle">20 câu · Fact types · Deduplication · Reduced fact · Incremental load</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">🧪</div>
+      Mini Test — 20 Câu Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div id="final-test">
+
+        <div class="test-question" data-q="1" data-correct="B">
+          <div class="test-question-title">Q1. Grain của fact table là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q1" value="A"> A. Primary key của bảng fact</label>
+            <label class="test-option"><input type="radio" name="q1" value="B"> B. Định nghĩa "1 row đại diện cho cái gì"</label>
+            <label class="test-option"><input type="radio" name="q1" value="C"> C. Số rows tối đa fact table có thể chứa</label>
+            <label class="test-option"><input type="radio" name="q1" value="D"> D. Partition key theo thời gian</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="2" data-correct="C">
+          <div class="test-question-title">Q2. <code>account_balance</code> là loại fact nào?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q2" value="A"> A. Additive</label>
+            <label class="test-option"><input type="radio" name="q2" value="B"> B. Non-additive</label>
+            <label class="test-option"><input type="radio" name="q2" value="C"> C. Semi-additive</label>
+            <label class="test-option"><input type="radio" name="q2" value="D"> D. Degenerate</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="3" data-correct="B">
+          <div class="test-question-title">Q3. Loại fact table nào phù hợp để track tồn kho cuối mỗi ngày?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q3" value="A"> A. Transaction Fact</label>
+            <label class="test-option"><input type="radio" name="q3" value="B"> B. Periodic Snapshot</label>
+            <label class="test-option"><input type="radio" name="q3" value="C"> C. Accumulating Snapshot</label>
+            <label class="test-option"><input type="radio" name="q3" value="D"> D. Degenerate Dimension</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="4" data-correct="C">
+          <div class="test-question-title">Q4. Accumulating Snapshot sử dụng UPDATE thay vì INSERT vì lý do gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q4" value="A"> A. UPDATE nhanh hơn INSERT</label>
+            <label class="test-option"><input type="radio" name="q4" value="B"> B. PostgreSQL không cho INSERT nhiều lần cùng key</label>
+            <label class="test-option"><input type="radio" name="q4" value="C"> C. 1 lifecycle = 1 row — milestone chỉ cập nhật row, không tạo sự kiện mới</label>
+            <label class="test-option"><input type="radio" name="q4" value="D"> D. UPDATE không tạo WAL log, tiết kiệm disk</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="5" data-correct="A">
+          <div class="test-question-title">Q5. ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY updated_at DESC) WHERE rn=1 làm gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q5" value="A"> A. Lấy row mới nhất (updated_at lớn nhất) cho mỗi event_id</label>
+            <label class="test-option"><input type="radio" name="q5" value="B"> B. Sort toàn bảng theo updated_at</label>
+            <label class="test-option"><input type="radio" name="q5" value="C"> C. Xóa duplicate tự động</label>
+            <label class="test-option"><input type="radio" name="q5" value="D"> D. Update tất cả rows cùng event_id</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="6" data-correct="B">
+          <div class="test-question-title">Q6. Microbatch deduplication chia theo giờ để giải quyết vấn đề gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q6" value="A"> A. SQL chỉ hỗ trợ window function theo giờ</label>
+            <label class="test-option"><input type="radio" name="q6" value="B"> B. Giảm memory usage — mỗi batch nhỏ hơn, xử lý được song song</label>
+            <label class="test-option"><input type="radio" name="q6" value="C"> C. Airflow chỉ schedule hourly</label>
+            <label class="test-option"><input type="radio" name="q6" value="D"> D. PostgreSQL partition yêu cầu hourly</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="7" data-correct="B">
+          <div class="test-question-title">Q7. Cross-hour dedup trong Microbatch giải quyết vấn đề gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q7" value="A"> A. Xóa duplicate user_id giữa các giờ</label>
+            <label class="test-option"><input type="radio" name="q7" value="B"> B. Late arrival — event arrive muộn xuất hiện trong 2 bucket giờ khác nhau</label>
+            <label class="test-option"><input type="radio" name="q7" value="C"> C. ROW_NUMBER bị giới hạn 1 giờ</label>
+            <label class="test-option"><input type="radio" name="q7" value="D"> D. Timezone conversion sau khi dedup</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="8" data-correct="C">
+          <div class="test-question-title">Q8. DISTINCT ON khác ROW_NUMBER() ở điểm nào quan trọng nhất?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q8" value="A"> A. DISTINCT ON không dùng ORDER BY</label>
+            <label class="test-option"><input type="radio" name="q8" value="B"> B. DISTINCT ON luôn nhanh hơn</label>
+            <label class="test-option"><input type="radio" name="q8" value="C"> C. DISTINCT ON chỉ chạy trên PostgreSQL; ROW_NUMBER() là ANSI SQL portable</label>
+            <label class="test-option"><input type="radio" name="q8" value="D"> D. ROW_NUMBER() chỉ partition 1 column</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="9" data-correct="B">
+          <div class="test-question-title">Q9. Reduced fact table với BIT(31) tiết kiệm storage bằng cách nào?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q9" value="A"> A. Dùng compression algorithm</label>
+            <label class="test-option"><input type="radio" name="q9" value="B"> B. Collapses 31 rows boolean thành 1 row với 31 bits</label>
+            <label class="test-option"><input type="radio" name="q9" value="C"> C. Lưu columnar format</label>
+            <label class="test-option"><input type="radio" name="q9" value="D"> D. Bỏ NULL columns</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="10" data-correct="B">
+          <div class="test-question-title">Q10. Khi nào dùng ARRAY thay vì BIT trong reduced fact?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q10" value="A"> A. ARRAY luôn nhỏ hơn BIT</label>
+            <label class="test-option"><input type="radio" name="q10" value="B"> B. Metric là số (count, sum) chứ không phải boolean</label>
+            <label class="test-option"><input type="radio" name="q10" value="C"> C. Khi có nhiều hơn 64 ngày</label>
+            <label class="test-option"><input type="radio" name="q10" value="D"> D. ARRAY có index tốt hơn</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="11" data-correct="A">
+          <div class="test-question-title">Q11. Tại sao precompute <code>active_count</code> thay vì tính on-the-fly?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q11" value="A"> A. Integer comparison O(1) có index — nhanh hơn bit counting O(31) khi full scan</label>
+            <label class="test-option"><input type="radio" name="q11" value="B"> B. PostgreSQL không đếm được bit 1 trong BIT type</label>
+            <label class="test-option"><input type="radio" name="q11" value="C"> C. BIT(31) không cho arithmetic</label>
+            <label class="test-option"><input type="radio" name="q11" value="D"> D. Để report dễ hiểu hơn</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="12" data-correct="B">
+          <div class="test-question-title">Q12. Pattern DELETE partition + INSERT đảm bảo idempotency như thế nào?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q12" value="A"> A. PostgreSQL tự detect duplicate</label>
+            <label class="test-option"><input type="radio" name="q12" value="B"> B. DELETE trước tạo clean slate — chạy lại bao nhiêu lần kết quả như nhau</label>
+            <label class="test-option"><input type="radio" name="q12" value="C"> C. Transaction ACID tự rollback</label>
+            <label class="test-option"><input type="radio" name="q12" value="D"> D. Primary key ngăn duplicate</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="13" data-correct="C">
+          <div class="test-question-title">Q13. Trong MERGE statement, WHEN NOT MATCHED thực hiện gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q13" value="A"> A. DELETE row không còn trong source</label>
+            <label class="test-option"><input type="radio" name="q13" value="B"> B. UPDATE row có trong target</label>
+            <label class="test-option"><input type="radio" name="q13" value="C"> C. INSERT row chỉ có trong source, chưa có trong target</label>
+            <label class="test-option"><input type="radio" name="q13" value="D"> D. SKIP row conflict</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="14" data-correct="B">
+          <div class="test-question-title">Q14. Tại sao TRUNCATE + INSERT nguy hiểm hơn DELETE partition + INSERT?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q14" value="A"> A. TRUNCATE chậm hơn DELETE</label>
+            <label class="test-option"><input type="radio" name="q14" value="B"> B. TRUNCATE lock toàn bộ table — queries khác không đọc được</label>
+            <label class="test-option"><input type="radio" name="q14" value="C"> C. TRUNCATE không thể rollback</label>
+            <label class="test-option"><input type="radio" name="q14" value="D"> D. TRUNCATE bỏ qua foreign key</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="15" data-correct="A">
+          <div class="test-question-title">Q15. EXCLUDED trong ON CONFLICT DO UPDATE là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q15" value="A"> A. Pseudo-table chứa giá trị mới từ INSERT đang bị conflict</label>
+            <label class="test-option"><input type="radio" name="q15" value="B"> B. Rows bị xóa khi có conflict</label>
+            <label class="test-option"><input type="radio" name="q15" value="C"> C. Snapshot của target trước conflict</label>
+            <label class="test-option"><input type="radio" name="q15" value="D"> D. Error object chứa constraint info</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="16" data-correct="C">
+          <div class="test-question-title">Q16. Degenerate dimension key là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q16" value="A"> A. Surrogate key trong dimension table</label>
+            <label class="test-option"><input type="radio" name="q16" value="B"> B. Foreign key trỏ đến bảng dimension bị xóa</label>
+            <label class="test-option"><input type="radio" name="q16" value="C"> C. Key từ source (order_id) nằm trong fact table không có dimension table riêng</label>
+            <label class="test-option"><input type="radio" name="q16" value="D"> D. NULL foreign key khi không có dimension match</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="17" data-correct="B">
+          <div class="test-question-title">Q17. UNNEST(hit_array) dùng để làm gì trong query ARRAY-based reduced fact?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q17" value="A"> A. Sort phần tử trong array</label>
+            <label class="test-option"><input type="radio" name="q17" value="B"> B. Mở rộng array thành nhiều rows để SUM, AVG, MAX</label>
+            <label class="test-option"><input type="radio" name="q17" value="C"> C. Xóa NULL trong array</label>
+            <label class="test-option"><input type="radio" name="q17" value="D"> D. Compress array trước khi lưu</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="18" data-correct="B">
+          <div class="test-question-title">Q18. Tại sao phải wrap DELETE + INSERT trong 1 transaction?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q18" value="A"> A. Để handle late arrival data</label>
+            <label class="test-option"><input type="radio" name="q18" value="B"> B. INSERT fail → DELETE rollback → table không bị empty</label>
+            <label class="test-option"><input type="radio" name="q18" value="C"> C. Chỉ với table lớn hơn 1GB</label>
+            <label class="test-option"><input type="radio" name="q18" value="D"> D. Airflow yêu cầu transaction</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="19" data-correct="C">
+          <div class="test-question-title">Q19. Duplicate trong fact table chủ yếu đến từ đâu?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q19" value="A"> A. Lỗi PostgreSQL</label>
+            <label class="test-option"><input type="radio" name="q19" value="B"> B. Query sai</label>
+            <label class="test-option"><input type="radio" name="q19" value="C"> C. Retry, pipeline rerun, multiple producers, CDC at-least-once, backfill overlap</label>
+            <label class="test-option"><input type="radio" name="q19" value="D"> D. JOIN nhiều bảng</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="20" data-correct="A">
+          <div class="test-question-title">Q20. Pattern nào xử lý tốt nhất khi có late arrival data cho ngày cũ?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q20" value="A"> A. DELETE partition ngày đó + re-INSERT (backfill) bao gồm late data</label>
+            <label class="test-option"><input type="radio" name="q20" value="B"> B. INSERT-only append late data vào cuối</label>
+            <label class="test-option"><input type="radio" name="q20" value="C"> C. Bỏ qua late data để đơn giản</label>
+            <label class="test-option"><input type="radio" name="q20" value="D"> D. Tăng partition size</label>
+          </div>
+        </div>
+
+        <div class="test-actions">
+          <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+          <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+        </div>
+        <div class="test-result" id="final-test-result" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">← W7.06 Homework</button>
+    <div style="text-align:center;color:var(--accent2);font-weight:700">🎉 Hoàn thành Tuần 7! Tiếp tục Tuần 8–9 — dbt →</div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+  explain.textContent = (correct ? '✓ Chính xác! ' : '✗ Sai. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? '🔼 Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (correctCount >= 19) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Nắm chắc Fact Data Modeling! Commit artifact và bắt đầu Tuần 8–9 — dbt ngay!'; }
+  else if (correctCount >= 16) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Sẵn sàng cho dbt. Ôn lại vài câu sai trước khi tiếp tục.'; }
+  else if (correctCount >= 12) { levelText = 'Đạt'; chipClass = 'warn'; guidance = 'Nên review W7.03 (Dedup) và W7.05 (Incremental Load) trước khi sang Tuần 8.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Ôn lại toàn bộ W7.02–W7.05, build artifact và chạy thử SQL queries trước khi sang Tuần 8.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đúng là <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng! 🎉</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+</body>
+</html>

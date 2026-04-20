@@ -1,6 +1,10 @@
-Dưới đây là **3 prompt chuẩn siêu tối ưu** cho riêng file `Week02_Python_DE.html` theo workflow nhanh nhất:
+Section 1: 📋 Menu Tổng Thể        (icon-purpose) — bảng tóm tắt các bước
+Section 2: 🎯 Mục Đích Module      (icon-purpose) — bullet list mục tiêu
+Section 3: 📖 Giải Thích Chi Tiết  (icon-detail)  — nội dung + code blocks + tables
+Section 4: ❓ Câu Hỏi Ôn Tập       (icon-quiz)    — 5-6 quiz items interactive
+Section 5: 📌 Tổng Kết             (icon-summary) — summary-grid 2 cột, 6 ô
+Section 6: 🔬 Bài Tập Thực Hành   (icon-practice)— practice-tasks + solution toggle
 
-# Tư duy đúng
 
 Thay vì 1 prompt khổng lồ chạy 30 phút+, ta chia thành:
 
@@ -16,7 +20,7 @@ Thay vì 1 prompt khổng lồ chạy 30 phút+, ta chia thành:
 
 Dùng prompt này đầu tiên:
 
-```text
+
 Use project rules from .claude.
 
 Current task:
@@ -44,7 +48,9 @@ Requirements:
 - Output only Week02_Python_DE.html
 
 Do not over-optimize. Do not spend time polishing minor details in this draft.
-```
+Depth target:
+Write with the richness, teaching depth, and practical detail of Claude Web.
+Do not be overly brief.
 
 ---
 
@@ -56,7 +62,7 @@ Sau khi file đã được tạo xong bản đầu.
 
 # PROMPT 2 — REFINE NÂNG CẤP
 
-```text
+
 Use project rules from .claude.
 
 Current task:
@@ -83,7 +89,9 @@ Requirements:
 - Keep the file clean and professional
 
 Do not rebuild from scratch. Improve the current file only.
-```
+Depth target:
+Write with the richness, teaching depth, and practical detail of Claude Web.
+Do not be overly brief.
 
 ---
 
@@ -211,3 +219,78 @@ Thay vì one-shot prompt rất chậm.
 * Week08_dbt.html
 * Week10_Airflow.html
 * Full auto next week mode
+
+======================================================================================
+1.
+Use project rules from .claude.
+
+Current task:
+Upgrade Week03_Data_Cleaning_Claude.html using the full local repository content.
+
+Allowed sources only:
+- ./Week03_Data_Cleaning_Claude.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+
+Do not read any other files.
+
+Upgrade goals:
+- Keep Week03_Data_Cleaning_Claude.html as the base file
+- Read the local cloned repository data-engineer-handbook thoroughly for Week 03 relevant topics
+- Enrich the current file with missing or stronger real content from the handbook
+- Add better practical examples, better explanations, better terminology, and better exercises where useful
+- Align content with actual handbook guidance instead of generic assumptions
+- Keep Vietnamese output
+- Preserve the current HTML structure, CSS style, layout, and JavaScript interactions
+- Keep compatibility with Week00_Setup.html style
+- Include PostgreSQL and Oracle SQL where relevant
+- Remove weak, generic, duplicated, or shallow sections if better repo-backed content is available
+- Improve only where value is clear
+- Do not rebuild from scratch
+
+Focus topics for Week03:
+- data cleaning
+- profiling
+- missing values
+- duplicates
+- outliers
+- schema validation
+- tidy data
+- defensive programming
+- data quality checks
+
+Expected result:
+Update only Week03_Data_Cleaning_Claude.html
+
+The final file should feel like:
+- current polished file structure
+- but upgraded with real handbook-backed depth and accuracy
+
+Before editing, identify which files in data-engineer-handbook are most relevant to Week03 and use only those.
+
+2.
+Review Week03_Data_Cleaning_Claude.html after repository upgrade.
+
+Check:
+- duplicated sections
+- broken HTML
+- weak explanations
+- mismatch with handbook concepts
+- inconsistent wording
+- broken quiz logic
+- layout issues
+
+Fix only high-value issues.
+Do not redesign.
+
+
+
+Week10_Airflow.html
+
+Lộ trình chi tiết ở repo link :
+GitHub - DataExpert-io/data-engineer-handbook: This is a repo with links to everything you'd ever want to learn about data engineering · GitHub
+
+format file week0_setup.html, hãy tạo file Week10_Airflow.html từ repo github trên nhé (phần câu hỏi ôn tập là 10 câu hỏi cho từng phần)
+LƯU Ý: DÙNG CẢ POSTGRESQL và ORACLE SQL

@@ -1,0 +1,148 @@
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+
+Nguồn chính:
+- Repo: DataExpert-io/data-engineer-handbook
+- File roadmap tôi đính kèm: DE_Roadmap_Expert_NHC.md
+- File cấu trúc tôi đính kèm: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu tham chiếu: Week00_Setup.html
+
+Nhiệm vụ:
+Hãy tạo file HTML hoàn chỉnh tên: Week05_Dimensional_Modeling.html
+
+Mục tiêu:
+Tạo tutorial HTML tương tác cho chủ đề:
+Tuần 5-6 – Dimensional Data Modeling
+
+YÊU CẦU NGUỒN THÔNG TIN:
+- Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
+- Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
+- Dùng roadmap đính kèm để bám đúng scope tuần 5-6
+- Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
+- Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
+
+YÊU CẦU QUAN TRỌNG:
+- Output phải là tiếng Việt, giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Phải dùng cả PostgreSQL và Oracle SQL ở các phần liên quan
+- Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
+- Không dùng placeholder như "..." hoặc "viết tương tự"
+- Mỗi module phải đầy đủ nội dung thật
+- Nếu chưa fetch được full repo thì phải nói rõ phần nào lấy từ repo trực tiếp, phần nào lấy từ roadmap, phần nào là suy luận hợp lý
+
+CẤU TRÚC FILE PHẢI GIỮ:
+Mỗi module PHẢI có đủ 6 section theo thứ tự:
+1. 📋 Menu Tổng Thể
+2. 🎯 Mục Đích Module
+3. 📖 Giải Thích Chi Tiết
+4. ❓ Câu Hỏi Ôn Tập
+5. 📌 Tổng Kết
+6. 🔬 Bài Tập Thực Hành
+
+Cấu trúc section cụ thể:
+- Section 1: 📋 Menu Tổng Thể        (icon-purpose) — bảng tóm tắt các bước
+- Section 2: 🎯 Mục Đích Module      (icon-purpose) — bullet list mục tiêu
+- Section 3: 📖 Giải Thích Chi Tiết  (icon-detail)  — nội dung + code blocks + tables
+- Section 4: ❓ Câu Hỏi Ôn Tập       (icon-quiz)    — 10 quiz items interactive
+- Section 5: 📌 Tổng Kết             (icon-summary) — summary-grid 2 cột, 6 ô
+- Section 6: 🔬 Bài Tập Thực Hành   (icon-practice)— practice-tasks + solution toggle
+
+FORMAT PHẢI GIỐNG FILE MẪU:
+- Hero banner
+- Badge row
+- Sidebar fixed 290px
+- Main content
+- Modules display:none, active display:block
+- Collapsible sections
+- Terminal-style code blocks
+- Info boxes: tip / warn / note
+- Interactive quiz
+- Practice task có nút xem lời giải
+- Mini test cuối file
+- Responsive mobile
+- Tất cả CSS inline trong <style>
+- Tất cả JS inline trong <script>
+- Không dùng framework ngoài
+
+JAVASCRIPT FUNCTIONS PHẢI CÓ:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+PHẠM VI NỘI DUNG TUẦN 5-6:
+Tên: Tuần 5-6 – Dimensional Data Modeling
+File: Week05_Dimensional_Modeling.html
+
+Các module bắt buộc:
+- W5.01 – Tổng Quan & Kimball Methodology
+- W5.02 – Grain: Nền Tảng Của Mọi Model
+- W5.03 – Dimension Tables (SCD1/2/3)
+- W5.04 – Fact Tables (Transaction/Snapshot/Accumulating)
+- W5.05 – Star Schema vs Snowflake Schema
+- W5.06 – Cumulative Table Design
+- W5.07 – Backfill Strategy
+- W5.08 – Homework: actors + actors_history_scd
+- W5.09 – Mini Test Tổng Kết
+
+NỘI DUNG CẦN BAO PHỦ:
+- Kimball methodology và tư duy dimensional modeling
+- Grain: định nghĩa 1 row là gì, tại sao grain quyết định toàn bộ model
+- Dimension tables: surrogate key, natural key, attributes
+- SCD Type 1, 2, 3: khi nào dùng, ưu nhược điểm, SQL implementation
+- Fact tables: transaction fact, periodic snapshot, accumulating snapshot
+- Star schema vs snowflake schema: trade-off và use case
+- Cumulative table design từ design pattern của repo
+- Backfill strategy cho historical data
+- Homework thực tế:
+  - DDL bảng actors
+  - Query cumulative theo từng năm
+  - DDL + backfill + incremental cho actors_history_scd
+- Domain examples: e-commerce / streaming / fintech nếu hữu ích
+
+YÊU CẦU SQL:
+- Phải dùng cả PostgreSQL và Oracle SQL ở các phần liên quan
+- Nếu cú pháp khác nhau, trình bày rõ riêng từng block
+- Tập trung vào:
+  - DDL
+  - SCD Type 2 implementation
+  - cumulative queries
+  - validation queries
+  - backfill and incremental logic
+- Giải thích ngắn gọn điểm khác nhau giữa PostgreSQL và Oracle SQL
+
+YÊU CẦU QUIZ:
+- Mỗi module phải có đúng 10 câu hỏi
+- Mỗi câu hỏi có đúng 4 đáp án A/B/C/D
+- Phải có giải thích cho từng đáp án
+- Giải thích đáp án sai phải nói rõ vì sao sai
+
+YÊU CẦU PRACTICE:
+- Mỗi module có bài tập thực hành thực tế
+- Có nút “💡 Xem lời giải”
+- Lời giải phải hữu ích, không sơ sài
+
+YÊU CẦU MINI TEST CUỐI FILE:
+- Module cuối phải có mini test tổng kết
+- 15–20 câu hỏi
+- Có chấm điểm
+- Có reset
+
+YÊU CẦU CHẤT LƯỢNG:
+- Phải sâu, đầy đủ, thực chiến
+- Ưu tiên chất lượng giảng dạy hơn tốc độ
+- Có production mindset rõ ràng
+- Có design trade-off rõ ràng
+- Không quá ngắn gọn
+- Nội dung phải đủ tốt để học như một tutorial thật
+
+TRƯỚC KHI VIẾT FILE:
+Hãy nói rõ ngắn gọn:
+1. Bạn đã lấy được nội dung nào trực tiếp từ repo
+2. Bạn đang dùng roadmap ở phần nào
+3. Bạn sẽ giữ format nào từ file mẫu
+
+SAU ĐÓ:
+Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week05_Dimensional_Modeling.html

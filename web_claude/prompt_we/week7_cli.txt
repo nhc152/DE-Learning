@@ -1,0 +1,79 @@
+1.
+Use project rules from .claude.
+
+Current task:
+Upgrade Week07_Fact_Modeling.html using the full local repository content.
+
+Allowed sources only:
+- ./Week07_Fact_Modeling.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+
+Do not read any other files.
+
+Upgrade goals:
+- Keep Week07_Fact_Modeling.html as the base file
+- Read the local cloned repository data-engineer-handbook thoroughly for Week 07 relevant topics
+- Enrich the current file with missing or stronger real content from the handbook
+- Add better practical examples, clearer explanations, stronger terminology, and more realistic exercises where useful
+- Align content with actual handbook guidance instead of generic assumptions
+- Keep Vietnamese output
+- Preserve the current HTML structure, CSS style, layout, and JavaScript interactions
+- Keep compatibility with Week00_Setup.html style
+- Include PostgreSQL and Oracle SQL where relevant
+- Remove weak, generic, duplicated, or shallow sections if better repo-backed content is available
+- Improve only where value is clear
+- Do not rebuild from scratch
+
+Focus topics for Week07:
+- fact table fundamentals
+- grain
+- transaction fact
+- periodic snapshot
+- accumulating snapshot
+- deduplication with ROW_NUMBER
+- microbatch deduplication
+- reduced fact tables
+- compressed or array formats
+- incremental load
+- MERGE
+- UPSERT
+- insert-only patterns
+- user_devices_cumulated
+- hosts_cumulated
+- host_activity_reduced
+- validation and incremental logic
+
+Expected result:
+Update only Week07_Fact_Modeling.html
+
+The final file should feel like:
+- the current polished file structure
+- but upgraded with real handbook-backed depth and accuracy
+
+Before editing, identify which files in data-engineer-handbook are most relevant to Week07 and use only those.
+
+2.
+Review Week07_Fact_Modeling.html after repository upgrade.
+
+Check:
+- duplicated sections
+- broken HTML
+- weak explanations
+- mismatch with handbook concepts
+- inconsistent wording
+- broken quiz logic
+- layout issues
+- missing required 6-section structure in any module
+- missing or weak PostgreSQL / Oracle SQL examples where relevant
+- incorrect module order
+- missing 10 review questions in any module
+- broken JavaScript interactions required by the template
+- unfinished placeholders or repeated content
+- weak deduplication explanations
+- missing or shallow homework coverage for user_devices_cumulated, hosts_cumulated, and host_activity_reduced
+
+Fix only high-value issues.
+Do not redesign.

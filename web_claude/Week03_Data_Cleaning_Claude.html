@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 3 · Data Cleaning</title>
+<style>
+  :root {
+    --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+    --accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;--accent4:#d2a8ff;
+    --accent5:#ffa657;--text:#e6edf3;--text-muted:#8b949e;
+    --code-bg:#0d1117;--highlight:#388bfd26;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;}
+  .hero{background:linear-gradient(135deg,#0d1117 0%,#161b22 40%,#1a2332 100%);border-bottom:2px solid var(--accent);padding:40px 24px 30px;text-align:center;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#1f6feb33,transparent 70%);pointer-events:none;}
+  .hero h1{font-size:2rem;font-weight:800;color:var(--accent);letter-spacing:-0.5px;}
+  .hero p{color:var(--text-muted);margin-top:8px;font-size:.95rem;}
+  .badge-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .badge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;border:1px solid;}
+  .badge-blue{color:var(--accent);border-color:var(--accent);background:#1f6feb1a;}
+  .badge-green{color:var(--accent2);border-color:var(--accent2);background:#2ea04326;}
+  .badge-orange{color:var(--accent5);border-color:var(--accent5);background:#d2940026;}
+  .badge-purple{color:var(--accent4);border-color:var(--accent4);background:#6e40c926;}
+  .container{display:flex;min-height:calc(100vh - 160px);}
+  .sidebar{width:290px;min-width:290px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .sidebar-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:0 16px 12px;}
+  .level-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 16px 4px;color:var(--text-muted);}
+  .level-label.l1{color:var(--accent5);}
+  .nav-item{display:block;padding:7px 16px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-left:3px solid transparent;transition:all .15s;text-decoration:none;}
+  .nav-item:hover{color:var(--text);background:var(--surface2);}
+  .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--highlight);font-weight:600;}
+  .nav-number{display:inline-block;width:44px;font-size:.7rem;color:var(--text-muted);font-family:monospace;}
+  .main{flex:1;padding:32px 40px;max-width:960px;}
+  .module{display:none;}
+  .module.active{display:block;}
+  .module-header{border:1px solid var(--border);border-radius:12px;padding:24px 28px;background:var(--surface);margin-bottom:24px;position:relative;overflow:hidden;}
+  .module-header::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);}
+  .module-tag{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:8px;}
+  .module-title{font-size:1.6rem;font-weight:800;margin-bottom:8px;}
+  .module-subtitle{color:var(--text-muted);font-size:.9rem;}
+  .section{margin-bottom:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .section-header{padding:14px 20px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--surface2);border-bottom:1px solid var(--border);user-select:none;}
+  .section-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .icon-purpose{background:#1f6feb33;}.icon-detail{background:#2ea04326;}.icon-quiz{background:#d2940026;}.icon-practice{background:#f7816626;}
+  .section-content{padding:20px;background:var(--surface);}
+  .section-toggle{margin-left:auto;color:var(--text-muted);font-size:12px;}
+  h3{font-size:1rem;font-weight:700;color:var(--accent);margin:18px 0 10px;}
+  h3:first-child{margin-top:0;}
+  p{margin-bottom:12px;color:var(--text);font-size:.88rem;}
+  ul,ol{padding-left:20px;margin-bottom:12px;}
+  li{font-size:.88rem;margin-bottom:5px;}
+  strong{color:var(--text);}
+  /* DB Tab System */
+  .db-wrapper{margin:12px 0;}
+  .db-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface2);border-radius:8px 8px 0 0;overflow:hidden;}
+  .db-tab{padding:7px 16px;cursor:pointer;font-size:.78rem;font-weight:700;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:5px;transition:all .15s;}
+  .db-tab.pg{color:#79b8ff;}.db-tab.pg.active{border-bottom-color:#79b8ff;background:#1f6feb15;}
+  .db-tab.ora{color:#ff9b9b;}.db-tab.ora.active{border-bottom-color:#ff9b9b;background:#f7816615;}
+  .db-tab:not(.active){color:var(--text-muted);}
+  .db-panel{display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;background:var(--code-bg);}
+  .db-panel.active{display:block;}
+  /* Code Blocks */
+  .cmd-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden;}
+  .cmd-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-muted);font-family:'Courier New',monospace;}
+  .cmd-dots{display:flex;gap:5px;}
+  .dot{width:10px;height:10px;border-radius:50%;}
+  .dot-red{background:#f7816680;}.dot-yellow{background:#ffa65780;}.dot-green{background:#3fb95080;}
+  .cmd-body{padding:14px;}
+  .db-panel .cmd-body{padding:14px;}
+  pre{font-family:'Courier New','Consolas',monospace;font-size:.82rem;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--text);}
+  .kw{color:var(--accent);}.str{color:var(--accent5);}.fn{color:var(--accent4);}.comment{color:var(--text-muted);}.num{color:#79c0ff;}.output{color:var(--accent5);}
+  code{font-family:'Courier New',monospace;background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.82rem;color:var(--accent4);}
+  /* Quiz */
+  .quiz-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;}
+  .quiz-q{font-weight:600;font-size:.88rem;margin-bottom:10px;}
+  .quiz-q::before{content:'Q';display:inline-block;width:22px;height:22px;background:var(--accent);color:#000;border-radius:50%;font-size:.7rem;font-weight:800;text-align:center;line-height:22px;margin-right:8px;}
+  .quiz-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+  .quiz-opt{padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.84rem;transition:all .15s;background:var(--bg);}
+  .quiz-opt:hover{border-color:var(--accent);color:var(--accent);}
+  .quiz-opt.correct{border-color:var(--accent2);color:var(--accent2);background:#2ea04310;}
+  .quiz-opt.wrong{border-color:var(--accent3);color:var(--accent3);background:#f7816610;}
+  .quiz-explain{font-size:.82rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;margin-top:8px;display:none;}
+  .quiz-explain.show{display:block;}
+  /* Info Boxes */
+  .info-box{border-radius:8px;padding:14px 16px;margin:12px 0;font-size:.84rem;border:1px solid;display:flex;gap:10px;}
+  .info-box.tip{border-color:var(--accent2);background:#2ea04310;color:var(--accent2);}
+  .info-box.warn{border-color:var(--accent5);background:#d2940015;color:var(--accent5);}
+  .info-box.note{border-color:var(--accent);background:#1f6feb15;color:var(--accent);}
+  .info-box.ora{border-color:#ff9b9b;background:#f7816610;color:#ff9b9b;}
+  .info-box span{color:var(--text);}
+  /* Progress */
+  .progress-bar{background:var(--surface2);border-radius:4px;height:4px;margin:16px 0;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;}
+  /* Tables */
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.83rem;}
+  th{background:var(--surface2);padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent);}
+  td{padding:8px 12px;border:1px solid var(--border);}
+  tr:nth-child(even) td{background:#ffffff05;}
+  /* Practice Tasks */
+  .practice-task{background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden;}
+  .practice-task-header{padding:12px 16px;background:#d2940015;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem;color:var(--accent5);}
+  .practice-task-body{padding:16px;}
+  .solution-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:.8rem;cursor:pointer;color:var(--accent2);margin-top:10px;transition:all .15s;}
+  .solution-toggle:hover{background:var(--surface2);}
+  .solution-box{margin-top:10px;display:none;border-top:1px solid var(--border);padding-top:12px;}
+  .solution-box.show{display:block;}
+  /* Nav Buttons */
+  .nav-buttons{display:flex;gap:12px;margin-top:32px;justify-content:space-between;}
+  .nav-btn{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px;}
+  .nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .nav-btn.primary{background:var(--accent);color:#000;border-color:var(--accent);}
+  .nav-btn.primary:hover{background:#79b8ff;}
+  /* Checklist */
+  .checklist{list-style:none;padding:0;}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.88rem;border-bottom:1px solid var(--border);}
+  .checklist li:last-child{border-bottom:none;}
+  .checklist li::before{content:'□';color:var(--accent5);font-size:1.1rem;flex-shrink:0;margin-top:-1px;}
+  /* Final Test */
+  .test-question{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;}
+  .test-question.correct{border-color:var(--accent2);background:#2ea04312;}
+  .test-question.wrong{border-color:var(--accent3);background:#f7816612;}
+  .test-question.unanswered{border-color:var(--accent5);background:#d2940015;}
+  .test-question-title{font-size:.86rem;font-weight:600;margin-bottom:8px;}
+  .test-options{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;}
+  .test-option{display:flex;align-items:center;gap:6px;font-size:.83rem;color:var(--text);}
+  .test-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
+  .test-result{margin-top:16px;padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);display:none;}
+  .score-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .score-chip{border:1px solid var(--border);border-radius:14px;padding:4px 10px;font-size:.78rem;color:var(--text);background:var(--bg);}
+  .score-chip.good{border-color:var(--accent2);color:var(--accent2);}
+  .score-chip.warn{border-color:var(--accent5);color:var(--accent5);}
+  .score-chip.bad{border-color:var(--accent3);color:var(--accent3);}
+  .mistake-list{margin-top:8px;padding-left:18px;}
+  @media(max-width:768px){.sidebar{display:none;}.main{padding:16px;}.test-options{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>🧹 Data Engineering Handbook Tutorial</h1>
+  <p>Giai đoạn 1 · Tuần 3 · Data Cleaning — Làm Sạch Dữ Liệu Chuyên Nghiệp</p>
+  <div class="badge-row">
+    <span class="badge badge-orange">Giai đoạn 1 · Foundation</span>
+    <span class="badge badge-green">Module 103 · Data Cleaning</span>
+    <span class="badge badge-blue">PostgreSQL &amp; Oracle 19c</span>
+    <span class="badge badge-purple">Tidy Data · Pandera · Profiling</span>
+  </div>
+</div>
+
+<div class="container">
+<nav class="sidebar">
+  <div class="sidebar-title">Chương Trình Học</div>
+  <div class="level-label l1">▶ TUẦN 3 · DATA CLEANING</div>
+  <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W3.01</span>Tổng Quan &amp; Checklist</div>
+  <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W3.02</span>Phát Hiện Vấn Đề DL</div>
+  <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W3.03</span>Missing Values</div>
+  <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W3.04</span>Duplicates &amp; Dedup</div>
+  <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W3.05</span>Outliers &amp; Wrong Types</div>
+  <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W3.06</span>Tidy Data &amp; Normalize</div>
+  <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W3.07</span>Data Profiling SQL</div>
+  <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W3.08</span>Validation &amp; Pandera</div>
+  <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W3.09</span>Artifacts &amp; Exit Criteria</div>
+  <div class="nav-item" onclick="showModule(9,this)"><span class="nav-number">W3.10</span>Mini Test Tổng Kết</div>
+</nav>
+<main class="main">
+<!-- MODULE 0: TỔNG QUAN -->
+<div class="module active" id="m0">
+  <div class="module-header">
+    <div class="module-tag">Tuần 3 · Giai đoạn 1 · Module 103</div>
+    <div class="module-title">📋 Tổng Quan &amp; Checklist</div>
+    <div class="module-subtitle">Tại sao data cleaning quan trọng · Roadmap nội dung · Artifacts cần nộp</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:10%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. Menu Tổng Thể Tuần 3<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <tr><th>Module</th><th>Nội dung</th><th>DB</th><th>Thời gian</th></tr>
+        <tr><td>W3.01</td><td>Tổng quan, checklist, why cleaning matters</td><td>—</td><td>20 phút</td></tr>
+        <tr><td>W3.02</td><td>Phát hiện vấn đề dữ liệu: taxonomy 5 loại lỗi</td><td>PG + ORA</td><td>45 phút</td></tr>
+        <tr><td>W3.03</td><td>Xử lý Missing Values: imputation strategies</td><td>PG + ORA</td><td>60 phút</td></tr>
+        <tr><td>W3.04</td><td>Duplicates &amp; Deduplication production-grade</td><td>PG + ORA</td><td>60 phút</td></tr>
+        <tr><td>W3.05</td><td>Outliers, sai kiểu dữ liệu, standardization</td><td>PG + ORA</td><td>45 phút</td></tr>
+        <tr><td>W3.06</td><td>Tidy Data principles + Normalization</td><td>PG + ORA</td><td>45 phút</td></tr>
+        <tr><td>W3.07</td><td>Data Profiling bằng SQL thuần</td><td>PG + ORA</td><td>60 phút</td></tr>
+        <tr><td>W3.08</td><td>Validation rules + Pandera (Python)</td><td>Python</td><td>45 phút</td></tr>
+        <tr><td>W3.09</td><td>Artifacts bắt buộc + Exit criteria</td><td>—</td><td>30 phút</td></tr>
+        <tr><td>W3.10</td><td>Mini test tổng kết 40 câu (10 câu/phần)</td><td>—</td><td>30 phút</td></tr>
+      </table>
+      <div class="info-box note"><span>📚</span><span>Tài liệu gốc: <strong>data_cleaning.md</strong> trong DataExpert-io/data-engineer-handbook + <em>Tidy Data</em> whitepaper (Hadley Wickham, 2014). Module này dùng song song <strong>PostgreSQL 15+</strong> và <strong>Oracle 19c</strong>.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. Tại Sao Data Cleaning Quan Trọng?<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <p>Data Engineering thực tế có câu: <strong>"Garbage In, Garbage Out"</strong>. Pipeline sạch nhưng data bẩn = insight sai = quyết định sai. Theo nhiều khảo sát ngành, data engineer dành <strong>60–80% thời gian</strong> cho data cleaning và preparation.</p>
+      <h3>🔴 Hậu quả của data bẩn không được xử lý</h3>
+      <ul>
+        <li><strong>Business impact:</strong> Report sai → CEO ra quyết định dựa trên số liệu lệch → thiệt hại tài chính thực tế</li>
+        <li><strong>Model ML:</strong> Dữ liệu training bẩn → model dự báo sai → AML false positive/negative (ngành ngân hàng)</li>
+        <li><strong>Pipeline downstream:</strong> JOIN trên key sai định dạng → mất dữ liệu im lặng (silent data loss)</li>
+        <li><strong>SLA:</strong> NULL cascade trong aggregation → metric bị undercount → SLA báo sai</li>
+      </ul>
+      <h3>🟢 Medallion Architecture — Nơi Cleaning Xảy Ra</h3>
+      <p>Bronze (raw ingestion) → <strong>Silver (cleaned + validated)</strong> → Gold (business aggregates). Silver layer chính là nơi toàn bộ data cleaning được thực hiện.</p>
+      <div class="info-box tip"><span>💡</span><span><strong>Banking/AML context:</strong> Dữ liệu giao dịch thường có: amount=NULL, account_no sai format, duplicate transaction do retry, ngày giờ sai timezone. Cleaning sai → AML rule bỏ sót → compliance risk.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>3. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="quiz-item"><div class="quiz-q">Trong kiến trúc Medallion, data cleaning chủ yếu xảy ra ở layer nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Bronze giữ nguyên raw data — không nên transform ở đây.')">A. Bronze Layer</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Silver = cleaned/validated layer. Bronze = raw ingestion, Gold = business aggregates.')">B. Silver Layer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Gold dùng data đã sạch từ Silver để aggregate.')">C. Gold Layer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Staging là bước ingestion, không phải cleaning trong Medallion.')">D. Staging Layer</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">"Silent data loss" trong data pipeline là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Pipeline crash thì dễ phát hiện vì có error log.')">A. Pipeline bị crash và mất toàn bộ dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Ví dụ: JOIN trên account_no format khác nhau → rows không match → bị bỏ qua không có warning. Pipeline vẫn báo SUCCESS.')">B. Dữ liệu bị mất âm thầm không có error/warning, pipeline vẫn báo SUCCESS</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Mất kết nối DB gây ra lỗi rõ ràng.')">C. Mất kết nối database giữa chừng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NULL propagation vẫn có thể detect được.')">D. NULL propagation trong aggregation</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Theo ngành, data engineer dành bao nhiêu % thời gian cho data cleaning?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'10-20% quá thấp.')">A. 10–20%</div><div class="quiz-opt" onclick="answerQuiz(this,false,'30-40% vẫn thấp hơn thực tế.')">B. 30–40%</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhiều khảo sát cho thấy 60–80% thời gian DE là data preparation.')">C. 60–80%</div><div class="quiz-opt" onclick="answerQuiz(this,false,'90% quá cao.')">D. 90%+</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Loại lỗi nào có thể gây "double counting" trong report doanh thu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Missing value làm undercount, không phải double count.')">A. Missing Values</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Duplicate transaction (bank retry gửi 2 lần) → cùng giao dịch được tính 2 lần → doanh thu bị inflated.')">B. Duplicates</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Wrong type gây lỗi conversion.')">C. Wrong Data Type</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Inconsistency tên địa danh không ảnh hưởng double counting amount.')">D. Inconsistency</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Placeholder value như 'N/A', '-1' nguy hiểm hơn NULL thuần thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Placeholder thường chiếm ít storage hơn.')">A. Placeholder chiếm nhiều storage hơn NULL</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. NULL được SQL xử lý đặc biệt (COUNT bỏ qua, AVG loại ra). Nhưng -1 được tính như số thực → làm lệch AVG, MIN, MAX mà không có warning.')">B. Placeholder được tính như giá trị thực → làm lệch aggregation mà không có cảnh báo</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NULL không gây SQL error.')">C. NULL gây SQL error còn placeholder thì không</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều cần xử lý.')">D. Không có sự khác biệt</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Trong AML banking, NULL trong cột amount KHÔNG nên impute bằng 0 vì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Database không từ chối 0.')">A. Oracle và PostgreSQL đều từ chối lưu amount=0</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. amount=NULL (chưa xác định) và amount=0 (giao dịch 0 đồng) có ý nghĩa business hoàn toàn khác nhau. Impute sai có thể làm mất AML alert.')">B. amount=NULL (chưa biết) và amount=0 (giao dịch 0đ) có ý nghĩa business khác nhau</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Mean imputation cũng có vấn đề tương tự.')">C. Nên dùng mean imputation thay vì 0</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Aggregate functions xử lý được 0.')">D. Aggregate functions không xử lý được amount=0</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">5 loại lỗi dữ liệu phổ biến nhất trong taxonomy data quality là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Schema error không phải 1 trong 5 loại chuẩn.')">A. NULL, Schema Error, Encoding, Latency, Format</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. 5 loại chuẩn: Missing Values (NULL/empty), Duplicates (row trùng), Outliers (giá trị bất thường), Wrong Types (sai kiểu/format), Inconsistency (cùng entity nhiều representation).')">B. Missing Values, Duplicates, Outliers, Wrong Types, Inconsistency</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cardinality không phải loại lỗi data quality.')">C. NULL, Duplicates, Cardinality, Encoding, Latency</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Schema drift là vấn đề pipeline, không phải data quality taxonomy.')">D. Missing, Schema Drift, Encoding Error, Timeout, Format</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Khi nào nên dùng "Flag + Keep NULL" thay vì impute?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là mô tả của Drop strategy.')">A. Khi NULL xuất hiện nhiều hơn 50% rows</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi NULL có semantic riêng: payment_date IS NULL = chưa thanh toán, không phải thiếu data. Giữ NULL + thêm flag is_null_xxx để downstream biết.')">B. Khi NULL có ý nghĩa business riêng biệt (ví dụ: chưa thanh toán ≠ thiếu data)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NULL ở PK nên drop hoặc investigate, không flag.')">C. Khi NULL ở cột primary key</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Luôn flag là không practical.')">D. Luôn luôn flag tất cả NULL trong mọi trường hợp</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Defensive programming trong ETL có nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Security là 1 khía cạnh nhỏ.')">A. Mã hóa data để bảo vệ security</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Assume data có thể sai → fail loudly với clear error messages thay vì silent incorrect processing. Bao gồm: assert, schema validation, count checks, null guards.')">B. Assume data có thể sai, fail loudly với clear errors thay vì silent incorrect processing</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Try/except là 1 tool nhỏ trong defensive programming.')">C. Bọc mọi thứ trong try/except để prevent crash</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Backup là data ops, không phải defensive programming.')">D. Backup data trước mỗi transformation step</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao phải log validation failures vào separate audit table thay vì chỉ raise exception?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Logging không nhất thiết nhanh hơn.')">A. Vì logging nhanh hơn exception handling</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Audit trail cho phép: trend monitoring (lỗi tăng theo thời gian?), SLA reporting, source investigation, và không block pipeline — xử lý valid rows, quarantine invalid rows.')">B. Trend monitoring, SLA reporting, source investigation, và không block pipeline với valid rows</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Log table không improve performance.')">C. Để validation query chạy nhanh hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Exception vẫn có thể caught.')">D. Vì exception bị lost khi process restart</div></div><div class="quiz-explain"></div></div>
+    </div>
+  </div>
+  <div class="nav-buttons"><div></div><button class="nav-btn primary" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">Tiếp theo: Phát Hiện Vấn Đề →</button></div>
+</div>
+<!-- MODULE 1: PHÁT HIỆN VẤN ĐỀ -->
+<div class="module" id="m1">
+  <div class="module-header">
+    <div class="module-tag">W3.02 · Identify Problems</div>
+    <div class="module-title">🔍 Phát Hiện Vấn Đề Dữ Liệu</div>
+    <div class="module-subtitle">5 loại lỗi dữ liệu · Quick scan SQL · Oracle vs PostgreSQL differences</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📖</div>1. Quick Scan SQL — Chạy đầu tiên khi nhận dataset mới<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <tr><th>Loại lỗi</th><th>Mô tả</th><th>Ví dụ thực tế</th></tr>
+        <tr><td><strong>Missing Values</strong></td><td>NULL, empty string, placeholder</td><td>amount=NULL, email='N/A'</td></tr>
+        <tr><td><strong>Duplicates</strong></td><td>Row trùng lặp hoàn toàn hoặc partial</td><td>Transaction gửi 2 lần do retry</td></tr>
+        <tr><td><strong>Outliers</strong></td><td>Giá trị bất thường ngoài range hợp lệ</td><td>Age=-5, amount=999999999</td></tr>
+        <tr><td><strong>Wrong Types</strong></td><td>Dữ liệu sai kiểu hoặc format</td><td>date='32/13/2024', phone='abc'</td></tr>
+        <tr><td><strong>Inconsistency</strong></td><td>Cùng dữ liệu, format/spelling khác nhau</td><td>'Ha Noi' vs 'Hà Nội' vs 'HANOI'</td></tr>
+      </table>
+      <div class="db-wrapper">
+        <div class="db-tabs" id="t1"><div class="db-tab pg active" onclick="switchDbTab('t1','pg1','ora1')">🐘 PostgreSQL</div><div class="db-tab ora" onclick="switchDbTab('t1','ora1','pg1')">🔴 Oracle 19c</div></div>
+        <div class="db-panel active" id="pg1"><div class="cmd-body"><pre><span class="comment">-- Quick health check — PostgreSQL</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_rows,
+    <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(transaction_id)  <span class="kw">AS</span> null_txn_id,
+    <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(amount)          <span class="kw">AS</span> null_amount,
+    <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> transaction_id) <span class="kw">AS</span> dup_txn_id,
+    <span class="fn">MIN</span>(amount) <span class="kw">AS</span> min_amount, <span class="fn">MAX</span>(amount) <span class="kw">AS</span> max_amount,
+    <span class="fn">MIN</span>(txn_date) <span class="kw">AS</span> earliest, <span class="fn">MAX</span>(txn_date) <span class="kw">AS</span> latest
+<span class="kw">FROM</span> transactions;
+
+<span class="comment">-- Phát hiện empty string (bẫy hay gặp trong PostgreSQL)</span>
+<span class="comment">-- PostgreSQL: '' != NULL — phải check riêng!</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> empty_or_null
+<span class="kw">FROM</span> transactions
+<span class="kw">WHERE</span> <span class="fn">TRIM</span>(account_no) = <span class="str">''</span> <span class="kw">OR</span> account_no <span class="kw">IS NULL</span>;</pre></div></div>
+        <div class="db-panel" id="ora1"><div class="cmd-body"><pre><span class="comment">-- Quick health check — Oracle 19c</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_rows,
+    <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(transaction_id)  <span class="kw">AS</span> null_txn_id,
+    <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(amount)          <span class="kw">AS</span> null_amount,
+    <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> transaction_id) <span class="kw">AS</span> dup_txn_id,
+    <span class="fn">MIN</span>(amount) <span class="kw">AS</span> min_amount, <span class="fn">MAX</span>(amount) <span class="kw">AS</span> max_amount
+<span class="kw">FROM</span> transactions;
+
+<span class="comment">-- Oracle: '' = NULL (không cần check empty string riêng!)</span>
+<span class="comment">-- EXEC DBMS_STATS.GATHER_TABLE_STATS(USER, 'TRANSACTIONS');</span>
+<span class="kw">SELECT</span> column_name, num_nulls, num_distinct
+<span class="kw">FROM</span> all_tab_col_statistics
+<span class="kw">WHERE</span> table_name = <span class="str">'TRANSACTIONS'</span> <span class="kw">AND</span> owner = <span class="kw">USER</span>
+<span class="kw">ORDER BY</span> num_nulls <span class="kw">DESC</span>;</pre></div></div>
+      </div>
+      <div class="info-box ora"><span>⚠️</span><span><strong>Khác biệt quan trọng Oracle vs PostgreSQL:</strong> Oracle coi <code>''</code> (empty string) = <code>NULL</code>. PostgreSQL thì <code>'' ≠ NULL</code>. Khi migrate data giữa hai DB, phải xử lý edge case này!</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>2. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="quiz-item"><div class="quiz-q">Trong Oracle 19c, câu lệnh nào ĐÚNG về empty string?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là behavior của PostgreSQL.')">A. WHERE col = '' tương đương WHERE TRIM(col) = ''</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Oracle coi empty string hoàn toàn là NULL — WHERE col IS NULL đã bao gồm cả col = \'\'.')">B. WHERE col IS NULL đã bao gồm cả trường hợp col = ''</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Oracle không có kiểu VARCHAR2 zero-length đặc biệt.')">C. Phải dùng WHERE LENGTH(col) = 0</div><div class="quiz-opt" onclick="answerQuiz(this,false,'COALESCE không giải quyết vấn đề empty vs null trong Oracle.')">D. COALESCE(col, 'EMPTY') để phân biệt NULL với empty</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Cách đếm NULL trong cột amount hoạt động trên CẢ Oracle và PostgreSQL?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'COUNT(*) đếm tất cả rows bao gồm NULL.')">A. SELECT COUNT(*) FROM t WHERE amount IS NULL — nhưng COUNT(*) đếm cả NULL</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. COUNT(col) bỏ qua NULL, nên COUNT(*) - COUNT(amount) = số NULL. Pattern này portable sang cả Oracle và PostgreSQL.')">B. COUNT(*) - COUNT(amount) — COUNT(col) bỏ qua NULL nên hiệu là số NULL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'IS NULL chỉ dùng trong WHERE, không dùng trong aggregate trực tiếp.')">C. SUM(amount IS NULL)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NVL là Oracle-only, NULLIF dùng khác mục đích.')">D. COUNT(NVL(amount, 0)) - COUNT(*)</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Khi quick scan Oracle, tool nào giúp xem NULL statistics mà không cần full table scan?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'ALL_TABLES chỉ có table-level info.')">A. ALL_TABLES view</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ALL_TAB_COL_STATISTICS chứa num_nulls, num_distinct sau khi gather stats. Cần DBMS_STATS.GATHER_TABLE_STATS trước.')">B. ALL_TAB_COL_STATISTICS — num_nulls sau khi gather stats</div><div class="quiz-opt" onclick="answerQuiz(this,false,'V$SQL là về execution plans.')">C. V$SQL view</div><div class="quiz-opt" onclick="answerQuiz(this,false,'ALL_CONSTRAINTS chỉ về constraint definitions.')">D. ALL_CONSTRAINTS view</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Câu lệnh detect DUPLICATE rows dựa trên nhiều cột trong PostgreSQL?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'DISTINCT loại bỏ nhưng không cho biết số lượng duplicate.')">A. SELECT DISTINCT * FROM t</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. GROUP BY các cột identify + HAVING COUNT(*) > 1 là pattern chuẩn để tìm duplicates.')">B. SELECT col1, col2, COUNT(*) FROM t GROUP BY col1, col2 HAVING COUNT(*) > 1</div><div class="quiz-opt" onclick="answerQuiz(this,false,'UNIQUE INDEX ngăn insert nhưng không detect existing duplicates.')">C. CREATE UNIQUE INDEX ON t(col1, col2)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'COUNT DISTINCT cho biết unique count, không phải duplicates.')">D. SELECT COUNT(DISTINCT col1) FROM t</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">information_schema.columns trong PostgreSQL dùng để làm gì trong data profiling?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'information_schema không chứa NULL counts.')">A. Đếm số lượng NULL trong từng cột</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. information_schema.columns chứa metadata: column_name, data_type, is_nullable, character_maximum_length. Dùng để enumerate cột và build dynamic profiling queries.')">B. Liệt kê metadata của từng cột: tên, kiểu dữ liệu, nullable, max length</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Row count lấy từ pg_stat_user_tables hoặc COUNT(*).')">C. Đếm số rows trong table</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Execution plan qua EXPLAIN ANALYZE.')">D. Xem execution plan của query</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao phải chạy DBMS_STATS.GATHER_TABLE_STATS trước khi dùng ALL_TAB_COL_STATISTICS?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan đến index rebuilding.')">A. Để rebuild index</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ALL_TAB_COL_STATISTICS chứa cached statistics từ lần gather cuối. Table thay đổi nhiều mà chưa gather lại thì num_nulls, num_distinct có thể stale và không chính xác.')">B. Cập nhật statistics — data cũ có thể stale và không phản ánh thực tế</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Gather stats không tạo thêm disk space.')">C. Tạo thêm disk space cho query</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Không cần DBA privilege nếu own table đó.')">D. Vì chỉ DBA mới đọc được ALL_TAB_COL_STATISTICS</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao nên kiểm tra MIN, MAX, AVG, STDDEV cùng lúc khi profiling?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'JOIN không liên quan đến cùng lúc check các stats.')">A. SQL JOIN chỉ hoạt động với đầy đủ aggregate functions</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Outlier cực đoan kéo AVG lệch — AVG=1000 nhưng MAX=50,000,000 báo hiệu outlier. STDDEV cho biết spread. Chỉ xem AVG một mình là không đủ.')">B. Outlier kéo AVG lệch — MIN/MAX/STDDEV giúp phát hiện anomaly mà AVG che</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Optimizer không yêu cầu aggregate đi cùng nhau.')">C. Database optimizer yêu cầu tất cả aggregate trong cùng query</div><div class="quiz-opt" onclick="answerQuiz(this,false,'MIN/MAX không làm index scan hiệu quả hơn khi đi cùng AVG.')">D. Để giảm số lần scan table xuống 1 lần</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Inconsistency trong địa danh 'Ha Noi', 'Hà Nội', 'HANOI' là loại lỗi gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Missing value là NULL hoặc empty.')">A. Missing Value</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Duplicate là row trùng.')">B. Duplicate</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Inconsistency (Semantic Inconsistency) là khi cùng 1 thực thể được biểu diễn nhiều cách khác nhau. Cần standardization để giải quyết.')">C. Inconsistency — cùng thực thể nhiều representation</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Wrong type là khi số lưu dạng text hay ngày sai format.')">D. Wrong Data Type</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">pg_stats (PostgreSQL) tương đương với gì trong Oracle?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'ALL_TABLES là table-level metadata.')">A. ALL_TABLES</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. pg_stats (PostgreSQL) và ALL_TAB_COL_STATISTICS (Oracle) đều chứa column-level statistics sau khi gather. Cả hai đều cần trigger gather trước (ANALYZE / DBMS_STATS).')">B. ALL_TAB_COL_STATISTICS</div><div class="quiz-opt" onclick="answerQuiz(this,false,'V$SQL là execution plan catalog.')">C. V$SQL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'DBA_CONSTRAINTS là constraint definitions.')">D. DBA_CONSTRAINTS</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Cardinality = 3 trên 1 triệu rows của cột txn_type có nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Low cardinality không ngụ ý data lỗi.')">A. Dữ liệu bị lỗi — cột này cần cleaning ngay</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. txn_type là low-cardinality category column chỉ có 3 loại (DEBIT, CREDIT, TRANSFER). Thông tin này giúp: chọn encoding phù hợp, quyết định indexing strategy, detect anomaly nếu cardinality thay đổi bất ngờ.')">B. txn_type là low-cardinality category column — thông tin quan trọng cho indexing &amp; encoding</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Low cardinality thường cần bitmap index, không phải B-tree index.')">C. Cần thêm B-tree index vì cardinality thấp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'3 unique values không ngụ ý duplicate.')">D. Có 999,997 duplicate rows cần xóa</div></div><div class="quiz-explain"></div></div>
+    </div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="showModule(0,document.querySelectorAll('.nav-item')[0])">← Tổng Quan</button><button class="nav-btn primary" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">Tiếp theo: Missing Values →</button></div>
+</div>
+<!-- MODULE 2: MISSING VALUES -->
+<div class="module" id="m2">
+  <div class="module-header">
+    <div class="module-tag">W3.03 · Missing Values</div>
+    <div class="module-title">🕳️ Xử Lý Missing Values</div>
+    <div class="module-subtitle">Imputation strategies · COALESCE vs NVL · Forward fill · Khi nào xóa vs giữ</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📖</div>1. Chiến Lược &amp; SQL Implementation<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <tr><th>Strategy</th><th>Khi nào dùng</th><th>Rủi ro</th></tr>
+        <tr><td><strong>Drop row</strong></td><td>NULL ở cột critical (PK, amount), &lt;5% rows</td><td>Mất data, bias nếu not MCAR</td></tr>
+        <tr><td><strong>Fill constant</strong></td><td>Default business value có ý nghĩa (0 cho count)</td><td>Sai nếu 0 không phải default đúng</td></tr>
+        <tr><td><strong>Mean/Median</strong></td><td>Numerical, không có trend</td><td>Reduce variance, ẩn pattern</td></tr>
+        <tr><td><strong>Forward Fill</strong></td><td>Time series — giá trị trước đó vẫn valid</td><td>Propagate error nếu nhiều NULL liên tiếp</td></tr>
+        <tr><td><strong>Flag + Keep</strong></td><td>NULL có semantic riêng (chưa thanh toán ≠ 0)</td><td>Cần thêm cột is_null_xxx</td></tr>
+      </table>
+      <div class="db-wrapper">
+        <div class="db-tabs" id="t2"><div class="db-tab pg active" onclick="switchDbTab('t2','pg2','ora2')">🐘 PostgreSQL</div><div class="db-tab ora" onclick="switchDbTab('t2','ora2','pg2')">🔴 Oracle 19c</div></div>
+        <div class="db-panel active" id="pg2"><div class="cmd-body"><pre><span class="comment">-- PostgreSQL: COALESCE (SQL Standard, portable)</span>
+<span class="kw">SELECT</span>
+    transaction_id,
+    <span class="fn">COALESCE</span>(amount, <span class="num">0</span>)             <span class="kw">AS</span> amount,
+    <span class="fn">COALESCE</span>(currency, <span class="str">'VND'</span>)        <span class="kw">AS</span> currency,
+    <span class="fn">COALESCE</span>(txn_date, <span class="kw">CURRENT_DATE</span>) <span class="kw">AS</span> txn_date,
+    (amount <span class="kw">IS NULL</span>)::INT           <span class="kw">AS</span> is_amount_imputed
+<span class="kw">FROM</span> transactions;
+
+<span class="comment">-- Forward fill (time series) — FIRST_VALUE IGNORE NULLS</span>
+<span class="kw">SELECT</span> account_no, txn_date, balance,
+    <span class="fn">FIRST_VALUE</span>(balance <span class="kw">IGNORE NULLS</span>)
+        <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> account_no <span class="kw">ORDER BY</span> txn_date
+              <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>)
+        <span class="kw">AS</span> balance_filled
+<span class="kw">FROM</span> account_daily_balance;
+
+<span class="comment">-- Mean imputation by group (UPDATE)</span>
+<span class="kw">UPDATE</span> transactions t
+<span class="kw">SET</span> amount = (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(amount)
+    <span class="kw">FROM</span> transactions t2
+    <span class="kw">WHERE</span> t2.txn_type = t.txn_type <span class="kw">AND</span> t2.amount <span class="kw">IS NOT NULL</span>
+)
+<span class="kw">WHERE</span> amount <span class="kw">IS NULL</span>;</pre></div></div>
+        <div class="db-panel" id="ora2"><div class="cmd-body"><pre><span class="comment">-- Oracle 19c: NVL và NVL2 (Oracle-specific)</span>
+<span class="kw">SELECT</span>
+    transaction_id,
+    <span class="fn">NVL</span>(amount, <span class="num">0</span>)                  <span class="kw">AS</span> amount,
+    <span class="fn">NVL</span>(currency, <span class="str">'VND'</span>)             <span class="kw">AS</span> currency,
+    <span class="fn">NVL</span>(txn_date, <span class="fn">SYSDATE</span>)           <span class="kw">AS</span> txn_date,
+    <span class="comment">-- NVL2(expr, val_not_null, val_null)</span>
+    <span class="fn">NVL2</span>(amount, <span class="str">'ORIGINAL'</span>, <span class="str">'IMPUTED'</span>) <span class="kw">AS</span> amount_source,
+    <span class="fn">NVL2</span>(amount, <span class="num">0</span>, <span class="num">1</span>)               <span class="kw">AS</span> is_amount_imputed
+<span class="kw">FROM</span> transactions;
+
+<span class="comment">-- Forward fill — LAST_VALUE IGNORE NULLS (Oracle 12c+)</span>
+<span class="kw">SELECT</span> account_no, txn_date, balance,
+    <span class="fn">LAST_VALUE</span>(balance <span class="kw">IGNORE NULLS</span>)
+        <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> account_no <span class="kw">ORDER BY</span> txn_date
+              <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>)
+        <span class="kw">AS</span> balance_filled
+<span class="kw">FROM</span> account_daily_balance;
+
+<span class="comment">-- Mean imputation dùng MERGE (Oracle-preferred pattern)</span>
+<span class="kw">MERGE INTO</span> transactions t
+<span class="kw">USING</span> (
+    <span class="kw">SELECT</span> txn_type, <span class="fn">AVG</span>(amount) <span class="kw">AS</span> avg_amount
+    <span class="kw">FROM</span> transactions
+    <span class="kw">WHERE</span> amount <span class="kw">IS NOT NULL</span>
+    <span class="kw">GROUP BY</span> txn_type
+) src <span class="kw">ON</span> (t.txn_type = src.txn_type <span class="kw">AND</span> t.amount <span class="kw">IS NULL</span>)
+<span class="kw">WHEN MATCHED THEN UPDATE SET</span> t.amount = src.avg_amount;</pre></div></div>
+      </div>
+      <div class="info-box tip"><span>💡</span><span><strong>Best practice:</strong> Luôn tạo cột flag <code>is_imputed</code> khi impute. Downstream analyst cần biết giá trị nào gốc, giá trị nào filled. Đặc biệt quan trọng trong AML — imputed amount không nên trigger alert.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>2. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="quiz-item"><div class="quiz-q">Sự khác biệt cốt lõi giữa NVL và COALESCE là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều xử lý NULL tốt.')">A. NVL không xử lý được NULL, COALESCE mới xử lý được</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. NVL chỉ nhận 2 tham số (Oracle-specific). COALESCE là SQL standard, nhận N tham số và trả về giá trị non-NULL đầu tiên — portable hơn.')">B. NVL chỉ nhận 2 tham số (Oracle-only), COALESCE nhận N tham số và là SQL standard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Performance difference không đáng kể.')">C. NVL nhanh hơn COALESCE</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều trả về non-NULL đầu tiên.')">D. COALESCE trả về NULL nếu tất cả tham số NULL còn NVL trả về 0</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">NVL2(col, val_a, val_b) hoạt động như thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'NVL2 là Oracle-specific.')">A. Nếu col NULL thì trả val_a, còn lại trả val_b (SQL standard)</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. NVL2 là Oracle-specific: nếu col IS NOT NULL thì trả val_a, nếu col IS NULL thì trả val_b. Tương đương CASE WHEN col IS NOT NULL THEN val_a ELSE val_b END.')">B. Nếu col IS NOT NULL trả val_a, nếu col IS NULL trả val_b (Oracle-specific)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là mô tả của NULLIF.')">C. So sánh val_a và val_b, trả NULL nếu bằng nhau</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NVL2 không cộng arithmetic.')">D. Cộng val_a và val_b nếu cả hai đều NOT NULL</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Khi nào NÊN dùng Forward Fill thay vì Mean Imputation?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Categorical data thường dùng mode imputation.')">A. Khi cột là categorical (tên thành phố, loại giao dịch)</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Time series thường có tính liên tục — số dư hôm nay gần số dư hôm qua. Forward fill phản ánh đúng business logic hơn mean imputation.')">B. Khi data là time series và giá trị trước đó vẫn valid (ví dụ: số dư tài khoản)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Random data không có trend thì forward fill vô nghĩa.')">C. Khi data là random noise không có trend</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Forward fill chỉ áp dụng cho cột có ordering.')">D. Khi cột là primary key không được phép NULL</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">IGNORE NULLS trong FIRST_VALUE/LAST_VALUE có sẵn từ phiên bản Oracle nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Oracle 10g không hỗ trợ.')">A. Oracle 10g</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. IGNORE NULLS trong FIRST_VALUE/LAST_VALUE window function được support từ Oracle 12c. PostgreSQL cũng hỗ trợ syntax tương tự.')">B. Oracle 12c trở lên</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Oracle 19c support nhưng không phải phiên bản đầu.')">C. Chỉ Oracle 19c mới hỗ trợ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải Oracle 21c exclusive.')">D. Oracle 21c trở lên</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao Mean Imputation làm giảm variance của dataset?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Aggregate function không bị sai về mặt kỹ thuật.')">A. SQL aggregate function không hoạt động đúng với mean values</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Thay nhiều giá trị diverse bằng 1 giá trị trung bình → làm hẹp spread của distribution → variance giảm → underestimate data variation.')">B. Thay nhiều giá trị diverse bằng một giá trị trung bình → làm hẹp spread của distribution</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Mean imputation không đổi giá trị mean của cột.')">C. Mean imputation thay đổi giá trị mean của cột</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Random noise tăng variance, không giảm.')">D. Mean imputation thêm random noise làm tăng variance</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Pattern MERGE INTO ... WHEN MATCHED THEN UPDATE trong Oracle dùng cho imputation như thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'MERGE không insert row mới khi imputation.')">A. Insert row mới cho mỗi NULL value</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. JOIN source (chứa imputation values) với target table, UPDATE rows NULL trong 1 statement. Hiệu quả hơn subquery UPDATE — chỉ cần 1 lần đọc source. Oracle-preferred pattern cho bulk update.')">B. JOIN target với source chứa imputation values, UPDATE rows NULL trong 1 statement</div><div class="quiz-opt" onclick="answerQuiz(this,false,'MERGE không delete rows.')">C. Xóa rows NULL rồi insert lại với giá trị imputed</div><div class="quiz-opt" onclick="answerQuiz(this,false,'MERGE không tạo new column.')">D. Tạo thêm cột mới với giá trị imputed</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Chiến lược Drop Row phù hợp khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'50% là quá nhiều để drop — mất quá nhiều data.')">A. Khi 50% rows có NULL trong cột đó</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Drop row hợp lý khi: NULL ở cột critical không thể impute (transaction_id, account_no), và tỷ lệ NULL ít (&lt;5%) và phân phối MCAR.')">B. Khi NULL ở cột critical (PK, FK) và tỷ lệ NULL thấp (&lt;5%)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NULL ở cột non-critical có nhiều chiến lược tốt hơn drop.')">C. Khi NULL ở cột non-critical và không ảnh hưởng aggregation</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Luôn drop không phải chiến lược đúng.')">D. Luôn drop row có NULL để đảm bảo data integrity</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">pg_stats trong PostgreSQL cần điều kiện gì để có null_frac chính xác?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'information_schema không có NULL counts.')">A. SELECT null_count FROM information_schema.columns</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. pg_stats chứa null_frac (fraction of NULLs) sau khi chạy ANALYZE. Cần ANALYZE table_name trước để stats được cập nhật.')">B. Cần chạy ANALYZE table_name trước để cập nhật null_frac trong pg_stats</div><div class="quiz-opt" onclick="answerQuiz(this,false,'VACUUM không cập nhật column statistics.')">C. VACUUM ANALYZE tự cập nhật stats</div><div class="quiz-opt" onclick="answerQuiz(this,false,'pg_index chứa index metadata.')">D. SELECT từ pg_index catalog</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Pattern "Flag + Keep NULL" — khi nào áp dụng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Drop và log là Drop strategy, không phải Flag + Keep.')">A. Xóa row có NULL và ghi log vào separate table</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Giữ NULL nguyên vẹn + thêm cột boolean is_null_xxx = 1. Áp dụng khi NULL có ý nghĩa riêng: payment_date IS NULL = chưa thanh toán, không phải thiếu dữ liệu.')">B. Giữ NULL nguyên vẹn nhưng thêm cột flag để đánh dấu cho downstream</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là Drop strategy.')">C. Đánh flag NULL rồi xóa toàn bộ cột đó</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là median imputation.')">D. Thay NULL bằng median và flag hàng nào đã bị thay</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">COALESCE(a, b, c) trả về gì nếu a=NULL, b=NULL, c=5?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Không trả về NULL nếu có non-NULL value.')">A. NULL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Không trả về a vì a là NULL.')">B. a (NULL)</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. COALESCE trả về giá trị non-NULL đầu tiên trong danh sách tham số. a=NULL bỏ qua, b=NULL bỏ qua, c=5 non-NULL → trả về 5.')">C. 5 — giá trị non-NULL đầu tiên trong danh sách</div><div class="quiz-opt" onclick="answerQuiz(this,false,'COALESCE không tính trung bình.')">D. AVG(a,b,c) = 5/3</div></div><div class="quiz-explain"></div></div>
+    </div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">← Phát Hiện Vấn Đề</button><button class="nav-btn primary" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">Tiếp theo: Duplicates →</button></div>
+</div>
+<!-- MODULE 3: DUPLICATES -->
+<div class="module" id="m3">
+  <div class="module-header">
+    <div class="module-tag">W3.04 · Deduplication</div>
+    <div class="module-title">♻️ Duplicates &amp; Deduplication</div>
+    <div class="module-subtitle">ROW_NUMBER pattern · ctid vs ROWID · Hard vs Soft dedup · Production-grade SQL</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📖</div>1. ROW_NUMBER Dedup Pattern — Production Standard<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="db-wrapper">
+        <div class="db-tabs" id="t3"><div class="db-tab pg active" onclick="switchDbTab('t3','pg3','ora3')">🐘 PostgreSQL</div><div class="db-tab ora" onclick="switchDbTab('t3','ora3','pg3')">🔴 Oracle 19c</div></div>
+        <div class="db-panel active" id="pg3"><div class="cmd-body"><pre><span class="comment">-- Detect duplicates — PostgreSQL</span>
+<span class="kw">WITH</span> dup_check <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *,
+        <span class="fn">COUNT</span>(*) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> transaction_id) <span class="kw">AS</span> dup_count
+    <span class="kw">FROM</span> transactions
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> dup_check <span class="kw">WHERE</span> dup_count > <span class="num">1</span>;
+
+<span class="comment">-- Dedup — giữ row mới nhất (ROW_NUMBER pattern)</span>
+<span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> transaction_id
+            <span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>, source_system <span class="kw">ASC</span>
+        ) <span class="kw">AS</span> rn
+    <span class="kw">FROM</span> transactions
+)
+<span class="kw">SELECT</span> * <span class="kw">EXCEPT</span>(rn) <span class="kw">FROM</span> ranked <span class="kw">WHERE</span> rn = <span class="num">1</span>;
+
+<span class="comment">-- Hard delete dùng ctid (PostgreSQL physical row ID)</span>
+<span class="kw">WITH</span> duplicates <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> ctid,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> transaction_id
+            <span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>
+        ) <span class="kw">AS</span> rn
+    <span class="kw">FROM</span> transactions
+)
+<span class="kw">DELETE FROM</span> transactions
+<span class="kw">WHERE</span> ctid <span class="kw">IN</span> (<span class="kw">SELECT</span> ctid <span class="kw">FROM</span> duplicates <span class="kw">WHERE</span> rn > <span class="num">1</span>);</pre></div></div>
+        <div class="db-panel" id="ora3"><div class="cmd-body"><pre><span class="comment">-- Oracle 19c: ROWID-based dedup (Oracle-specific, efficient)</span>
+
+<span class="comment">-- ROW_NUMBER pattern — giữ row mới nhất</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> t.*,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> transaction_id
+            <span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>, source_system <span class="kw">ASC</span>
+        ) <span class="kw">AS</span> rn
+    <span class="kw">FROM</span> transactions t
+)
+<span class="kw">WHERE</span> rn = <span class="num">1</span>;
+
+<span class="comment">-- Hard delete với ROWID (Oracle-efficient)</span>
+<span class="kw">DELETE FROM</span> transactions
+<span class="kw">WHERE</span> ROWID <span class="kw">NOT IN</span> (
+    <span class="kw">SELECT</span> <span class="fn">MIN</span>(ROWID)
+    <span class="kw">FROM</span> transactions
+    <span class="kw">GROUP BY</span> transaction_id
+);
+
+<span class="comment">-- Oracle-specific: KEEP (DENSE_RANK FIRST) aggregate</span>
+<span class="kw">SELECT</span>
+    transaction_id,
+    <span class="fn">MIN</span>(amount) <span class="kw">KEEP</span> (<span class="kw">DENSE_RANK FIRST ORDER BY</span> created_at <span class="kw">DESC</span>) <span class="kw">AS</span> latest_amount,
+    <span class="fn">MIN</span>(created_at) <span class="kw">KEEP</span> (<span class="kw">DENSE_RANK FIRST ORDER BY</span> created_at <span class="kw">DESC</span>) <span class="kw">AS</span> latest_ts
+<span class="kw">FROM</span> transactions
+<span class="kw">GROUP BY</span> transaction_id;</pre></div></div>
+      </div>
+      <div class="info-box warn"><span>⚠️</span><span><strong>Production warning:</strong> Không bao giờ DELETE trực tiếp không có backup. Dùng <code>is_deleted = 1</code> flag (soft delete) thay vì physical DELETE để có audit trail và recovery.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>2. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="quiz-item"><div class="quiz-q">Tại sao ROW_NUMBER() được ưu tiên hơn DISTINCT khi deduplication?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'ROW_NUMBER không nhất thiết nhanh hơn DISTINCT.')">A. ROW_NUMBER nhanh hơn DISTINCT về performance</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. DISTINCT loại bỏ duplicate nhưng không cho phép chọn "winner" theo tiêu chí (latest timestamp, highest priority source). ROW_NUMBER OVER (PARTITION BY key ORDER BY criterion) cho phép rank và chọn đúng row muốn giữ.')">B. ROW_NUMBER cho phép xác định "winner" dựa trên ordering (latest, highest priority source)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều dùng được trong CTE.')">C. DISTINCT không dùng được trong CTE</div><div class="quiz-opt" onclick="answerQuiz(this,false,'DISTINCT vẫn dùng được bình thường với NULL.')">D. DISTINCT không hoạt động với NULL values</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">ctid trong PostgreSQL tương đương với gì trong Oracle?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'ROWNUM là số thứ tự trong result set.')">A. ROWNUM</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ctid (PostgreSQL) và ROWID (Oracle) đều là physical row locator — địa chỉ vật lý của row trên disk. Cả hai cho phép DELETE chính xác đến từng row.')">B. ROWID</div><div class="quiz-opt" onclick="answerQuiz(this,false,'OID là object identifier trong PostgreSQL.')">C. OID</div><div class="quiz-opt" onclick="answerQuiz(this,false,'DBMS_ROWID là package để decode ROWID.')">D. DBMS_ROWID</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">DELETE FROM t WHERE ROWID NOT IN (SELECT MIN(ROWID) FROM t GROUP BY key) làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Câu này xóa duplicate, không giữ chúng.')">A. Giữ lại tất cả duplicate và xóa original</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. MIN(ROWID) cho mỗi business key = row "đầu tiên". NOT IN = tất cả ROWIDs không phải min → là duplicates. DELETE xóa chúng, giữ 1 row per key.')">B. Xóa tất cả duplicate, chỉ giữ 1 row (có ROWID nhỏ nhất) cho mỗi key</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NOT IN subquery loại bỏ ROWIDs cần giữ.')">C. Xóa tất cả rows bao gồm cả original</div><div class="quiz-opt" onclick="answerQuiz(this,false,'GROUP BY không ảnh hưởng đến logic DELETE.')">D. Chỉ xóa rows có GROUP BY count > 1</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">KEEP (DENSE_RANK FIRST ORDER BY created_at DESC) trong Oracle dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là aggregate function, không sort kết quả.')">A. Sắp xếp kết quả theo DESC</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Oracle-specific aggregate: lấy value của 1 cột khác từ row có rank cao nhất trong GROUP BY. MIN(amount) KEEP (DENSE_RANK FIRST ORDER BY date DESC) = amount của transaction mới nhất trong group.')">B. Lấy giá trị của 1 cột từ row đứng đầu theo ordering trong GROUP BY</div><div class="quiz-opt" onclick="answerQuiz(this,false,'DENSE_RANK KEEP không phải window function thông thường.')">C. Tạo dense ranking không có gap như RANK()</div><div class="quiz-opt" onclick="answerQuiz(this,false,'KEEP không liên quan đến NULL handling.')">D. Giữ lại NULL values trong aggregation</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Soft duplicate là gì và khác hard duplicate thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Soft duplicate là về business key, không phải data type.')">A. Soft duplicate là khi cột có kiểu dữ liệu không chính xác</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Hard Duplicate = row giống nhau 100% trên tất cả cột. Soft Duplicate = cùng business key nhưng khác metadata (timestamp khác, source khác) — cần quyết định "winner" theo business rule.')">B. Hard=row giống 100%. Soft=cùng business key nhưng metadata khác → cần chọn winner</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NULL không tạo ra soft duplicate theo nghĩa này.')">C. Soft duplicate là khi cột có giá trị NULL trùng nhau</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Duplicate theo primary key là hard duplicate, không phải soft.')">D. Soft duplicate chỉ xảy ra khi không có primary key</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao nên dùng soft delete (is_deleted flag) thay vì physical DELETE trong ETL production?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Soft delete thực ra tốn nhiều storage hơn vì giữ data cũ.')">A. Soft delete không tốn storage còn physical DELETE tốn storage</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Physical DELETE không thể undo. Soft delete cho phép: audit trail, recovery nếu xóa nhầm, và downstream system detect "deleted" records để sync trạng thái.')">B. Soft delete có thể undo, tạo audit trail, và downstream detect deleted records</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai DB đều hỗ trợ physical DELETE.')">C. Oracle và PostgreSQL không cho phép DELETE trong ETL jobs</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Physical DELETE phá vỡ FK chỉ nếu không có ON DELETE CASCADE.')">D. Physical DELETE luôn phá vỡ foreign key constraints</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">PARTITION BY trong dedup pattern tại sao dùng business key thay vì tất cả cột?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Performance không phải lý do chính.')">A. PARTITION BY nhiều cột chậm hơn nhiều</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. PARTITION BY business key group theo nghĩa business. PARTITION BY tất cả cột chỉ bắt được hard duplicate (100% giống) — bỏ qua soft duplicate (cùng business entity, khác metadata).')">B. Muốn group theo business identity, không phải row identity — bắt cả soft duplicate</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Số lượng cột trong PARTITION BY không ảnh hưởng technical correctness.')">C. PARTITION BY tất cả cột không tạo được ranking</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Không có giới hạn cố định về số cột.')">D. PostgreSQL giới hạn tối đa 5 cột trong PARTITION BY</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Microbatch deduplication khác gì so với full-table dedup?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Microbatch không require in-memory database.')">A. Microbatch chỉ chạy trên in-memory database như Redis</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Microbatch dedup xử lý trong time window nhỏ (ví dụ 1 giờ) thay vì toàn bộ history. Efficient cho data lớn. Trade-off: nếu duplicate span nhiều hơn 1 window thì bỏ sót.')">B. Xử lý trong time window nhỏ thay vì toàn bộ history — efficient cho data lớn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Microbatch có thể làm bằng SQL, không require Kafka/Flink.')">C. Microbatch yêu cầu Kafka/Flink, không thể làm bằng SQL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Microbatch tốt về scalability nhưng có trade-off late duplicates.')">D. Microbatch kém chính xác hơn full-table trong mọi trường hợp</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao nên log duplicates vào separate audit table trước khi delete?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Database performance không phải lý do chính.')">A. Để tăng performance DELETE operation</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Audit trail của duplicates cho phép: phân tích nguồn gốc (bug ở source nào?), recovery nếu delete nhầm, compliance audit (banking yêu cầu traceability), monitoring trends.')">B. Audit trail: phân tích nguồn gốc, recovery, compliance, monitoring trend</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Log để audit, không phải giải phóng disk space.')">C. Chỉ để giải phóng disk space</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Constraint không liên quan đến log trước delete.')">D. Oracle yêu cầu log trước khi DROP constraint</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Khi dedup transactions có source_system khác nhau, ORDER BY trong ROW_NUMBER nên là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Alphabetical không phản ánh priority hay recency.')">A. ORDER BY transaction_id ASC — alphabetical</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kết hợp: (1) created_at DESC để lấy mới nhất, (2) source_system theo priority list (trusted source first). Cả hai tiêu chí để xác định "winner" đúng nghĩa business.')">B. ORDER BY created_at DESC, source_system ASC — mới nhất trước, theo priority nguồn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Amount không phải tiêu chí chọn winner khi dedup.')">C. ORDER BY amount DESC — lấy giá trị lớn nhất</div><div class="quiz-opt" onclick="answerQuiz(this,false,'RANDOM() không deterministic.')">D. ORDER BY RANDOM() — random để không bias</div></div><div class="quiz-explain"></div></div>
+    </div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">← Missing Values</button><button class="nav-btn primary" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">Tiếp theo: Outliers →</button></div>
+</div>
+<!-- MODULE 4: OUTLIERS -->
+<div class="module" id="m4">
+  <div class="module-header">
+    <div class="module-tag">W3.05 · Outliers &amp; Wrong Types</div>
+    <div class="module-title">📊 Outliers &amp; Sai Kiểu Dữ Liệu</div>
+    <div class="module-subtitle">IQR method · PERCENTILE_CONT · CAST/TO_DATE · Winsorization vs Trimming</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📖</div>1. IQR Outlier Detection + Date Type Validation<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="db-wrapper">
+        <div class="db-tabs" id="t4"><div class="db-tab pg active" onclick="switchDbTab('t4','pg4','ora4')">🐘 PostgreSQL</div><div class="db-tab ora" onclick="switchDbTab('t4','ora4','pg4')">🔴 Oracle 19c</div></div>
+        <div class="db-panel active" id="pg4"><div class="cmd-body"><pre><span class="comment">-- IQR Outlier Detection — PostgreSQL</span>
+<span class="kw">WITH</span> stats <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">PERCENTILE_CONT</span>(<span class="num">0.25</span>) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> amount) <span class="kw">AS</span> q1,
+        <span class="fn">PERCENTILE_CONT</span>(<span class="num">0.75</span>) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> amount) <span class="kw">AS</span> q3
+    <span class="kw">FROM</span> transactions <span class="kw">WHERE</span> amount <span class="kw">IS NOT NULL</span>
+),
+bounds <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> q1, q3,
+        q1 - <span class="num">1.5</span> * (q3 - q1) <span class="kw">AS</span> lower_fence,
+        q3 + <span class="num">1.5</span> * (q3 - q1) <span class="kw">AS</span> upper_fence
+    <span class="kw">FROM</span> stats
+)
+<span class="kw">SELECT</span> t.*,
+    <span class="kw">CASE WHEN</span> t.amount < b.lower_fence <span class="kw">OR</span> t.amount > b.upper_fence
+         <span class="kw">THEN</span> <span class="str">'OUTLIER'</span> <span class="kw">ELSE</span> <span class="str">'NORMAL'</span> <span class="kw">END</span> <span class="kw">AS</span> outlier_flag
+<span class="kw">FROM</span> transactions t, bounds b;
+
+<span class="comment">-- Validate date string format với regex TRƯỚC KHI CAST</span>
+<span class="kw">SELECT</span> txn_date_raw,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> txn_date_raw ~ <span class="str">'^[0-9]{4}-[0-9]{2}-[0-9]{2}$'</span>
+        <span class="kw">THEN</span> txn_date_raw::<span class="kw">DATE</span>
+        <span class="kw">ELSE NULL</span>
+    <span class="kw">END</span> <span class="kw">AS</span> txn_date_parsed,
+    txn_date_raw !~ <span class="str">'^[0-9]{4}-[0-9]{2}-[0-9]{2}$'</span> <span class="kw">AS</span> is_invalid_date
+<span class="kw">FROM</span> raw_transactions;</pre></div></div>
+        <div class="db-panel" id="ora4"><div class="cmd-body"><pre><span class="comment">-- IQR Outlier Detection — Oracle 19c (syntax tương tự)</span>
+<span class="kw">WITH</span> stats <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">PERCENTILE_CONT</span>(<span class="num">0.25</span>) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> amount) <span class="kw">AS</span> q1,
+        <span class="fn">PERCENTILE_CONT</span>(<span class="num">0.75</span>) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> amount) <span class="kw">AS</span> q3
+    <span class="kw">FROM</span> transactions <span class="kw">WHERE</span> amount <span class="kw">IS NOT NULL</span>
+),
+bounds <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> q1, q3,
+        q1 - <span class="num">1.5</span> * (q3 - q1) <span class="kw">AS</span> lower_fence,
+        q3 + <span class="num">1.5</span> * (q3 - q1) <span class="kw">AS</span> upper_fence
+    <span class="kw">FROM</span> stats
+)
+<span class="kw">SELECT</span> t.*,
+    <span class="kw">CASE WHEN</span> t.amount < b.lower_fence <span class="kw">OR</span> t.amount > b.upper_fence
+         <span class="kw">THEN</span> <span class="str">'OUTLIER'</span> <span class="kw">ELSE</span> <span class="str">'NORMAL'</span> <span class="kw">END</span> <span class="kw">AS</span> outlier_flag
+<span class="kw">FROM</span> transactions t, bounds b;
+
+<span class="comment">-- Oracle: validate date TRƯỚC KHI dùng TO_DATE</span>
+<span class="kw">SELECT</span> txn_date_raw,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN REGEXP_LIKE</span>(txn_date_raw, <span class="str">'^[0-9]{4}-[0-9]{2}-[0-9]{2}$'</span>)
+        <span class="kw">THEN TO_DATE</span>(txn_date_raw, <span class="str">'YYYY-MM-DD'</span>)
+        <span class="kw">ELSE NULL</span>
+    <span class="kw">END</span> <span class="kw">AS</span> txn_date_parsed,
+    <span class="kw">CASE WHEN NOT REGEXP_LIKE</span>(txn_date_raw, <span class="str">'^[0-9]{4}-[0-9]{2}-[0-9]{2}$'</span>)
+         <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span>
+    <span class="kw">END</span> <span class="kw">AS</span> is_invalid_date
+<span class="kw">FROM</span> raw_transactions;</pre></div></div>
+      </div>
+      <div class="info-box tip"><span>💡</span><span><strong>Winsorization vs Trimming:</strong> Trimming xóa outlier rows. Winsorization giữ rows nhưng thay giá trị outlier bằng fence value (upper = Q3+1.5*IQR, lower = Q1-1.5*IQR). Winsorization giữ sample size, robust hơn cho analytics.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>2. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="quiz-item"><div class="quiz-q">IQR fence = Q1 - 1.5*IQR và Q3 + 1.5*IQR. Tại sao dùng 1.5 (Tukey's rule)?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'1.5 không xuất phát từ standard deviation.')">A. 1.5 là giá trị standard deviation trong normal distribution</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. John Tukey empirical rule: 1.5*IQR bao gồm ~99.3% dữ liệu trong normal distribution. Dùng 3.0 cho "extreme outliers" (~99.99%).')">B. Tukey empirical rule: 1.5*IQR bao gồm ~99.3% data trong normal distribution</div><div class="quiz-opt" onclick="answerQuiz(this,false,'1.5 không xuất phát từ percentile calculation.')">C. 1.5 = trung bình của Q1 và Q3 percentile</div><div class="quiz-opt" onclick="answerQuiz(this,false,'1.5 không được mandate bởi ISO.')">D. ISO data quality standard quy định sử dụng 1.5</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">PERCENTILE_CONT và PERCENTILE_DISC cho kết quả khác nhau thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều dùng được với numeric.')">A. PERCENTILE_DISC chỉ dùng cho integer, PERCENTILE_CONT cho float</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. PERCENTILE_CONT nội suy (interpolate) giữa 2 adjacent values → có thể trả về giá trị không tồn tại trong data. PERCENTILE_DISC trả về giá trị thực có trong dataset. Median của [1,2,3,4]: CONT=2.5, DISC=2.')">B. PERCENTILE_CONT nội suy (interpolate), PERCENTILE_DISC trả về giá trị thực có trong data</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều dùng WITHIN GROUP ORDER BY.')">C. PERCENTILE_DISC yêu cầu GROUP BY còn PERCENTILE_CONT thì không</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều hỗ trợ 0-1 range.')">D. PERCENTILE_CONT chỉ tính percentile dương</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Khi CAST('32/13/2024' AS DATE) trong PostgreSQL, kết quả là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL không tự coerce invalid date sang NULL.')">A. Trả về NULL vì invalid date</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. CAST với invalid date string trong PostgreSQL sẽ throw ERROR "invalid input syntax for type date". Phải validate bằng regex TRƯỚC KHI CAST.')">B. Throw ERROR — PostgreSQL không tự động handle invalid date</div><div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL không wrap sang current_date.')">C. Trả về current_date thay thế</div><div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL không trả về epoch cho invalid date.')">D. Trả về 1970-01-01 (epoch)</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Sự khác biệt giữa REGEXP_LIKE (Oracle) và ~ operator (PostgreSQL)?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều hỗ trợ full regex.')">A. REGEXP_LIKE hỗ trợ full regex, ~ chỉ hỗ trợ wildcards</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Về chức năng tương đương (POSIX regex). Oracle dùng REGEXP_LIKE(col, pattern, flags) là function; PostgreSQL dùng col ~ pattern là operator. Oracle dùng flag "i" cho case-insensitive, PostgreSQL dùng ~*.')">B. Chức năng tương đương; Oracle dùng function REGEXP_LIKE(), PostgreSQL dùng ~ operator</div><div class="quiz-opt" onclick="answerQuiz(this,false,'REGEXP_LIKE không chậm hơn ~.')">C. REGEXP_LIKE chậm hơn ~ vì Oracle không optimize regex</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều support Unicode trong version hiện đại.')">D. ~ chỉ hỗ trợ ASCII, REGEXP_LIKE hỗ trợ Unicode</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Winsorization khác với Trimming (truncation) như thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Winsorization không xóa row.')">A. Winsorization xóa outlier rows, trimming giữ lại</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Trimming xóa outlier rows. Winsorization giữ rows nhưng replace outlier bằng fence value (Q3+1.5*IQR, Q1-1.5*IQR). Winsorization giữ sample size, robust hơn cho analytics.')">B. Winsorization giữ row nhưng replace outlier bằng fence value; trimming xóa outlier rows</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Winsorization không liên quan đến log transformation.')">C. Winsorization áp dụng log transformation, trimming áp dụng square root</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều dùng được với bất kỳ cột numeric nào.')">D. Winsorization chỉ dùng cho INTEGER, trimming cho FLOAT</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Z-score outlier detection khác IQR method ở điểm quan trọng nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Z-score có thể dùng trong SQL bằng (val - avg) / stddev.')">A. Z-score chỉ dùng được trong Python</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Z-score assume normal distribution. IQR là non-parametric (không assume distribution). Với skewed financial data, IQR thường robust hơn Z-score vì không bị ảnh hưởng bởi extreme values.')">B. Z-score assume normal distribution; IQR là non-parametric — IQR robust hơn cho skewed financial data</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều dùng được cho continuous data.')">C. Z-score chỉ cho discrete data, IQR cho continuous</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều là O(n log n) với sorting.')">D. Z-score nhanh hơn IQR vì không cần sort data</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Câu lệnh Oracle chuẩn để convert date string 'DDMMYYYY' sang DATE type?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'CAST không nhận format mask trong Oracle.')">A. CAST(col AS DATE FORMAT 'DDMMYYYY')</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. TO_DATE là Oracle-standard function để convert string sang DATE với format mask. Cần validate trước bằng REGEXP_LIKE hoặc exception handling.')">B. TO_DATE(col, \'DDMMYYYY\') với regex validate trước</div><div class="quiz-opt" onclick="answerQuiz(this,false,'CONVERT là Oracle function cho character set conversion.')">C. CONVERT(DATE, col, 103)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'DATE_FORMAT là MySQL syntax.')">D. DATE_FORMAT(col, \'%d%m%Y\')</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao type coercion "implicit" trong SQL nguy hiểm khi cleaning data?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Implicit coercion không nhất thiết chậm hơn explicit.')">A. Implicit coercion chậm hơn explicit CAST</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Implicit coercion phụ thuộc vào NLS/session settings — không deterministic across environments. Oracle so sánh DATE với string dùng NLS_DATE_FORMAT hiện tại. Kết quả khác nhau giữa môi trường dev/prod.')">B. Output phụ thuộc vào NLS/session settings — không deterministic across environments</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Implicit coercion không phá primary key.')">C. Implicit coercion phá vỡ primary key constraints</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Không cần special permissions.')">D. Chỉ DBA mới được phép dùng implicit coercion</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Trong banking, outlier amount = 0 VND nên xử lý như thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Delete ngay là sai — cần điều tra business context.')">A. Xóa ngay vì giao dịch 0 đồng không có ý nghĩa</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Trong banking/AML, giao dịch 0 đồng có thể là: test transaction, fee waiver, hoặc STRUCTURING red flag. Phải flag để review, không tự động xóa.')">B. Flag để review — giao dịch 0 có thể là test, waiver, hoặc AML red flag (structuring)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Replace bằng mean không đúng — 0 là giá trị có ý nghĩa.')">C. Replace bằng mean amount của cùng loại giao dịch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Tự động push không phải xử lý data cleaning.')">D. Tự động push alert sang compliance team</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Khi outlier được phát hiện trong ETL pipeline, bước TIẾP THEO là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Tự động xóa không có confirmation từ business là sai.')">A. Tự động xóa tất cả outlier khỏi dataset</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Outlier handling là business decision: flag outlier → log vào audit table → chờ business decision (cap/winsorize, exclude, hoặc investigate). Luôn flag trước, không xóa ngay.')">B. Flag outlier, log vào audit table, và chờ business decision (cap, exclude, hoặc investigate)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Replace bằng median có thể đúng nhưng cần investigate trước.')">C. Tự động replace bằng median</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Tạo index không giải quyết outlier.')">D. Tạo index trên cột outlier để query nhanh hơn</div></div><div class="quiz-explain"></div></div>
+    </div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">← Duplicates</button><button class="nav-btn primary" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">Tiếp theo: Tidy Data →</button></div>
+</div>
+<!-- MODULE 5: TIDY DATA -->
+<div class="module" id="m5">
+  <div class="module-header">
+    <div class="module-tag">W3.06 · Tidy Data</div>
+    <div class="module-title">🗂️ Tidy Data &amp; Normalization</div>
+    <div class="module-subtitle">3 quy tắc Hadley Wickham · UNPIVOT/PIVOT · String normalization</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📖</div>1. Tidy Data + PIVOT/UNPIVOT + String Normalization<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <h3>📜 3 Quy tắc Tidy Data (Hadley Wickham, 2014)</h3>
+      <ol>
+        <li><strong>Each variable forms a column</strong> — Mỗi biến là 1 cột</li>
+        <li><strong>Each observation forms a row</strong> — Mỗi observation là 1 row</li>
+        <li><strong>Each type of observational unit forms a table</strong> — Mỗi entity là 1 table riêng</li>
+      </ol>
+      <div class="db-wrapper">
+        <div class="db-tabs" id="t5"><div class="db-tab pg active" onclick="switchDbTab('t5','pg5','ora5')">🐘 PostgreSQL</div><div class="db-tab ora" onclick="switchDbTab('t5','ora5','pg5')">🔴 Oracle 19c</div></div>
+        <div class="db-panel active" id="pg5"><div class="cmd-body"><pre><span class="comment">-- PostgreSQL: UNPIVOT bằng UNION ALL (không có native UNPIVOT)</span>
+<span class="kw">SELECT</span> branch_id, <span class="str">'Q1'</span> <span class="kw">AS</span> quarter, sales_q1 <span class="kw">AS</span> sales <span class="kw">FROM</span> branch_sales
+<span class="kw">UNION ALL</span>
+<span class="kw">SELECT</span> branch_id, <span class="str">'Q2'</span>,              sales_q2             <span class="kw">FROM</span> branch_sales
+<span class="kw">UNION ALL</span>
+<span class="kw">SELECT</span> branch_id, <span class="str">'Q3'</span>,              sales_q3             <span class="kw">FROM</span> branch_sales
+<span class="kw">UNION ALL</span>
+<span class="kw">SELECT</span> branch_id, <span class="str">'Q4'</span>,              sales_q4             <span class="kw">FROM</span> branch_sales;
+
+<span class="comment">-- PIVOT (Long → Wide): conditional aggregation pattern (portable!)</span>
+<span class="kw">SELECT</span>
+    branch_id,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> quarter = <span class="str">'Q1'</span> <span class="kw">THEN</span> sales <span class="kw">END</span>) <span class="kw">AS</span> sales_q1,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> quarter = <span class="str">'Q2'</span> <span class="kw">THEN</span> sales <span class="kw">END</span>) <span class="kw">AS</span> sales_q2,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> quarter = <span class="str">'Q3'</span> <span class="kw">THEN</span> sales <span class="kw">END</span>) <span class="kw">AS</span> sales_q3,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> quarter = <span class="str">'Q4'</span> <span class="kw">THEN</span> sales <span class="kw">END</span>) <span class="kw">AS</span> sales_q4
+<span class="kw">FROM</span> long_sales
+<span class="kw">GROUP BY</span> branch_id;
+
+<span class="comment">-- String normalization — PostgreSQL</span>
+<span class="kw">SELECT</span>
+    <span class="fn">TRIM</span>(<span class="fn">UPPER</span>(city_name))                     <span class="kw">AS</span> city_upper,
+    <span class="fn">REGEXP_REPLACE</span>(phone, <span class="str">'[^0-9]'</span>, <span class="str">''</span>, <span class="str">'g'</span>) <span class="kw">AS</span> phone_digits_only,
+    <span class="fn">LOWER</span>(<span class="fn">TRIM</span>(email))                          <span class="kw">AS</span> email_clean,
+    <span class="fn">unaccent</span>(<span class="fn">TRIM</span>(<span class="fn">LOWER</span>(city_name)))            <span class="kw">AS</span> city_no_diacritics
+<span class="kw">FROM</span> customer_data;</pre></div></div>
+        <div class="db-panel" id="ora5"><div class="cmd-body"><pre><span class="comment">-- Oracle 19c: Native UNPIVOT syntax (Oracle 11g+)</span>
+<span class="kw">SELECT</span> branch_id, quarter, sales
+<span class="kw">FROM</span> branch_sales
+<span class="kw">UNPIVOT</span> (
+    sales <span class="kw">FOR</span> quarter <span class="kw">IN</span> (
+        sales_q1 <span class="kw">AS</span> <span class="str">'Q1'</span>,
+        sales_q2 <span class="kw">AS</span> <span class="str">'Q2'</span>,
+        sales_q3 <span class="kw">AS</span> <span class="str">'Q3'</span>,
+        sales_q4 <span class="kw">AS</span> <span class="str">'Q4'</span>
+    )
+);
+
+<span class="comment">-- Oracle native PIVOT syntax</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> long_sales
+<span class="kw">PIVOT</span> (
+    <span class="fn">SUM</span>(sales)
+    <span class="kw">FOR</span> quarter <span class="kw">IN</span> (
+        <span class="str">'Q1'</span> <span class="kw">AS</span> sales_q1, <span class="str">'Q2'</span> <span class="kw">AS</span> sales_q2,
+        <span class="str">'Q3'</span> <span class="kw">AS</span> sales_q3, <span class="str">'Q4'</span> <span class="kw">AS</span> sales_q4
+    )
+);
+
+<span class="comment">-- String normalization — Oracle</span>
+<span class="kw">SELECT</span>
+    <span class="fn">TRIM</span>(<span class="fn">UPPER</span>(city_name))               <span class="kw">AS</span> city_upper,
+    <span class="fn">REGEXP_REPLACE</span>(phone, <span class="str">'[^0-9]'</span>, <span class="str">''</span>)  <span class="kw">AS</span> phone_digits_only,
+    <span class="fn">LOWER</span>(<span class="fn">TRIM</span>(email))                    <span class="kw">AS</span> email_clean,
+    <span class="comment">-- Oracle không có unaccent native, dùng UTL_I18N</span>
+    <span class="fn">UTL_I18N.TRANSLITERATE</span>(city_name, <span class="str">'Latin'</span>) <span class="kw">AS</span> city_latin
+<span class="kw">FROM</span> customer_data;</pre></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>2. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="quiz-item"><div class="quiz-q">Table: student_id, math_score, lit_score, eng_score — vi phạm Tidy Data quy tắc nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Các cột riêng biệt không vi phạm "each observation forms a row".')">A. Each observation forms a row</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. math_score, lit_score, eng_score đều là instances của variable "score" — khác giá trị "subject". Tidy format: student_id | subject | score. "Each variable forms a column" bị vi phạm.')">B. Each variable forms a column — "score" là 1 variable nhưng split thành 3 cột theo subject</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Table không vi phạm quy tắc entity separation.')">C. Each observational unit forms a table</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Có vi phạm Tidy Data.')">D. Không vi phạm quy tắc nào</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao Oracle có native UNPIVOT còn PostgreSQL không có?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải vấn đề về licensing.')">A. PostgreSQL là open source nên không có enterprise features</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. PIVOT/UNPIVOT là Oracle extensions không có trong SQL Standard. PostgreSQL theo SQL Standard chặt hơn, không implement vendor-specific extensions. Dùng UNION ALL (UNPIVOT) và conditional aggregation (PIVOT) làm alternative.')">B. PIVOT/UNPIVOT là Oracle extensions; PostgreSQL theo SQL Standard chặt hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL dùng UNION ALL, không phải JSON để PIVOT.')">C. PostgreSQL dùng JSON để PIVOT thay vì native syntax</div><div class="quiz-opt" onclick="answerQuiz(this,false,'UNPIVOT là Oracle 11g+, không phải Oracle 19c exclusive.')">D. UNPIVOT là feature mới của Oracle 19c</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">unaccent() trong PostgreSQL làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'unaccent không làm uppercase.')">A. Convert string sang uppercase và remove special chars</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. unaccent là PostgreSQL extension xóa diacritical marks: "Hà Nội" → "Ha Noi", "Nguyễn" → "Nguyen". Cần CREATE EXTENSION unaccent. Dùng khi normalize Vietnamese/French/German text.')">B. Xóa diacritical marks (dấu tiếng Việt): "Hà Nội" → "Ha Noi" — cần CREATE EXTENSION unaccent</div><div class="quiz-opt" onclick="answerQuiz(this,false,'unaccent không làm gì với spaces.')">C. Remove leading/trailing spaces như TRIM</div><div class="quiz-opt" onclick="answerQuiz(this,false,'unaccent không mã hóa string.')">D. Encode string sang Base64</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">REGEXP_REPLACE(phone, '[^0-9]', '', 'g') làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'[^0-9] là NOT digit, không phải digit.')">A. Xóa tất cả chữ số, chỉ giữ lại ký tự đặc biệt</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. [^0-9] = character class phủ định = mọi ký tự KHÔNG phải digit. Replace bằng empty string → xóa tất cả non-digits. Flag g (global) = áp dụng tất cả occurrences. Kết quả: "+84 (0) 123-456" → "840123456".')">B. Xóa tất cả ký tự không phải số: "+84 (0) 123-456" → "840123456"</div><div class="quiz-opt" onclick="answerQuiz(this,false,'[^0-9] match tất cả non-digit, không chỉ space.')">C. Chỉ xóa spaces trong phone number</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Pattern này thay bằng empty string, không phải 0.')">D. Thay tất cả chữ số bằng 0</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">SUM(CASE WHEN quarter='Q1' THEN sales END) là pattern để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'UNPIVOT chuyển wide sang long, ngược lại.')">A. UNPIVOT — chuyển wide format sang long format</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là manual PIVOT pattern: từ long format (quarter, sales) chuyển sang wide (sales_q1, sales_q2...). Portable hơn native PIVOT vì chạy được trên mọi SQL database.')">B. PIVOT — chuyển long format sang wide format (portable, không cần native PIVOT syntax)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Pattern này không validate data type.')">C. Type validation — kiểm tra data type của cột sales</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Đây không phải outlier detection pattern.')">D. Outlier detection — tìm quarters có sales bất thường</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Quy tắc Tidy Data "Each type of observational unit forms a table" giải quyết vấn đề gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Quy tắc này không liên quan đến NULL.')">A. Vấn đề NULL values trong bảng</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi trộn nhiều entity vào 1 table (customer + order + product) → redundancy (customer info lặp mỗi order), update anomalies (sửa tên cần update nhiều rows). Tách entity thành tables riêng giải quyết.')">B. Redundancy và update anomalies khi trộn nhiều entity vào 1 table</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Schema evolution được giải quyết bởi quy tắc thứ nhất.')">C. Schema evolution khi thêm cột mới</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Query performance không phải mục tiêu chính của Tidy Data.')">D. Query performance khi table quá lớn</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">UTL_I18N.TRANSLITERATE trong Oracle dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'UTL_I18N là I18N utility, không phải encryption.')">A. Encrypt string theo I18N standard</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. UTL_I18N.TRANSLITERATE chuyển đổi text giữa các script. TRANSLITERATE(text, "Latin") chuyển Unicode sang Latin — tương tự unaccent PostgreSQL nhưng powerful hơn (hỗ trợ Cyrillic, Arabic, CJK → Latin).')">B. Transliterate text giữa các script: Unicode → Latin (xóa diacritics + convert non-Latin chars)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'UTL_I18N xử lý text, không phải date.')">C. Format date theo locale cụ thể</div><div class="quiz-opt" onclick="answerQuiz(this,false,'UTL_I18N không compress text.')">D. Compress string để giảm storage</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">TRIM(UPPER(col)) vs UPPER(TRIM(col)) — thứ tự có quan trọng không?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Thứ tự không ảnh hưởng kết quả cuối.')">A. Có — UPPER trước TRIM cho kết quả sai</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. TRIM(UPPER(x)) = UPPER(TRIM(x)) vì TRIM xóa spaces (không bị ảnh hưởng bởi UPPER) và UPPER không thêm/xóa spaces. Hai operations commute — thứ tự nào cũng OK.')">B. Không quan trọng — TRIM và UPPER commute, kết quả giống nhau dù thứ tự nào</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Performance difference không đáng kể.')">C. Quan trọng về performance — TRIM trước giúp UPPER xử lý ít bytes</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Không chỉ đúng với Unicode.')">D. Chỉ quan trọng với Unicode, không quan trọng với ASCII</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Khi normalize Vietnamese address ('Ha Noi', 'Hà Nội', 'TP.HCM', 'TPHCM'), chiến lược nào hiệu quả nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'UPPER+TRIM giúp standardize case nhưng không resolve semantic variants.')">A. UPPER và TRIM để đồng nhất case và spaces</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Địa danh Việt Nam có quá nhiều variant (viết tắt, dấu/không dấu, viết hoa). Cần: reference lookup table mapping tất cả variants → canonical form. UPPER/TRIM chỉ giải quyết case/space.')">B. Reference lookup table mapping mọi variant → canonical form (tên thành phố chuẩn)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Soundex là cho English phonetics.')">C. Soundex algorithm để match phonetically</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Normalize khi report quá muộn — data sẽ inconsistent trong intermediate tables.')">D. Giữ nguyên variants và chỉ normalize khi report</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao Tidy Data quan trọng với Data Engineers (không chỉ Data Scientists)?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Tidy Data không phải ML-specific.')">A. Chỉ ML models mới cần Tidy Data format</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tidy format giúp: JOIN tables hiệu quả (consistent structure), aggregation đúng (không double-count), downstream tools (dbt, pandas, Spark) xử lý nhất quán, schema evolution dễ hơn.')">B. Tidy format giúp JOIN hiệu quả, aggregation đúng, và downstream tools xử lý nhất quán</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Tidy Data không trực tiếp giảm storage.')">C. Tidy format giảm storage đáng kể</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Tidy Data không phải tên khác của 3NF.')">D. Tidy Data là tên khác của database normalization (3NF)</div></div><div class="quiz-explain"></div></div>
+    </div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">← Outliers</button><button class="nav-btn primary" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">Tiếp theo: Data Profiling →</button></div>
+</div>
+<!-- MODULE 6: DATA PROFILING -->
+<div class="module" id="m6">
+  <div class="module-header">
+    <div class="module-tag">W3.07 · Data Profiling SQL</div>
+    <div class="module-title">🔬 Data Profiling bằng SQL</div>
+    <div class="module-subtitle">Comprehensive profiling script · Cardinality · Distribution · Freshness check</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📖</div>1. Comprehensive Profiling Script<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="db-wrapper">
+        <div class="db-tabs" id="t6"><div class="db-tab pg active" onclick="switchDbTab('t6','pg6','ora6')">🐘 PostgreSQL</div><div class="db-tab ora" onclick="switchDbTab('t6','ora6','pg6')">🔴 Oracle 19c</div></div>
+        <div class="db-panel active" id="pg6"><div class="cmd-body"><pre><span class="comment">-- Comprehensive Data Profile — PostgreSQL</span>
+<span class="kw">WITH</span> base_stats <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">COUNT</span>(*)                                     <span class="kw">AS</span> total_rows,
+        <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(transaction_id)            <span class="kw">AS</span> null_txn_id,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> transaction_id)               <span class="kw">AS</span> unique_txn_id,
+        <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(amount)                   <span class="kw">AS</span> null_amount,
+        <span class="fn">MIN</span>(amount) <span class="kw">AS</span> min_amt,  <span class="fn">MAX</span>(amount) <span class="kw">AS</span> max_amt,
+        <span class="fn">AVG</span>(amount) <span class="kw">AS</span> avg_amt,  <span class="fn">STDDEV</span>(amount) <span class="kw">AS</span> std_amt,
+        <span class="fn">PERCENTILE_CONT</span>(<span class="num">0.5</span>) <span class="kw">WITHIN GROUP</span>
+            (<span class="kw">ORDER BY</span> amount)                        <span class="kw">AS</span> median_amt,
+        <span class="fn">MIN</span>(txn_date) <span class="kw">AS</span> earliest_date,
+        <span class="fn">MAX</span>(txn_date) <span class="kw">AS</span> latest_date,
+        <span class="kw">CURRENT_DATE</span> - <span class="fn">MAX</span>(txn_date)               <span class="kw">AS</span> days_stale,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> account_no)                   <span class="kw">AS</span> unique_accounts
+    <span class="kw">FROM</span> transactions
+),
+dup_check <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> dup_rows
+    <span class="kw">FROM</span> (<span class="kw">SELECT</span> transaction_id
+          <span class="kw">FROM</span> transactions
+          <span class="kw">GROUP BY</span> transaction_id <span class="kw">HAVING COUNT</span>(*) > <span class="num">1</span>) d
+)
+<span class="kw">SELECT</span> b.*, d.dup_rows,
+    <span class="fn">ROUND</span>(null_txn_id * <span class="num">100.0</span> / total_rows, <span class="num">2</span>) <span class="kw">AS</span> null_txn_pct,
+    <span class="fn">ROUND</span>(null_amount * <span class="num">100.0</span> / total_rows, <span class="num">2</span>)  <span class="kw">AS</span> null_amt_pct
+<span class="kw">FROM</span> base_stats b, dup_check d;</pre></div></div>
+        <div class="db-panel" id="ora6"><div class="cmd-body"><pre><span class="comment">-- Comprehensive Data Profile — Oracle 19c</span>
+<span class="kw">WITH</span> base_stats <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">COUNT</span>(*)                                     <span class="kw">AS</span> total_rows,
+        <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(transaction_id)            <span class="kw">AS</span> null_txn_id,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> transaction_id)               <span class="kw">AS</span> unique_txn_id,
+        <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(amount)                   <span class="kw">AS</span> null_amount,
+        <span class="fn">MIN</span>(amount) <span class="kw">AS</span> min_amt,  <span class="fn">MAX</span>(amount) <span class="kw">AS</span> max_amt,
+        <span class="fn">AVG</span>(amount) <span class="kw">AS</span> avg_amt,  <span class="fn">STDDEV</span>(amount) <span class="kw">AS</span> std_amt,
+        <span class="fn">MEDIAN</span>(amount) <span class="kw">AS</span> median_amt,  <span class="comment">-- Oracle native MEDIAN()!</span>
+        <span class="fn">MIN</span>(txn_date) <span class="kw">AS</span> earliest_date,
+        <span class="fn">MAX</span>(txn_date) <span class="kw">AS</span> latest_date,
+        <span class="fn">TRUNC</span>(<span class="fn">SYSDATE</span>) - <span class="fn">TRUNC</span>(<span class="fn">MAX</span>(txn_date))      <span class="kw">AS</span> days_stale,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> account_no)                   <span class="kw">AS</span> unique_accounts
+    <span class="kw">FROM</span> transactions
+),
+dup_check <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> dup_rows
+    <span class="kw">FROM</span> (<span class="kw">SELECT</span> transaction_id
+          <span class="kw">FROM</span> transactions
+          <span class="kw">GROUP BY</span> transaction_id <span class="kw">HAVING COUNT</span>(*) > <span class="num">1</span>)
+)
+<span class="kw">SELECT</span> b.*, d.dup_rows,
+    <span class="fn">ROUND</span>(null_txn_id * <span class="num">100</span> / total_rows, <span class="num">2</span>) <span class="kw">AS</span> null_txn_pct,
+    <span class="fn">ROUND</span>(null_amount * <span class="num">100</span> / total_rows, <span class="num">2</span>)  <span class="kw">AS</span> null_amt_pct
+<span class="kw">FROM</span> base_stats b, dup_check d;</pre></div></div>
+      </div>
+      <div class="info-box tip"><span>💡</span><span><strong>Oracle có MEDIAN() built-in!</strong> PostgreSQL phải dùng PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col). TRUNC(SYSDATE) - TRUNC(MAX(date)) trong Oracle trả về NUMBER (số ngày) — tương đương CURRENT_DATE - MAX(date) trong PostgreSQL.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>2. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="quiz-item"><div class="quiz-q">Cardinality của một cột là gì và tại sao quan trọng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Cardinality là số lượng unique values, không phải tổng rows.')">A. Tổng số rows trong cột</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cardinality = COUNT(DISTINCT col). High cardinality (~= total rows) → potential ID/key. Low cardinality (vài chục values) → category column phù hợp để GROUP BY hoặc partition.')">B. Số lượng unique values = COUNT(DISTINCT col) — chỉ ra nature của cột (ID vs category)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cardinality không liên quan đến data type.')">C. Kiểu dữ liệu của cột</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Tỷ lệ NULL là null rate, không phải cardinality.')">D. Tỷ lệ phần trăm NULL trong cột</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Freshness check trong data profiling kiểm tra điều gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Freshness là về thời gian, không phải định dạng.')">A. Kiểm tra data có đúng định dạng không</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Freshness = CURRENT_DATE - MAX(date_col). Nếu days_stale > threshold (ví dụ >1 ngày với daily batch) → pipeline bị trễ hoặc lỗi. Critical metric trong SLA monitoring.')">B. Kiểm tra data mới nhất đã bao nhiêu ngày: CURRENT_DATE - MAX(date_col) > threshold</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cardinality check là phần khác của profiling.')">C. Đếm số unique values mới được thêm vào</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Row count check là volume check, không phải freshness.')">D. Kiểm tra số rows được thêm vào mỗi ngày</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao MEDIAN(amount) trong Oracle tốt hơn AVG(amount) để profile financial data?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'MEDIAN không nhất thiết nhanh hơn AVG.')">A. MEDIAN nhanh hơn AVG vì không cần full scan</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Financial data thường right-skewed (nhiều giao dịch nhỏ, ít giao dịch lớn). AVG bị kéo lên bởi outliers. MEDIAN robust hơn và phản ánh "typical transaction" tốt hơn.')">B. Financial data bị skew bởi large outliers — MEDIAN robust hơn AVG khi có large transactions</div><div class="quiz-opt" onclick="answerQuiz(this,false,'MEDIAN không require GROUP BY obligatorily.')">C. MEDIAN yêu cầu GROUP BY còn AVG không cần</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều ignore NULL.')">D. MEDIAN xử lý NULL tốt hơn AVG</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">TRUNC(SYSDATE) - TRUNC(MAX(txn_date)) trong Oracle trả về gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'DATE - DATE trong Oracle trả về NUMBER, không phải string.')">A. String như "3 days ago"</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Trong Oracle, DATE - DATE trả về NUMBER = số ngày. TRUNC() bỏ time component để chỉ so sánh ngày. Kết quả: integer số ngày kể từ latest transaction đến hôm nay.')">B. NUMBER = số ngày giữa hôm nay và ngày giao dịch mới nhất</div><div class="quiz-opt" onclick="answerQuiz(this,false,'DATE subtraction trong Oracle không tự return INTERVAL.')">C. INTERVAL type như INTERVAL \'3\' DAY</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Chỉ NULL nếu txn_date là NULL.')">D. NULL trong mọi trường hợp</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Nếu days_stale = 45 trong daily batch pipeline, điều đó báo hiệu gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'45 ngày không có data mới là bất thường cho daily batch.')">A. Bình thường — data cập nhật theo chu kỳ 45 ngày</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Daily pipeline mà data mới nhất là 45 ngày trước = pipeline bị broken nghiêm trọng. Cần alert ngay, investigate logs, check source system.')">B. Pipeline bị broken nghiêm trọng — cần alert, investigate logs ngay</div><div class="quiz-opt" onclick="answerQuiz(this,false,'45 ngày stale không phải timezone issue.')">C. Timezone configuration sai</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cardinality thấp không gây stale data.')">D. Cột txn_date có cardinality quá thấp</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao nên profile cả STDDEV cùng với AVG?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'STDDEV không cần thiết cho AVG computation.')">A. STDDEV là bắt buộc để tính AVG trong SQL</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. AVG một mình che giấu data spread. AVG=1000 với STDDEV=5 → data tập trung. AVG=1000 với STDDEV=50000 → data rất phân tán, có outliers cực đoan.')">B. STDDEV cho biết data spread — AVG=1000 với STDDEV=50000 báo hiệu outlier cực đoan</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Index selection không dựa vào STDDEV.')">C. STDDEV giúp database optimizer chọn index tốt hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'STDDEV không liên quan đến duplicate detection.')">D. STDDEV giúp phát hiện duplicate rows</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Null rate bao nhiêu % trong cột critical (account_no) nên kích hoạt alert?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'50% là quá cao.')">A. 50%</div><div class="quiz-opt" onclick="answerQuiz(this,false,'20% vẫn quá cao.')">B. 20%</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Critical columns như account_no, transaction_id không nên có bất kỳ NULL nào. Threshold thực tế: > 0% (nếu expected non-null). Trong banking, ngay cả 0.1% NULL ở account_no là data quality incident.')">C. &gt; 0% (hoặc vượt baseline đã biết) — critical columns không nên có NULL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'5% quá cao cho critical column.')">D. 5%</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao chạy ANALYZE (PostgreSQL) hoặc DBMS_STATS (Oracle) trước data profiling?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'ANALYZE không liên quan đến user permissions.')">A. Cấp quyền SELECT cho profiling user</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ANALYZE/DBMS_STATS cập nhật catalog statistics. Optimizer dùng statistics để chọn execution plan. Outdated statistics → suboptimal plan → profiling query chậm không cần thiết.')">B. Cập nhật catalog statistics → optimizer chọn tốt execution plan → profiling query nhanh hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'ANALYZE không lock table.')">C. Lock table để prevent concurrent writes</div><div class="quiz-opt" onclick="answerQuiz(this,false,'ANALYZE không backup data.')">D. Backup data trước khi chạy profiling queries</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Distribution skewness ảnh hưởng thế nào đến chọn imputation strategy?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Skewness không mandate dùng Mode.')">A. Data skewed nên luôn dùng Mode imputation</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Right-skewed financial data: Mean bị kéo lên bởi large transactions → overestimate typical value. Median robust hơn với skew. Với symmetric distribution: Mean và Median gần nhau → cả hai OK.')">B. Right-skewed: dùng Median thay Mean vì Mean bị kéo lên bởi large outliers</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Skewness không ảnh hưởng đến Forward Fill.')">C. Skewed data nên dùng Forward Fill thay vì Mean/Median</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Skewness ảnh hưởng đến imputation choice.')">D. Data skew không ảnh hưởng đến imputation choice</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao profile CẢ count_distinct_txn_id VÀ total_rows cùng lúc?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai không phải để validate PK constraint.')">A. Để validate primary key constraint trong DB</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu total_rows > count_distinct_txn_id → có duplicate transaction IDs. Tỷ lệ = (total - unique) / total = % duplicate rate. Phát hiện ngay trong profiling step mà không cần query riêng.')">B. Nếu total &gt; distinct → có duplicates. Phát hiện duplicate rate ngay trong profiling</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Primary key check là DB constraint, không liên quan profiling stats.')">C. Để check primary key integrity trong database</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải để tối ưu storage.')">D. Để biết cần bao nhiêu storage cho indexes</div></div><div class="quiz-explain"></div></div>
+    </div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">← Tidy Data</button><button class="nav-btn primary" onclick="showModule(7,document.querySelectorAll('.nav-item')[7])">Tiếp theo: Validation →</button></div>
+</div>
+<!-- MODULE 7: VALIDATION -->
+<div class="module" id="m7">
+  <div class="module-header">
+    <div class="module-tag">W3.08 · Validation &amp; Pandera</div>
+    <div class="module-title">✅ Schema Validation &amp; Pandera</div>
+    <div class="module-subtitle">Business rules SQL · Pandera schema · DECODE vs CASE WHEN · Defensive programming</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📖</div>1. Business Rules Validation + Pandera<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="db-wrapper">
+        <div class="db-tabs" id="t7"><div class="db-tab pg active" onclick="switchDbTab('t7','pg7','ora7')">🐘 PostgreSQL</div><div class="db-tab ora" onclick="switchDbTab('t7','ora7','pg7')">🔴 Oracle 19c</div></div>
+        <div class="db-panel active" id="pg7"><div class="cmd-body"><pre><span class="comment">-- CTE-based Validation — PostgreSQL (mỗi rule là 1 CTE)</span>
+<span class="kw">WITH</span>
+rule_amount_positive <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> violations <span class="kw">FROM</span> transactions <span class="kw">WHERE</span> amount < <span class="num">0</span>
+),
+rule_account_format <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> violations <span class="kw">FROM</span> transactions
+    <span class="kw">WHERE</span> account_no !~ <span class="str">'^[0-9]{10,16}$'</span>
+),
+rule_no_future_date <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> violations <span class="kw">FROM</span> transactions
+    <span class="kw">WHERE</span> txn_date > <span class="kw">CURRENT_DATE</span>
+),
+rule_ref_integrity <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> violations
+    <span class="kw">FROM</span> transactions t
+    <span class="kw">LEFT JOIN</span> accounts a <span class="kw">ON</span> t.account_no = a.account_no
+    <span class="kw">WHERE</span> a.account_no <span class="kw">IS NULL</span>
+)
+<span class="kw">SELECT</span> <span class="str">'amount_positive'</span> <span class="kw">AS</span> rule, violations,
+       <span class="kw">CASE WHEN</span> violations=<span class="num">0</span> <span class="kw">THEN</span> <span class="str">'PASS'</span> <span class="kw">ELSE</span> <span class="str">'FAIL'</span> <span class="kw">END</span> <span class="kw">AS</span> status
+<span class="kw">FROM</span> rule_amount_positive
+<span class="kw">UNION ALL SELECT</span> <span class="str">'account_format'</span>,  violations,
+       <span class="kw">CASE WHEN</span> violations=<span class="num">0</span> <span class="kw">THEN</span> <span class="str">'PASS'</span> <span class="kw">ELSE</span> <span class="str">'FAIL'</span> <span class="kw">END</span>
+<span class="kw">FROM</span> rule_account_format
+<span class="kw">UNION ALL SELECT</span> <span class="str">'no_future_date'</span>, violations,
+       <span class="kw">CASE WHEN</span> violations=<span class="num">0</span> <span class="kw">THEN</span> <span class="str">'PASS'</span> <span class="kw">ELSE</span> <span class="str">'FAIL'</span> <span class="kw">END</span>
+<span class="kw">FROM</span> rule_no_future_date
+<span class="kw">UNION ALL SELECT</span> <span class="str">'ref_integrity'</span>,   violations,
+       <span class="kw">CASE WHEN</span> violations=<span class="num">0</span> <span class="kw">THEN</span> <span class="str">'PASS'</span> <span class="kw">ELSE</span> <span class="str">'FAIL'</span> <span class="kw">END</span>
+<span class="kw">FROM</span> rule_ref_integrity;</pre></div></div>
+        <div class="db-panel" id="ora7"><div class="cmd-body"><pre><span class="comment">-- CTE-based Validation — Oracle 19c (dùng DECODE thay CASE WHEN)</span>
+<span class="kw">WITH</span>
+rule_amount_positive <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> violations <span class="kw">FROM</span> transactions <span class="kw">WHERE</span> amount < <span class="num">0</span>
+),
+rule_account_format <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> violations <span class="kw">FROM</span> transactions
+    <span class="kw">WHERE NOT REGEXP_LIKE</span>(account_no, <span class="str">'^[0-9]{10,16}$'</span>)
+),
+rule_no_future_date <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> violations <span class="kw">FROM</span> transactions
+    <span class="kw">WHERE</span> txn_date > <span class="fn">TRUNC</span>(<span class="fn">SYSDATE</span>)
+),
+rule_ref_integrity <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> violations <span class="kw">FROM</span> transactions t
+    <span class="kw">WHERE NOT EXISTS</span> (
+        <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> accounts a <span class="kw">WHERE</span> a.account_no = t.account_no
+    )
+)
+<span class="kw">SELECT</span> <span class="str">'amount_positive'</span> <span class="kw">AS</span> rule_name, violations,
+       <span class="fn">DECODE</span>(violations, <span class="num">0</span>, <span class="str">'PASS'</span>, <span class="str">'FAIL'</span>) <span class="kw">AS</span> status
+<span class="kw">FROM</span> rule_amount_positive
+<span class="kw">UNION ALL SELECT</span> <span class="str">'account_format'</span>,  violations,
+       <span class="fn">DECODE</span>(violations, <span class="num">0</span>, <span class="str">'PASS'</span>, <span class="str">'FAIL'</span>) <span class="kw">FROM</span> rule_account_format
+<span class="kw">UNION ALL SELECT</span> <span class="str">'no_future_date'</span>, violations,
+       <span class="fn">DECODE</span>(violations, <span class="num">0</span>, <span class="str">'PASS'</span>, <span class="str">'FAIL'</span>) <span class="kw">FROM</span> rule_no_future_date
+<span class="kw">UNION ALL SELECT</span> <span class="str">'ref_integrity'</span>,  violations,
+       <span class="fn">DECODE</span>(violations, <span class="num">0</span>, <span class="str">'PASS'</span>, <span class="str">'FAIL'</span>) <span class="kw">FROM</span> rule_ref_integrity;</pre></div></div>
+      </div>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>validation_rules.py · Pandera schema</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> pandera <span class="kw">as</span> pa
+<span class="kw">from</span> pandera <span class="kw">import</span> Column, DataFrameSchema, Check
+
+transaction_schema = DataFrameSchema({
+    <span class="str">"transaction_id"</span>: Column(str,
+        checks=[Check.str_matches(<span class="str">r'^TXN[0-9]{10}$'</span>)],
+        nullable=<span class="kw">False</span>),
+    <span class="str">"account_no"</span>: Column(str,
+        checks=[Check.str_length(<span class="num">10</span>, <span class="num">16</span>)],
+        nullable=<span class="kw">False</span>),
+    <span class="str">"amount"</span>: Column(float,
+        checks=[Check.greater_than_or_equal_to(<span class="num">0</span>),
+                Check.less_than_or_equal_to(<span class="num">1_000_000_000</span>)],
+        nullable=<span class="kw">True</span>),
+    <span class="str">"txn_date"</span>: Column(<span class="str">"datetime64[ns]"</span>,
+        checks=[Check.less_than_or_equal_to(pd.Timestamp(<span class="str">'today'</span>))],
+        nullable=<span class="kw">False</span>),
+    <span class="str">"txn_type"</span>: Column(str,
+        checks=[Check.isin([<span class="str">"DEBIT"</span>, <span class="str">"CREDIT"</span>, <span class="str">"TRANSFER"</span>])],
+        nullable=<span class="kw">False</span>)
+}, strict=<span class="kw">True</span>)  <span class="comment"># strict=True: reject extra columns</span>
+
+<span class="kw">try</span>:
+    validated_df = transaction_schema.validate(df, lazy=<span class="kw">True</span>)
+    print(<span class="str">"✓ Validation PASSED"</span>)
+<span class="kw">except</span> pa.errors.SchemaErrors <span class="kw">as</span> e:
+    print(e.failure_cases)  <span class="comment"># DataFrame với chi tiết lỗi từng row</span></pre></div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>2. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="quiz-item"><div class="quiz-q">DECODE(violations, 0, 'PASS', 'FAIL') trong Oracle tương đương với gì trong SQL Standard?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'NVL không làm conditional mapping.')">A. NVL(violations, 'PASS')</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. DECODE(col, val1, result1, default) là Oracle shorthand cho CASE WHEN col = val1 THEN result1 ELSE default END. Portable hơn nên dùng CASE WHEN.')">B. CASE WHEN violations = 0 THEN 'PASS' ELSE 'FAIL' END</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NULLIF trả về NULL nếu 2 values bằng nhau.')">C. NULLIF(violations, 0)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'COALESCE không làm conditional mapping.')">D. COALESCE(violations, 'PASS', 'FAIL')</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">lazy=True trong pandera validate() nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'lazy không ảnh hưởng đến schema loading speed.')">A. Load schema lazily để tiết kiệm memory</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. lazy=False (default): pandera dừng ngay khi gặp lỗi đầu tiên. lazy=True: collect tất cả violations trước rồi raise tất cả cùng lúc. Với large dataset, lazy=True giúp thấy toàn bộ data quality issues trong 1 lần chạy.')">B. Collect tất cả violations trước, raise một lần thay vì dừng ngay ở lỗi đầu tiên</div><div class="quiz-opt" onclick="answerQuiz(this,false,'lazy không liên quan đến threading.')">C. Validate trên background thread</div><div class="quiz-opt" onclick="answerQuiz(this,false,'lazy validate vẫn check toàn bộ DataFrame.')">D. Chỉ validate sample của DataFrame</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">strict=True trong Pandera DataFrameSchema nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'strict không liên quan đến NaN handling.')">A. Strict mode không cho phép NaN values</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. strict=True: DataFrame phải có chính xác các cột được định nghĩa trong schema — không nhiều hơn, không ít hơn. Extra columns → ValidationError. Dùng khi muốn schema contract nghiêm ngặt.')">B. DataFrame phải có chính xác các cột trong schema, không cho phép extra columns</div><div class="quiz-opt" onclick="answerQuiz(this,false,'strict không ảnh hưởng đến regex case sensitivity.')">C. Regex checks là case-sensitive</div><div class="quiz-opt" onclick="answerQuiz(this,false,'strict không có nghĩa là "not lazy".')">D. Validation dừng ngay ở lỗi đầu tiên (strict = not lazy)</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">NOT EXISTS vs LEFT JOIN + IS NULL trong Oracle cho referential integrity check — hiệu năng khác nhau không?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải luôn luôn NOT EXISTS nhanh hơn.')">A. Luôn NOT EXISTS nhanh hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải luôn LEFT JOIN nhanh hơn.')">B. Luôn LEFT JOIN + IS NULL nhanh hơn</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Oracle CBO transform NOT EXISTS sang ANTI JOIN internally — về semantic bằng nhau với LEFT JOIN + IS NULL. Performance phụ thuộc vào indexes, cardinality, và execution plan cụ thể. Cần EXPLAIN PLAN để biết chắc.')">C. Tương đương về performance — Oracle optimizer biến đổi cả hai thành ANTI JOIN internally</div><div class="quiz-opt" onclick="answerQuiz(this,false,'NOT EXISTS là SQL standard, không phải Oracle-only.')">D. NOT EXISTS là Oracle-only</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Check.isin(["DEBIT", "CREDIT", "TRANSFER"]) trong Pandera kiểm tra điều gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'isin không kiểm tra data type.')">A. Kiểm tra data type của cột là string</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Check.isin([...]) validate mọi non-null value trong cột phải thuộc whitelist. Equivalent với SQL: WHERE txn_type NOT IN ("DEBIT", "CREDIT", "TRANSFER").')">B. Kiểm tra mọi giá trị trong cột phải thuộc whitelist cho phép</div><div class="quiz-opt" onclick="answerQuiz(this,false,'isin không kiểm tra thứ tự.')">C. Kiểm tra values xuất hiện theo đúng thứ tự trong list</div><div class="quiz-opt" onclick="answerQuiz(this,false,'isin không có liên quan đến case sensitivity setting riêng.')">D. Kiểm tra case-sensitive match (chỉ uppercase)</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Pattern CTE-based validation (mỗi rule là 1 CTE) có ưu điểm gì so với nhiều query riêng lẻ?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'CTE-based không nhất thiết nhanh hơn.')">A. Nhanh hơn vì mỗi CTE chạy parallel</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. CTE-based validation: (1) Dễ maintain — mỗi rule là 1 unit độc lập, (2) Atomic execution, (3) Dễ đọc và review, (4) Dễ add/remove rule, (5) Result UNION ALL cho overview nhanh.')">B. Dễ maintain, mỗi rule là 1 unit độc lập, result tổng hợp trong 1 statement</div><div class="quiz-opt" onclick="answerQuiz(this,false,'CTE không reduce memory consumption.')">C. Tiết kiệm memory vì CTE tự evicted sau khi dùng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'CTE không đảm bảo atomicity với rollback.')">D. Đảm bảo atomicity — nếu 1 rule fail thì rollback tất cả</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Khi nào nên dùng Pandera thay vì SQL validation?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Pandera không phải chỉ dùng với large datasets.')">A. Chỉ với dataset &gt; 1 triệu rows</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Pandera phù hợp khi: (1) Validation trong Python pipeline (ETL code), (2) Schema as code — version control được, (3) Validate trước khi load vào DB, (4) Integration với pytest cho unit testing.')">B. Validation trong Python ETL code, schema as code, integration với testing framework</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Pandera là Python library, không phải Oracle-specific.')">C. Chỉ dùng với Oracle database</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Pandera không luôn luôn chậm hơn SQL.')">D. Pandera luôn chậm hơn SQL</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Referential integrity check bằng SQL phát hiện vấn đề gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Orphan records đúng nhưng mô tả không đầy đủ.')">A. Orphan records — rows có null account_no</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. LEFT JOIN accounts ON account_no + WHERE accounts.account_no IS NULL → transactions có account_no không tồn tại trong bảng master accounts. Giao dịch của account "ma" không tồn tại trong hệ thống.')">B. Transactions với account_no không tồn tại trong bảng accounts (dangling reference)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Duplicate account_nos là vấn đề trong bảng accounts.')">C. Duplicate account_no trong bảng accounts</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Date range không liên quan đến referential integrity.')">D. Transactions nằm ngoài date range của account</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">DECODE khác CASE WHEN về portability như thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'DECODE không phải SQL Standard.')">A. DECODE là SQL Standard còn CASE WHEN là Oracle-specific</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. CASE WHEN là SQL Standard (ANSI SQL) — chạy được trên Oracle, PostgreSQL, SQL Server, MySQL. DECODE là Oracle-specific shorthand — không chạy được trên PostgreSQL. Nên dùng CASE WHEN để code portable.')">B. CASE WHEN là SQL Standard (portable). DECODE là Oracle-specific shorthand (không portable)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều xử lý NULL thống nhất theo SQL null-safe comparison.')">C. DECODE xử lý NULL tốt hơn CASE WHEN</div><div class="quiz-opt" onclick="answerQuiz(this,false,'DECODE không hỗ trợ range conditions như CASE WHEN BETWEEN.')">D. Chúng hoàn toàn tương đương trong mọi trường hợp</div></div><div class="quiz-explain"></div></div>
+
+      <div class="quiz-item"><div class="quiz-q">Tại sao phải validate format account_no bằng regex TRƯỚC KHI JOIN với bảng accounts?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Regex và JOIN không ảnh hưởng nhau về performance theo cách này.')">A. Regex validation nhanh hơn JOIN performance</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Account_no sai format không bao giờ match trong accounts table (silent non-match). Referential integrity check sẽ báo cáo chúng là orphans — nhưng thực ra chúng không sai về business, chỉ sai format. Cần phân biệt: format error vs genuine orphan.')">B. Account_no sai format gây silent non-match trong JOIN — cần phân biệt format error vs genuine orphan</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Regex không bắt buộc để chạy được JOIN.')">C. Phải validate format trước để JOIN có thể chạy được</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Null đã được xử lý bởi IS NULL check riêng.')">D. Để loại bỏ NULL values trước khi JOIN</div></div><div class="quiz-explain"></div></div>
+    </div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">← Data Profiling</button><button class="nav-btn primary" onclick="showModule(8,document.querySelectorAll('.nav-item')[8])">Tiếp theo: Artifacts →</button></div>
+</div>
+<!-- MODULE 8: ARTIFACTS -->
+<div class="module" id="m8">
+  <div class="module-header">
+    <div class="module-tag">W3.09 · Artifacts &amp; Exit Criteria</div>
+    <div class="module-title">📦 Artifacts Bắt Buộc &amp; Exit Criteria</div>
+    <div class="module-subtitle">4 files phải commit · Before/after comparison · Checklist hoàn thành</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🛠️</div>1. Artifacts Bắt Buộc — week3_data_cleaning/<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">📓 Artifact 1: profiling_report.ipynb</div>
+        <div class="practice-task-body">
+          <p>Jupyter notebook phân tích chất lượng 1 dataset thực tế (dùng dataset giao dịch banking hoặc từ Kaggle như <a href="https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud" style="color:var(--accent)">Credit Card Fraud Dataset</a>)</p>
+          <ul>
+            <li>Quick scan SQL: null counts, cardinality, min/max/avg/stddev/median</li>
+            <li>Visualize null heatmap bằng seaborn/plotly</li>
+            <li>Distribution plot cho numerical columns (histogram + box plot)</li>
+            <li>Outlier detection IQR với visualization</li>
+            <li>Summary markdown: "5 vấn đề quan trọng nhất tìm được"</li>
+          </ul>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem snippet mẫu</button>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>profiling_report.ipynb — key cells</span></div>
+              <div class="cmd-body"><pre><span class="kw">import</span> pandas <span class="kw">as</span> pd, seaborn <span class="kw">as</span> sns
+df = pd.read_csv(<span class="str">'transactions.csv'</span>)
+
+<span class="comment"># 1. Quick stats</span>
+print(df.describe()); print(df.isnull().sum() / len(df) * 100)
+
+<span class="comment"># 2. Null heatmap</span>
+sns.heatmap(df.isnull(), yticklabels=False, cbar=False)
+
+<span class="comment"># 3. IQR Outliers</span>
+Q1=df[<span class="str">'amount'</span>].quantile(0.25); Q3=df[<span class="str">'amount'</span>].quantile(0.75); IQR=Q3-Q1
+outliers = df[(df[<span class="str">'amount'</span>] &lt; Q1-1.5*IQR)|(df[<span class="str">'amount'</span>] &gt; Q3+1.5*IQR)]
+print(f"Outliers: {len(outliers)} rows ({len(outliers)/len(df)*100:.2f}%)")</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="practice-task">
+        <div class="practice-task-header">🐍 Artifact 2: cleaning_pipeline.py</div>
+        <div class="practice-task-body">
+          <p>Python script áp dụng tất cả cleaning techniques</p>
+          <ul>
+            <li><code>handle_missing(df)</code> — impute với strategy phù hợp từng cột + is_imputed flag</li>
+            <li><code>deduplicate(df, key_cols)</code> — ROW_NUMBER equivalent bằng pandas + log duplicates</li>
+            <li><code>detect_outliers(df, col)</code> — IQR method, return flagged df + winsorize option</li>
+            <li><code>normalize_strings(df, text_cols)</code> — TRIM, UPPER, remove diacritics</li>
+            <li><code>main()</code> — orchestrate với logging, before/after row count</li>
+          </ul>
+        </div>
+      </div>
+      <div class="practice-task">
+        <div class="practice-task-header">✅ Artifact 3: validation_rules.py + SQL scripts</div>
+        <div class="practice-task-body">
+          <ul>
+            <li>Pandera schema với tất cả business rules (type, range, format, isin)</li>
+            <li>SQL validation script cho cả PostgreSQL và Oracle (4+ rules)</li>
+            <li>Test với 3 cases: valid data, data có lỗi biết trước, edge cases (NULL, 0, boundary)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="practice-task">
+        <div class="practice-task-header">📝 Artifact 4: before_after_comparison.md</div>
+        <div class="practice-task-body">
+          <table>
+            <tr><th>Metric</th><th>Before</th><th>After</th><th>Action taken</th></tr>
+            <tr><td>Null rate (amount)</td><td>12.3%</td><td>0%</td><td>Mean imputation by txn_type + is_imputed flag</td></tr>
+            <tr><td>Duplicate rows</td><td>1,247</td><td>0</td><td>ROW_NUMBER dedup, keep latest, log 1,247 to audit</td></tr>
+            <tr><td>Outlier rows</td><td>89</td><td>89 (flagged)</td><td>Winsorization + is_outlier flag — await business decision</td></tr>
+            <tr><td>Invalid date</td><td>34</td><td>34 (nullified)</td><td>Regex validate, invalid → NULL + is_invalid_date flag</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">✅</div>2. Exit Criteria Checklist<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <ul class="checklist">
+        <li>Chạy được quick scan SQL trên dataset thực và giải thích được kết quả (null rates, cardinality, freshness)</li>
+        <li>Xử lý được missing values với ít nhất 3 strategies (drop, impute, flag) + tạo is_imputed flag</li>
+        <li>Viết được dedup SQL chuẩn (ROW_NUMBER pattern) cho cả PostgreSQL (ctid) và Oracle (ROWID)</li>
+        <li>Phát hiện outlier bằng IQR method bằng SQL + biết sự khác biệt PERCENTILE_CONT vs PERCENTILE_DISC</li>
+        <li>Giải thích được 3 quy tắc Tidy Data + transform wide → long format (UNPIVOT) bằng cả hai DB</li>
+        <li>Viết được validation SQL với ít nhất 4 business rules + UNION ALL summary</li>
+        <li>Tạo được Pandera schema với type checks, range checks, isin checks + lazy=True validation</li>
+        <li>Giải thích được khác biệt key: NVL vs COALESCE, DECODE vs CASE WHEN, ctid vs ROWID, MEDIAN vs PERCENTILE_CONT</li>
+        <li>Commit đủ 4 artifacts lên GitHub với README giải thích design decisions</li>
+      </ul>
+    </div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="showModule(7,document.querySelectorAll('.nav-item')[7])">← Validation</button><button class="nav-btn primary" onclick="showModule(9,document.querySelectorAll('.nav-item')[9])">Tiếp theo: Mini Test →</button></div>
+</div>
+<!-- MODULE 9: MINI TEST -->
+<div class="module" id="m9">
+  <div class="module-header">
+    <div class="module-tag">W3.10 · Mini Test Tổng Kết</div>
+    <div class="module-title">📝 Mini Test Tổng Kết Tuần 3</div>
+    <div class="module-subtitle">20 câu trắc nghiệm tổng hợp toàn bộ nội dung · Chấm điểm tự động</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">📝</div>Bài Test Tổng Kết — 20 Câu<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div id="final-test">
+        <div class="test-question" data-q="1" data-correct="B"><div class="test-question-title">1. Trong Oracle 19c, empty string '' được coi là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q1" value="A"> A. Chuỗi độ dài 0 khác NULL</label><label class="test-option"><input type="radio" name="q1" value="B"> B. Hoàn toàn bằng NULL</label><label class="test-option"><input type="radio" name="q1" value="C"> C. Chuỗi 1 ký tự space</label><label class="test-option"><input type="radio" name="q1" value="D"> D. Phụ thuộc NLS setting</label></div></div>
+        <div class="test-question" data-q="2" data-correct="C"><div class="test-question-title">2. Pattern đếm NULL trong cột amount (hoạt động trên cả Oracle và PostgreSQL)?</div><div class="test-options"><label class="test-option"><input type="radio" name="q2" value="A"> A. SUM(amount IS NULL)</label><label class="test-option"><input type="radio" name="q2" value="B"> B. COUNT(amount = NULL)</label><label class="test-option"><input type="radio" name="q2" value="C"> C. COUNT(*) - COUNT(amount)</label><label class="test-option"><input type="radio" name="q2" value="D"> D. COUNT(NVL(amount,0)) - COUNT(*)</label></div></div>
+        <div class="test-question" data-q="3" data-correct="B"><div class="test-question-title">3. ROW_NUMBER PARTITION BY được dùng để dedup như thế nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q3" value="A"> A. PARTITION BY tất cả cột để tìm hard duplicate</label><label class="test-option"><input type="radio" name="q3" value="B"> B. PARTITION BY business key, ORDER BY timestamp DESC, chọn rn=1</label><label class="test-option"><input type="radio" name="q3" value="C"> C. PARTITION BY timestamp, giữ row đầu tiên</label><label class="test-option"><input type="radio" name="q3" value="D"> D. PARTITION BY source_system, xóa source phụ</label></div></div>
+        <div class="test-question" data-q="4" data-correct="A"><div class="test-question-title">4. IQR lower fence = ?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> A. Q1 - 1.5 × (Q3 - Q1)</label><label class="test-option"><input type="radio" name="q4" value="B"> B. Q1 - 1.5 × Q3</label><label class="test-option"><input type="radio" name="q4" value="C"> C. Mean - 2 × STDDEV</label><label class="test-option"><input type="radio" name="q4" value="D"> D. Q1 - 3 × STDDEV</label></div></div>
+        <div class="test-question" data-q="5" data-correct="D"><div class="test-question-title">5. Oracle native UNPIVOT syntax là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> A. UNION ALL với SELECT thủ công từng cột</label><label class="test-option"><input type="radio" name="q5" value="B"> B. MELT() function</label><label class="test-option"><input type="radio" name="q5" value="C"> C. STACK() trong analytics functions</label><label class="test-option"><input type="radio" name="q5" value="D"> D. FROM table UNPIVOT (val FOR col IN (col1 AS 'v1', ...))</label></div></div>
+        <div class="test-question" data-q="6" data-correct="B"><div class="test-question-title">6. COALESCE khác NVL ở điểm cốt lõi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> A. COALESCE xử lý NULL tốt hơn</label><label class="test-option"><input type="radio" name="q6" value="B"> B. COALESCE nhận N tham số (SQL standard); NVL chỉ nhận 2 (Oracle-only)</label><label class="test-option"><input type="radio" name="q6" value="C"> C. NVL nhanh hơn COALESCE</label><label class="test-option"><input type="radio" name="q6" value="D"> D. COALESCE chỉ dùng với số, NVL dùng với mọi type</label></div></div>
+        <div class="test-question" data-q="7" data-correct="C"><div class="test-question-title">7. Quy tắc Tidy Data nào bị vi phạm khi table có: order_id, item1_qty, item2_qty, item3_qty?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> A. Each observation forms a row</label><label class="test-option"><input type="radio" name="q7" value="B"> B. Each observational unit forms a table</label><label class="test-option"><input type="radio" name="q7" value="C"> C. Each variable forms a column</label><label class="test-option"><input type="radio" name="q7" value="D"> D. Không vi phạm quy tắc nào</label></div></div>
+        <div class="test-question" data-q="8" data-correct="A"><div class="test-question-title">8. ROWID trong Oracle tương đương với gì trong PostgreSQL?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> A. ctid</label><label class="test-option"><input type="radio" name="q8" value="B"> B. oid</label><label class="test-option"><input type="radio" name="q8" value="C"> C. xmin</label><label class="test-option"><input type="radio" name="q8" value="D"> D. sequence</label></div></div>
+        <div class="test-question" data-q="9" data-correct="B"><div class="test-question-title">9. lazy=True trong pandera validate() nghĩa là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Load schema từ file một cách lazy</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Collect tất cả violations trước, raise một lần thay vì dừng ngay lỗi đầu</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Chỉ validate 10% sample</label><label class="test-option"><input type="radio" name="q9" value="D"> D. Validate asynchronously</label></div></div>
+        <div class="test-question" data-q="10" data-correct="D"><div class="test-question-title">10. MEDIAN() native có trong database nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. Chỉ PostgreSQL</label><label class="test-option"><input type="radio" name="q10" value="B"> B. Cả Oracle lẫn PostgreSQL đều có MEDIAN()</label><label class="test-option"><input type="radio" name="q10" value="C"> C. Chỉ SQL Server</label><label class="test-option"><input type="radio" name="q10" value="D"> D. Oracle (MEDIAN()). PostgreSQL dùng PERCENTILE_CONT(0.5)</label></div></div>
+        <div class="test-question" data-q="11" data-correct="C"><div class="test-question-title">11. Chiến lược nào phù hợp nhất để xử lý NULL trong cột balance (time series)?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. Drop row</label><label class="test-option"><input type="radio" name="q11" value="B"> B. Mean imputation</label><label class="test-option"><input type="radio" name="q11" value="C"> C. Forward fill (LAST_VALUE IGNORE NULLS)</label><label class="test-option"><input type="radio" name="q11" value="D"> D. Replace bằng 0</label></div></div>
+        <div class="test-question" data-q="12" data-correct="B"><div class="test-question-title">12. DECODE(violations, 0, 'PASS', 'FAIL') trong Oracle tương đương SQL Standard là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. NVL(violations, 'PASS')</label><label class="test-option"><input type="radio" name="q12" value="B"> B. CASE WHEN violations = 0 THEN 'PASS' ELSE 'FAIL' END</label><label class="test-option"><input type="radio" name="q12" value="C"> C. NULLIF(violations, 0)</label><label class="test-option"><input type="radio" name="q12" value="D"> D. IIF(violations = 0, 'PASS', 'FAIL')</label></div></div>
+        <div class="test-question" data-q="13" data-correct="B"><div class="test-question-title">13. Winsorization khác Trimming (truncation) như thế nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. Winsorization xóa outlier rows, trimming giữ lại</label><label class="test-option"><input type="radio" name="q13" value="B"> B. Winsorization giữ row nhưng replace outlier bằng fence value; trimming xóa outlier rows</label><label class="test-option"><input type="radio" name="q13" value="C"> C. Winsorization áp dụng log transformation</label><label class="test-option"><input type="radio" name="q13" value="D"> D. Winsorization chỉ dùng cho INTEGER</label></div></div>
+        <div class="test-question" data-q="14" data-correct="B"><div class="test-question-title">14. unaccent() trong PostgreSQL làm gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. Convert string sang uppercase</label><label class="test-option"><input type="radio" name="q14" value="B"> B. Xóa diacritical marks: "Hà Nội" → "Ha Noi" — cần CREATE EXTENSION unaccent</label><label class="test-option"><input type="radio" name="q14" value="C"> C. Remove leading/trailing spaces</label><label class="test-option"><input type="radio" name="q14" value="D"> D. Encode string sang Base64</label></div></div>
+        <div class="test-question" data-q="15" data-correct="C"><div class="test-question-title">15. Freshness check trong data profiling kiểm tra điều gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Data có đúng định dạng không</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Số lượng unique values mới được thêm</label><label class="test-option"><input type="radio" name="q15" value="C"> C. CURRENT_DATE - MAX(date_col) — số ngày kể từ data mới nhất</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Row count mỗi ngày</label></div></div>
+        <div class="test-question" data-q="16" data-correct="A"><div class="test-question-title">16. PERCENTILE_CONT vs PERCENTILE_DISC — điểm khác biệt chính?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. CONT nội suy (có thể trả giá trị không có trong data); DISC trả giá trị thực có trong dataset</label><label class="test-option"><input type="radio" name="q16" value="B"> B. DISC chỉ dùng cho integer, CONT cho float</label><label class="test-option"><input type="radio" name="q16" value="C"> C. DISC yêu cầu GROUP BY, CONT thì không</label><label class="test-option"><input type="radio" name="q16" value="D"> D. Chúng hoàn toàn giống nhau</label></div></div>
+        <div class="test-question" data-q="17" data-correct="B"><div class="test-question-title">17. REGEXP_REPLACE(phone, '[^0-9]', '', 'g') trong PostgreSQL làm gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q17" value="A"> A. Xóa tất cả chữ số, giữ ký tự đặc biệt</label><label class="test-option"><input type="radio" name="q17" value="B"> B. Xóa tất cả ký tự KHÔNG phải số: "+84 (0)123" → "840123"</label><label class="test-option"><input type="radio" name="q17" value="C"> C. Chỉ xóa spaces</label><label class="test-option"><input type="radio" name="q17" value="D"> D. Thay tất cả chữ số bằng 0</label></div></div>
+        <div class="test-question" data-q="18" data-correct="B"><div class="test-question-title">18. strict=True trong Pandera DataFrameSchema nghĩa là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q18" value="A"> A. Không cho phép NaN values</label><label class="test-option"><input type="radio" name="q18" value="B"> B. DataFrame phải có chính xác các cột trong schema — extra columns bị reject</label><label class="test-option"><input type="radio" name="q18" value="C"> C. Regex checks là case-sensitive</label><label class="test-option"><input type="radio" name="q18" value="D"> D. Validation dừng ngay ở lỗi đầu tiên</label></div></div>
+        <div class="test-question" data-q="19" data-correct="C"><div class="test-question-title">19. CASE WHEN portable hơn DECODE vì lý do gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q19" value="A"> A. CASE WHEN là Oracle-specific, DECODE là SQL Standard</label><label class="test-option"><input type="radio" name="q19" value="B"> B. DECODE nhanh hơn CASE WHEN</label><label class="test-option"><input type="radio" name="q19" value="C"> C. CASE WHEN là ANSI SQL Standard — chạy được Oracle, PostgreSQL, SQL Server, MySQL. DECODE chỉ Oracle</label><label class="test-option"><input type="radio" name="q19" value="D"> D. Chúng hoàn toàn tương đương và equally portable</label></div></div>
+        <div class="test-question" data-q="20" data-correct="B"><div class="test-question-title">20. Tại sao nên log duplicates vào audit table TRƯỚC KHI delete?</div><div class="test-options"><label class="test-option"><input type="radio" name="q20" value="A"> A. Để tăng performance DELETE operation</label><label class="test-option"><input type="radio" name="q20" value="B"> B. Audit trail: phân tích nguồn gốc, recovery nếu nhầm, compliance, monitoring trend</label><label class="test-option"><input type="radio" name="q20" value="C"> C. Chỉ để giải phóng disk space</label><label class="test-option"><input type="radio" name="q20" value="D"> D. Oracle yêu cầu log trước khi DROP constraint</label></div></div>
+      </div>
+      <div class="test-actions">
+        <button class="nav-btn primary" onclick="gradeFinalTest()">🎯 Chấm điểm</button>
+        <button class="nav-btn" onclick="resetFinalTest()">🔄 Làm lại</button>
+      </div>
+      <div id="final-test-result" class="test-result"></div>
+    </div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="showModule(8,document.querySelectorAll('.nav-item')[8])">← Artifacts</button><div style="text-align:center;color:var(--accent2);font-weight:700">🎉 Hoàn thành Tuần 3! Sẵn sàng cho Tuần 4 — Pipeline Design →</div></div>
+</div>
+
+</main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) o.classList.add('correct');
+    });
+  }
+  explain.textContent = (correct ? '✓ Chính xác! ' : '✗ Sai. ') + explanation;
+  explain.classList.add('show');
+}
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? '🔼 Ẩn lời giải' : '💡 Xem snippet mẫu';
+}
+function switchDbTab(groupId, showId, hideId) {
+  const show = document.getElementById(showId);
+  const hide = document.getElementById(hideId);
+  if (show) { show.classList.add('active'); }
+  if (hide) { hide.classList.remove('active'); }
+  const tabs = document.getElementById(groupId).querySelectorAll('.db-tab');
+  tabs.forEach(t => {
+    if (t.getAttribute('onclick').includes(showId)) t.classList.add('active');
+    else t.classList.remove('active');
+  });
+}
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+  if (correctCount >= 19) { levelText = 'Xuất sắc 🏆'; chipClass = 'good'; guidance = 'Bạn nắm chắc toàn bộ tuần 3. Commit 4 artifacts và bắt đầu Tuần 4 — Pipeline Design ngay!'; }
+  else if (correctCount >= 16) { levelText = 'Tốt ✅'; chipClass = 'good'; guidance = 'Sẵn sàng cho Tuần 4. Ôn lại vài câu sai về Oracle/PostgreSQL differences.'; }
+  else if (correctCount >= 12) { levelText = 'Đạt 🔔'; chipClass = 'warn'; guidance = 'Nền tảng ổn. Ôn lại modules còn yếu (đặc biệt phần Oracle) trước khi sang Tuần 4.'; }
+  else { levelText = 'Cần ôn thêm ❌'; chipClass = 'bad'; guidance = 'Ôn lại W3.02-W3.08 và thực hành SQL trên cả PostgreSQL và Oracle. Đặc biệt chú ý NVL vs COALESCE, ROWID vs ctid, DECODE vs CASE WHEN.'; }
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đúng là <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng! 🎉</strong></p>';
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+</body>
+</html>

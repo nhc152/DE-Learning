@@ -1,0 +1,69 @@
+1.
+Use project rules from .claude.
+
+Current task:
+Upgrade Week10_Airflow.html using the full local repository content.
+
+Allowed sources only:
+- ./Week10_Airflow.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+
+Do not read any other files.
+
+Upgrade goals:
+- Keep Week10_Airflow.html as the base file
+- Read the local cloned repository data-engineer-handbook thoroughly for Week 10-11 relevant topics
+- Enrich the current file with missing or stronger real content from the handbook
+- Add better practical examples, clearer explanations, stronger terminology, and more realistic exercises where useful
+- Align content with actual handbook guidance instead of generic assumptions
+- Keep Vietnamese output
+- Preserve the current HTML structure, CSS style, layout, and JavaScript interactions
+- Keep compatibility with Week00_Setup.html style
+- Include PostgreSQL and Oracle SQL where relevant
+- Remove weak, generic, duplicated, or shallow sections if better repo-backed content is available
+- Improve only where value is clear
+- Do not rebuild from scratch
+
+Focus topics for Week10:
+- Airflow architecture: Scheduler, Executor, Worker, Metadata DB, Webserver
+- DAG definition and scheduling
+- Core Operators: PythonOperator, BashOperator, SQLExecuteQueryOperator
+- Task dependencies and XCom
+- Variables, Connections, and Secrets
+- Sensors including ExternalTaskSensor and HttpSensor
+- Dynamic DAGs from config
+- dbt + Airflow integration
+- Retry, timeout, and SLA miss
+- airflow_dags artifact structure and practical setup
+
+Expected result:
+Update only Week10_Airflow.html
+
+The final file should feel like:
+- the current polished file structure
+- but upgraded with real handbook-backed depth and accuracy
+
+Before editing, identify which files in data-engineer-handbook are most relevant to Week10 and use only those.
+
+2.
+Review Week10_Airflow.html after repository upgrade.
+
+Check:
+- duplicated sections
+- broken HTML
+- weak explanations
+- mismatch with handbook concepts
+- inconsistent wording
+- broken quiz logic
+- layout issues
+- missing required 6-section structure in any module
+- missing or weak PostgreSQL / Oracle SQL examples where relevant
+- incorrect module order
+- missing 10 review questions in any module
+- broken JavaScript interactions required by the template
+
+Fix only high-value issues.
+Do not redesign.

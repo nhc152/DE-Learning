@@ -67,7 +67,7 @@ Mỗi module PHẢI có đủ 6 section theo thứ tự này:
 Section 1: 📋 Menu Tổng Thể        (icon-purpose) — bảng tóm tắt các bước
 Section 2: 🎯 Mục Đích Module      (icon-purpose) — bullet list mục tiêu
 Section 3: 📖 Giải Thích Chi Tiết  (icon-detail)  — nội dung + code blocks + tables
-Section 4: ❓ Câu Hỏi Ôn Tập       (icon-quiz)    — 5-6 quiz items interactive
+Section 4: ❓ Câu Hỏi Ôn Tập       (icon-quiz)    — 10 quiz items interactive
 Section 5: 📌 Tổng Kết             (icon-summary) — summary-grid 2 cột, 6 ô
 Section 6: 🔬 Bài Tập Thực Hành   (icon-practice)— practice-tasks + solution toggle
 ```

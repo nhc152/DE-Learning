@@ -1,0 +1,2339 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 4 · Tư Duy Pipeline Design</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent5);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #ffa65722, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent5); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+  .badge-purple { color: var(--accent4); border-color: var(--accent4); background: #6e40c926; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 290px; min-width: 290px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--text-muted); }
+  .level-label.l1 { color: var(--accent5); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent5); border-left-color: var(--accent5); background: #ffa65715; font-weight: 600; }
+  .nav-number { display: inline-block; width: 44px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 960px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent5); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent5); margin-bottom: 8px; }
+  .module-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .icon-pg { background: #4169e126; }
+  .icon-oracle { background: #ff000026; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent5); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  h3.blue { color: var(--accent); }
+  h3.green { color: var(--accent2); }
+  h3.purple { color: var(--accent4); }
+  h3.red { color: var(--accent3); }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+  .kw { color: #ff7b72; }
+  .kw2 { color: var(--accent); }
+  .str { color: var(--accent5); }
+  .fn { color: var(--accent4); }
+  .num { color: #79c0ff; }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  /* DB tag badges */
+  .db-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .db-pg { background: #4169e122; color: #4d9de0; border: 1px solid #4169e155; }
+  .db-oracle { background: #cc000022; color: #f97316; border: 1px solid #cc000055; }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent5); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent5); color: var(--accent5); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent5); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box.danger { border-color: var(--accent3); background: #f7816610; color: var(--accent3); }
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent5), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent5); color: var(--accent5); }
+  .nav-btn.primary { background: var(--accent5); color: #000; border-color: var(--accent5); }
+  .nav-btn.primary:hover { background: #ffbb77; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent5); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '□'; color: var(--accent5); font-size: 1.1rem; flex-shrink: 0; margin-top: -1px; }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  .tab-group { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 18px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--accent5); border-bottom-color: var(--accent5); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* DAG diagram */
+  .dag-container { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 14px 0; overflow-x: auto; }
+  .dag-row { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; margin: 6px 0; }
+  .dag-node { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; min-width: 110px; text-align: center; }
+  .dag-node.source { border-color: var(--accent); color: var(--accent); }
+  .dag-node.transform { border-color: var(--accent5); color: var(--accent5); }
+  .dag-node.load { border-color: var(--accent2); color: var(--accent2); }
+  .dag-node.check { border-color: var(--accent4); color: var(--accent4); }
+  .dag-node.alert { border-color: var(--accent3); color: var(--accent3); }
+  .dag-arrow { color: var(--text-muted); font-size: 1.2rem; padding: 0 6px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🔀 Tư Duy Pipeline Design</h1>
+  <p>Giai đoạn 1 · Tuần 4 · Module 104 — Foundation Series</p>
+  <div class="badge-row">
+    <span class="badge badge-orange">Giai đoạn 1 · Foundation</span>
+    <span class="badge badge-blue">DAG · Idempotency · Monitoring</span>
+    <span class="badge badge-green">PostgreSQL + Oracle SQL</span>
+    <span class="badge badge-purple">Artifact: week4_pipeline_design.md</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương Trình Học</div>
+    <div class="level-label l1">▶ TUẦN 4 · PIPELINE DESIGN</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W4.01</span>Tổng Quan & Mục Tiêu</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W4.02</span>DAG & Dependency Graph</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W4.03</span>Idempotency</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W4.04</span>Load Strategy: Full vs Incremental vs Backfill</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W4.05</span>Failure Handling & Retry</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W4.06</span>Monitoring & Data Quality Checks</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W4.07</span>SLA, SLO, SLI & Data Contract</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W4.08</span>Bài Thực Hành & Artifact</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W4.09</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+<!-- ═══════════════ MODULE 0: TỔNG QUAN ═══════════════ -->
+<div class="module active" id="m0">
+  <div class="module-header">
+    <div class="module-tag">Tuần 4 · Giai đoạn 1 · Module 104</div>
+    <div class="module-title">📋 Tổng Quan & Mục Tiêu</div>
+    <div class="module-subtitle">Tại sao tư duy pipeline quan trọng · Roadmap module · Exit criteria</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:11%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể Tuần 4
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Module</th><th>Nội dung</th><th>Thời gian ước tính</th></tr>
+        <tr><td>W4.01</td><td>Tổng quan, mục tiêu, tại sao tư duy pipeline quan trọng</td><td>30 phút</td></tr>
+        <tr><td>W4.02</td><td>DAG — Directed Acyclic Graph: node, edge, dependency</td><td>45 phút</td></tr>
+        <tr><td>W4.03</td><td>Idempotency — pipeline an toàn khi chạy nhiều lần</td><td>60 phút</td></tr>
+        <tr><td>W4.04</td><td>Load Strategy: Full Load vs Incremental vs Backfill</td><td>60 phút</td></tr>
+        <tr><td>W4.05</td><td>Failure Handling: retry, dead letter queue, alerting</td><td>45 phút</td></tr>
+        <tr><td>W4.06</td><td>Monitoring cơ bản: row count, null check, freshness</td><td>45 phút</td></tr>
+        <tr><td>W4.07</td><td>SLA và Data Contract — cam kết chất lượng dữ liệu</td><td>30 phút</td></tr>
+        <tr><td>W4.08</td><td>Bài thực hành SQL (PostgreSQL + Oracle) & Artifact</td><td>90 phút</td></tr>
+        <tr><td>W4.09</td><td>Mini test 12 câu tổng kết (bao phủ các phần cốt lõi)</td><td>30 phút</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Tại Sao Tư Duy Pipeline Quan Trọng?
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Ba tuần đầu bạn đã có SQL nâng cao, Python ETL, và kỹ thuật data cleaning. Tuần 4 là bản lề — nơi bạn học cách <strong>tư duy như một Data Engineer thực thụ</strong>, không chỉ viết code chạy được mà còn hiểu tại sao pipeline phải an toàn, đáng tin cậy và có thể vận hành production.</p>
+
+      <h3>🔴 Vấn đề phổ biến khi không có tư duy pipeline</h3>
+      <ul>
+        <li><strong>Chạy lại pipeline bị duplicate data</strong> — không ai thiết kế idempotency từ đầu</li>
+        <li><strong>Backfill 6 tháng dữ liệu mất cả tuần</strong> — vì chỉ biết full load</li>
+        <li><strong>Pipeline fail lúc 3 giờ sáng, không ai biết</strong> — vì không có monitoring/alerting</li>
+        <li><strong>Dashboard sai vì upstream table chậm 2 ngày</strong> — vì không có SLA và data contract</li>
+        <li><strong>Không rollback được khi có bug</strong> — vì logic không idempotent</li>
+      </ul>
+
+      <h3>🟢 Những gì bạn sẽ có sau tuần này</h3>
+      <ul>
+        <li>Vẽ và giải thích được DAG cho bất kỳ pipeline ETL nào</li>
+        <li>Implement idempotency pattern trong SQL (PostgreSQL và Oracle)</li>
+        <li>Chọn đúng load strategy cho từng use case cụ thể</li>
+        <li>Thiết kế failure handling và monitoring checklist production-ready</li>
+        <li>Hiểu SLA và viết data contract đơn giản</li>
+      </ul>
+
+      <div class="info-box note">
+        💡 <span><strong>Connection to Week 5+:</strong> Tuần 5–6 bạn sẽ implement Dimensional Data Modeling — toàn bộ concept SCD Type 2, incremental load, backfill strategy đều xây trên nền tư duy pipeline tuần này.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      3. Câu Hỏi Ôn Tập — Tổng Quan
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+
+      <div class="quiz-item">
+        <div class="quiz-q">Điều gì xảy ra khi một pipeline ETL KHÔNG được thiết kế idempotent và bị trigger chạy lại 3 lần do lỗi scheduler?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Nếu không idempotent, pipeline sẽ INSERT hoặc ghi dữ liệu 3 lần — gây duplicate data nghiêm trọng, không tự deduplicate.')">A. Pipeline tự dedup, dữ liệu cuối cùng vẫn đúng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không idempotent = mỗi lần chạy thêm data vào. Chạy 3 lần = 3x duplicate. Đây là bug production cực kỳ nguy hiểm vì rất khó phát hiện và sửa sau.')">B. Dữ liệu bị duplicate 3 lần, dashboard và report sai hoàn toàn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Scheduler không tự detect và skip. Đó là trách nhiệm của người thiết kế pipeline.')">C. Scheduler tự detect và skip lần chạy thứ 2, 3</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Pipeline không rollback tự động nếu không có cơ chế idempotency rõ ràng.')">D. Pipeline tự rollback lần chạy sai về trạng thái ban đầu</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Một pipeline production tốt cần ít nhất những yếu tố nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Chỉ có logging là chưa đủ cho production. Cần thêm monitoring, retry và idempotency.')">A. Logging + SQL query đúng là đủ cho production</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Tốc độ quan trọng nhưng không phải yếu tố duy nhất. Pipeline chậm nhưng đúng và ổn định vẫn tốt hơn pipeline nhanh nhưng sai và fragile.')">B. Tốc độ xử lý cao là yếu tố quan trọng nhất</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Pipeline production cần: idempotency (an toàn khi retry), monitoring (biết khi nào sai), failure handling (retry + alerting), và load strategy phù hợp (incremental/full).')">C. Idempotency + Monitoring + Failure Handling + Load Strategy phù hợp</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Airflow và dbt quan trọng nhưng là công cụ, không phải tư duy pipeline. Có thể implement pipeline tốt mà không dùng những tool này.')">D. Airflow + dbt là bắt buộc cho mọi pipeline production</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Artifact bắt buộc của Tuần 4 là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'week4_etl_pipeline.py chưa phải artifact đúng. Tuần 4 tập trung vào tư duy thiết kế, không phải code pipeline.')">A. week4_etl_pipeline.py — file Python ETL hoàn chỉnh</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Theo roadmap, artifact tuần 4 là file markdown mô tả: DAG diagram, idempotency strategy, failure scenarios, monitoring checklist, và trade-off phân tích.')">B. week4_pipeline_design.md — DAG diagram, idempotency strategy, failure scenarios, monitoring checklist</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'dbt project chưa đến lúc này. dbt là tuần 8–9.')">C. week4_dbt_project/ — dbt models và tests</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Airflow DAG chưa đến lúc này. Airflow là tuần 10–11.')">D. week4_airflow_dag.py — Airflow DAG file</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <div></div>
+    <button class="nav-btn primary" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">W4.02 DAG & Dependency →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 1: DAG ═══════════════ -->
+<div class="module" id="m1">
+  <div class="module-header">
+    <div class="module-tag">Tuần 4 · W4.02</div>
+    <div class="module-title">🔀 DAG & Dependency Graph</div>
+    <div class="module-subtitle">Directed Acyclic Graph · Node · Edge · Dependency · Parallel vs Serial execution</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:22%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📖</div>
+      1. DAG Là Gì?
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p><strong>DAG (Directed Acyclic Graph)</strong> là đồ thị có hướng không có chu trình. Trong data engineering, DAG mô tả <strong>thứ tự thực thi các task</strong> trong một pipeline.</p>
+      <ul>
+        <li><strong>Node:</strong> mỗi task/step trong pipeline (extract, transform, load, check)</li>
+        <li><strong>Edge (cạnh có hướng):</strong> dependency — "A phải xong trước khi B bắt đầu"</li>
+        <li><strong>Acyclic (không có chu trình):</strong> không có task nào phụ thuộc vào chính nó</li>
+      </ul>
+
+      <h3>Ví dụ DAG — Pipeline ETL Doanh Thu Hàng Ngày</h3>
+      <div class="dag-container">
+        <div style="color:var(--text-muted);font-size:0.75rem;margin-bottom:14px;">Luồng thực thi pipeline (→ = "phải xong trước")</div>
+        <div class="dag-row">
+          <div class="dag-node source">📥 Extract<br><small>orders API</small></div>
+          <div class="dag-arrow">→</div>
+          <div class="dag-node transform">🔧 Clean &<br>Validate</div>
+          <div class="dag-arrow">→</div>
+          <div class="dag-node transform">💱 Transform<br>revenue_daily</div>
+          <div class="dag-arrow">→</div>
+          <div class="dag-node load">📦 Load<br>DWH</div>
+          <div class="dag-arrow">→</div>
+          <div class="dag-node check">✅ Quality<br>Check</div>
+          <div class="dag-arrow">→</div>
+          <div class="dag-node alert">📤 Notify<br>Slack</div>
+        </div>
+        <div style="margin-top:16px;color:var(--text-muted);font-size:0.75rem;">
+          Nếu bất kỳ node nào fail → các node downstream không chạy → trigger alert
+        </div>
+      </div>
+
+      <h3 class="green">Parallel vs Serial Execution</h3>
+      <table>
+        <tr><th>Loại</th><th>Khi nào dùng</th><th>Ví dụ</th></tr>
+        <tr><td><strong>Serial (tuần tự)</strong></td><td>Task B cần output của task A</td><td>Extract → Transform → Load</td></tr>
+        <tr><td><strong>Parallel (song song)</strong></td><td>Các task độc lập nhau</td><td>Extract_orders + Extract_products cùng lúc</td></tr>
+        <tr><td><strong>Fan-out</strong></td><td>1 task tạo ra nhiều branch</td><td>Load xong → Check_row_count + Check_nulls + Check_freshness</td></tr>
+        <tr><td><strong>Fan-in</strong></td><td>Nhiều task merge lại 1 điểm</td><td>Extract_orders + Extract_users → Join_transform</td></tr>
+      </table>
+
+      <div class="info-box warn">
+        ⚠️ <span><strong>Sai lầm phổ biến:</strong> Thiết kế mọi thứ serial khi nhiều task hoàn toàn độc lập nhau — làm pipeline chậm không cần thiết. Ngược lại, parallel hoá bừa bãi khi task thực ra có dependency ngầm dẫn đến race condition.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">💻</div>
+      2. DAG trong SQL — Biểu Diễn Dependency bằng CTE
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Trong SQL, CTE (Common Table Expression) chính là cách biểu diễn DAG tuyến tính — mỗi CTE là một node, phụ thuộc CTE trước đó.</p>
+
+      <div class="tab-group" id="dag-sql-tabs">
+        <div class="tab active" onclick="switchTab('dag-sql-tabs','dag-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('dag-sql-tabs','dag-oracle')">🔴 Oracle SQL</div>
+      </div>
+
+      <div id="dag-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL 15+</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>pipeline_dag_cte.sql — PostgreSQL</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- DAG biểu diễn bằng CTE: mỗi CTE = 1 node trong pipeline</span>
+<span class="kw">WITH</span>
+
+<span class="comment">-- Node 1: Extract (raw source)</span>
+raw_orders <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> order_id, customer_id, amount, created_at, status
+    <span class="kw">FROM</span> staging.orders
+    <span class="kw">WHERE</span> created_at::date = <span class="str">'2024-01-15'</span>
+),
+
+<span class="comment">-- Node 2: Validate (filter hợp lệ)</span>
+validated_orders <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *
+    <span class="kw">FROM</span> raw_orders
+    <span class="kw">WHERE</span> amount > <span class="num">0</span>
+      <span class="kw">AND</span> customer_id <span class="kw">IS NOT NULL</span>
+      <span class="kw">AND</span> status <span class="kw">IN</span> (<span class="str">'completed'</span>, <span class="str">'shipped'</span>)
+),
+
+<span class="comment">-- Node 3: Transform (aggregate)</span>
+revenue_daily <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        created_at::date     <span class="kw">AS</span> report_date,
+        <span class="fn">COUNT</span>(*)            <span class="kw">AS</span> order_count,
+        <span class="fn">SUM</span>(amount)         <span class="kw">AS</span> total_revenue,
+        <span class="fn">AVG</span>(amount)         <span class="kw">AS</span> avg_order_value
+    <span class="kw">FROM</span> validated_orders
+    <span class="kw">GROUP BY</span> <span class="num">1</span>
+),
+
+<span class="comment">-- Node 4: Quality Check (inline assertion)</span>
+quality_check <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        report_date,
+        order_count,
+        total_revenue,
+        <span class="kw">CASE</span>
+            <span class="kw">WHEN</span> order_count = <span class="num">0</span>      <span class="kw">THEN</span> <span class="str">'FAIL: no orders'</span>
+            <span class="kw">WHEN</span> total_revenue <= <span class="num">0</span>  <span class="kw">THEN</span> <span class="str">'FAIL: negative revenue'</span>
+            <span class="kw">ELSE</span> <span class="str">'PASS'</span>
+        <span class="kw">END</span> <span class="kw">AS</span> check_status
+    <span class="kw">FROM</span> revenue_daily
+)
+
+<span class="comment">-- Node 5: Load (chỉ insert nếu PASS)</span>
+<span class="kw">INSERT INTO</span> marts.revenue_daily_fact
+    (report_date, order_count, total_revenue, avg_order_value, loaded_at)
+<span class="kw">SELECT</span>
+    report_date, order_count, total_revenue, avg_order_value,
+    <span class="fn">NOW</span>()
+<span class="kw">FROM</span> quality_check
+<span class="kw">WHERE</span> check_status = <span class="str">'PASS'</span>;</pre></div>
+        </div>
+      </div>
+
+      <div id="dag-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>pipeline_dag_cte.sql — Oracle</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Oracle: CTE với WITH clause giống PostgreSQL</span>
+<span class="comment">-- Khác biệt: dùng TRUNC(date) thay cast, SYSDATE thay NOW()</span>
+<span class="kw">WITH</span>
+
+raw_orders <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> order_id, customer_id, amount, created_at, status
+    <span class="kw">FROM</span> staging.orders
+    <span class="kw">WHERE</span> <span class="fn">TRUNC</span>(created_at) = <span class="fn">TO_DATE</span>(<span class="str">'2024-01-15'</span>, <span class="str">'YYYY-MM-DD'</span>)
+),
+
+validated_orders <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *
+    <span class="kw">FROM</span> raw_orders
+    <span class="kw">WHERE</span> amount > <span class="num">0</span>
+      <span class="kw">AND</span> customer_id <span class="kw">IS NOT NULL</span>
+      <span class="kw">AND</span> status <span class="kw">IN</span> (<span class="str">'completed'</span>, <span class="str">'shipped'</span>)
+),
+
+revenue_daily <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">TRUNC</span>(created_at)       <span class="kw">AS</span> report_date,
+        <span class="fn">COUNT</span>(*)               <span class="kw">AS</span> order_count,
+        <span class="fn">SUM</span>(amount)            <span class="kw">AS</span> total_revenue,
+        <span class="fn">AVG</span>(amount)            <span class="kw">AS</span> avg_order_value
+    <span class="kw">FROM</span> validated_orders
+    <span class="kw">GROUP BY</span> <span class="fn">TRUNC</span>(created_at)
+),
+
+quality_check <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        report_date, order_count, total_revenue,
+        <span class="kw">CASE</span>
+            <span class="kw">WHEN</span> order_count = <span class="num">0</span>      <span class="kw">THEN</span> <span class="str">'FAIL: no orders'</span>
+            <span class="kw">WHEN</span> total_revenue <= <span class="num">0</span>  <span class="kw">THEN</span> <span class="str">'FAIL: negative revenue'</span>
+            <span class="kw">ELSE</span> <span class="str">'PASS'</span>
+        <span class="kw">END</span> <span class="kw">AS</span> check_status
+    <span class="kw">FROM</span> revenue_daily
+)
+
+<span class="kw">INSERT INTO</span> marts.revenue_daily_fact
+    (report_date, order_count, total_revenue, avg_order_value, loaded_at)
+<span class="kw">SELECT</span>
+    report_date, order_count, total_revenue, avg_order_value,
+    <span class="fn">SYSDATE</span>   <span class="comment">-- Oracle dùng SYSDATE thay NOW()</span>
+<span class="kw">FROM</span> quality_check
+<span class="kw">WHERE</span> check_status = <span class="str">'PASS'</span>;</pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      3. Câu Hỏi Ôn Tập — DAG
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao DAG không được phép có chu trình (cycle)?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Chu trình không làm tăng memory usage về mặt định nghĩa DAG. Đây không phải lý do chính.')">A. Chu trình làm tăng memory usage của scheduler</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu Task A phụ thuộc B, B phụ thuộc C, C phụ thuộc A — không task nào có thể bắt đầu vì tất cả đang chờ nhau. Pipeline deadlock hoàn toàn.')">B. Chu trình tạo deadlock — không task nào có thể start vì mọi task đều chờ task khác</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Chu trình không ảnh hưởng đến disk I/O theo cách này.')">C. Chu trình làm tăng disk I/O không kiểm soát được</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Airflow có thể detect cycle nhưng không phải lý do lý thuyết tại sao DAG không được có cycle.')">D. Airflow không hỗ trợ cycle nên phải tránh</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong một pipeline, task Extract_A và Extract_B đều độc lập với nhau nhưng cùng feed vào Transform_C. Pattern DAG này là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Fan-out là từ 1 task tỏa ra nhiều nhánh, không phải 2 task gộp lại 1.')">A. Fan-out</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Fan-in: nhiều task độc lập (Extract_A, Extract_B) chạy song song rồi hội tụ vào 1 task (Transform_C). Lợi thế: extract song song tiết kiệm thời gian.')">B. Fan-in</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Serial là A→B→C tuần tự, không phải 2 branch gộp lại.')">C. Serial</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Broadcast là pattern gửi data tới nhiều worker, không phải pattern dependency graph này.')">D. Broadcast</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong Oracle SQL, để lấy phần ngày (không có giờ) từ cột TIMESTAMP, dùng hàm gì thay vì cast::date của PostgreSQL?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DATE_TRUNC là hàm của PostgreSQL, không phải Oracle.')">A. DATE_TRUNC(created_at, 'day')</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'TO_DATE chuyển string sang date, không dùng để truncate timestamp.')">B. TO_DATE(created_at)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Oracle dùng TRUNC(date_column) để xóa phần giờ/phút/giây, tương đương ::date cast trong PostgreSQL.')">C. TRUNC(created_at)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'EXTRACT trả về số nguyên (ví dụ 15), không phải date value.')">D. EXTRACT(DAY FROM created_at)</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">CTE trong SQL biểu diễn DAG theo cách nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CTE không tạo index tự động. Đây không phải cách CTE liên quan đến DAG.')">A. Mỗi CTE tạo một index tự động, giúp query nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Mỗi CTE là 1 node trong DAG. CTE sau có thể SELECT từ CTE trước — đây chính là directed edge (dependency). Không có CTE nào tham chiếu ngược lại CTE sau nó — đảm bảo acyclic.')">B. Mỗi CTE là 1 node; CTE sau SELECT từ CTE trước = directed edge; không có tham chiếu ngược = acyclic</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CTE không tạo temporary table vật lý trong PostgreSQL (trừ khi dùng MATERIALIZED). Đây không phải ý nghĩa DAG của CTE.')">C. Mỗi CTE tạo 1 temporary table riêng biệt trên disk</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CTE chỉ dùng trong 1 query, không persistent giữa các session.')">D. CTE là cách lưu trạng thái pipeline giữa các session</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Để chạy Extract_orders và Extract_products song song rồi join lại, cần thêm điều kiện gì trong thiết kế DAG?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cần đảm bảo 2 extract thực sự độc lập — không share state hay phụ thuộc cùng 1 resource có lock.')">A. Không cần thêm điều kiện gì, chỉ cần trigger cả 2 cùng lúc</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần đảm bảo: (1) 2 task thực sự độc lập, không share mutable state, (2) task Join chỉ start khi CẢ 2 extract đều DONE (fan-in barrier), (3) không có race condition trên shared resource.')">B. 2 extract phải thực sự độc lập + Join task có barrier chờ cả 2 hoàn thành (fan-in)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Lock toàn bộ database sẽ loại bỏ lợi thế parallel, ngược lại mục đích.')">C. Lock toàn bộ database trong suốt thời gian extract song song</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Parallel execution không yêu cầu phải có Airflow. Có thể implement bằng Python threading/subprocess.')">D. Bắt buộc phải dùng Airflow mới chạy song song được</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi một node giữa DAG (ví dụ Transform) fail, các node phía sau (Load, Check) sẽ như thế nào theo design đúng?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không nên để downstream chạy với dữ liệu sai/thiếu từ step fail. Đây là anti-pattern nguy hiểm.')">A. Tiếp tục chạy với output rỗng từ Transform</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi Transform fail, Load và Check phụ thuộc vào nó sẽ không chạy (skipped hoặc blocked). Pipeline dừng tại điểm fail và trigger alert. Không có data sai nào được load vào DWH.')">B. Không chạy (blocked/skipped) — pipeline dừng tại điểm fail, trigger alert</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Rollback chỉ áp dụng cho những gì đã được commit, không phải cho các node chưa chạy.')">C. Tự động rollback tất cả node đã chạy trước đó</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Retry toàn bộ DAG không đúng — chỉ retry node fail và downstream, không phải restart từ đầu.')">D. Tự động retry toàn bộ DAG từ node đầu tiên</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Hàm NOW() trong PostgreSQL tương đương với hàm nào trong Oracle?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CURRENT_DATE trả về chỉ ngày, không có giờ/phút/giây.')">A. CURRENT_DATE</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'LOCALTIMESTAMP trả về timestamp không có timezone — gần đúng nhưng SYSDATE là equivalent chuẩn hơn trong Oracle.')">B. LOCALTIMESTAMP</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SYSDATE trong Oracle trả về ngày và giờ hiện tại của database server, tương đương NOW() trong PostgreSQL. SYSTIMESTAMP nếu cần fractional seconds.')">C. SYSDATE</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'GETDATE() là hàm của SQL Server (T-SQL), không phải Oracle.')">D. GETDATE()</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao nên đặt Quality Check là một node riêng trong DAG thay vì gộp vào Transform?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Tách ra không nhất thiết nhanh hơn. Lý do là về observability và control flow.')">A. Để pipeline chạy nhanh hơn vì tách thành node nhỏ hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Node riêng = (1) dễ retry chỉ mỗi check khi cần, (2) log/metric riêng biệt cho từng loại lỗi, (3) có thể thay đổi logic check mà không động đến Transform, (4) DAG rõ ràng hơn khi debug.')">B. Dễ retry độc lập, có log riêng, tách concern giữa transform logic và validation logic</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Check không tiêu tốn ít RAM hơn khi tách node. Đây không phải lý do.')">C. Quality Check tiêu tốn ít RAM hơn khi là node riêng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Airflow không yêu cầu tách node như vậy — đây là design decision, không phải technical requirement.')">D. Airflow yêu cầu Quality Check phải là node riêng biệt</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong CTE chain, nếu CTE thứ 3 tham chiếu ngược lại CTE thứ 5 (chưa được define), SQL engine sẽ xử lý như thế nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SQL không tự sắp xếp lại CTE theo dependency graph. Thứ tự khai báo quan trọng.')">A. SQL engine tự sắp xếp lại thứ tự CTE theo dependency</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SQL không cho phép CTE tham chiếu CTE chưa được define. Query sẽ báo lỗi "relation does not exist" hoặc tương tự. CTE thông thường không có cycle — chỉ recursive CTE mới có tự-tham chiếu nhưng theo cách có kiểm soát.')">B. Báo lỗi — CTE không thể tham chiếu CTE chưa được define phía sau nó</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SQL không lazy evaluate CTE theo cách này. Lỗi xảy ra lúc parse/compile.')">C. CTE thứ 3 trả về NULL vì CTE thứ 5 chưa có giá trị</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SQL không cho phép forward reference trong CTE thông thường.')">D. SQL tạm thời skip CTE thứ 3 và chờ CTE thứ 5 xong mới quay lại</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Fan-out pattern trong DAG có lợi ích gì so với chạy serial từng check?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Fan-out không đảm bảo consistency cao hơn. Lợi ích chủ yếu là hiệu năng và independence.')">A. Đảm bảo data consistency cao hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Fan-out chạy nhiều check song song sau Load = (1) tiết kiệm thời gian tổng thể so với serial, (2) mỗi check fail độc lập không block check khác, (3) dễ thêm/bớt check mà không ảnh hưởng flow khác.')">B. Các check chạy song song → tiết kiệm thời gian; mỗi check fail độc lập không block nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Fan-out tiêu tốn nhiều resource hơn serial vì nhiều task chạy đồng thời.')">C. Tiêu tốn ít tài nguyên hơn vì gộp logic vào ít bước</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Fan-out không liên quan đến việc retry có dễ hơn hay không về mặt logic.')">D. Dễ retry hơn vì chỉ có 1 điểm thất bại duy nhất</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(0,document.querySelectorAll('.nav-item')[0])">← Tổng Quan</button>
+    <button class="nav-btn primary" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">W4.03 Idempotency →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 2: IDEMPOTENCY ═══════════════ -->
+<div class="module" id="m2">
+  <div class="module-header">
+    <div class="module-tag">Tuần 4 · W4.03</div>
+    <div class="module-title">🔁 Idempotency</div>
+    <div class="module-subtitle">Pipeline an toàn khi chạy nhiều lần · DELETE+INSERT · MERGE/UPSERT · INSERT ... ON CONFLICT</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📖</div>
+      1. Idempotency Là Gì?
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p><strong>Idempotency</strong>: Chạy pipeline N lần với cùng input luôn cho ra cùng output — không duplicate, không thiếu, không lỗi.</p>
+      <p>Công thức: <code>f(f(x)) = f(x)</code> — áp dụng hàm nhiều lần cho kết quả giống áp dụng 1 lần.</p>
+
+      <h3 class="red">❌ Ví dụ KHÔNG idempotent</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>anti_pattern — KHÔNG dùng</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Chạy lần 1 vào ngày 2024-01-15: INSERT 1000 rows ✓</span>
+<span class="comment">-- Scheduler fail, chạy lại lần 2: INSERT thêm 1000 rows ❌ DUPLICATE!</span>
+<span class="kw">INSERT INTO</span> marts.revenue_daily
+<span class="kw">SELECT</span> report_date, <span class="fn">SUM</span>(amount)
+<span class="kw">FROM</span> staging.orders
+<span class="kw">WHERE</span> report_date = <span class="str">'2024-01-15'</span>
+<span class="kw">GROUP BY</span> report_date;</pre></div>
+      </div>
+
+      <h3 class="green">✅ Pattern 1: DELETE + INSERT (PostgreSQL & Oracle)</h3>
+      <div class="tab-group" id="idem1-tabs">
+        <div class="tab active" onclick="switchTab('idem1-tabs','idem1-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('idem1-tabs','idem1-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="idem1-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>idempotent_delete_insert.sql — PostgreSQL</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Trong 1 transaction: xóa ngày cũ trước, rồi insert mới</span>
+<span class="kw">BEGIN</span>;
+
+<span class="kw">DELETE FROM</span> marts.revenue_daily
+<span class="kw">WHERE</span> report_date = <span class="str">'2024-01-15'</span>;
+
+<span class="kw">INSERT INTO</span> marts.revenue_daily (report_date, order_count, total_revenue)
+<span class="kw">SELECT</span>
+    created_at::date,
+    <span class="fn">COUNT</span>(*),
+    <span class="fn">SUM</span>(amount)
+<span class="kw">FROM</span> staging.orders
+<span class="kw">WHERE</span> created_at::date = <span class="str">'2024-01-15'</span>
+  <span class="kw">AND</span> status = <span class="str">'completed'</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span>;
+
+<span class="kw">COMMIT</span>;
+<span class="comment">-- Chạy 10 lần vẫn cho kết quả y hệt → idempotent ✓</span></pre></div>
+        </div>
+      </div>
+      <div id="idem1-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>idempotent_delete_insert.sql — Oracle</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Oracle: transaction tự động, dùng COMMIT/ROLLBACK tường minh</span>
+<span class="kw">DELETE FROM</span> marts.revenue_daily
+<span class="kw">WHERE</span> report_date = <span class="fn">TO_DATE</span>(<span class="str">'2024-01-15'</span>, <span class="str">'YYYY-MM-DD'</span>);
+
+<span class="kw">INSERT INTO</span> marts.revenue_daily (report_date, order_count, total_revenue)
+<span class="kw">SELECT</span>
+    <span class="fn">TRUNC</span>(created_at)   <span class="kw">AS</span> report_date,
+    <span class="fn">COUNT</span>(*)            <span class="kw">AS</span> order_count,
+    <span class="fn">SUM</span>(amount)         <span class="kw">AS</span> total_revenue
+<span class="kw">FROM</span> staging.orders
+<span class="kw">WHERE</span> <span class="fn">TRUNC</span>(created_at) = <span class="fn">TO_DATE</span>(<span class="str">'2024-01-15'</span>, <span class="str">'YYYY-MM-DD'</span>)
+  <span class="kw">AND</span> status = <span class="str">'completed'</span>
+<span class="kw">GROUP BY</span> <span class="fn">TRUNC</span>(created_at);
+
+<span class="kw">COMMIT</span>;</pre></div>
+        </div>
+      </div>
+
+      <h3 class="green">✅ Pattern 2: INSERT ON CONFLICT / MERGE (UPSERT)</h3>
+      <div class="tab-group" id="idem2-tabs">
+        <div class="tab active" onclick="switchTab('idem2-tabs','idem2-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('idem2-tabs','idem2-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="idem2-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL 9.5+</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>upsert_on_conflict.sql — PostgreSQL</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Dùng UNIQUE constraint trên report_date</span>
+<span class="comment">-- INSERT nếu chưa có, UPDATE nếu đã có</span>
+<span class="kw">INSERT INTO</span> marts.revenue_daily
+    (report_date, order_count, total_revenue, updated_at)
+<span class="kw">SELECT</span>
+    created_at::date,
+    <span class="fn">COUNT</span>(*),
+    <span class="fn">SUM</span>(amount),
+    <span class="fn">NOW</span>()
+<span class="kw">FROM</span> staging.orders
+<span class="kw">WHERE</span> created_at::date = <span class="str">'2024-01-15'</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span>
+<span class="kw2">ON CONFLICT</span> (report_date) <span class="kw2">DO UPDATE SET</span>
+    order_count   = <span class="kw2">EXCLUDED</span>.order_count,
+    total_revenue = <span class="kw2">EXCLUDED</span>.total_revenue,
+    updated_at    = <span class="fn">NOW</span>();
+<span class="comment">-- Idempotent: chạy N lần luôn cho cùng kết quả ✓</span></pre></div>
+        </div>
+      </div>
+      <div id="idem2-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL — MERGE</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>merge_upsert.sql — Oracle</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Oracle dùng MERGE thay ON CONFLICT DO UPDATE</span>
+<span class="kw">MERGE INTO</span> marts.revenue_daily tgt
+<span class="kw">USING</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">TRUNC</span>(created_at)  <span class="kw">AS</span> report_date,
+        <span class="fn">COUNT</span>(*)           <span class="kw">AS</span> order_count,
+        <span class="fn">SUM</span>(amount)        <span class="kw">AS</span> total_revenue
+    <span class="kw">FROM</span> staging.orders
+    <span class="kw">WHERE</span> <span class="fn">TRUNC</span>(created_at) = <span class="fn">TO_DATE</span>(<span class="str">'2024-01-15'</span>, <span class="str">'YYYY-MM-DD'</span>)
+    <span class="kw">GROUP BY</span> <span class="fn">TRUNC</span>(created_at)
+) src
+<span class="kw2">ON</span> (tgt.report_date = src.report_date)
+<span class="kw2">WHEN MATCHED THEN UPDATE SET</span>
+    tgt.order_count   = src.order_count,
+    tgt.total_revenue = src.total_revenue,
+    tgt.updated_at    = <span class="fn">SYSDATE</span>
+<span class="kw2">WHEN NOT MATCHED THEN INSERT</span>
+    (report_date, order_count, total_revenue, updated_at)
+<span class="kw2">VALUES</span>
+    (src.report_date, src.order_count, src.total_revenue, <span class="fn">SYSDATE</span>);
+
+<span class="kw">COMMIT</span>;</pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      2. Câu Hỏi Ôn Tập — Idempotency
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+
+      <div class="quiz-item">
+        <div class="quiz-q">Định nghĩa chính xác nhất của idempotency trong pipeline là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Tốc độ không phải định nghĩa của idempotency.')">A. Pipeline chạy nhanh nhất có thể bất kể số lần trigger</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Idempotency: f(f(x)) = f(x). Chạy N lần với cùng input → cùng output. Đây là property quan trọng nhất cho retry safety.')">B. Chạy N lần với cùng input luôn cho ra cùng output — không có side effect tích lũy</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Rollback khi fail là error handling, không phải idempotency.')">C. Pipeline tự động rollback khi fail để về trạng thái ban đầu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Chỉ chạy 1 lần dù trigger nhiều lần là de-duplication logic ở scheduler level, không phải idempotency.')">D. Pipeline chỉ chạy đúng 1 lần dù được trigger nhiều lần</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao pattern DELETE + INSERT phải nằm trong cùng 1 transaction?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DELETE và INSERT riêng transaction vẫn chạy được — nhưng không an toàn nếu INSERT fail sau khi DELETE đã commit.')">A. Vì DELETE và INSERT dùng chung bộ nhớ, không thể tách ra</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu DELETE commit nhưng INSERT fail → data bị mất hoàn toàn. Transaction đảm bảo atomicity: cả hai thành công hoặc cả hai rollback — không có trạng thái trung gian nguy hiểm.')">B. Atomicity: nếu INSERT fail, DELETE cũng rollback — tránh mất data giữa chừng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Transaction không tăng tốc độ, thậm chí có overhead nhỏ.')">C. Transaction giúp DELETE + INSERT chạy nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây không phải lý do sử dụng transaction trong pattern này.')">D. Vì PostgreSQL yêu cầu DELETE và INSERT phải cùng transaction</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Oracle MERGE khác với PostgreSQL INSERT ... ON CONFLICT như thế nào về cú pháp?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều có thể UPDATE khi matched.')">A. Oracle MERGE chỉ INSERT, không UPDATE được</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ON CONFLICT là cú pháp của PostgreSQL, không phải Oracle.')">B. Oracle MERGE cũng dùng ON CONFLICT nhưng viết khác chút</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Oracle MERGE có cấu trúc USING source ON condition WHEN MATCHED THEN UPDATE / WHEN NOT MATCHED THEN INSERT. PostgreSQL dùng INSERT ... ON CONFLICT (column) DO UPDATE SET. Kết quả logic tương đương nhưng cú pháp khác hoàn toàn.')">C. Oracle dùng MERGE INTO ... USING ... ON ... WHEN MATCHED/NOT MATCHED; PostgreSQL dùng INSERT ... ON CONFLICT DO UPDATE</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều có thể handle INSERT và UPDATE trong 1 statement.')">D. Oracle MERGE chỉ dùng được cho UPDATE, còn INSERT phải dùng lệnh riêng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào nên dùng UPSERT (ON CONFLICT/MERGE) thay vì DELETE + INSERT?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'UPSERT không nhanh hơn DELETE+INSERT trong mọi trường hợp. Tùy use case.')">A. Luôn dùng UPSERT vì nhanh hơn DELETE + INSERT</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. UPSERT tốt khi load row-by-row hoặc muốn giữ nguyên các row không đổi. DELETE+INSERT tốt hơn khi replace toàn bộ partition (ví dụ 1 ngày data) hoặc khi cần clean toàn bộ trước khi viết lại.')">B. UPSERT khi update row-by-row hoặc giữ nguyên row không thay đổi; DELETE+INSERT khi replace cả partition</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'UPSERT không yêu cầu primary key tuyệt đối — cần UNIQUE constraint trên conflict column, không nhất thiết phải là PK.')">C. UPSERT chỉ dùng khi table có primary key, DELETE+INSERT khi không có</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều có thể dùng trong transaction. Đây không phải tiêu chí phân biệt.')">D. DELETE+INSERT chỉ dùng trong transaction; UPSERT không cần transaction</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong PostgreSQL ON CONFLICT, từ khóa EXCLUDED đề cập đến gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'EXCLUDED không phải là các row bị xóa mà là row mới đang cố INSERT.')">A. Các row đã bị DELETE trước đó</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. EXCLUDED là pseudo-table chứa các giá trị mà câu INSERT đang cố ghi vào — tức là "row mới bị conflict". Dùng EXCLUDED.column để lấy giá trị mới để UPDATE.')">B. Row mới đang cố INSERT (bị conflict) — dùng để lấy giá trị mới trong DO UPDATE SET</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'EXCLUDED không phải NULL values.')">C. Các cột NULL trong row mới</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'EXCLUDED không phải constraint. Đây là pseudo-table built-in của PostgreSQL UPSERT.')">D. Tên của UNIQUE constraint gây ra conflict</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Một pipeline load data vào bảng fact_sales. Sau khi load, team phát hiện source data bị sai và cần reprocess lại dữ liệu của ngày hôm qua. Pipeline có idempotency thì xử lý như thế nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không cần truncate toàn bộ bảng — chỉ cần reprocess ngày hôm qua là đủ.')">A. Phải truncate toàn bộ bảng rồi reprocess tất cả data từ đầu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhờ idempotency (DELETE+INSERT hoặc MERGE theo ngày), chỉ cần trigger lại pipeline cho ngày hôm qua. Pipeline sẽ xóa data cũ của ngày đó và insert lại data mới đúng — không ảnh hưởng các ngày khác.')">B. Trigger lại pipeline cho ngày hôm qua — idempotency đảm bảo xóa data cũ và insert lại đúng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Manual fix từng row không scalable và dễ gây thêm lỗi.')">C. Phải manual fix từng row bị sai trong database</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Incremental append chỉ thêm mà không xóa data cũ sai — không giải quyết được vấn đề.')">D. Chạy thêm 1 lần incremental append để override data cũ</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong Oracle MERGE, nếu một row trong source KHÔNG tồn tại trong target, mệnh đề nào được thực thi?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WHEN MATCHED được thực thi khi ON condition = TRUE, tức là row đã TỒN TẠI trong target.')">A. WHEN MATCHED THEN UPDATE</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. WHEN NOT MATCHED THEN INSERT chạy khi source row không tìm thấy match trong target dựa trên điều kiện ON. Đây là phần INSERT của UPSERT.')">B. WHEN NOT MATCHED THEN INSERT</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ON là điều kiện join, không phải action được thực thi.')">C. ON condition</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WHEN NOT MATCHED BY SOURCE là Oracle-specific syntax để DELETE, không phải INSERT.')">D. WHEN NOT MATCHED BY SOURCE THEN DELETE</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao NOT idempotent pipeline đặc biệt nguy hiểm hơn các loại bug khác trong data engineering?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Duplicate data từ non-idempotent pipeline có thể không gây chậm ngay lập tức — nguy hiểm chính là về correctness.')">A. Vì nó làm pipeline chạy chậm hơn 10x</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Duplicate data từ non-idempotent pipeline tích lũy âm thầm — dashboard, report, ML model nhận data sai mà không có error rõ ràng. Rất khó phát hiện và rất tốn công cleanup sau khi phát hiện.')">B. Data duplicate tích lũy âm thầm, không có error rõ ràng — dashboard sai mà không ai biết cho đến khi có incident</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Non-idempotent pipeline không nhất thiết tốn nhiều storage hơn ngay lập tức.')">C. Vì nó tiêu tốn storage gấp đôi ngay lần chạy đầu tiên</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Non-idempotent pipeline không crash; nó chạy "thành công" nhưng data sai — đây chính là điều nguy hiểm.')">D. Vì nó làm crash database ngay lần chạy thứ 2</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Để làm pipeline idempotent theo partition ngày, điều kiện WHERE trong DELETE phải là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DELETE không có WHERE sẽ xóa toàn bộ bảng — rất nguy hiểm trong production.')">A. Không cần WHERE, DELETE toàn bộ rồi INSERT lại từ đầu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chỉ xóa đúng partition (ngày) đang được process. Ví dụ: WHERE report_date = :target_date. Không xóa data của ngày khác — đây là partition-safe idempotency.')">B. WHERE report_date = :target_date — chỉ xóa đúng partition ngày đang process</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WHERE 1=1 xóa toàn bộ bảng, tương đương TRUNCATE — không phải idempotency pattern.')">C. WHERE 1=1 để xóa hết rồi INSERT lại tất cả</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WHERE created_at > NOW() không xóa gì cả vì không có data trong tương lai.')">D. WHERE created_at > NOW() để chỉ xóa data mới nhất</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong PostgreSQL, nếu INSERT ... ON CONFLICT DO NOTHING được dùng, điều gì xảy ra khi có conflict?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DO NOTHING không raise error — đây là ưu điểm của nó.')">A. Raise lỗi như INSERT thông thường</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. DO NOTHING silently bỏ qua row conflict, không INSERT, không UPDATE, không error. Dùng khi muốn "insert if not exists" mà không cần update nếu đã có.')">B. Bỏ qua row conflict hoàn toàn — không INSERT, không UPDATE, không lỗi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DO NOTHING không tự UPDATE. Phải dùng DO UPDATE SET để update.')">C. Tự động UPDATE row cũ với giá trị mới</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DO NOTHING không rollback transaction.')">D. Rollback toàn bộ transaction khi gặp conflict</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">← DAG</button>
+    <button class="nav-btn primary" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">W4.04 Load Strategy →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 3: LOAD STRATEGY ═══════════════ -->
+<div class="module" id="m3">
+  <div class="module-header">
+    <div class="module-tag">Tuần 4 · W4.04</div>
+    <div class="module-title">📦 Load Strategy</div>
+    <div class="module-subtitle">Full Load · Incremental Load · Backfill · Khi nào dùng gì</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:44%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📖</div>
+      1. Ba Load Strategy Chính
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Strategy</th><th>Cơ chế</th><th>Ưu điểm</th><th>Nhược điểm</th><th>Dùng khi</th></tr>
+        <tr>
+          <td><strong>Full Load</strong></td>
+          <td>TRUNCATE + INSERT toàn bộ</td>
+          <td>Đơn giản, luôn sync</td>
+          <td>Chậm với data lớn, tốn resource</td>
+          <td>Table nhỏ (&lt;1M rows), thay đổi cấu trúc hoàn toàn</td>
+        </tr>
+        <tr>
+          <td><strong>Incremental</strong></td>
+          <td>Chỉ load data mới/thay đổi từ lần chạy trước</td>
+          <td>Nhanh, ít resource</td>
+          <td>Phức tạp hơn, cần watermark/timestamp</td>
+          <td>Table lớn, data chỉ append hoặc update theo thời gian</td>
+        </tr>
+        <tr>
+          <td><strong>Backfill</strong></td>
+          <td>Load lại data historical cho khoảng thời gian cụ thể</td>
+          <td>Sửa data sai trong quá khứ</td>
+          <td>Tốn thời gian, cần idempotency tốt</td>
+          <td>Sửa bug, thêm dimension mới, schema migration</td>
+        </tr>
+      </table>
+
+      <h3 class="purple">Liên kết trực tiếp với nội dung handbook (để tránh học lý thuyết rời rạc)</h3>
+      <table>
+        <tr><th>Nguồn trong handbook</th><th>Pattern bắt buộc</th><th>Ý nghĩa cho tuần 4</th></tr>
+        <tr>
+          <td><code>materials/1-dimensional-data-modeling/homework/homework.md</code></td>
+          <td>Backfill query + Incremental query cho <code>actors_history_scd</code></td>
+          <td>Phân biệt rõ backfill (nạp lịch sử một lần) và incremental (nạp delta hằng kỳ) cho SCD Type 2</td>
+        </tr>
+        <tr>
+          <td><code>materials/2-fact-data-modeling/homework/homework.md</code></td>
+          <td>Incremental query cho <code>host_activity_datelist</code></td>
+          <td>Thiết kế checkpoint và xử lý load theo ngày, không quét lại toàn bộ bảng</td>
+        </tr>
+        <tr>
+          <td><code>materials/2-fact-data-modeling/homework/homework.md</code></td>
+          <td>Incremental load day-by-day cho <code>host_activity_reduced</code></td>
+          <td>Áp dụng idempotency ở granular level (theo ngày/tháng) để retry an toàn</td>
+        </tr>
+      </table>
+
+      <div class="info-box note">
+        📌 <span><strong>Production mindset:</strong> Khi chọn load strategy, hãy viết rõ <strong>grains xử lý</strong> (theo ngày, theo tháng, theo entity), <strong>checkpoint key</strong>, và <strong>kịch bản re-run/backfill</strong>. Đây là phần interviewer DE hỏi rất sâu.</span>
+      </div>
+
+      <h3 class="blue">Incremental Load: Watermark Pattern</h3>
+      <div class="tab-group" id="inc-tabs">
+        <div class="tab active" onclick="switchTab('inc-tabs','inc-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('inc-tabs','inc-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="inc-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>incremental_load_watermark.sql — PostgreSQL</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Bước 1: Lấy watermark (điểm checkpoint lần chạy trước)</span>
+<span class="kw">SELECT</span> <span class="fn">COALESCE</span>(<span class="fn">MAX</span>(last_loaded_at), <span class="str">'1970-01-01'</span>::timestamp)
+<span class="kw">FROM</span> pipeline.checkpoints
+<span class="kw">WHERE</span> pipeline_name = <span class="str">'orders_incremental'</span>;
+
+<span class="comment">-- Bước 2: Load chỉ data mới từ watermark</span>
+<span class="kw">INSERT INTO</span> marts.orders_fact
+    (order_id, customer_id, amount, created_at, loaded_at)
+<span class="kw">SELECT</span>
+    order_id, customer_id, amount, created_at, <span class="fn">NOW</span>()
+<span class="kw">FROM</span> staging.orders
+<span class="kw">WHERE</span> created_at > :<span class="str">last_watermark</span>   <span class="comment">-- từ checkpoint</span>
+  <span class="kw">AND</span> created_at <= <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="str">'5 minutes'</span>  <span class="comment">-- buffer cho late data</span>
+<span class="kw2">ON CONFLICT</span> (order_id) <span class="kw2">DO UPDATE SET</span>
+    amount = <span class="kw2">EXCLUDED</span>.amount,
+    loaded_at = <span class="fn">NOW</span>();
+
+<span class="comment">-- Bước 3: Cập nhật checkpoint</span>
+<span class="kw">INSERT INTO</span> pipeline.checkpoints (pipeline_name, last_loaded_at)
+<span class="kw">VALUES</span> (<span class="str">'orders_incremental'</span>, <span class="fn">NOW</span>())
+<span class="kw2">ON CONFLICT</span> (pipeline_name) <span class="kw2">DO UPDATE SET</span>
+    last_loaded_at = <span class="fn">NOW</span>();</pre></div>
+        </div>
+      </div>
+      <div id="inc-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>incremental_load_watermark.sql — Oracle</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Oracle: dùng MERGE cho incremental idempotent</span>
+<span class="comment">-- Dùng inline watermark subquery để chạy được trực tiếp trong SQL worksheet</span>
+<span class="kw">MERGE INTO</span> marts.orders_fact tgt
+<span class="kw">USING</span> (
+    <span class="kw">SELECT</span> order_id, customer_id, amount, created_at
+    <span class="kw">FROM</span> staging.orders
+    <span class="kw">WHERE</span> created_at > (
+        <span class="kw">SELECT</span> <span class="fn">NVL</span>(<span class="fn">MAX</span>(last_loaded_at), <span class="fn">TO_DATE</span>(<span class="str">'1970-01-01'</span>, <span class="str">'YYYY-MM-DD'</span>))
+        <span class="kw">FROM</span> pipeline.checkpoints
+        <span class="kw">WHERE</span> pipeline_name = <span class="str">'orders_incremental'</span>
+    )
+      <span class="kw">AND</span> created_at <= <span class="fn">SYSDATE</span> - <span class="num">5</span>/<span class="num">1440</span>  <span class="comment">-- buffer 5 phút</span>
+) src
+<span class="kw2">ON</span> (tgt.order_id = src.order_id)
+<span class="kw2">WHEN MATCHED THEN UPDATE SET</span>
+    tgt.amount    = src.amount,
+    tgt.loaded_at = <span class="fn">SYSDATE</span>
+<span class="kw2">WHEN NOT MATCHED THEN INSERT</span>
+    (order_id, customer_id, amount, created_at, loaded_at)
+<span class="kw2">VALUES</span>
+    (src.order_id, src.customer_id, src.amount, src.created_at, <span class="fn">SYSDATE</span>);
+
+<span class="comment">-- Bước 3: Update checkpoint</span>
+<span class="kw">MERGE INTO</span> pipeline.checkpoints tgt
+<span class="kw">USING</span> (<span class="kw">SELECT</span> <span class="str">'orders_incremental'</span> <span class="kw">AS</span> pipeline_name, <span class="fn">SYSDATE</span> <span class="kw">AS</span> ts <span class="kw">FROM</span> DUAL) src
+<span class="kw2">ON</span> (tgt.pipeline_name = src.pipeline_name)
+<span class="kw2">WHEN MATCHED THEN UPDATE SET</span> tgt.last_loaded_at = src.ts
+<span class="kw2">WHEN NOT MATCHED THEN INSERT</span> (pipeline_name, last_loaded_at) <span class="kw2">VALUES</span> (src.pipeline_name, src.ts);
+
+<span class="kw">COMMIT</span>;</pre></div>
+        </div>
+      </div>
+
+      <div class="info-box warn">
+        ⚠️ <span><strong>Late Arriving Data:</strong> Luôn trừ buffer time (5–15 phút) khỏi watermark để tránh bỏ sót event đến muộn nhưng có timestamp trong window. Với Oracle dùng SYSDATE - N/1440 (N phút).</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      2. Câu Hỏi Ôn Tập — Load Strategy
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+
+      <div class="quiz-item">
+        <div class="quiz-q">Một bảng dim_products có 500 sản phẩm và thay đổi hoàn toàn mỗi tuần (xóa cũ, thêm mới, update giá). Load strategy nào phù hợp nhất?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Table nhỏ (500 rows), thay đổi hoàn toàn mỗi tuần → Full Load (TRUNCATE + INSERT) là đơn giản và đúng nhất. Chi phí tính toán không đáng kể.')">A. Full Load — table nhỏ, thay đổi hoàn toàn, overhead không đáng kể</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Incremental cần watermark và phức tạp hơn không cần thiết khi table nhỏ và thay đổi hoàn toàn.')">B. Incremental Load — để chỉ load sản phẩm thay đổi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Backfill cho lịch sử không phù hợp với case cần sync weekly thường xuyên.')">C. Backfill — load 52 tuần lịch sử mỗi lần chạy</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Manual cập nhật không phải pipeline strategy.')">D. Manual cập nhật — vì table quá nhỏ, không cần pipeline</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Watermark trong incremental load là gì và tại sao cần lưu nó vào checkpoint table?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Watermark không phải index và không lưu trong table chính.')">A. Index đặc biệt trên cột timestamp để query nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Watermark là điểm thời gian của lần load cuối. Lưu vào checkpoint table để lần sau biết từ đâu mà load tiếp. Không lưu → phải scan toàn bộ data hoặc không biết data nào đã load.')">B. Điểm thời gian của lần load cuối — lưu vào checkpoint để lần sau biết load từ đâu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Watermark không phải hash, không dùng để detect duplicate.')">C. Hash của toàn bộ data để detect duplicate khi load lần sau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Watermark không liên quan đến số lượng row.')">D. Số lượng row đã load trong lần chạy trước</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Team DE phát hiện pipeline fact_revenue bị bug từ 3 tháng trước — tất cả doanh thu bị nhân đôi. Cần dùng strategy nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Full Load toàn bộ bảng fact lớn rất tốn kém và không cần thiết nếu chỉ 3 tháng bị sai.')">A. Full Load lại toàn bộ fact_revenue từ đầu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Incremental load không thích hợp để fix dữ liệu quá khứ đã sai — incremental chỉ load data mới.')">B. Incremental Load — chỉ load data mới từ hôm nay trở đi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Backfill: reprocess lại đúng 3 tháng bị sai. Nhờ idempotency (DELETE+INSERT theo ngày), pipeline sẽ xóa data cũ sai và load lại data đúng cho từng ngày trong range đó.')">C. Backfill — reprocess đúng 3 tháng bị sai, idempotency đảm bảo không duplicate</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Manual fix 3 tháng data không scalable và dễ gây thêm lỗi.')">D. Manual SQL UPDATE để chia đôi tất cả số doanh thu sai</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao incremental load cần trừ buffer time (ví dụ 5 phút) khỏi watermark?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải để database recover. Buffer time là về late-arriving data.')">A. Để database có thời gian recover sau mỗi lần load</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Late arriving data: event xảy ra lúc 12:00 nhưng không đến source DB cho đến 12:03. Nếu watermark chính xác là 12:00, event này sẽ bị bỏ sót mãi mãi. Buffer 5 phút đảm bảo không miss.')">B. Tránh bỏ sót late-arriving data — event có thể đến muộn vài phút nhưng có timestamp trong window</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Buffer time không ảnh hưởng đến hiệu năng index.')">C. Để index hoạt động hiệu quả hơn trên cột timestamp</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Buffer time không giải quyết concurrency — đó là việc của transaction lock.')">D. Tránh concurrency conflict với pipeline đang chạy song song</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong Oracle, 5/1440 trong biểu thức SYSDATE - 5/1440 có nghĩa là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'5/1440 không phải 5 giây. 1440 = số phút trong 1 ngày.')">A. Trừ 5 giây (1440 = số giây trong 1 giờ)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Oracle DATE arithmetic: 1 = 1 ngày. 1440 phút/ngày. 5/1440 = 5 phút. SYSDATE - 5/1440 = 5 phút trước. Đây là cách chuẩn để làm date arithmetic bằng fraction trong Oracle.')">B. Trừ 5 phút (1440 = số phút trong 1 ngày, 5/1440 = 5 phút)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'5/1440 ≈ 0.00347 ngày ≈ 5 phút, không phải 5 giờ.')">C. Trừ 5 giờ (1440 = số giờ trong 60 ngày)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'5/1440 không phải 5 ngày. 5 ngày sẽ là SYSDATE - 5.')">D. Trừ 5 ngày (1440 là số ngày trong 4 năm)</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Nếu pipeline incremental fail vào 14:00 và chạy lại thành công lúc 15:00, dữ liệu từ 14:00-15:00 sẽ ra sao nếu đã có checkpoint?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Data sẽ không bị mất nếu checkpoint được lấy từ lần chạy thành công gần nhất.')">A. Bị mất hoàn toàn vì pipeline đã fail và skip window đó</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Checkpoint lưu watermark của lần chạy thành công trước đó (trước 14:00). Khi retry lúc 15:00, pipeline sẽ load data từ checkpoint đó đến 15:00 — bao gồm cả window 14:00-15:00 bị miss.')">B. Được load bình thường khi retry — checkpoint từ lần thành công trước bao phủ cả window bị miss</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Checkpoint không tự động update khi fail — chỉ update sau khi load thành công.')">C. Bị duplicate vì checkpoint đã update dù pipeline fail</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Pipeline không bỏ qua window — watermark đảm bảo load từ điểm cuối thành công.')">D. Chỉ load data từ 15:00 trở đi, bỏ qua window bị miss</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong PostgreSQL, COALESCE(MAX(last_loaded_at), '1970-01-01'::timestamp) trong checkpoint query có tác dụng gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COALESCE không tính trung bình. Nó trả về giá trị không NULL đầu tiên.')">A. Tính giá trị trung bình của tất cả checkpoint timestamps</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. MAX(last_loaded_at) trả về NULL nếu pipeline chưa bao giờ chạy (checkpoint table rỗng). COALESCE đổi NULL thành 1970-01-01 để incremental load biết cần load toàn bộ data từ đầu trong lần chạy đầu tiên.')">B. Khi pipeline chưa chạy lần nào (NULL), fallback về 1970-01-01 để load toàn bộ data lần đầu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COALESCE không convert timestamp sang integer.')">C. Convert timestamp sang integer để so sánh nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COALESCE không liên quan đến timezone.')">D. Chuẩn hóa timezone của timestamp về UTC</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trade-off chính giữa Full Load và Incremental Load là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều có thể idempotent nếu thiết kế đúng.')">A. Full Load không thể idempotent; Incremental thì có</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Full Load: đơn giản, luôn consistent, nhưng tốn resource O(N) với mọi data. Incremental: nhanh, tiết kiệm resource O(new_data), nhưng phức tạp hơn (cần watermark, xử lý late data, schema evolution).')">B. Full Load đơn giản nhưng tốn O(N) resource; Incremental tiết kiệm O(delta) nhưng phức tạp hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều dùng được với table có hoặc không có primary key.')">C. Incremental yêu cầu bắt buộc có primary key; Full Load thì không</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều hỗ trợ PostgreSQL và Oracle.')">D. Full Load chỉ dùng được với PostgreSQL; Incremental chỉ dùng Oracle</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào KHÔNG nên dùng Incremental Load dù table rất lớn?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Số row không phải yếu tố quyết định khi nào incremental không phù hợp.')">A. Khi table có hơn 100 triệu rows</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Incremental không an toàn khi data cũ có thể bị sửa (update) mà không có updated_at timestamp — pipeline sẽ không phát hiện sự thay đổi. Ví dụ: late correction, retroactive edits không cập nhật updated_at.')">B. Khi data cũ có thể bị retroactively updated mà không có updated_at timestamp được cập nhật</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Incremental hoàn toàn ổn với read replica — thậm chí tốt hơn vì ít đọc hơn.')">C. Khi source là read replica của database chính</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cloud storage không ảnh hưởng đến việc chọn load strategy.')">D. Khi data lưu trên cloud storage thay vì database</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Backfill khác với Incremental Load như thế nào về mục đích sử dụng?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Backfill không phải là cách làm Incremental chạy nhanh hơn.')">A. Backfill là cách làm Incremental Load chạy nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Incremental load = load data mới theo schedule thường xuyên (hàng ngày/giờ). Backfill = reprocess data historical trong khoảng thời gian cụ thể để sửa lỗi, migrate schema, hoặc populate dimension mới. Backfill là "one-time fix" còn incremental là "ongoing operation".')">B. Incremental là ongoing (load data mới thường xuyên); Backfill là one-time fix (reprocess historical data)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều có thể và nên dùng idempotency.')">C. Backfill không cần idempotency vì chỉ chạy 1 lần</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Incremental cũng dùng được với Oracle.')">D. Incremental chỉ dùng PostgreSQL; Backfill chỉ dùng Oracle</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">← Idempotency</button>
+    <button class="nav-btn primary" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">W4.05 Failure Handling →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 4: FAILURE HANDLING ═══════════════ -->
+<div class="module" id="m4">
+  <div class="module-header">
+    <div class="module-tag">Tuần 4 · W4.05</div>
+    <div class="module-title">⚠️ Failure Handling & Retry</div>
+    <div class="module-subtitle">Retry logic · Dead letter queue · Alerting · Failure scenarios & cách xử lý</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📖</div>
+      1. Failure Taxonomy trong Data Pipeline
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Loại lỗi</th><th>Ví dụ</th><th>Retry được?</th><th>Xử lý</th></tr>
+        <tr><td><strong>Transient</strong></td><td>Network timeout, DB connection timeout</td><td>✅ Có</td><td>Retry với exponential backoff</td></tr>
+        <tr><td><strong>Source Unavailable</strong></td><td>API down, source DB maintenance</td><td>✅ Có</td><td>Retry + alert nếu quá N lần</td></tr>
+        <tr><td><strong>Data Quality</strong></td><td>Schema change, NULL ở cột NOT NULL</td><td>❌ Không</td><td>Dead letter queue + alert + human review</td></tr>
+        <tr><td><strong>Logic/Bug</strong></td><td>Transform logic sai, division by zero</td><td>❌ Không</td><td>Alert + fix code + backfill</td></tr>
+        <tr><td><strong>Resource</strong></td><td>Out of memory, disk full</td><td>⚠️ Tùy</td><td>Alert + scale resource + retry</td></tr>
+      </table>
+
+      <h3 class="blue">Retry với Exponential Backoff</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>retry_pattern.py</span></div>
+        <div class="cmd-body"><pre><span class="kw">import</span> time, logging
+
+<span class="kw">def</span> <span class="fn">run_with_retry</span>(func, max_retries=<span class="num">3</span>, base_delay=<span class="num">30</span>):
+    <span class="str">"""Exponential backoff: 30s → 60s → 120s"""</span>
+    <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(max_retries):
+        <span class="kw">try</span>:
+            <span class="kw">return</span> <span class="fn">func</span>()
+        <span class="kw">except</span> TransientError <span class="kw">as</span> e:
+            delay = base_delay * (<span class="num">2</span> ** attempt)
+            logging.<span class="fn">warning</span>(<span class="str">f"Attempt {attempt+1} failed: {e}. Retry in {delay}s"</span>)
+            <span class="fn">time.sleep</span>(delay)
+        <span class="kw">except</span> DataQualityError <span class="kw">as</span> e:
+            <span class="fn">send_to_dead_letter_queue</span>(e)   <span class="comment"># Không retry data quality error</span>
+            <span class="kw">raise</span>
+    <span class="kw">raise</span> <span class="fn">PipelineFailedError</span>(<span class="str">"Max retries exceeded"</span>)</pre></div>
+      </div>
+
+      <h3 class="purple">Dead Letter Queue (DLQ)</h3>
+      <p>Khi một record không thể xử lý được (schema sai, validation fail), thay vì drop hoặc block pipeline, đưa vào DLQ để:</p>
+      <ul>
+        <li>Pipeline tiếp tục chạy với các record còn lại</li>
+        <li>Team DE review và fix thủ công nếu cần</li>
+        <li>Có audit trail đầy đủ về data bị lỗi</li>
+      </ul>
+
+      <div class="tab-group" id="dlq-tabs">
+        <div class="tab active" onclick="switchTab('dlq-tabs','dlq-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('dlq-tabs','dlq-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="dlq-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dead_letter_queue.sql — PostgreSQL</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Tạo bảng DLQ</span>
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> pipeline.dead_letter_queue (
+    dlq_id        <span class="kw">BIGSERIAL PRIMARY KEY</span>,
+    pipeline_name <span class="kw">TEXT NOT NULL</span>,
+    raw_data      <span class="kw">JSONB</span>,
+    error_type    <span class="kw">TEXT</span>,
+    error_message <span class="kw">TEXT</span>,
+    failed_at     <span class="kw">TIMESTAMPTZ DEFAULT</span> <span class="fn">NOW</span>(),
+    resolved      <span class="kw">BOOLEAN DEFAULT FALSE</span>,
+    resolved_at   <span class="kw">TIMESTAMPTZ</span>
+);
+
+<span class="comment">-- Insert record lỗi vào DLQ thay vì fail toàn bộ pipeline</span>
+<span class="kw">INSERT INTO</span> pipeline.dead_letter_queue
+    (pipeline_name, raw_data, error_type, error_message)
+<span class="kw">VALUES</span>
+    (<span class="str">'orders_incremental'</span>,
+     <span class="str">'{"order_id": 999, "amount": null}'</span>::jsonb,
+     <span class="str">'DATA_QUALITY'</span>,
+     <span class="str">'amount cannot be NULL for completed orders'</span>);
+
+<span class="comment">-- Query để xem unresolved errors</span>
+<span class="kw">SELECT</span> pipeline_name, error_type, error_message, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> error_count
+<span class="kw">FROM</span> pipeline.dead_letter_queue
+<span class="kw">WHERE</span> resolved = <span class="kw">FALSE</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>
+<span class="kw">ORDER BY</span> <span class="fn">COUNT</span>(*) <span class="kw">DESC</span>;</pre></div>
+        </div>
+      </div>
+      <div id="dlq-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dead_letter_queue.sql — Oracle</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- Oracle: dùng CLOB thay JSONB, TIMESTAMP thay TIMESTAMPTZ</span>
+<span class="kw">CREATE TABLE</span> pipeline.dead_letter_queue (
+    dlq_id        <span class="kw">NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+    pipeline_name <span class="kw">VARCHAR2</span>(<span class="num">200</span>) <span class="kw">NOT NULL</span>,
+    raw_data      <span class="kw">CLOB</span>,                     <span class="comment">-- Oracle không có JSONB native</span>
+    error_type    <span class="kw">VARCHAR2</span>(<span class="num">100</span>),
+    error_message <span class="kw">VARCHAR2</span>(<span class="num">4000</span>),
+    failed_at     <span class="kw">TIMESTAMP DEFAULT</span> <span class="fn">SYSTIMESTAMP</span>,
+    resolved      <span class="kw">NUMBER</span>(<span class="num">1</span>) <span class="kw">DEFAULT</span> <span class="num">0</span>,         <span class="comment">-- Pattern tương thích rộng cho môi trường Oracle legacy</span>
+    resolved_at   <span class="kw">TIMESTAMP</span>
+);
+
+<span class="kw">INSERT INTO</span> pipeline.dead_letter_queue
+    (pipeline_name, raw_data, error_type, error_message)
+<span class="kw">VALUES</span>
+    (<span class="str">'orders_incremental'</span>,
+     <span class="str">'{"order_id": 999, "amount": null}'</span>,
+     <span class="str">'DATA_QUALITY'</span>,
+     <span class="str">'amount cannot be NULL for completed orders'</span>);
+
+<span class="kw">COMMIT</span>;
+
+<span class="comment">-- Xem unresolved errors</span>
+<span class="kw">SELECT</span> pipeline_name, error_type, error_message, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> error_count
+<span class="kw">FROM</span> pipeline.dead_letter_queue
+<span class="kw">WHERE</span> resolved = <span class="num">0</span>
+<span class="kw">GROUP BY</span> pipeline_name, error_type, error_message
+<span class="kw">ORDER BY</span> <span class="fn">COUNT</span>(*) <span class="kw">DESC</span>;</pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      2. Câu Hỏi Ôn Tập — Failure Handling
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+
+      <div class="quiz-item">
+        <div class="quiz-q">Pipeline gặp lỗi "Connection timeout to source database" — đây là loại lỗi gì và xử lý như thế nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Connection timeout là transient error (tạm thời). Retry với exponential backoff là đúng: lần 1 chờ 30s, lần 2 chờ 60s, lần 3 chờ 120s. Nếu vẫn fail sau N lần → alert on-call.')">A. Transient error → retry với exponential backoff (30s, 60s, 120s); alert nếu quá số lần cho phép</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DLQ dành cho data quality error, không phải infrastructure transient error.')">B. Data quality error → đưa vào dead letter queue ngay lập tức</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không nên pass empty dataset xuống downstream khi fail. Đây là anti-pattern.')">C. Logic error → fix code, pass empty dataset xuống downstream</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không nên ignore lỗi. Phải retry hoặc alert.')">D. Ignore lỗi và tiếp tục pipeline với data của ngày hôm qua</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Pipeline nhận record với schema bất ngờ — cột "amount" thay đổi từ NUMERIC sang TEXT. Đây là loại lỗi gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Schema change không phải transient — retry sẽ tiếp tục fail cho đến khi schema được sửa.')">A. Transient error — retry sau 30 giây sẽ tự sửa</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Schema change là data quality / source contract violation. Không retry được — cần human review. Đưa records bị ảnh hưởng vào DLQ, alert team, và block pipeline đến khi schema được clarify.')">B. Data quality/schema error — không retry, đưa vào DLQ, alert team, cần human review</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Resource error là RAM, disk, CPU — không phải schema issue.')">C. Resource error — cần scale up RAM để handle schema change</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Schema change không tự hết khi retry sau 1 ngày.')">D. Transient error — chờ 24 giờ cho source restore schema cũ</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao exponential backoff tốt hơn fixed-interval retry (ví dụ retry mỗi 10 giây)?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Exponential backoff không đảm bảo thành công sớm hơn — nó giảm load lên system đang quá tải.')">A. Exponential backoff đảm bảo pipeline thành công sớm hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu source đang bị overload, nhiều pipeline cùng retry mỗi 10s tạo thundering herd — làm tệ hơn. Exponential backoff giảm dần tần suất retry, cho phép source recover mà không bị storm thêm.')">B. Giảm thundering herd — tránh nhiều pipeline cùng retry dồn dập làm source càng overload hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Exponential backoff không dùng ít bandwidth hơn về tổng thể.')">C. Tiêu tốn ít network bandwidth hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Exponential backoff không cần thêm hardware.')">D. Yêu cầu ít phần cứng hơn để chạy</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong Oracle, tại sao cột resolved dùng NUMBER(1) thay vì BOOLEAN?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'NUMBER(1) không nhanh hơn BOOLEAN về performance theo cách này.')">A. NUMBER(1) nhanh hơn BOOLEAN trong Oracle</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Trong nhiều hệ thống Oracle đang vận hành (đặc biệt môi trường legacy), NUMBER(1) với 0/1 vẫn là quy ước ổn định và dễ tương thích cho cờ trạng thái. Dùng pattern này giúp script chạy nhất quán giữa nhiều phiên bản/chuẩn triển khai.')">B. Trong môi trường Oracle thực tế, NUMBER(1) với 0/1 thường được dùng để biểu diễn cờ trạng thái</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'BOOLEAN có từ Oracle 23c nhưng vẫn không phổ biến trong legacy systems. NUMBER(1) là quy ước lâu đời.')">C. BOOLEAN không được phép trong table DDL bất kỳ database nào</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'NUMBER(1) không storage-efficient hơn BOOLEAN trong Oracle context.')">D. Vì NUMBER(1) tiết kiệm storage hơn BOOLEAN</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào nên KHÔNG retry và alert ngay lập tức?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Network timeout thường nên retry trước, chỉ alert sau N lần fail.')">A. Khi có network timeout trong extract step</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Logic/bug error (ví dụ divide by zero, null pointer) sẽ fail mỗi lần retry — retry vô ích, chỉ waste resource và delay alert. Nên fail fast và alert ngay để engineer fix code.')">B. Khi phát hiện lỗi logic trong code (divide by zero, wrong join key) — retry sẽ tiếp tục fail</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'API rate limit thường nên retry sau khi chờ reset window.')">C. Khi API trả về rate limit error (429 Too Many Requests)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DB timeout thường nên retry trước.')">D. Khi database connection pool bị hết</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong PostgreSQL, cột raw_data dùng JSONB cho DLQ có lợi ích gì so với TEXT?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JSONB lưu binary format — nhỏ hơn TEXT về storage và query nhanh hơn, nhưng đây không phải lý do chính.')">A. JSONB nhỏ hơn TEXT về storage</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. JSONB trong PostgreSQL cho phép query vào cấu trúc JSON (SELECT raw_data->>\'order_id\') và đánh index trên JSON field. TEXT thì phải parse trong application. JSONB cũng validate JSON format khi insert.')">B. Query được vào JSON field (raw_data->>\'key\'), đánh index GIN, và validate JSON format khi insert</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JSONB không compress data tự động.')">C. JSONB tự động compress data để tiết kiệm disk</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JSONB không encrypt data.')">D. JSONB mã hóa data tự động khi lưu</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Pipeline fail lúc 3 giờ sáng và không ai biết cho đến 8 giờ sáng khi stakeholder hỏi. Vấn đề thiếu gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Số lần retry không giải quyết vấn đề không ai biết khi fail.')">A. Cần tăng số lần retry từ 3 lên 10</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Thiếu alerting khi pipeline fail. Alert tốt phải: gửi Slack/email ngay khi fail (không chỉ khi retry hết), include thông tin đủ để diagnose (pipeline name, error, timestamp, node bị fail), có on-call rotation.')">B. Thiếu alerting — pipeline fail phải gửi Slack/email ngay, không chờ người hỏi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Idempotency không giải quyết vấn đề notification khi fail.')">C. Cần implement idempotency tốt hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Full Load không giải quyết vấn đề alerting.')">D. Nên dùng Full Load thay vì Incremental để tránh fail</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi upstream pipeline (pipeline A cung cấp data cho pipeline B) fail, pipeline B nên làm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Chạy với data cũ sẽ produce output sai/stale mà không có warning rõ ràng.')">A. Chạy với data cũ nhất có sẵn và note trong output</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Pipeline B phụ thuộc vào A (DAG dependency). Nếu A fail, B nên: (1) không chạy (skip/block), (2) alert, (3) chờ A success rồi tự trigger lại. Đây là upstream dependency handling chuẩn.')">B. Không chạy (block) — đợi A thành công rồi trigger lại; alert về dependency fail</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Retry không giải quyết vấn đề khi upstream data chưa sẵn sàng.')">C. Retry B vô tận cho đến khi A xong</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Bỏ qua dependency là anti-pattern nguy hiểm.')">D. Chạy B và bỏ qua dependency vì B có default values</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Alert tốt khi pipeline fail phải chứa những thông tin gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Alert chỉ nói "pipeline failed" không đủ để diagnose. Cần context cụ thể.')">A. Chỉ cần ghi "Pipeline failed" là đủ để on-call xử lý</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Alert hữu ích cần: tên pipeline, task/node fail, timestamp, loại lỗi, error message, link đến log, và action suggested. On-call nhìn vào phải biết ngay đây là gì và làm gì.')">B. Tên pipeline, node bị fail, timestamp, error type, error message, link log, suggested action</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Source code không nên nằm trong alert message.')">C. Toàn bộ source code của pipeline để debug</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Data sample trong alert có thể gây security issue với PII data.')">D. Toàn bộ raw data sample bị lỗi để review ngay trong Slack</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Sự khác biệt chính giữa JSONB (PostgreSQL) và CLOB (Oracle) khi dùng cho cột raw_data trong DLQ là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều lưu được nhiều data. Sự khác biệt không phải về dung lượng.')">A. JSONB lưu được nhiều data hơn CLOB</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. JSONB là binary JSON với native query operators ($->>, @>, GIN index). CLOB là character large object — raw text, không validate hay query JSON natively. Oracle 21c+ có JSON datatype nhưng CLOB vẫn phổ biến trong legacy systems.')">B. JSONB có native JSON operators và indexing; CLOB là raw text không có JSON awareness trong SQL query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều là DB-side storage, không có processing speed difference theo cách này.')">C. CLOB được process nhanh hơn vì Oracle tối ưu hơn PostgreSQL</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JSONB không encrypt data.')">D. JSONB tự encrypt data; CLOB để plain text</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">← Load Strategy</button>
+    <button class="nav-btn primary" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">W4.06 Monitoring →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 5: MONITORING ═══════════════ -->
+<div class="module" id="m5">
+  <div class="module-header">
+    <div class="module-tag">Tuần 4 · W4.06</div>
+    <div class="module-title">📊 Monitoring & Data Quality Checks</div>
+    <div class="module-subtitle">Row count check · Null check · Freshness check · Anomaly detection cơ bản</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📖</div>
+      1. Ba Loại Check Cơ Bản
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Monitoring pipeline là biết <strong>ngay khi có vấn đề</strong> — trước khi stakeholder phàn nàn.</p>
+
+      <div class="tab-group" id="mon-tabs">
+        <div class="tab active" onclick="switchTab('mon-tabs','mon-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('mon-tabs','mon-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="mon-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>monitoring_checks.sql — PostgreSQL</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- ① ROW COUNT CHECK: Phát hiện zero-row hoặc volume drop bất thường</span>
+<span class="kw">WITH</span> today_count <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cnt
+    <span class="kw">FROM</span> marts.orders_fact
+    <span class="kw">WHERE</span> created_at::date = <span class="fn">CURRENT_DATE</span>
+),
+avg_7d <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(daily_cnt) <span class="kw">AS</span> avg_cnt
+    <span class="kw">FROM</span> (
+        <span class="kw">SELECT</span> created_at::date, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> daily_cnt
+        <span class="kw">FROM</span> marts.orders_fact
+        <span class="kw">WHERE</span> created_at::date <span class="kw">BETWEEN</span> <span class="fn">CURRENT_DATE</span>-<span class="num">7</span> <span class="kw">AND</span> <span class="fn">CURRENT_DATE</span>-<span class="num">1</span>
+        <span class="kw">GROUP BY</span> <span class="num">1</span>
+    ) d
+)
+<span class="kw">SELECT</span>
+    today_count.cnt,
+    avg_7d.avg_cnt,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> today_count.cnt = <span class="num">0</span>
+             <span class="kw">THEN</span> <span class="str">'FAIL: zero rows today'</span>
+        <span class="kw">WHEN</span> today_count.cnt < avg_7d.avg_cnt * <span class="num">0.5</span>
+             <span class="kw">THEN</span> <span class="str">'WARN: volume dropped >50% vs 7-day avg'</span>
+        <span class="kw">ELSE</span> <span class="str">'PASS'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> row_count_check
+<span class="kw">FROM</span> today_count, avg_7d;
+
+<span class="comment">-- ② NULL CHECK: Phát hiện cột quan trọng có NULL</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total,
+    <span class="fn">COUNT</span>(amount)      <span class="kw">AS</span> non_null_amount,
+    <span class="fn">COUNT</span>(customer_id) <span class="kw">AS</span> non_null_customer,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(amount) > <span class="num">0</span>
+             <span class="kw">THEN</span> <span class="fn">FORMAT</span>(<span class="str">'FAIL: %s NULL amounts'</span>, <span class="fn">COUNT</span>(*)-<span class="fn">COUNT</span>(amount))
+        <span class="kw">ELSE</span> <span class="str">'PASS'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> null_check
+<span class="kw">FROM</span> marts.orders_fact
+<span class="kw">WHERE</span> created_at::date = <span class="fn">CURRENT_DATE</span>;
+
+<span class="comment">-- ③ FRESHNESS CHECK: Data có được load đúng giờ không?</span>
+<span class="kw">SELECT</span>
+    <span class="fn">MAX</span>(loaded_at) <span class="kw">AS</span> last_load,
+    <span class="fn">NOW</span>() - <span class="fn">MAX</span>(loaded_at) <span class="kw">AS</span> staleness,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">NOW</span>() - <span class="fn">MAX</span>(loaded_at) > <span class="kw">INTERVAL</span> <span class="str">'26 hours'</span>
+             <span class="kw">THEN</span> <span class="str">'FAIL: data is stale >26h'</span>
+        <span class="kw">ELSE</span> <span class="str">'PASS'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> freshness_check
+<span class="kw">FROM</span> marts.orders_fact;</pre></div>
+        </div>
+      </div>
+      <div id="mon-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>monitoring_checks.sql — Oracle</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- ① ROW COUNT CHECK — Oracle</span>
+<span class="kw">WITH</span> today_count <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cnt
+    <span class="kw">FROM</span> marts.orders_fact
+    <span class="kw">WHERE</span> <span class="fn">TRUNC</span>(created_at) = <span class="fn">TRUNC</span>(<span class="fn">SYSDATE</span>)
+),
+avg_7d <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(daily_cnt) <span class="kw">AS</span> avg_cnt
+    <span class="kw">FROM</span> (
+        <span class="kw">SELECT</span> <span class="fn">TRUNC</span>(created_at), <span class="fn">COUNT</span>(*) <span class="kw">AS</span> daily_cnt
+        <span class="kw">FROM</span> marts.orders_fact
+        <span class="kw">WHERE</span> <span class="fn">TRUNC</span>(created_at) <span class="kw">BETWEEN</span> <span class="fn">TRUNC</span>(<span class="fn">SYSDATE</span>)-<span class="num">7</span> <span class="kw">AND</span> <span class="fn">TRUNC</span>(<span class="fn">SYSDATE</span>)-<span class="num">1</span>
+        <span class="kw">GROUP BY</span> <span class="fn">TRUNC</span>(created_at)
+    )
+)
+<span class="kw">SELECT</span>
+    t.cnt, a.avg_cnt,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> t.cnt = <span class="num">0</span>             <span class="kw">THEN</span> <span class="str">'FAIL: zero rows today'</span>
+        <span class="kw">WHEN</span> t.cnt < a.avg_cnt*<span class="num">0.5</span>  <span class="kw">THEN</span> <span class="str">'WARN: volume dropped >50%'</span>
+        <span class="kw">ELSE</span> <span class="str">'PASS'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> row_count_check
+<span class="kw">FROM</span> today_count t, avg_7d a;
+
+<span class="comment">-- ② NULL CHECK — Oracle</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total,
+    <span class="fn">COUNT</span>(amount) <span class="kw">AS</span> non_null_amount,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">COUNT</span>(*) - <span class="fn">COUNT</span>(amount) > <span class="num">0</span>
+             <span class="kw">THEN</span> <span class="str">'FAIL: '</span> || (<span class="fn">COUNT</span>(*)-<span class="fn">COUNT</span>(amount)) || <span class="str">' NULL amounts'</span>
+        <span class="kw">ELSE</span> <span class="str">'PASS'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> null_check
+<span class="kw">FROM</span> marts.orders_fact
+<span class="kw">WHERE</span> <span class="fn">TRUNC</span>(created_at) = <span class="fn">TRUNC</span>(<span class="fn">SYSDATE</span>);
+
+<span class="comment">-- ③ FRESHNESS CHECK — Oracle (dùng phút thay interval)</span>
+<span class="kw">SELECT</span>
+    <span class="fn">MAX</span>(loaded_at) <span class="kw">AS</span> last_load,
+    (<span class="fn">SYSDATE</span> - <span class="fn">MAX</span>(loaded_at)) * <span class="num">24</span> <span class="kw">AS</span> staleness_hours,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> (<span class="fn">SYSDATE</span> - <span class="fn">MAX</span>(loaded_at)) * <span class="num">24</span> > <span class="num">26</span>
+             <span class="kw">THEN</span> <span class="str">'FAIL: data is stale >26h'</span>
+        <span class="kw">ELSE</span> <span class="str">'PASS'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> freshness_check
+<span class="kw">FROM</span> marts.orders_fact;</pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      2. Câu Hỏi Ôn Tập — Monitoring
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+
+      <div class="quiz-item">
+        <div class="quiz-q">Row count check so sánh với 7-day average phát hiện được loại vấn đề nào mà absolute threshold không phát hiện?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'NULL values cần null check riêng, không phải row count check.')">A. Cột bị NULL bất ngờ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Seasonal variation: thứ 2 có thể có 10,000 orders, chủ nhật chỉ 2,000 — absolute threshold sẽ false-alarm mỗi cuối tuần. So sánh với 7-day average tính seasonal pattern, phát hiện DROP bất thường so với baseline gần đây.')">B. Volume drop bất thường theo ngữ cảnh — seasonal pattern tự nhiên (weekday vs weekend) không bị false alarm</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Schema change cần schema validation riêng.')">C. Schema thay đổi bất ngờ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Duplicate phát hiện bằng COUNT(*) vs COUNT(DISTINCT key) riêng.')">D. Duplicate rows trong bảng fact</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Freshness check với threshold 26 giờ cho pipeline daily (chạy lúc 6 AM) có nghĩa gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'26 giờ không đồng nghĩa với alert khi có nhiều hơn 1 giờ trễ.')">A. Alert khi data trễ hơn 1 giờ so với schedule</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Pipeline daily chạy 6AM. 24h sau là 6AM hôm sau. Buffer 2h (=26h) cho phép trễ đến 8AM trước khi alert. Điều này tránh false alarm khi pipeline hơi chậm do load cao, nhưng vẫn catch được miss hoàn toàn.')">B. Cho phép pipeline trễ đến 2 giờ (đến 8AM) trước khi alert — buffer tránh false alarm</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'26 giờ không liên quan đến timezone offset.')">C. Data được load 2 lần/ngày, check từng 13 giờ/lần</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'26 giờ không có nghĩa là chỉ check lúc nửa đêm.')">D. Chỉ check freshness vào nửa đêm hàng ngày</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong Oracle, (SYSDATE - MAX(loaded_at)) * 24 tính ra đơn vị gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'(SYSDATE - date) trả về số ngày, nhân 24 = số giờ, không phải giây.')">A. Giây</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Phút sẽ cần nhân thêm 60: (SYSDATE - date) * 24 * 60.')">B. Phút</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Oracle DATE subtraction trả về số ngày (có thể là decimal). Nhân 24 chuyển sang số giờ. Ví dụ 1.5 ngày × 24 = 36 giờ.')">C. Giờ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Ngày sẽ là (SYSDATE - date) không nhân gì thêm.')">D. Ngày</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Null check dùng COUNT(*) - COUNT(column) thay vì COUNT(column IS NULL) — tại sao?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Tốc độ không phải lý do chính. Cả hai đều O(N).')">A. COUNT(*) - COUNT(column) nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. COUNT(column) trong SQL bỏ qua NULL tự nhiên — chỉ đếm non-NULL. COUNT(*) đếm tất cả rows. Hiệu là số NULL. Đây là idiom SQL chuẩn hoạt động nhất quán trên cả PostgreSQL và Oracle.')">B. COUNT(column) bỏ qua NULL tự nhiên trong SQL — COUNT(*) - COUNT(col) chính là số NULL, đây là SQL-standard idiom</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CASE WHEN col IS NULL THEN 1 ELSE 0 END cũng đúng nhưng verbose hơn. COUNT(*) - COUNT(col) là cách cô đọng hơn.')">C. COUNT(column IS NULL) là cú pháp sai trong mọi database</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COUNT không liên quan đến memory.')">D. Tiết kiệm memory khi xử lý large table</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Nên đặt monitoring check ở đâu trong pipeline? Trước Load hay sau Load?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Check trước Load tốt nhưng chỉ check staging data, không check data đã vào DWH.')">A. Chỉ trước Load — để không load data sai vào DWH</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Chỉ sau Load không phát hiện vấn đề sớm ở staging.')">B. Chỉ sau Load — để check data thực tế đã vào DWH</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Defense in depth: (1) Pre-load check trên staging để không load data sai, (2) Post-load check trên DWH để verify data đã load đúng. Hai lớp check bổ sung nhau.')">C. Cả hai: pre-load check trên staging + post-load check trên DWH — defense in depth</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không nên chờ T+1 ngày mới check — quá muộn để fix kịp cho stakeholder.')">D. Không cần trong pipeline, chạy scheduled check riêng T+1 ngày sau</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Duplicate check trong SQL cơ bản nhất sử dụng pattern gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SELECT DISTINCT không count duplicate — nó chỉ return unique rows.')">A. SELECT DISTINCT * FROM table</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. COUNT(*) > COUNT(DISTINCT key): nếu số row khác số row unique theo key → có duplicate. Ví dụ: COUNT(*)=1000, COUNT(DISTINCT order_id)=998 → 2 duplicate order_id.')">B. HAVING COUNT(*) > COUNT(DISTINCT primary_key): nếu khác nhau thì có duplicate</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ROW_NUMBER phát hiện duplicate nhưng không phải cách đơn giản nhất để count.')">C. ROW_NUMBER() OVER (PARTITION BY key) > 1</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CHECKSUM không phải SQL function chuẩn cho duplicate check.')">D. CHECKSUM(*) = CHECKSUM(DISTINCT *)</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong PostgreSQL, NOW() - MAX(loaded_at) > INTERVAL '26 hours' so sánh hai kiểu data gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải integer comparison.')">A. INTEGER với INTEGER</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. NOW() - MAX(loaded_at) trả về INTERVAL type trong PostgreSQL. So sánh với INTERVAL \'26 hours\' là INTERVAL vs INTERVAL — cú pháp hợp lệ và tự nhiên trong PostgreSQL.')">B. INTERVAL với INTERVAL — PostgreSQL tự tính hiệu timestamp thành interval type</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải text comparison.')">C. TEXT với TEXT</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'FLOAT không chính xác cho time arithmetic.')">D. FLOAT với FLOAT (số giây)</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Pipeline monitoring nên được lưu kết quả vào đâu để track trend theo thời gian?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Console log mất khi process kết thúc, không thể track trend.')">A. Chỉ log ra console — đủ để engineer xem ngay lúc đó</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Lưu kết quả check vào pipeline.monitoring_log với timestamp, check_name, status, metric_value. Cho phép: query trend, so sánh hôm nay vs tuần trước, build dashboard về data quality, phát hiện drift dần dần.')">B. Lưu vào monitoring log table (pipeline.monitoring_log) với timestamp — track trend, build quality dashboard</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Email không thể query và không thể visualize trend.')">C. Gửi email với kết quả mỗi lần chạy</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Spreadsheet không phải solution scalable cho production monitoring.')">D. Export ra Excel spreadsheet để stakeholder review hàng tuần</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Giá trị WARN (thay vì FAIL/PASS) trong monitoring check có vai trò gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WARN không có nghĩa là ignore — cần investigate.')">A. WARN nghĩa là ignore — chỉ quan tâm PASS và FAIL</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. WARN là early warning system: chỉ bất thường cần investigate nhưng không đủ tệ để block pipeline. Ví dụ: volume giảm 50% có thể là promotion kết thúc hoặc có vấn đề. WARN trigger alert nhẹ hơn FAIL nhưng vẫn cần human review.')">B. Early warning — bất thường đáng investigate nhưng chưa đủ để block; trigger soft alert để human review</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WARN không phải intermediate state giữa 2 PASS.')">C. Intermediate state giữa hai lần PASS liên tiếp</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WARN không dành riêng cho Oracle.')">D. Chỉ dùng trong Oracle, PostgreSQL không có khái niệm WARN</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Nếu freshness check fail (data stale >26h) nhưng row count check PASS, điều đó chỉ ra vấn đề gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Data quality không phải kết luận đúng khi chỉ freshness fail.')">A. Data có chất lượng kém — nhiều NULL values</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Row count PASS = data trong table đủ về số lượng. Freshness FAIL = data này đã cũ, pipeline không chạy đúng schedule. Có thể: scheduler không trigger, pipeline silent fail không alert, hoặc job bị skip.')">B. Pipeline không chạy đúng schedule — data trong table là data cũ từ ngày hôm trước hoặc xa hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Duplicate không phải kết luận từ freshness fail + row count pass.')">C. Có duplicate data — count tăng nhưng load không được trigger</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Source change không phải kết luận đúng từ pattern này.')">D. Source database thay đổi schema</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">← Failure Handling</button>
+    <button class="nav-btn primary" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">W4.07 SLA/SLO/SLI & Contract →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 6: SLA & DATA CONTRACT ═══════════════ -->
+<div class="module" id="m6">
+  <div class="module-header">
+    <div class="module-tag">Tuần 4 · W4.07</div>
+    <div class="module-title">📋 SLA, SLO, SLI & Data Contract</div>
+    <div class="module-subtitle">Service Level Agreement · Service Level Objective · Service Level Indicator · Data Contract</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:77%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📖</div>
+      1. SLA, SLO, SLI và Data Contract Là Gì?
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p><strong>SLA (Service Level Agreement)</strong>: Cam kết mức dịch vụ giữa team data và stakeholder (ví dụ: bảng phải sẵn sàng trước 8:00 AM mỗi ngày).</p>
+      <p><strong>SLI (Service Level Indicator)</strong>: Chỉ số đo lường thực tế để biết dịch vụ đang vận hành ra sao (ví dụ: độ trễ dữ liệu, tỷ lệ job thành công).</p>
+      <p><strong>SLO (Service Level Objective)</strong>: Mục tiêu định lượng đặt trên SLI (ví dụ: 99.5% runs hoàn thành trước 8:00 AM trong 30 ngày).</p>
+      <p><strong>Data Contract</strong>: Thỏa thuận producer-consumer về schema, semantics, lịch phát hành thay đổi, và quy tắc breaking change.</p>
+
+      <h3>Mapping nhanh: SLA · SLI · SLO</h3>
+      <table>
+        <tr><th>Thành phần</th><th>Định nghĩa ngắn</th><th>Ví dụ cho pipeline orders_daily_fact</th></tr>
+        <tr><td><strong>SLI</strong></td><td>Chỉ số đo được</td><td>% run hoàn thành trước 8:00 AM; độ trễ freshness (phút)</td></tr>
+        <tr><td><strong>SLO</strong></td><td>Mục tiêu trên SLI</td><td>≥99.5% run đúng hạn trong rolling 30 ngày</td></tr>
+        <tr><td><strong>SLA</strong></td><td>Cam kết với business</td><td>Dữ liệu sẵn sàng trước 8:00 AM; vi phạm sẽ có quy trình incident</td></tr>
+      </table>
+
+      <h3>Ví dụ SLA thực tế</h3>
+      <table>
+        <tr><th>Pipeline</th><th>Freshness SLA</th><th>Completeness SLA</th><th>Error Budget</th></tr>
+        <tr><td>orders_daily_fact</td><td>Data sẵn sàng trước 8:00 AM</td><td>≥99.5% rows vs source</td><td>≤1 incident/tháng</td></tr>
+        <tr><td>revenue_weekly</td><td>Sẵn sàng trước thứ Hai 9:00 AM</td><td>≥100% (tài chính)</td><td>0 (zero tolerance)</td></tr>
+        <tr><td>user_events_hourly</td><td>Trễ tối đa 90 phút</td><td>≥98%</td><td>≤3 incidents/tuần</td></tr>
+      </table>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>data_contract_example.yaml</span></div>
+        <div class="cmd-body"><pre><span class="comment"># Data Contract — orders_daily_fact</span>
+<span class="str">dataset:</span> marts.orders_daily_fact
+<span class="str">owner:</span> data-engineering@company.com
+<span class="str">version:</span> <span class="str">"2.1.0"</span>
+<span class="str">updated:</span> <span class="str">"2024-01-15"</span>
+
+<span class="str">sla:</span>
+  <span class="str">freshness:</span> <span class="str">"available by 08:00 UTC daily"</span>
+  <span class="str">completeness:</span> <span class="str">"≥ 99.5% of source rows"</span>
+  <span class="str">error_budget:</span> <span class="str">"1 incident per calendar month"</span>
+
+<span class="str">schema:</span>
+  <span class="str">- name:</span> order_id
+    <span class="str">type:</span> BIGINT
+    <span class="str">nullable:</span> false
+    <span class="str">description:</span> <span class="str">"Unique order identifier from source system"</span>
+  <span class="str">- name:</span> amount
+    <span class="str">type:</span> NUMERIC(12,2)
+    <span class="str">nullable:</span> false
+    <span class="str">description:</span> <span class="str">"Order amount in USD, always positive"</span>
+
+<span class="str">breaking_changes_policy:</span> <span class="str">"Notify consumers 14 days before any schema change"</span></pre></div>
+      </div>
+
+      <div class="info-box tip">
+        ✅ <span><strong>Pro tip:</strong> Lưu Data Contract vào Git repo cùng với code pipeline. Version control giúp track thay đổi và review trước khi merge. Breaking change = cần PR review từ consumer teams.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      2. Câu Hỏi Ôn Tập — SLA, SLO, SLI & Data Contract
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao Data Contract cần được lưu vào Git thay vì chỉ document trong wiki?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Git không tự validate schema — cần thêm CI/CD cho điều đó.')">A. Git tự động validate schema khi contract thay đổi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Git cho phép: version control (track ai thay đổi gì, khi nào), code review (breaking change cần PR approval từ consumer), rollback nếu cần, và history đầy đủ — tất cả những gì wiki không có.')">B. Version control, code review trước breaking change, rollback, và history đầy đủ — wiki không có những điều này</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Git không phát sóng contract tự động đến consumers.')">C. Git tự động broadcast contract changes tới tất cả consumers</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Git không phải yêu cầu pháp lý — đây là best practice engineering.')">D. Yêu cầu pháp lý bắt buộc phải dùng Git cho data contract</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Error budget trong SLA là gì và tại sao cần nó?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Error budget không phải số tiền phạt.')">A. Số tiền phạt khi vi phạm SLA</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Error budget là lượng "incident cho phép" trong kỳ (tháng/quý). Ví dụ: 1 incident/tháng. Mục đích: (1) realistic — không ai có 100% uptime, (2) cho phép team đổi mới mà không sợ quá, (3) khi hết budget → freeze feature, tập trung reliability.')">B. Lượng incident cho phép trong kỳ — realistic về downtime, balance giữa reliability và đổi mới</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Error budget không phải chi phí infra.')">C. Ngân sách chi cho infrastructure khi có lỗi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Error budget không phải số lượng data sai được phép.')">D. Số lượng data rows được phép sai tối đa</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Pipeline tài chính (financial reporting) thường có SLA Completeness ≥100%. Tại sao không dùng 99.5% như pipeline thông thường?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SLA tài chính không phải vì quy định cụ thể nào mà vì business consequence.')">A. Quy định pháp lý bắt buộc financial data phải 100%</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Financial report bị thiếu 0.5% = báo cáo doanh thu sai, decisions dựa trên số sai, audit fail, compliance violation. Consequence quá lớn để chấp nhận bất kỳ thiếu sót nào.')">B. Thiếu dù 0.5% tổng revenue có thể gây audit fail, compliance violation, và business decisions sai nghiêm trọng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Tài chính không xử lý ít data hơn — thường xử lý nhiều hơn.')">C. Financial pipeline xử lý ít data hơn nên dễ đạt 100%</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SLA tài chính không liên quan đến giá cloud.')">D. 100% rẻ hơn 99.5% trên cloud infrastructure</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">SLI khác với SLO ở điểm cốt lõi nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SLA là cam kết, không phải phép đo. SLI mới là chỉ số đo.')">A. SLI là cam kết với business, SLO là số đo kỹ thuật</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SLI là chỉ số đo thực tế (ví dụ % run đúng hạn), còn SLO là mục tiêu đặt trên chỉ số đó (ví dụ ≥99.5% trong 30 ngày).')">B. SLI là chỉ số đo thực tế; SLO là mục tiêu định lượng đặt trên SLI</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SLO không phải lúc nào cũng là legal contract.')">C. SLI là metric nội bộ, SLO luôn là hợp đồng pháp lý</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải. Cả hai đều có thể dùng cho technical và business context.')">D. SLI chỉ dùng cho business, SLO chỉ dùng cho technical</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi SLI freshness giảm nhưng vẫn chưa vi phạm SLO, team nên làm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không nên chờ vi phạm mới xử lý vì sẽ mất error budget nhanh.')">A. Chờ đến khi vi phạm SLO rồi mới điều tra</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là tín hiệu cảnh báo sớm: cần điều tra root cause, theo dõi trend, và xử lý trước khi đốt hết error budget.')">B. Điều tra sớm như tín hiệu cảnh báo, xử lý trước khi vi phạm SLO</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không nên nâng SLO chỉ để che vấn đề reliability.')">C. Tăng ngưỡng SLO ngay để tránh bị cảnh báo</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Tắt monitoring làm mất khả năng quan sát hệ thống.')">D. Tắt freshness monitoring để giảm noise</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Data contract nên chứa tối thiểu các nhóm thông tin nào để consumer tích hợp an toàn?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Chỉ schema là chưa đủ vì thiếu owner, SLA, và chính sách thay đổi.')">A. Chỉ cần danh sách cột và kiểu dữ liệu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tối thiểu cần: schema + nullable/semantic, owner liên hệ, SLA/SLI/SLO chính, và breaking-change policy/versioning.')">B. Schema + semantic + owner + SLA/SLI/SLO chính + versioning/breaking-change policy</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Chi phí cloud không phải thành phần bắt buộc trong data contract.')">C. Schema + chi phí cloud + roadmap sản phẩm</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Runbook hữu ích cho vận hành nhưng không thay thế contract interface producer-consumer.')">D. Chỉ cần runbook incident là đủ</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi thay đổi kiểu dữ liệu cột amount từ NUMERIC sang TEXT, hành động đúng theo data contract là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là breaking change, không nên deploy âm thầm.')">A. Deploy thẳng vì consumer sẽ tự parse lại</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Minor version không phù hợp cho breaking schema change.')">B. Tăng minor version và thông báo sau khi deploy</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là breaking change: tăng major version, thông báo trước theo policy, và phối hợp kế hoạch migration với consumer.')">C. Xem là breaking change: tăng major version, thông báo trước, có kế hoạch migration</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không thể giữ nguyên version nếu interface đã thay đổi phá vỡ tương thích.')">D. Giữ nguyên version để tránh ảnh hưởng dashboard</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Error budget liên quan thế nào đến tốc độ phát triển tính năng pipeline?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Error budget là công cụ điều phối reliability, không phải KPI chỉ của QA.')">A. Chỉ QA team cần quan tâm, DE team không liên quan</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi đốt gần hết error budget, team nên ưu tiên reliability work (fix incident, hardening) thay vì đẩy thêm feature mới.')">B. Là tín hiệu điều phối: gần hết budget thì ưu tiên ổn định thay vì thêm feature</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Error budget không có nghĩa luôn phải dừng mọi thay đổi.')">C. Hết budget thì phải dừng toàn bộ thay đổi vô thời hạn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không nên tăng budget tùy tiện vì sẽ làm SLA mất ý nghĩa quản trị rủi ro.')">D. Có thể tăng budget bất cứ lúc nào để tránh alert</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong bối cảnh handbook maintenance homework, vì sao cần ownership matrix cùng SLA/Data Contract?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Ownership không chỉ để báo cáo tháng mà để phản ứng incident.')">A. Để tổng hợp KPI cuối tháng cho lãnh đạo</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SLA/contract định nghĩa cam kết, còn ownership matrix định nghĩa ai chịu trách nhiệm chính/phụ khi vi phạm và khi cần quyết định xử lý.')">B. Vì cần xác định rõ ai chịu trách nhiệm primary/secondary khi vi phạm SLA hoặc contract</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không thể gom hết trách nhiệm vào một người vì rủi ro vận hành và nghỉ phép.')">C. Để chỉ định một người duy nhất xử lý mọi pipeline</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'On-call không thay thế ownership; hai thứ bổ sung nhau.')">D. Vì có on-call thì không cần ownership matrix nữa</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">← Monitoring</button>
+    <button class="nav-btn primary" onclick="showModule(7,document.querySelectorAll('.nav-item')[7])">W4.08 Bài Thực Hành →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 7: PRACTICE ═══════════════ -->
+<div class="module" id="m7">
+  <div class="module-header">
+    <div class="module-tag">Tuần 4 · W4.08</div>
+    <div class="module-title">🔨 Bài Thực Hành & Artifact</div>
+    <div class="module-subtitle">2 bài thực hành SQL · Artifact week4_pipeline_design.md · Exit Criteria</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔨</div>
+      Bài 1 — Pipeline Idempotent với MERGE/UPSERT
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">📝 Yêu cầu</div>
+        <div class="practice-task-body">
+          <p>Bảng <code>staging.page_views</code> có cột: <code>view_id BIGINT, user_id BIGINT, page_url TEXT, viewed_at TIMESTAMP, session_id TEXT</code></p>
+          <p>Viết pipeline idempotent để aggregate thành <code>marts.daily_page_views</code> với: <code>report_date, page_url, view_count, unique_users</code>. Chạy nhiều lần phải cho cùng kết quả.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="tab-group" id="p1-tabs">
+              <div class="tab active" onclick="switchTab('p1-tabs','p1-pg')">🐘 PostgreSQL</div>
+              <div class="tab" onclick="switchTab('p1-tabs','p1-oracle')">🔴 Oracle</div>
+            </div>
+            <div id="p1-pg" class="tab-content active">
+              <span class="db-tag db-pg">PostgreSQL</span>
+              <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution_p1.sql</span></div>
+              <div class="cmd-body"><pre><span class="kw">BEGIN</span>;
+
+<span class="comment">-- Idempotent: xóa ngày target trước</span>
+<span class="kw">DELETE FROM</span> marts.daily_page_views
+<span class="kw">WHERE</span> report_date = <span class="str">'2024-01-15'</span>;
+
+<span class="kw">INSERT INTO</span> marts.daily_page_views
+    (report_date, page_url, view_count, unique_users)
+<span class="kw">SELECT</span>
+    viewed_at::date        <span class="kw">AS</span> report_date,
+    page_url,
+    <span class="fn">COUNT</span>(*)               <span class="kw">AS</span> view_count,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> user_id) <span class="kw">AS</span> unique_users
+<span class="kw">FROM</span> staging.page_views
+<span class="kw">WHERE</span> viewed_at::date = <span class="str">'2024-01-15'</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span>, <span class="num">2</span>;
+
+<span class="kw">COMMIT</span>;</pre></div></div>
+            </div>
+            <div id="p1-oracle" class="tab-content">
+              <span class="db-tag db-oracle">Oracle</span>
+              <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution_p1_oracle.sql</span></div>
+              <div class="cmd-body"><pre><span class="kw">DELETE FROM</span> marts.daily_page_views
+<span class="kw">WHERE</span> report_date = <span class="fn">TO_DATE</span>(<span class="str">'2024-01-15'</span>,<span class="str">'YYYY-MM-DD'</span>);
+
+<span class="kw">INSERT INTO</span> marts.daily_page_views
+    (report_date, page_url, view_count, unique_users)
+<span class="kw">SELECT</span>
+    <span class="fn">TRUNC</span>(viewed_at)       <span class="kw">AS</span> report_date,
+    page_url,
+    <span class="fn">COUNT</span>(*)               <span class="kw">AS</span> view_count,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> user_id) <span class="kw">AS</span> unique_users
+<span class="kw">FROM</span> staging.page_views
+<span class="kw">WHERE</span> <span class="fn">TRUNC</span>(viewed_at) = <span class="fn">TO_DATE</span>(<span class="str">'2024-01-15'</span>,<span class="str">'YYYY-MM-DD'</span>)
+<span class="kw">GROUP BY</span> <span class="fn">TRUNC</span>(viewed_at), page_url;
+<span class="kw">COMMIT</span>;</pre></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔨</div>
+      Bài 2 — Incremental Load với Checkpoint
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">📝 Yêu cầu</div>
+        <div class="practice-task-body">
+          <p>Viết incremental load cho bảng <code>staging.events</code> → <code>marts.events_fact</code>. Tạo bảng checkpoint và viết query: (1) lấy watermark, (2) load data mới, (3) update checkpoint. Xét late data với buffer 10 phút.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="tab-group" id="p2-tabs">
+              <div class="tab active" onclick="switchTab('p2-tabs','p2-pg')">🐘 PostgreSQL</div>
+              <div class="tab" onclick="switchTab('p2-tabs','p2-oracle')">🔴 Oracle</div>
+            </div>
+            <div id="p2-pg" class="tab-content active">
+              <span class="db-tag db-pg">PostgreSQL</span>
+              <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution_p2.sql</span></div>
+              <div class="cmd-body"><pre><span class="comment">-- Step 1: Lấy watermark</span>
+<span class="kw">SELECT</span> <span class="fn">COALESCE</span>(<span class="fn">MAX</span>(last_loaded_at), <span class="str">'1970-01-01'</span>::timestamp)
+<span class="kw">FROM</span> pipeline.checkpoints <span class="kw">WHERE</span> pipeline_name = <span class="str">'events_incremental'</span>;
+
+<span class="comment">-- Step 2: Load data mới với buffer 10 phút</span>
+<span class="kw">INSERT INTO</span> marts.events_fact
+    (event_id, user_id, event_type, occurred_at, loaded_at)
+<span class="kw">SELECT</span> event_id, user_id, event_type, occurred_at, <span class="fn">NOW</span>()
+<span class="kw">FROM</span> staging.events
+<span class="kw">WHERE</span> occurred_at > :<span class="num">last_watermark</span>
+  <span class="kw">AND</span> occurred_at <= <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="str">'10 minutes'</span>
+<span class="kw2">ON CONFLICT</span> (event_id) <span class="kw2">DO UPDATE SET</span>
+    loaded_at = <span class="fn">NOW</span>();
+
+<span class="comment">-- Step 3: Update checkpoint</span>
+<span class="kw">INSERT INTO</span> pipeline.checkpoints (pipeline_name, last_loaded_at)
+<span class="kw">VALUES</span> (<span class="str">'events_incremental'</span>, <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="str">'10 minutes'</span>)
+<span class="kw2">ON CONFLICT</span> (pipeline_name) <span class="kw2">DO UPDATE SET</span>
+    last_loaded_at = <span class="fn">NOW</span>() - <span class="kw">INTERVAL</span> <span class="str">'10 minutes'</span>;</pre></div></div>
+            </div>
+            <div id="p2-oracle" class="tab-content">
+              <span class="db-tag db-oracle">Oracle</span>
+              <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution_p2_oracle.sql</span></div>
+              <div class="cmd-body"><pre><span class="comment">-- Oracle: buffer 10 phút = 10/1440</span>
+<span class="kw">MERGE INTO</span> marts.events_fact tgt
+<span class="kw">USING</span> (
+    <span class="kw">SELECT</span> event_id, user_id, event_type, occurred_at
+    <span class="kw">FROM</span> staging.events
+    <span class="kw">WHERE</span> occurred_at > (
+        <span class="kw">SELECT</span> <span class="fn">NVL</span>(<span class="fn">MAX</span>(last_loaded_at), <span class="fn">TO_DATE</span>(<span class="str">'1970-01-01'</span>, <span class="str">'YYYY-MM-DD'</span>))
+        <span class="kw">FROM</span> pipeline.checkpoints
+        <span class="kw">WHERE</span> pipeline_name = <span class="str">'events_incremental'</span>
+    )
+      <span class="kw">AND</span> occurred_at <= <span class="fn">SYSDATE</span> - <span class="num">10</span>/<span class="num">1440</span>
+) src
+<span class="kw2">ON</span> (tgt.event_id = src.event_id)
+<span class="kw2">WHEN MATCHED THEN UPDATE SET</span> tgt.loaded_at = <span class="fn">SYSDATE</span>
+<span class="kw2">WHEN NOT MATCHED THEN INSERT</span>
+    (event_id, user_id, event_type, occurred_at, loaded_at)
+<span class="kw2">VALUES</span>
+    (src.event_id, src.user_id, src.event_type, src.occurred_at, <span class="fn">SYSDATE</span>);
+<span class="kw">COMMIT</span>;</pre></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📦</div>
+      Artifact Checklist — week4_pipeline_design.md
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>File artifact phải bao gồm đủ các mục sau và commit lên GitHub:</p>
+      <ul class="checklist">
+        <li>DAG diagram (text-based hoặc Mermaid) cho pipeline ETL doanh thu thực tế</li>
+        <li>Giải thích tại sao chọn serial hay parallel cho từng cặp task</li>
+        <li>Idempotency strategy: DELETE+INSERT hay MERGE — giải thích trade-off</li>
+        <li>Load strategy decision: Full Load vs Incremental — trade-off cho use case cụ thể</li>
+        <li>Failure scenario table: ít nhất 3 loại lỗi, retry/no-retry, xử lý</li>
+        <li>Monitoring checklist: row count, null check, freshness, duplicate</li>
+        <li>SLA/SLI/SLO definition cho pipeline (freshness, completeness, success-rate, error budget)</li>
+        <li>Data contract: schema, nullable rules, breaking-change policy, owner liên hệ</li>
+        <li>Ownership matrix tối thiểu: primary owner + secondary owner cho pipeline</li>
+        <li>Runbook ngắn cho incident chính (source down, quality fail, stale data)</li>
+        <li>Đề xuất on-call rotation mức cơ bản cho tuần vận hành cao điểm</li>
+        <li>SQL code ít nhất 1 monitoring check bằng PostgreSQL và 1 bằng Oracle</li>
+        <li>README.md: mục tiêu, thiết kế, cách chạy, kết quả</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">← SLA & Contract</button>
+    <button class="nav-btn primary" onclick="showModule(8,document.querySelectorAll('.nav-item')[8])">W4.09 Mini Test →</button>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE 8: MINI TEST ═══════════════ -->
+<div class="module" id="m8">
+  <div class="module-header">
+    <div class="module-tag">Tuần 4 · W4.09</div>
+    <div class="module-title">🧪 Mini Test Tổng Kết — Tuần 4</div>
+    <div class="module-subtitle">12 câu · Bao phủ DAG, Idempotency, Load Strategy, Failure Handling, Monitoring, SLA/SLO/SLI</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+
+  <div id="final-test">
+    <div class="info-box note">
+      💡 <span>Bài test gồm 12 câu đại diện cho các phần chính. Chọn đáp án đúng nhất và nhấn <strong>Nộp bài</strong> để xem kết quả.</span>
+    </div>
+
+    <div class="test-question" data-q="1" data-correct="B">
+      <div class="test-question-title">Q1. Trong DAG, "acyclic" (không có chu trình) nghĩa là gì trong thực tế pipeline?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q1" value="A"> A. Pipeline chỉ chạy 1 lần, không loop lại</label>
+        <label class="test-option"><input type="radio" name="q1" value="B"> B. Không có task nào phụ thuộc (trực tiếp hay gián tiếp) vào chính nó — tránh deadlock</label>
+        <label class="test-option"><input type="radio" name="q1" value="C"> C. Pipeline không dùng vòng lặp (for/while) trong code</label>
+        <label class="test-option"><input type="radio" name="q1" value="D"> D. Tất cả task chạy song song, không có dependency</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="2" data-correct="C">
+      <div class="test-question-title">Q2. Pattern idempotent chuẩn nhất cho fact table hàng ngày trong Oracle là gì?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q2" value="A"> A. TRUNCATE toàn bảng rồi INSERT toàn bộ data</label>
+        <label class="test-option"><input type="radio" name="q2" value="B"> B. INSERT IGNORE để bỏ qua duplicate</label>
+        <label class="test-option"><input type="radio" name="q2" value="C"> C. MERGE INTO target USING source ON date_key WHEN MATCHED UPDATE / WHEN NOT MATCHED INSERT</label>
+        <label class="test-option"><input type="radio" name="q2" value="D"> D. Chạy DELETE toàn bảng sau mỗi load thành công</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="3" data-correct="A">
+      <div class="test-question-title">Q3. Bảng dim_currency có 180 currencies, cập nhật tỷ giá mỗi ngày với toàn bộ 180 rows thay đổi. Load strategy nào tốt nhất?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q3" value="A"> A. Full Load — bảng nhỏ, toàn bộ thay đổi mỗi ngày, overhead không đáng kể</label>
+        <label class="test-option"><input type="radio" name="q3" value="B"> B. Incremental — chỉ load currency thay đổi tỷ giá</label>
+        <label class="test-option"><input type="radio" name="q3" value="C"> C. Backfill — load lịch sử 1 năm mỗi ngày</label>
+        <label class="test-option"><input type="radio" name="q3" value="D"> D. Manual — team finance update tay</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="4" data-correct="D">
+      <div class="test-question-title">Q4. Pipeline nhận NULL ở cột NOT NULL quan trọng (customer_id). Cách xử lý đúng là?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q4" value="A"> A. Retry 3 lần với exponential backoff</label>
+        <label class="test-option"><input type="radio" name="q4" value="B"> B. Skip record đó và tiếp tục load các record khác mà không log</label>
+        <label class="test-option"><input type="radio" name="q4" value="C"> C. Fill NULL bằng giá trị default (0 hoặc 'unknown') rồi load bình thường</label>
+        <label class="test-option"><input type="radio" name="q4" value="D"> D. Đưa record vào dead letter queue, log lỗi DATA_QUALITY, alert team, tiếp tục với records hợp lệ</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="5" data-correct="B">
+      <div class="test-question-title">Q5. Trong Oracle, freshness check tính số giờ kể từ lần load cuối dùng biểu thức nào?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q5" value="A"> A. NOW() - MAX(loaded_at) > INTERVAL '26 hours'</label>
+        <label class="test-option"><input type="radio" name="q5" value="B"> B. (SYSDATE - MAX(loaded_at)) * 24 > 26</label>
+        <label class="test-option"><input type="radio" name="q5" value="C"> C. DATEDIFF(hour, MAX(loaded_at), SYSDATE) > 26</label>
+        <label class="test-option"><input type="radio" name="q5" value="D"> D. EXTRACT(HOUR FROM SYSDATE - MAX(loaded_at)) > 26</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="6" data-correct="C">
+      <div class="test-question-title">Q6. Data Contract version "2.1.0" → "3.0.0" chỉ ra điều gì?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q6" value="A"> A. Minor improvement, backward compatible</label>
+        <label class="test-option"><input type="radio" name="q6" value="B"> B. Patch fix cho bug trong contract</label>
+        <label class="test-option"><input type="radio" name="q6" value="C"> C. Major/breaking change — consumers cần được notify trước và update integration</label>
+        <label class="test-option"><input type="radio" name="q6" value="D"> D. Chỉ thay đổi documentation, không thay đổi schema</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="7" data-correct="A">
+      <div class="test-question-title">Q7. PostgreSQL: COUNT(*) = 1000, COUNT(DISTINCT order_id) = 995. Kết luận gì?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q7" value="A"> A. Có 5 duplicate order_id — cần investigate source hoặc idempotency pipeline</label>
+        <label class="test-option"><input type="radio" name="q7" value="B"> B. 5 rows bị NULL ở cột order_id</label>
+        <label class="test-option"><input type="radio" name="q7" value="C"> C. Có 995 unique orders trong 1000 ngày khác nhau</label>
+        <label class="test-option"><input type="radio" name="q7" value="D"> D. Không có vấn đề — COUNT DISTINCT luôn nhỏ hơn COUNT(*)</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="8" data-correct="B">
+      <div class="test-question-title">Q8. Lý do chính để thêm buffer time trong watermark của incremental load là gì?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q8" value="A"> A. Để database có thời gian commit trước khi pipeline đọc</label>
+        <label class="test-option"><input type="radio" name="q8" value="B"> B. Tránh bỏ sót late-arriving data — event xảy ra đúng giờ nhưng đến source DB trễ vài phút</label>
+        <label class="test-option"><input type="radio" name="q8" value="C"> C. Cho phép human review data trước khi load</label>
+        <label class="test-option"><input type="radio" name="q8" value="D"> D. Tránh conflict với pipeline backup đang chạy</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="9" data-correct="D">
+      <div class="test-question-title">Q9. Trong Oracle DLQ table, cột resolved dùng NUMBER(1) thay BOOLEAN vì lý do gì?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q9" value="A"> A. NUMBER(1) nhanh hơn BOOLEAN trong Oracle</label>
+        <label class="test-option"><input type="radio" name="q9" value="B"> B. BOOLEAN không thể lưu trong table Oracle bất kỳ version nào</label>
+        <label class="test-option"><input type="radio" name="q9" value="C"> C. NUMBER(1) tiết kiệm storage hơn BOOLEAN trong Oracle</label>
+        <label class="test-option"><input type="radio" name="q9" value="D"> D. Trong môi trường Oracle thực tế (đặc biệt legacy), NUMBER(1) với 0/1 thường được dùng để biểu diễn cờ trạng thái</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="10" data-correct="C">
+      <div class="test-question-title">Q10. Pipeline fail lúc 3 giờ sáng. Alert tốt nhất gửi vào Slack phải chứa gì?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q10" value="A"> A. Chỉ "Pipeline failed" — on-call sẽ tự tìm hiểu thêm</label>
+        <label class="test-option"><input type="radio" name="q10" value="B"> B. Toàn bộ stack trace 500 dòng và raw data bị lỗi</label>
+        <label class="test-option"><input type="radio" name="q10" value="C"> C. Tên pipeline, node fail, timestamp, error type + message, link log, suggested action</label>
+        <label class="test-option"><input type="radio" name="q10" value="D"> D. Email cho manager kèm Excel report về số lần fail trong tháng</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="11" data-correct="B">
+      <div class="test-question-title">Q11. Phân biệt đúng giữa SLI và SLO là gì?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q11" value="A"> A. SLI là cam kết, SLO là số đo kỹ thuật</label>
+        <label class="test-option"><input type="radio" name="q11" value="B"> B. SLI là số đo thực tế; SLO là mục tiêu đặt trên số đo đó</label>
+        <label class="test-option"><input type="radio" name="q11" value="C"> C. SLI chỉ dùng cho business, SLO chỉ dùng cho kỹ thuật</label>
+        <label class="test-option"><input type="radio" name="q11" value="D"> D. SLI và SLO là hai tên gọi giống nhau</label>
+      </div>
+    </div>
+
+    <div class="test-question" data-q="12" data-correct="C">
+      <div class="test-question-title">Q12. Với data contract, thay đổi nào thường được xem là breaking change?</div>
+      <div class="test-options">
+        <label class="test-option"><input type="radio" name="q12" value="A"> A. Thêm comment trong tài liệu</label>
+        <label class="test-option"><input type="radio" name="q12" value="B"> B. Thêm cột nullable không ảnh hưởng consumer hiện tại</label>
+        <label class="test-option"><input type="radio" name="q12" value="C"> C. Đổi kiểu dữ liệu amount từ NUMERIC sang TEXT làm hỏng logic consumer</label>
+        <label class="test-option"><input type="radio" name="q12" value="D"> D. Chỉnh format markdown README</label>
+      </div>
+    </div>
+
+    <div class="test-actions">
+      <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Nộp bài & Xem kết quả</button>
+      <button class="nav-btn" onclick="resetFinalTest()">🔄 Làm lại</button>
+    </div>
+
+    <div id="final-test-result" class="test-result" style="display:none;"></div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(7,document.querySelectorAll('.nav-item')[7])">← Bài Thực Hành</button>
+    <div style="text-align:center;color:var(--accent2);font-weight:700">🎉 Hoàn thành Tuần 4! Sẵn sàng cho Tuần 5 → Dimensional Data Modeling</div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+  explain.textContent = (correct ? '✓ Chính xác! ' : '✗ Sai. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? '🔼 Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function switchTab(groupId, tabId) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  const tabs = group.querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  const clickedTab = group.querySelector(`[onclick*="${tabId}"]`);
+  if (clickedTab) clickedTab.classList.add('active');
+  const siblings = group.parentElement.querySelectorAll('.tab-content');
+  siblings.forEach(c => c.classList.remove('active'));
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (correctCount >= 9) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Nắm chắc tư duy pipeline! Commit artifact và bắt đầu Tuần 5 — Dimensional Data Modeling.'; }
+  else if (correctCount >= 7) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Sẵn sàng tiếp tục. Ôn lại phần còn yếu trước khi sang Tuần 5.'; }
+  else if (correctCount >= 5) { levelText = 'Đạt'; chipClass = 'warn'; guidance = 'Nên ôn lại W4.03 (Idempotency) và W4.06 (Monitoring) trước khi tiếp tục.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Ôn lại toàn bộ module W4.02–W4.07 và thử lại bài thực hành SQL trước khi submit artifact.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đúng là <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng! 🎉</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+</body>
+</html>
