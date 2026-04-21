@@ -1,0 +1,262 @@
+Use project rules from .claude.
+
+Current task:
+Upgrade Week16_Spark.html into a high-quality tutorial file for Apache Spark Fundamentals in Data Engineering.
+
+The final version should intelligently combine:
+1. strengths of the current file
+2. stronger repository-backed improvements
+3. better teaching quality
+4. more realistic production-grade Spark guidance
+
+Allowed sources only:
+- ./Week16_Spark.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not read any other files.
+
+CORE PRINCIPLES:
+- Do NOT blindly overwrite the current file
+- Do NOT assume newer content is always better
+- Treat the current file as valuable content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or incorrect content
+- Final result must feel like one polished tutorial
+
+UPGRADE STRATEGY:
+1. Audit the current file first
+2. Preserve strong current sections
+3. Identify missing Spark / distributed processing topics
+4. Read local repository sources for stronger depth
+5. Merge improvements intelligently
+6. If both old and new versions are useful, combine them
+7. Remove duplicated content
+8. Improve clarity, depth, and practical value
+
+IMPORTANT PRESERVATION RULE:
+If the current version contains strong conceptual explanations, KEEP and enrich them.
+
+Examples:
+- good explanation of Spark architecture
+- useful join strategy comparisons
+- practical repartition vs coalesce examples
+- strong shuffle explanation
+- good Spark UI bottleneck reading guidance
+- realistic unit test examples
+- useful artifact/job structure
+
+CURRENT / TARGET STRUCTURE TO PRESERVE:
+
+- W16.01 – Tổng Quan: Khi Nào Cần Spark
+- W16.02 – Spark Architecture: Driver, Executor, Stage, Task, Shuffle
+- W16.03 – RDD vs DataFrame vs Dataset
+- W16.04 – Transformations, Actions & Lazy Evaluation
+- W16.05 – Join Strategies: Broadcast, Sort-Merge, Shuffle Hash
+- W16.06 – Partitioning, Repartition, Coalesce & partitionBy
+- W16.07 – Bucketing, sortWithinPartitions, Cache & Persistence
+- W16.08 – Spark UI: Đọc DAG và Tìm Bottleneck
+- W16.09 – Unit Testing Spark Transformations
+- W16.10 – Artifact: spark_jobs/ hoàn chỉnh
+- W16.11 – Mini Test Tổng Kết
+
+TOPICS TO ENSURE STRONG COVERAGE:
+
+W16.01
+- when Spark is needed
+- distributed processing mindset
+- limits of local tools
+- why Spark exists in DE workflows
+
+W16.02
+- driver
+- executor
+- stages
+- tasks
+- shuffle
+- cluster manager
+- narrow vs wide transformations
+- execution flow
+
+W16.03
+- RDD basics
+- DataFrame basics
+- Dataset concept
+- why DataFrame is default for most DE tasks
+- abstraction vs control trade-offs
+
+W16.04
+- transformations
+- actions
+- lazy evaluation
+- lineage
+- optimizer mindset
+- execution triggering
+- anti-patterns around repeated actions
+
+W16.05
+- broadcast join
+- sort-merge join
+- shuffle hash join
+- join skew
+- choosing a strategy
+- performance trade-offs
+
+W16.06
+- repartition
+- coalesce
+- partitionBy
+- partition count tuning
+- write patterns
+- small files problem
+- partitioning anti-patterns
+
+W16.07
+- bucketing
+- sortWithinPartitions
+- caching
+- persistence levels
+- when optimization helps
+- when optimization hurts
+
+W16.08
+- Spark UI basics
+- jobs, stages, tasks
+- DAG view
+- shuffle metrics
+- skew detection
+- bottleneck analysis
+- practical debugging workflow
+
+W16.09
+- unit testing Spark logic
+- fake DataFrame testing
+- asserting transformation outputs
+- separating transformation from IO
+- maintainable Spark code
+
+W16.10
+- complete spark_jobs artifact
+- optimized jobs
+- test folder
+- README
+- practical organization
+
+W16.11
+- final mini test
+
+CODE / PYTHON REQUIREMENTS:
+- Include realistic PySpark code where relevant
+- Use believable examples
+- Include:
+  - SparkSession examples
+  - join strategy examples
+  - repartition/coalesce examples
+  - partitioned writes
+  - cache/persist examples
+  - unit tests for transformations
+- Avoid shallow toy snippets
+
+QUALITY GOALS:
+- Keep Vietnamese output
+- Preserve HTML structure, CSS, layout, and JS interactions
+- Keep compatibility with Week00_Setup.html style
+- Keep required 6-section structure for each module
+- Keep 10 review questions per module
+- Keep final mini test working
+- Improve teaching quality and production realism
+- No placeholders
+- Do not rebuild from scratch unless necessary
+
+EXPECTED RESULT:
+Update only Week16_Spark.html
+
+BEFORE EDITING:
+First clearly identify:
+1. Which current sections should be preserved
+2. Which Spark topics are missing or weak
+3. Which repository-backed improvements should be merged in
+
+Then perform the upgrade.
+
+2.
+Use project rules from .claude.
+
+Review Week16_Spark.html after upgrade.
+
+CHECK CONTENT QUALITY:
+- duplicated sections
+- weak explanations
+- poor teaching flow
+- shallow Spark explanations
+- inconsistent wording
+- weak architecture explanation
+- weak RDD vs DataFrame vs Dataset explanation
+- weak lazy evaluation explanation
+- weak join strategy explanation
+- weak partitioning explanation
+- weak cache/bucketing explanation
+- weak Spark UI explanation
+- weak unit testing explanation
+- weak artifact guidance
+- Did any strong old section get removed unnecessarily?
+- Is the final file better than before?
+
+CHECK STRUCTURE:
+- broken HTML
+- broken CSS layout
+- missing required 6-section structure in any module
+- incorrect module order
+- unfinished placeholders
+- repeated content
+
+CHECK INTERACTIVITY:
+- broken quiz logic
+- missing 10 review questions in any module
+- broken JavaScript interactions
+- broken navigation
+- broken toggle sections
+- broken solution buttons
+- broken final test grading/reset
+
+CHECK SPARK / TECHNICAL QUALITY:
+- weak PySpark examples
+- weak join strategy examples
+- weak shuffle explanation
+- weak repartition vs coalesce guidance
+- weak partitioned write examples
+- weak Spark UI debugging examples
+- weak testing patterns
+- unrealistic optimization advice
+- does the tutorial explain why jobs are fast or slow?
+
+CHECK TEACHING QUALITY:
+- Is the tutorial teaching Spark for Data Engineers, not generic PySpark syntax?
+- Are trade-offs clearly explained?
+- Are anti-patterns mentioned where useful?
+- Is performance awareness visible?
+- Is shuffle awareness visible?
+- Is testing awareness visible?
+- Are examples coherent across modules?
+
+CHECK ARTIFACT QUALITY:
+- Is spark_jobs/ artifact complete and realistic?
+- Do optimized jobs match the narrative?
+- Is tests/test_transform_functions.py actually useful?
+- Does README explain optimization and testing strategy clearly?
+
+FIX RULES:
+- Fix all broken HTML / JS / quiz logic
+- Strengthen weak explanations
+- Remove duplicated content
+- Improve Spark comparisons
+- Improve PySpark / join / partition / Spark UI / testing examples
+- Preserve strong original content where useful
+- Keep everything in Vietnamese
+- Keep final file polished and cohesive
+
+EXPECTED RESULT:
+Return the improved final content for Week16_Spark.html only.

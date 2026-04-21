@@ -1,0 +1,201 @@
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+Nguồn chính:
+- Repo: D:\TaiLieu\Data Engineer\DE Roadmap\DE-Learning\data-engineer-handbook ( được clone từ https://github.com/DataExpert-io/data-engineer-handbook)
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nhiệm vụ:
+Hãy tạo file HTML hoàn chỉnh tên: Week18_Flink_Kafka.html
+
+Mục tiêu:
+Tạo tutorial HTML tương tác cho chủ đề:
+Tuần 18 – Real-time Pipelines với Apache Flink & Kafka
+
+YÊU CẦU NGUỒN THÔNG TIN:
+- Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
+- Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
+- Dùng roadmap để bám đúng scope tuần 18
+- Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
+- Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
+
+YÊU CẦU QUAN TRỌNG:
+- Output phải là tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Phải viết theo mindset của Data Engineer làm streaming thực chiến, không phải tutorial Kafka/Flink quá generic
+- Nội dung phải practical, production-oriented, nhấn mạnh event time, state, late data, checkpoint, sessionization
+- Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
+- Không dùng placeholder như "..." hoặc "viết tương tự"
+- Mỗi module phải đầy đủ nội dung thật
+- Nếu chưa fetch được full repo thì phải nói rõ phần nào lấy từ repo trực tiếp, phần nào lấy từ roadmap, phần nào là suy luận hợp lý
+
+CẤU TRÚC FILE PHẢI GIỮ:
+Mỗi module PHẢI có đủ 6 section theo thứ tự:
+1. 📋 Menu Tổng Thể
+2. 🎯 Mục Đích Module
+3. 📖 Giải Thích Chi Tiết
+4. ❓ Câu Hỏi Ôn Tập
+5. 📌 Tổng Kết
+6. 🔬 Bài Tập Thực Hành
+
+FORMAT PHẢI GIỐNG FILE MẪU:
+- Hero banner
+- Badge row
+- Sidebar fixed 290px
+- Main content
+- Modules display:none, active display:block
+- Collapsible sections
+- Terminal-style code blocks
+- Info boxes: tip / warn / note
+- Interactive quiz
+- Practice task có nút xem lời giải
+- Mini test cuối file
+- Responsive mobile
+- Tất cả CSS inline trong <style>
+- Tất cả JS inline trong <script>
+- Không dùng framework ngoài
+
+JAVASCRIPT FUNCTIONS PHẢI CÓ:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+PHẠM VI NỘI DUNG TUẦN 18:
+Tên: Tuần 18 – Real-time Pipelines với Apache Flink & Kafka
+File: Week18_Flink_Kafka.html
+
+Các module bắt buộc:
+- W18.01 – Tổng Quan: Vì Sao Cần Streaming Pipeline
+- W18.02 – Kafka Fundamentals: Topic, Partition, Consumer Group, Offset
+- W18.03 – Flink Architecture: JobManager, TaskManager, Checkpoint
+- W18.04 – Event Time, Processing Time, Watermark & Late Data
+- W18.05 – Windowing: Tumbling, Sliding, Session Windows
+- W18.06 – Stateful Processing & RocksDB State Backend
+- W18.07 – Sessionization với Flink: Group Events Theo Gap
+- W18.08 – Kafka → Flink → Sink: Thiết Kế Pipeline Thực Tế
+- W18.09 – Reliability, Checkpointing, Exactly-Once & Failure Recovery
+- W18.10 – Artifact: flink_jobs/ hoàn chỉnh
+- W18.11 – Mini Test Tổng Kết
+
+NỘI DUNG CẦN BAO PHỦ:
+- Vì sao batch không đủ cho một số use case:
+  - fraud detection
+  - clickstream/session tracking
+  - real-time metrics
+  - low-latency alerts
+- Kafka fundamentals:
+  - topic
+  - partition
+  - consumer group
+  - offset
+  - retention
+  - ordering trong phạm vi partition
+  - rebalance basics
+- Flink architecture:
+  - JobManager
+  - TaskManager
+  - operators
+  - state
+  - checkpoint
+  - stream processing engine mindset
+- Time semantics:
+  - event time vs processing time vs ingestion time
+  - tại sao event time quan trọng
+  - watermark là gì
+  - late data là gì
+  - allowed lateness
+- Windowing:
+  - tumbling window
+  - sliding window
+  - session window
+  - khi nào dùng mỗi loại
+  - output semantics
+- Stateful processing:
+  - keyed state
+  - operator state
+  - state backend
+  - checkpointing
+  - RocksDB concept
+  - memory vs durability trade-off
+- Sessionization:
+  - session gap
+  - user/IP/host-based sessionization
+  - event stream grouping
+  - bài toán thực tế
+- End-to-end pipeline:
+  - Kafka source
+  - Flink processing
+  - sink to PostgreSQL / S3 / ClickHouse nếu phù hợp
+  - serialization basics
+  - schema consistency mindset
+- Reliability:
+  - checkpointing
+  - restart strategy
+  - exactly-once vs at-least-once
+  - idempotent sink mindset
+  - failure recovery basics
+- Artifact flink_jobs/ gồm:
+  - session_by_ip.py
+  - session_by_host.py
+  - kafka_producer_mock.py
+  - analysis_output.md
+  - README.md mô tả pipeline, windowing strategy, checkpoint strategy, sink behavior
+
+YÊU CẦU CODE / PYTHON / STREAMING:
+- Ở các phần liên quan, hãy minh họa bằng nội dung thật, không pseudo-code:
+  - Kafka producer mock
+  - Flink DataStream / Python streaming job examples nếu phù hợp
+  - watermark example
+  - tumbling/sliding/session window example
+  - keyed state example
+  - checkpoint config example
+  - sink writing pattern example
+- Nếu project rules yêu cầu tabs, có thể dùng tab như:
+  - Kafka
+  - PyFlink
+  - SQL
+  - Streaming Notes
+- Giải thích ngắn gọn sự khác nhau giữa các cách tiếp cận
+
+YÊU CẦU QUIZ:
+- Mỗi module phải có đúng 10 câu hỏi
+- Mỗi câu hỏi có đúng 4 đáp án A/B/C/D
+- Phải có giải thích cho từng đáp án
+- Giải thích đáp án sai phải nói rõ vì sao sai
+
+YÊU CẦU PRACTICE:
+- Mỗi module có bài tập thực hành thực tế
+- Có nút “💡 Xem lời giải”
+- Lời giải phải hữu ích, không sơ sài
+- Practice nên hướng tới time semantics, sessionization, reliability, pipeline design thực tế
+
+YÊU CẦU MINI TEST CUỐI FILE:
+- Module cuối phải có mini test tổng kết
+- 15–20 câu hỏi
+- Có chấm điểm
+- Có reset
+
+YÊU CẦU CHẤT LƯỢNG:
+- Phải sâu, đầy đủ, thực chiến
+- Ưu tiên chất lượng giảng dạy hơn tốc độ
+- Có streaming mindset rõ ràng
+- Có event-time mindset, state mindset, reliability mindset
+- Không quá ngắn gọn
+- Nội dung phải đủ tốt để học như một tutorial thật
+- Phải giúp người học hiểu “vì sao streaming pipeline này đúng hoặc sai”
+- Phải tránh dạy Kafka/Flink như các khái niệm rời rạc
+
+TRƯỚC KHI VIẾT FILE:
+Hãy nói rõ ngắn gọn:
+1. Bạn đã lấy được nội dung nào trực tiếp từ repo
+2. Bạn đang dùng roadmap ở phần nào
+3. Bạn sẽ giữ format nào từ file mẫu
+
+SAU ĐÓ:
+Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week18_Flink_Kafka.html

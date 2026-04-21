@@ -1,7 +1,7 @@
 Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
-
+Apply project rules from .claude.
 Nguồn chính:
-- Repo: https://github.com/DataExpert-io/data-engineer-handbook
+- Repo: D:\TaiLieu\Data Engineer\DE Roadmap\DE-Learning\data-engineer-handbook ( được clone từ https://github.com/DataExpert-io/data-engineer-handbook)
 - File roadmap local: DE_Roadmap_Expert_NHC.md
 - File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
 - File format mẫu local: Week00_Setup.html

@@ -1,0 +1,250 @@
+1.
+Use project rules from .claude.
+
+Current task:
+Upgrade Week20_Modern_OLAP.html into a high-quality tutorial file for Modern OLAP Engines in Data Engineering.
+
+The final version should intelligently combine:
+1. strengths of the current file
+2. stronger repository-backed improvements
+3. better teaching quality
+4. more realistic production-grade OLAP guidance
+
+Allowed sources only:
+- ./Week20_Modern_OLAP.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not read any other files.
+
+CORE PRINCIPLES:
+- Do NOT blindly overwrite the current file
+- Do NOT assume newer content is always better
+- Treat the current file as valuable content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or incorrect content
+- Final result must feel like one polished tutorial
+
+UPGRADE STRATEGY:
+1. Audit the current file first
+2. Preserve strong current sections
+3. Identify missing OLAP / serving / engine-selection topics
+4. Read local repository sources for stronger depth
+5. Merge improvements intelligently
+6. If both old and new versions are useful, combine them
+7. Remove duplicated content
+8. Improve clarity, depth, and practical value
+
+IMPORTANT PRESERVATION RULE:
+If the current version contains strong conceptual explanations, KEEP and enrich them.
+
+Examples:
+- good OLTP vs OLAP explanation
+- useful DuckDB vs ClickHouse comparisons
+- practical ClickHouse schema explanation
+- strong benchmark design guidance
+- useful serving / pre-aggregation discussion
+- realistic engine selection framework
+- strong artifact structure
+
+CURRENT / TARGET STRUCTURE TO PRESERVE:
+
+- W20.01 – Tổng Quan: OLTP vs OLAP và Vì Sao Cần Engine Riêng
+- W20.02 – DuckDB: SQL Analytics Trên Laptop & Parquet
+- W20.03 – ClickHouse: Columnar OLAP cho Event Data & Time-Series
+- W20.04 – Apache Druid: Low-Latency Analytics cho Dashboard Real-Time
+- W20.05 – Pre-Aggregation, Materialized Views & Serving Patterns
+- W20.06 – Benchmark Mindset: PostgreSQL vs DuckDB vs ClickHouse
+- W20.07 – Chọn Engine Nào: DuckDB vs ClickHouse vs BigQuery/Redshift
+- W20.08 – Pipeline Pattern: Kafka → ClickHouse / Parquet → DuckDB
+- W20.09 – Artifact: modern_olap/ hoàn chỉnh
+- W20.10 – Mini Test Tổng Kết
+
+TOPICS TO ENSURE STRONG COVERAGE:
+
+W20.01
+- OLTP vs OLAP
+- row-based vs columnar
+- transactional vs analytical workload
+- concurrency patterns
+- why a separate engine may be needed
+
+W20.02
+- DuckDB basics
+- query over Parquet
+- local analytics workflow
+- notebook usage
+- fast ad hoc analysis
+- limitations and boundaries
+
+W20.03
+- ClickHouse basics
+- columnar engine for events/time-series
+- sorting key mindset
+- partitioning basics
+- aggregation performance
+- ingestion trade-offs
+- realistic use cases
+
+W20.04
+- Druid basics
+- real-time ingestion
+- serving layer use cases
+- dashboard latency requirements
+- rollup mindset
+- where Druid fits and where it does not
+
+W20.05
+- pre-aggregation
+- materialized views
+- serving tables
+- rollups
+- freshness vs latency trade-offs
+- dashboard optimization
+
+W20.06
+- fair benchmark design
+- same dataset same query same goal
+- latency and scan comparison
+- concurrency awareness
+- avoiding misleading benchmark conclusions
+
+W20.07
+- engine selection framework
+- DuckDB vs ClickHouse vs warehouse
+- cost
+- latency
+- operational burden
+- concurrency
+- analyst/DE workflows
+
+W20.08
+- Kafka to ClickHouse
+- Parquet to DuckDB
+- hybrid analytics patterns
+- precompute vs query raw
+- practical data flow design
+
+W20.09
+- complete modern_olap artifact
+- benchmark queries
+- DuckDB demo
+- ClickHouse schema
+- comparison notes
+- README
+
+W20.10
+- final mini test
+
+SQL / TECHNICAL REQUIREMENTS:
+- Include realistic SQL/config where relevant
+- Use believable OLAP examples
+- Include:
+  - DuckDB parquet queries
+  - ClickHouse CREATE TABLE example
+  - aggregation examples
+  - benchmark query examples
+  - serving / materialized view examples when useful
+- Avoid shallow toy snippets
+
+QUALITY GOALS:
+- Keep Vietnamese output
+- Preserve HTML structure, CSS, layout, and JS interactions
+- Keep compatibility with Week00_Setup.html style
+- Keep required 6-section structure for each module
+- Keep 10 review questions per module
+- Keep final mini test working
+- Improve teaching quality and production realism
+- No placeholders
+- Do not rebuild from scratch unless necessary
+
+EXPECTED RESULT:
+Update only Week20_Modern_OLAP.html
+
+BEFORE EDITING:
+First clearly identify:
+1. Which current sections should be preserved
+2. Which OLAP topics are missing or weak
+3. Which repository-backed improvements should be merged in
+
+Then perform the upgrade.
+
+2.
+Use project rules from .claude.
+
+Review Week20_Modern_OLAP.html after upgrade.
+
+CHECK CONTENT QUALITY:
+- duplicated sections
+- weak explanations
+- poor teaching flow
+- shallow OLAP explanations
+- inconsistent wording
+- weak OLTP vs OLAP explanation
+- weak DuckDB explanation
+- weak ClickHouse explanation
+- weak Druid explanation
+- weak pre-aggregation explanation
+- weak benchmark guidance
+- weak engine selection framework
+- weak artifact guidance
+- Did any strong old section get removed unnecessarily?
+- Is the final file better than before?
+
+CHECK STRUCTURE:
+- broken HTML
+- broken CSS layout
+- missing required 6-section structure in any module
+- incorrect module order
+- unfinished placeholders
+- repeated content
+
+CHECK INTERACTIVITY:
+- broken quiz logic
+- missing 10 review questions in any module
+- broken JavaScript interactions
+- broken navigation
+- broken toggle sections
+- broken solution buttons
+- broken final test grading/reset
+
+CHECK OLAP / TECHNICAL QUALITY:
+- weak DuckDB query examples
+- weak ClickHouse schema examples
+- weak aggregation examples
+- weak benchmark fairness explanation
+- weak serving layer explanation
+- confusing engine boundaries
+- unrealistic optimization advice
+- does the tutorial explain why one engine fits one workload better than another?
+
+CHECK TEACHING QUALITY:
+- Is the tutorial teaching OLAP systems for Data Engineers, not generic vendor theory?
+- Are trade-offs clearly explained?
+- Are anti-patterns mentioned where useful?
+- Is latency awareness visible?
+- Is serving-layer awareness visible?
+- Is workload-fit reasoning visible?
+- Are examples coherent across modules?
+
+CHECK ARTIFACT QUALITY:
+- Is modern_olap/ artifact complete and realistic?
+- Do benchmark_queries.sql and engine_comparison.md match the narrative?
+- Is clickhouse_schema.sql actually useful?
+- Does README explain workload, benchmark assumptions, and trade-offs clearly?
+
+FIX RULES:
+- Fix all broken HTML / JS / quiz logic
+- Strengthen weak explanations
+- Remove duplicated content
+- Improve DuckDB / ClickHouse / Druid / serving / benchmark examples
+- Improve engine selection reasoning
+- Preserve strong original content where useful
+- Keep everything in Vietnamese
+- Keep final file polished and cohesive
+
+EXPECTED RESULT:
+Return the improved final content for Week20_Modern_OLAP.html only.

@@ -1,0 +1,189 @@
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+Nguồn chính:
+- Repo: D:\TaiLieu\Data Engineer\DE Roadmap\DE-Learning\data-engineer-handbook ( được clone từ https://github.com/DataExpert-io/data-engineer-handbook)
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nhiệm vụ:
+Hãy tạo file HTML hoàn chỉnh tên: Week20_Modern_OLAP.html
+
+Mục tiêu:
+Tạo tutorial HTML tương tác cho chủ đề:
+Tuần 20 – Modern OLAP Engines cho Data Engineer
+
+YÊU CẦU NGUỒN THÔNG TIN:
+- Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
+- Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
+- Dùng roadmap để bám đúng scope tuần 20
+- Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
+- Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
+
+YÊU CẦU QUAN TRỌNG:
+- Output phải là tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Phải viết theo mindset của Data Engineer / Analytics Engineer
+- Nội dung phải practical, production-oriented, không chỉ là overview công cụ
+- Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
+- Không dùng placeholder như "..." hoặc "viết tương tự"
+- Mỗi module phải đầy đủ nội dung thật
+- Nếu chưa fetch được full repo thì phải nói rõ phần nào lấy từ repo trực tiếp, phần nào lấy từ roadmap, phần nào là suy luận hợp lý
+
+CẤU TRÚC FILE PHẢI GIỮ:
+Mỗi module PHẢI có đủ 6 section theo thứ tự:
+1. 📋 Menu Tổng Thể
+2. 🎯 Mục Đích Module
+3. 📖 Giải Thích Chi Tiết
+4. ❓ Câu Hỏi Ôn Tập
+5. 📌 Tổng Kết
+6. 🔬 Bài Tập Thực Hành
+
+FORMAT PHẢI GIỐNG FILE MẪU:
+- Hero banner
+- Badge row
+- Sidebar fixed 290px
+- Main content
+- Modules display:none, active display:block
+- Collapsible sections
+- Terminal-style code blocks
+- Info boxes: tip / warn / note
+- Interactive quiz
+- Practice task có nút xem lời giải
+- Mini test cuối file
+- Responsive mobile
+- Tất cả CSS inline trong <style>
+- Tất cả JS inline trong <script>
+- Không dùng framework ngoài
+
+JAVASCRIPT FUNCTIONS PHẢI CÓ:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+PHẠM VI NỘI DUNG TUẦN 20:
+Tên: Tuần 20 – Modern OLAP Engines cho Data Engineer
+File: Week20_Modern_OLAP.html
+
+Các module bắt buộc:
+- W20.01 – Tổng Quan: OLTP vs OLAP và Vì Sao Cần Engine Riêng
+- W20.02 – DuckDB: SQL Analytics Trên Laptop & Parquet
+- W20.03 – ClickHouse: Columnar OLAP cho Event Data & Time-Series
+- W20.04 – Apache Druid: Low-Latency Analytics cho Dashboard Real-Time
+- W20.05 – Pre-Aggregation, Materialized Views & Serving Patterns
+- W20.06 – Benchmark Mindset: PostgreSQL vs DuckDB vs ClickHouse
+- W20.07 – Chọn Engine Nào: DuckDB vs ClickHouse vs BigQuery/Redshift
+- W20.08 – Pipeline Pattern: Kafka → ClickHouse / Parquet → DuckDB
+- W20.09 – Artifact: modern_olap/ hoàn chỉnh
+- W20.10 – Mini Test Tổng Kết
+
+NỘI DUNG CẦN BAO PHỦ:
+- OLTP vs OLAP:
+  - row-based vs columnar
+  - transactional workload vs analytical workload
+  - concurrency pattern khác nhau
+  - vì sao PostgreSQL tốt cho app DB nhưng không phải lúc nào cũng tối ưu cho analytics lớn
+- DuckDB:
+  - local analytics engine
+  - query trực tiếp trên Parquet
+  - không cần server riêng
+  - use case cho data exploration, local benchmarking, analytics notebook
+  - hạn chế của DuckDB
+- ClickHouse:
+  - columnar storage
+  - rất mạnh cho event/time-series analytics
+  - ingestion nhanh
+  - aggregation nhanh
+  - primary key / sorting key mindset
+  - partitioning basics
+  - use cases thật
+- Apache Druid:
+  - low-latency OLAP
+  - real-time ingestion mindset
+  - pre-aggregated / serving layer use cases
+  - dashboard workloads
+  - khi nào Druid phù hợp, khi nào không
+- Pre-aggregation / serving:
+  - materialized views
+  - rollups
+  - serving tables
+  - latency vs freshness trade-off
+  - dashboard optimization mindset
+- Benchmark mindset:
+  - benchmark phải công bằng
+  - cùng dataset, cùng query, cùng mục tiêu
+  - scan volume, latency, concurrency
+  - không benchmark kiểu cảm tính
+- Decision framework:
+  - khi nào dùng DuckDB
+  - khi nào dùng ClickHouse
+  - khi nào warehouse cloud vẫn hợp lý hơn
+  - trade-off về ops burden, latency, cost, concurrency
+- Pipeline patterns:
+  - Kafka → ClickHouse cho real-time event analytics
+  - S3/Parquet → DuckDB cho local / ad hoc analysis
+  - khi nào cần precompute serving table
+- Artifact modern_olap/ gồm:
+  - benchmark_queries.sql
+  - duckdb_demo.sql
+  - clickhouse_schema.sql
+  - pipeline_notes.md
+  - engine_comparison.md
+  - README.md mô tả workload, benchmark setup, trade-offs
+
+YÊU CẦU CODE / SQL:
+- Ở các phần liên quan, hãy minh họa bằng nội dung thật, không pseudo-code:
+  - DuckDB query trên Parquet
+  - ClickHouse CREATE TABLE ví dụ
+  - aggregation query examples
+  - materialized view / rollup idea nếu phù hợp
+  - benchmark query examples
+  - schema / sorting / partition examples
+- Nếu project rules yêu cầu tabs, có thể dùng tab như:
+  - PostgreSQL
+  - DuckDB
+  - ClickHouse
+  - Druid Notes
+- Giải thích ngắn gọn sự khác nhau giữa các cách tiếp cận
+
+YÊU CẦU QUIZ:
+- Mỗi module phải có đúng 10 câu hỏi
+- Mỗi câu hỏi có đúng 4 đáp án A/B/C/D
+- Phải có giải thích cho từng đáp án
+- Giải thích đáp án sai phải nói rõ vì sao sai
+
+YÊU CẦU PRACTICE:
+- Mỗi module có bài tập thực hành thực tế
+- Có nút “💡 Xem lời giải”
+- Lời giải phải hữu ích, không sơ sài
+- Practice nên hướng tới workload analysis, engine selection, query optimization, serving design thực tế
+
+YÊU CẦU MINI TEST CUỐI FILE:
+- Module cuối phải có mini test tổng kết
+- 15–20 câu hỏi
+- Có chấm điểm
+- Có reset
+
+YÊU CẦU CHẤT LƯỢNG:
+- Phải sâu, đầy đủ, thực chiến
+- Ưu tiên chất lượng giảng dạy hơn tốc độ
+- Có OLAP mindset rõ ràng
+- Có latency mindset, serving mindset, workload-fit mindset
+- Không quá ngắn gọn
+- Nội dung phải đủ tốt để học như một tutorial thật
+- Phải giúp người học hiểu “vì sao engine này phù hợp workload này”
+- Phải tránh biến tutorial thành danh sách tính năng rời rạc
+
+TRƯỚC KHI VIẾT FILE:
+Hãy nói rõ ngắn gọn:
+1. Bạn đã lấy được nội dung nào trực tiếp từ repo
+2. Bạn đang dùng roadmap ở phần nào
+3. Bạn sẽ giữ format nào từ file mẫu
+
+SAU ĐÓ:
+Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week20_Modern_OLAP.html

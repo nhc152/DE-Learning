@@ -355,6 +355,9 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 pip install pandas sqlalchemy psycopg2-binary</pre></div></div>
+    <h3>Command line basics cần dùng hằng ngày</h3>
+    <table><tr><th>Mục tiêu</th><th>Windows PowerShell</th><th>macOS/Linux</th></tr><tr><td>Kiểm tra đang đứng ở thư mục nào</td><td><code>pwd</code></td><td><code>pwd</code></td></tr><tr><td>Xem danh sách file/thư mục</td><td><code>ls</code> hoặc <code>dir</code></td><td><code>ls -la</code></td></tr><tr><td>Di chuyển vào thư mục tuần học</td><td><code>cd week00</code></td><td><code>cd week00</code></td></tr><tr><td>Tạo thư mục lưu output</td><td><code>mkdir artifacts</code></td><td><code>mkdir -p artifacts</code></td></tr><tr><td>Chạy script kiểm tra môi trường</td><td><code>python verify_python.py</code></td><td><code>python verify_python.py</code></td></tr></table>
+    <div class="info-box note">Nguyên tắc cho người mới: luôn chạy <code>pwd</code> trước lệnh thay đổi file để tránh thao tác nhầm thư mục.</div>
     <h3>Checklist xác minh</h3>
     <ul class="checklist"><li class="done">Python báo 3.11+</li><li class="done">pip chạy trong .venv</li><li class="done">Import pandas không lỗi</li><li class="done">Có file requirements.txt để khóa package</li></ul>
     <div class="info-box warn">Nếu cài Python xong nhưng terminal vẫn ra bản cũ, kiểm tra PATH hoặc mở terminal mới.</div>
@@ -408,6 +411,15 @@ git commit -m "setup: initialize week00 foundation"
 git branch -M main
 git remote add origin git@github.com:&lt;user&gt;/de-roadmap-artifacts.git
 git push -u origin main</pre></div></div>
+    <h3>Luồng làm việc Git tối thiểu mỗi ngày</h3>
+    <div class="cmd-block"><div class="cmd-header"><span>Daily Git flow (an toàn cho người mới)</span></div><div class="cmd-body"><pre>git status
+# kiểm tra thay đổi trước khi add
+
+git add &lt;file_cần_commit&gt;
+git commit -m "setup: mô tả thay đổi cụ thể"
+git pull --rebase origin main
+git push origin main</pre></div></div>
+    <div class="info-box note">Không dùng <code>git add .</code> khi chưa kiểm tra kỹ. Ưu tiên add theo từng file để tránh đẩy nhầm file nhạy cảm.</div>
     <h3>Conventional commit gợi ý</h3>
     <ul><li><code>setup:</code> thay đổi môi trường, cấu hình</li><li><code>feat:</code> thêm tính năng/code mới</li><li><code>fix:</code> sửa lỗi</li><li><code>docs:</code> cập nhật ghi chú học tập</li></ul>
     <div class="info-box warn">Nếu <code>Permission denied (publickey)</code>, kiểm tra lại SSH key đã add vào GitHub và đang dùng remote SSH.</div>
@@ -494,6 +506,10 @@ SELECT * FROM v$version;</pre></div></div></div>
 
 INSERT INTO stg_healthcheck(status) VALUES ('OK');
 SELECT COUNT(*) AS total_checks FROM stg_healthcheck;</pre></div></div>
+    <h3>Lệnh verify kết nối PostgreSQL nhanh</h3>
+    <div class="cmd-block"><div class="cmd-header"><span>psql verify</span></div><div class="cmd-body"><pre>psql -h localhost -p 5432 -U de_user -d de_lab -c "SELECT version();"
+psql -h localhost -p 5432 -U de_user -d de_lab -c "SELECT COUNT(*) FROM stg_healthcheck;"</pre></div></div>
+    <div class="info-box tip">Nếu bạn map sang port khác (ví dụ 5433), nhớ đổi đúng tham số <code>-p</code> trong lệnh verify.</div>
     <h3>Lỗi setup PostgreSQL local thường gặp</h3>
     <table><tr><th>Lỗi</th><th>Nguyên nhân hay gặp</th><th>Cách xử lý</th></tr><tr><td>Connection refused</td><td>Container chưa chạy hoặc sai port map</td><td>Kiểm tra <code>docker ps</code> và thông số connection</td></tr><tr><td>Authentication failed</td><td>Sai user/password</td><td>Đối chiếu lại env trong compose</td></tr><tr><td>Data mất sau khi restart</td><td>Chưa gắn volume persistent</td><td>Thêm volume cho thư mục data của PostgreSQL</td></tr></table>
   </div></div>
@@ -537,6 +553,16 @@ SELECT SYSTIMESTAMP FROM dual;</pre></div></div></div>
     <h3>Khác biệt thường gặp cần nhớ</h3>
     <table><tr><th>Chủ đề</th><th>PostgreSQL</th><th>Oracle SQL</th></tr><tr><td>Giới hạn dòng</td><td>LIMIT 10</td><td>FETCH FIRST 10 ROWS ONLY</td></tr><tr><td>Null handling</td><td>COALESCE(a,b)</td><td>NVL(a,b) hoặc COALESCE</td></tr><tr><td>Chuỗi ngày</td><td>DATE '2026-04-21'</td><td>TO_DATE('2026-04-21','YYYY-MM-DD')</td></tr></table>
     <div class="info-box tip">Không cần học hết Oracle ngay tuần 0. Mục tiêu là có môi trường và biết khác biệt cơ bản.</div>
+    <h3>Luồng setup Oracle SQL cho người mới</h3>
+    <ol>
+      <li>Chọn một môi trường ổn định: Oracle Database Free/XE local hoặc lab Oracle SQL online của đơn vị đào tạo.</li>
+      <li>Tạo user học tập riêng, tránh dùng account quản trị cho bài thực hành hằng ngày.</li>
+      <li>Kiểm tra kết nối bằng 3 câu lệnh tối thiểu: user hiện tại, thời gian hệ thống, truy vấn giới hạn dòng.</li>
+      <li>Lưu lại 1 file SQL verification trong thư mục <code>week00/sql/oracle/</code> để tái chạy khi cần.</li>
+    </ol>
+    <div class="cmd-block"><div class="cmd-header"><span>oracle_verify.sql</span></div><div class="cmd-body"><pre>SELECT user FROM dual;
+SELECT SYSTIMESTAMP FROM dual;
+SELECT table_name FROM user_tables FETCH FIRST 5 ROWS ONLY;</pre></div></div>
     <h3>Map chuyển đổi cú pháp nhanh (dùng hằng tuần)</h3>
     <table><tr><th>Intent</th><th>PostgreSQL</th><th>Oracle SQL</th></tr><tr><td>Lấy 5 dòng mới nhất</td><td><code>ORDER BY created_at DESC LIMIT 5</code></td><td><code>ORDER BY created_at DESC FETCH FIRST 5 ROWS ONLY</code></td></tr><tr><td>Thay NULL</td><td><code>COALESCE(col, 0)</code></td><td><code>NVL(col, 0)</code> hoặc <code>COALESCE</code></td></tr><tr><td>Ngày hiện tại</td><td><code>CURRENT_DATE</code></td><td><code>TRUNC(SYSDATE)</code></td></tr></table>
     <h3>Nguyên tắc thực hành Oracle cho người mới</h3>

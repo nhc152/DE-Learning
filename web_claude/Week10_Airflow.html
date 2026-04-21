@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Week10_Airflow - Apache Airflow Orchestration</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #64748b;
+      --brand: #2563eb;
+      --brand-2: #1d4ed8;
+      --border: #dbe3f0;
+      --success: #166534;
+      --success-bg: #dcfce7;
+      --danger: #991b1b;
+      --danger-bg: #fee2e2;
+      --warning-bg: #fff7ed;
+      --warning-text: #9a3412;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 45%, #0ea5e9 100%);
+      color: #fff;
+      padding: 36px 24px 30px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+    }
+
+    .hero p {
+      margin: 0;
+      opacity: 0.95;
+      max-width: 980px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 16px 24px;
+      background: #eef4ff;
+      border-bottom: 1px solid #d5e3ff;
+    }
+
+    .badge {
+      background: #fff;
+      color: #1e3a8a;
+      border: 1px solid #bfdbfe;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .layout {
+      display: flex;
+      gap: 20px;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .sidebar {
+      width: 290px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 12px;
+      align-self: flex-start;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      max-height: calc(100vh - 24px);
+      overflow: auto;
+    }
+
+    .sidebar-head {
+      padding: 16px 16px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-head h3 {
+      margin: 0 0 4px;
+      font-size: 16px;
+    }
+
+    .sidebar-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .nav-list {
+      padding: 10px;
+    }
+
+    .nav-item {
+      width: 100%;
+      text-align: left;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      color: #0f172a;
+      padding: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      display: grid;
+      gap: 2px;
+      transition: 0.2s;
+    }
+
+    .nav-item .code {
+      font-size: 12px;
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+
+    .nav-item .name {
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .nav-item:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    .nav-item.active {
+      background: #dbeafe;
+      border-color: #93c5fd;
+    }
+
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .module {
+      display: none;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .module.active { display: block; }
+
+    .module h2 {
+      margin: 0 0 14px;
+      font-size: 24px;
+      color: #0f172a;
+    }
+
+    .section {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .section-header {
+      padding: 12px 14px;
+      background: #f8fbff;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-header .arrow {
+      color: #475569;
+      font-size: 12px;
+    }
+
+    .section-body {
+      padding: 14px;
+    }
+
+    .section-body p { margin-top: 0; }
+    .section-body ul { margin: 8px 0 0 18px; }
+
+    .info-box {
+      border: 1px solid #fed7aa;
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    pre {
+      margin: 10px 0 0;
+      border-radius: 10px;
+      overflow: auto;
+    }
+
+    .terminal {
+      background: #0b1220;
+      color: #e2e8f0;
+      border: 1px solid #1e293b;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .sql-box {
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 12px;
+      background: #f8fbff;
+    }
+
+    .sql-tabs {
+      display: flex;
+      gap: 6px;
+      padding: 8px;
+      border-bottom: 1px solid #dbeafe;
+      background: #eff6ff;
+    }
+
+    .sql-tab {
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      background: #fff;
+      color: #1e3a8a;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .sql-tab.active {
+      background: #1d4ed8;
+      color: #fff;
+      border-color: #1d4ed8;
+    }
+
+    .sql-panel {
+      display: none;
+      padding: 0 10px 10px;
+    }
+
+    .sql-panel.active { display: block; }
+
+    .sql-note {
+      margin: 8px 10px 12px;
+      color: #475569;
+      font-size: 13px;
+    }
+
+    .quiz-question {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fcfdff;
+    }
+
+    .quiz-question p {
+      margin: 0 0 10px;
+      font-weight: 600;
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .quiz-option {
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .quiz-option:hover { background: #f8fafc; }
+
+    .quiz-option.correct {
+      border-color: #22c55e;
+      background: #ecfdf5;
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .quiz-option.wrong {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #991b1b;
+      font-weight: 700;
+    }
+
+    .quiz-feedback {
+      display: none;
+      margin-top: 8px;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+
+    .quiz-feedback.ok {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #86efac;
+    }
+
+    .quiz-feedback.bad {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #fca5a5;
+    }
+
+    .practice {
+      border: 1px dashed #93c5fd;
+      border-radius: 10px;
+      padding: 12px;
+      background: #f8fbff;
+    }
+
+    .solution-btn {
+      margin-top: 8px;
+      border: 1px solid #93c5fd;
+      background: #fff;
+      color: #1d4ed8;
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .solution {
+      display: none;
+      margin-top: 10px;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 10px;
+      background: #eff6ff;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .nav-buttons button {
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .nav-buttons button:hover {
+      background: #f8fafc;
+    }
+
+    .final-test {
+      margin-top: 12px;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      background: #f8fbff;
+      padding: 14px;
+    }
+
+    .final-test h3 { margin-top: 0; }
+
+    .final-question {
+      border: 1px solid #dbeafe;
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .final-question p {
+      margin: 0 0 8px;
+      font-weight: 700;
+    }
+
+    .final-question label {
+      display: block;
+      padding: 4px 0;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .final-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .final-actions button {
+      border: 1px solid #93c5fd;
+      background: #fff;
+      color: #1d4ed8;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .final-result {
+      margin-top: 10px;
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid transparent;
+    }
+
+    .final-result.ok {
+      background: var(--success-bg);
+      color: var(--success);
+      border-color: #86efac;
+    }
+
+    .final-result.bad {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: #fca5a5;
+    }
+
+    @media (max-width: 1200px) {
+      .layout { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <h1>Tuần 10-11: Apache Airflow — Orchestration</h1>
+    <p>
+      Mục tiêu của tuần này là xây được tư duy orchestration production: thiết kế DAG đúng lịch,
+      vận hành ổn định, xử lý sự cố nhanh, kết hợp dbt và data quality để pipeline đáng tin cậy.
+    </p>
+  </header>
+
+  <div class="badge-row">
+    <span class="badge">11 modules</span>
+    <span class="badge">100 câu hỏi ôn tập</span>
+    <span class="badge">Mini test 18 câu</span>
+    <span class="badge">PostgreSQL + Oracle SQL</span>
+    <span class="badge">Standalone HTML (CSS/JS inline)</span>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h3>Menu Tổng Thể</h3>
+        <p>Tuần 10-11 · Airflow Orchestration</p>
+      </div>
+      <div class="nav-list" id="moduleNav"></div>
+    </aside>
+
+    <main class="content" id="modulesHost"></main>
+  </div>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function escapeAttr(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function codeBlock(code, className = "terminal") {
+      return `<pre class="${className}"><code>${escapeHtml(code)}</code></pre>`;
+    }
+
+    function sqlBlock(groupId, postgresSql, oracleSql, note = "") {
+      return `
+        <div class="sql-box" id="${groupId}">
+          <div class="sql-tabs">
+            <button class="sql-tab active" onclick="switchSqlTab('${groupId}', 0, this)">PostgreSQL</button>
+            <button class="sql-tab" onclick="switchSqlTab('${groupId}', 1, this)">Oracle SQL</button>
+          </div>
+          <div class="sql-panel active">${codeBlock(postgresSql)}</div>
+          <div class="sql-panel">${codeBlock(oracleSql)}</div>
+          ${note ? `<p class="sql-note">${note}</p>` : ""}
+        </div>
+      `;
+    }
+
+    function q(question, options, correct, explanation) {
+      return { q: question, options, correct, explanation };
+    }
+
+    const modulesData = [
+      {
+        code: "W10.01",
+        title: "Airflow Architecture",
+        menu: [
+          "Vai trò Scheduler, Executor, Worker, Webserver, Metadata DB",
+          "Luồng lifecycle của một Task Instance",
+          "Nguyên tắc idempotent + observability",
+          "Điểm nghẽn thường gặp khi scale"
+        ],
+        objectives: [
+          "Hiểu thành phần cốt lõi của Airflow ở mức production.",
+          "Biết đường đi của task từ lúc được lập lịch đến lúc hoàn thành.",
+          "Biết cách theo dõi pipeline bằng bảng audit."
+        ],
+        detailHtml: `
+          <p>Một cụm Airflow production thường có 5 khối chính: Scheduler, Executor, Worker, Webserver và Metadata DB.</p>
+          <ul>
+            <li><strong>Scheduler:</strong> đọc DAG, tạo DAG Run, quyết định task nào đủ điều kiện chạy.</li>
+            <li><strong>Executor:</strong> cách phân phối task (Local/Celery/Kubernetes).</li>
+            <li><strong>Worker:</strong> thực thi code task.</li>
+            <li><strong>Webserver:</strong> hiển thị UI theo dữ liệu metadata.</li>
+            <li><strong>Metadata DB:</strong> lưu trạng thái DAG/Task, log tham chiếu, lịch chạy.</li>
+          </ul>
+          ${codeBlock(`Scheduler -> Queue -> Worker
+Webserver <-> Metadata DB
+Triggerer xử lý deferrable task để giảm chiếm slot Worker`)}
+          <div class="info-box">Production mindset: task phải idempotent để retry không gây duplicate dữ liệu.</div>
+          ${sqlBlock(
+            "sql-w1001",
+            `SELECT pipeline_name,
+       MAX(finished_at) AS last_success
+FROM audit_pipeline_run
+WHERE status = 'success'
+GROUP BY pipeline_name
+ORDER BY last_success DESC;`,
+            `SELECT pipeline_name,
+       MAX(finished_at) AS last_success
+FROM audit_pipeline_run
+WHERE status = 'success'
+GROUP BY pipeline_name
+ORDER BY last_success DESC;`,
+            "Truy vấn kiểm tra pipeline nào thành công gần nhất để phát hiện lag vận hành."
+          )}
+        `,
+        quiz: [
+          q("Thành phần nào quyết định task nào đủ điều kiện đưa vào queue?", ["Webserver", "Scheduler", "Worker", "Metadata DB"], 1, "Scheduler chịu trách nhiệm xét dependency, lịch chạy và tạo task instance runnable."),
+          q("Metadata DB trong Airflow chủ yếu dùng để làm gì?", ["Lưu trạng thái DAG/Task", "Chạy SQL transform", "Làm queue broker", "Lưu file DAG Python"], 0, "Metadata DB lưu trạng thái vận hành, là nguồn dữ liệu cho Web UI và Scheduler."),
+          q("Worker có vai trò chính nào?", ["Phân tích DAG", "Hiển thị UI", "Thực thi task", "Tạo lịch cron"], 2, "Worker là nơi chạy code của từng task."),
+          q("Webserver trong Airflow làm gì?", ["Thực thi task Python", "Lưu password", "Cung cấp giao diện giám sát", "Quét DAG file theo lịch"], 2, "Webserver chủ yếu phục vụ UI và đọc trạng thái từ metadata DB."),
+          q("Điểm khác nhau giữa Scheduler và Executor là gì?", ["Scheduler phân task, Executor định cách chạy", "Scheduler chỉ hiển thị UI", "Executor lưu metadata", "Không có khác biệt"], 0, "Scheduler quyết định runnable tasks, Executor quyết định cơ chế thực thi thực tế."),
+          q("Triggerer giúp ích nhất trong trường hợp nào?", ["Task CPU-bound nặng", "Deferrable sensor", "Load file DAG", "Ghi log vào S3"], 1, "Triggerer xử lý deferrable task để không giữ worker slot khi chờ I/O."),
+          q("Tín hiệu heartbeat mất thường gợi ý điều gì?", ["Component có thể bị treo/chết", "SQL syntax sai", "DAG bị delete", "Webserver mất CSS"], 0, "Heartbeat là chỉ báo sống của component, mất heartbeat là tín hiệu sự cố."),
+          q("DAG file thường được component nào parse để tạo scheduling metadata?", ["Scheduler (dag processor)", "Webserver", "Worker", "Broker"], 0, "Scheduler hoặc process liên quan của scheduler parse DAG để quyết định lịch chạy."),
+          q("Khi scale Airflow, bottleneck phổ biến nhất là gì?", ["Màu giao diện", "Độ trễ metadata DB", "Tên DAG quá dài", "Số lượng user"], 1, "Metadata DB chậm làm cả Scheduler/Webserver/Task state cập nhật chậm."),
+          q("Nguyên tắc thiết kế task quan trọng để retry an toàn là gì?", ["Task ngẫu nhiên", "Task idempotent", "Task ghi đè tùy ý", "Task luôn ngủ 5 phút"], 1, "Idempotent giúp chạy lại không làm sai hoặc nhân đôi dữ liệu.")
+        ],
+        summary: [
+          "Airflow là hệ orchestration; không thay thế logic transform chuyên sâu.",
+          "Scheduler + Metadata DB là lõi vận hành cần theo dõi sát.",
+          "Thiết kế idempotent và audit ngay từ đầu giúp giảm rủi ro production."
+        ],
+        practice: {
+          task: "Thiết kế kiến trúc Airflow cho 3 pipeline: daily_profit, daily_growth, investor_engagement.",
+          steps: [
+            "Chỉ rõ primary/secondary owner cho từng pipeline.",
+            "Mô tả điểm chạm của Scheduler, Worker, Metadata DB.",
+            "Định nghĩa bảng audit tối thiểu để giám sát run."
+          ],
+          solution: `
+            <p>Mẫu thiết kế thực tế:</p>
+            <ul>
+              <li><strong>Owner:</strong> mỗi DAG có owner chính + backup để đảm bảo on-call không bị single point of failure.</li>
+              <li><strong>Audit:</strong> lưu <code>dag_id, run_id, status, started_at, finished_at, row_count</code>.</li>
+              <li><strong>Alert:</strong> SLA miss gửi cảnh báo theo pipeline criticality.</li>
+            </ul>
+            ${codeBlock(`CREATE TABLE audit_pipeline_run (
+  pipeline_name VARCHAR(120),
+  run_id VARCHAR(120),
+  status VARCHAR(30),
+  started_at TIMESTAMP,
+  finished_at TIMESTAMP,
+  row_count BIGINT
+);`)}
+          `
+        }
+      },
+      {
+        code: "W10.02",
+        title: "DAG Definition & Schedule",
+        menu: [
+          "Cấu trúc DAG chuẩn production",
+          "schedule, start_date, catchup, data interval",
+          "Backfill vs run tay",
+          "Timezone và business SLA"
+        ],
+        objectives: [
+          "Tạo DAG có lịch chạy rõ ràng, tránh hiểu sai data interval.",
+          "Biết khi nào nên bật/tắt catchup.",
+          "Thiết kế lịch phù hợp SLA nghiệp vụ."
+        ],
+        detailHtml: `
+          <p>DAG định nghĩa đúng lịch là nền tảng orchestration. Sai ở <code>start_date</code>, <code>catchup</code> hoặc timezone sẽ gây backlog hoặc thiếu dữ liệu.</p>
+          ${codeBlock(`from airflow import DAG
+from datetime import datetime, timedelta
+
+with DAG(
+    dag_id="daily_profit_pipeline",
+    start_date=datetime(2026, 1, 1),
+    schedule="@daily",
+    catchup=False,
+    max_active_runs=1,
+    default_args={"retries": 2, "retry_delay": timedelta(minutes=5)}
+) as dag:
+    ...`)}
+          <ul>
+            <li><strong>catchup=True:</strong> tạo run lịch sử bị thiếu.</li>
+            <li><strong>catchup=False:</strong> chỉ chạy từ hiện tại trở đi.</li>
+            <li><strong>data interval:</strong> cửa sổ dữ liệu của run, không phải thời điểm task bắt đầu.</li>
+          </ul>
+          ${sqlBlock(
+            "sql-w1002",
+            `SELECT dataset_name, loaded_at
+FROM dataset_freshness
+WHERE loaded_at < NOW() - INTERVAL '1 day'
+ORDER BY loaded_at;`,
+            `SELECT dataset_name, loaded_at
+FROM dataset_freshness
+WHERE loaded_at < SYSTIMESTAMP - INTERVAL '1' DAY
+ORDER BY loaded_at;`,
+            "PostgreSQL dùng NOW() - INTERVAL, Oracle dùng SYSTIMESTAMP - INTERVAL."
+          )}
+        `,
+        quiz: [
+          q("Trong DAG, start_date thể hiện điều gì?", ["Thời gian deploy code", "Mốc bắt đầu xét lịch", "Giờ chạy UI", "Giờ restart scheduler"], 1, "start_date là mốc logic để scheduler bắt đầu tạo run theo lịch."),
+          q("catchup=True sẽ làm gì?", ["Bỏ qua run quá khứ", "Tạo thêm run lịch sử còn thiếu", "Tắt retry", "Giảm số worker"], 1, "catchup=True giúp backfill các data interval đã qua."),
+          q("schedule=None nghĩa là gì?", ["Chạy mỗi giờ", "Chỉ chạy manual/trigger", "Chạy theo cron mặc định", "Tắt DAG vĩnh viễn"], 1, "schedule=None không có lịch tự động, chỉ chạy khi trigger."),
+          q("Cron '0 6 * * 1-5' nghĩa là gì?", ["6h mỗi ngày", "6h các ngày thứ 2-6", "6h các ngày thứ 2-6? sai", "6h các ngày làm việc thứ 2-6"], 3, "Biểu thức chạy 06:00 từ thứ 2 đến thứ 6."),
+          q("max_active_runs=1 giúp gì?", ["Tăng số run song song", "Giới hạn run đồng thời để tránh chồng dữ liệu", "Tắt scheduler", "Tăng tốc parse DAG"], 1, "Giới hạn số DAG run song song giảm xung đột ghi dữ liệu."),
+          q("depends_on_past=True trên task nghĩa là gì?", ["Task chỉ chạy nếu lần trước của chính task thành công", "Task bỏ qua dependency", "Task luôn retry vô hạn", "Task chỉ chạy cuối tuần"], 0, "depends_on_past buộc tính liên tục theo chuỗi thời gian."),
+          q("Data interval đúng nhất là gì?", ["Giờ bạn bấm trigger", "Khoảng dữ liệu mà run chịu trách nhiệm", "Tên task", "Thời gian uptime webserver"], 1, "Data interval mô tả phạm vi dữ liệu logic của run."),
+          q("Khi nào nên chạy backfill?", ["Khi muốn bỏ dữ liệu thiếu", "Khi có dữ liệu lịch sử bị thiếu/cần tính lại", "Mọi lúc dù không cần", "Chỉ khi đổi màu dashboard"], 1, "Backfill dành cho xử lý khoảng thời gian lịch sử."),
+          q("Timezone nên đặt ở đâu để nhất quán?", ["Từng worker tự đặt", "DAG + hệ thống phải thống nhất timezone", "Chỉ ở trình duyệt", "Không cần timezone"], 1, "Timezone không thống nhất dễ gây lệch run window."),
+          q("Với pipeline near-real-time không cần lịch sử, nên chọn gì?", ["catchup=True", "catchup=False", "depends_on_past=True bắt buộc", "max_active_runs=99"], 1, "catchup=False tránh backlog lịch sử không cần thiết.")
+        ],
+        summary: [
+          "Lịch chạy phải bám theo business SLA và data interval.",
+          "catchup/backfill là công cụ mạnh nhưng cần dùng có kiểm soát.",
+          "Timezone và max_active_runs là hai tham số giảm lỗi vận hành."
+        ],
+        practice: {
+          task: "Thiết kế DAG daily_growth chạy 07:00 ngày làm việc, không backfill tự động.",
+          steps: [
+            "Định nghĩa cron rõ ràng cho ngày làm việc.",
+            "Cấu hình catchup, max_active_runs phù hợp.",
+            "Thêm logic trigger backfill bằng DAG riêng."
+          ],
+          solution: `
+            ${codeBlock(`with DAG(
+    dag_id="daily_growth",
+    start_date=datetime(2026, 1, 1),
+    schedule="0 7 * * 1-5",
+    catchup=False,
+    max_active_runs=1
+) as dag:
+    ...`)}
+            <p>DAG chạy ổn định cho daily flow; backfill nên tách DAG riêng để giảm rủi ro vận hành.</p>
+          `
+        }
+      },
+      {
+        code: "W10.03",
+        title: "Core Operators",
+        menu: [
+          "PythonOperator, BashOperator, SQLExecuteQueryOperator",
+          "TaskFlow API và return value",
+          "Idempotent task design",
+          "Pool và retry ở mức task"
+        ],
+        objectives: [
+          "Chọn đúng operator theo bản chất công việc.",
+          "Áp dụng TaskFlow và SQL operator đúng ngữ cảnh.",
+          "Thiết kế task an toàn khi retry."
+        ],
+        detailHtml: `
+          <p>Operator là đơn vị thực thi trong DAG. Chọn sai operator dễ làm DAG khó bảo trì.</p>
+          ${codeBlock(`from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+
+extract = PythonOperator(
+    task_id="extract_orders",
+    python_callable=extract_orders_fn
+)
+
+transform = BashOperator(
+    task_id="transform_orders",
+    bash_command="python scripts/transform_orders.py"
+)
+
+quality = SQLExecuteQueryOperator(
+    task_id="quality_check",
+    conn_id="warehouse_conn",
+    sql="SELECT COUNT(*) FROM mart_orders WHERE ds='{{ ds }}';"
+)
+
+extract >> transform >> quality`)}
+          <div class="info-box">Bất kỳ operator nào ghi dữ liệu đều cần idempotent (upsert/merge hoặc partition overwrite có kiểm soát).</div>
+          ${sqlBlock(
+            "sql-w1003",
+            `SELECT order_date, COUNT(*) AS total_rows
+FROM mart_orders
+WHERE order_date = CURRENT_DATE - INTERVAL '1 day'
+GROUP BY order_date;`,
+            `SELECT order_date, COUNT(*) AS total_rows
+FROM mart_orders
+WHERE order_date = TRUNC(SYSDATE) - 1
+GROUP BY order_date;`,
+            "So sánh ngày: PostgreSQL thường dùng CURRENT_DATE, Oracle dùng TRUNC(SYSDATE)."
+          )}
+        `,
+        quiz: [
+          q("Operator nào phù hợp nhất để chạy logic Python thuần?", ["BashOperator", "PythonOperator", "EmailOperator", "ExternalTaskSensor"], 1, "PythonOperator dùng callable Python trực tiếp."),
+          q("BashOperator thường phù hợp khi nào?", ["Chạy shell command/script CLI", "Render UI", "Lưu metadata", "Đọc Connection"], 0, "BashOperator chạy lệnh shell, tiện cho script hoặc CLI."),
+          q("SQLExecuteQueryOperator dùng để làm gì?", ["Parse DAG", "Chạy SQL qua connection", "Scale worker", "Tạo user Airflow"], 1, "Operator này thực thi SQL trên DB qua conn_id."),
+          q("TaskFlow API có lợi ích nổi bật nào?", ["Không cần dependency", "Tự đẩy return vào XCom", "Không cần DAG", "Không cần retry"], 1, "TaskFlow giúp code gọn và return tự động thành XCom."),
+          q("Thiết kế task idempotent giúp gì?", ["Retry không gây duplicate sai", "Task chạy nhanh hơn mọi lúc", "Giảm số DAG", "Không cần monitoring"], 0, "Idempotent bảo vệ pipeline khi retry hoặc rerun."),
+          q("Pool trong Airflow dùng để?", ["Giới hạn concurrency theo resource", "Đổi màu task", "Mã hóa connection", "Tăng RAM webserver"], 0, "Pool giới hạn số task dùng chung một tài nguyên hiếm."),
+          q("Retry có thể cấu hình ở đâu?", ["Chỉ trong web UI", "default_args hoặc trực tiếp task", "Chỉ trong metadata DB", "Không cấu hình được"], 1, "Retry có thể đặt ở DAG default_args hoặc từng task."),
+          q("Khi dùng BashOperator với input động, rủi ro chính là gì?", ["SQL parse chậm", "Command injection nếu không kiểm soát input", "Web UI lỗi CSS", "Scheduler mất heartbeat"], 1, "Input không tin cậy có thể gây command injection."),
+          q("Branching thường dùng operator nào?", ["PythonOperator", "BranchPythonOperator", "TriggerDagRunOperator", "ShortCircuitOperator"], 1, "BranchPythonOperator trả về task_id để chọn nhánh chạy."),
+          q("Best practice khi task chứa logic lớn là gì?", ["Nhồi hết vào inline lambda", "Tách thành module Python riêng", "Chỉ dùng Bash", "Không viết test"], 1, "Tách module giúp test, tái dùng và bảo trì tốt hơn.")
+        ],
+        summary: [
+          "Operator nên phản ánh bản chất công việc (Python, shell, SQL).",
+          "TaskFlow giúp code DAG sạch và nhất quán XCom.",
+          "Idempotent + pool + retry là bộ ba giảm lỗi production."
+        ],
+        practice: {
+          task: "Xây chuỗi task extract -> transform -> quality check cho bảng orders.",
+          steps: [
+            "Dùng PythonOperator cho extract.",
+            "Dùng BashOperator cho transform script.",
+            "Dùng SQLExecuteQueryOperator để kiểm tra row count sau load."
+          ],
+          solution: `
+            <p>Chuỗi operator mẫu:</p>
+            ${codeBlock(`extract >> transform >> quality_check
+
+# quality_check nên fail DAG nếu COUNT(*) = 0
+# để chặn dữ liệu rỗng đi tiếp dashboard`)}
+            <p>Điểm quan trọng: quality check phải chạy sau bước ghi dữ liệu và là gate bắt buộc.</p>
+          `
+        }
+      },
+      {
+        code: "W10.04",
+        title: "Dependencies & XCom",
+        menu: [
+          "Bitshift operator (>>, <<) và set_upstream/downstream",
+          "XCom push/pull đúng cách",
+          "Trigger rules và branching",
+          "Giảm coupling giữa task"
+        ],
+        objectives: [
+          "Thiết kế dependency rõ, dễ đọc.",
+          "Dùng XCom cho metadata nhỏ thay vì payload lớn.",
+          "Nắm trigger_rule cho luồng merge/cleanup."
+        ],
+        detailHtml: `
+          <p>Dependency là contract vận hành: task nào phải hoàn thành trước khi task khác chạy.</p>
+          ${codeBlock(`t_extract >> [t_validate, t_profile]
+[t_validate, t_profile] >> t_load
+
+# XCom cho metadata nhỏ
+@task
+def count_rows():
+    return 152340
+
+@task
+def publish_metrics(row_count):
+    print(f"row_count={row_count}")`)}
+          <ul>
+            <li>Dùng <strong>XCom</strong> cho giá trị nhỏ: row_count, file_path, status.</li>
+            <li>Không nhét DataFrame lớn vào XCom để tránh phình metadata DB.</li>
+            <li>Task cleanup có thể dùng <code>trigger_rule='all_done'</code> để luôn chạy.</li>
+          </ul>
+          ${sqlBlock(
+            "sql-w1004",
+            `SELECT
+  COALESCE(s.order_date, t.order_date) AS order_date,
+  COALESCE(s.cnt_src, 0) AS src_cnt,
+  COALESCE(t.cnt_tgt, 0) AS tgt_cnt
+FROM src_daily_count s
+FULL OUTER JOIN tgt_daily_count t
+  ON s.order_date = t.order_date;`,
+            `SELECT
+  NVL(s.order_date, t.order_date) AS order_date,
+  NVL(s.cnt_src, 0) AS src_cnt,
+  NVL(t.cnt_tgt, 0) AS tgt_cnt
+FROM src_daily_count s
+FULL OUTER JOIN tgt_daily_count t
+  ON s.order_date = t.order_date;`,
+            "COALESCE (PostgreSQL) và NVL (Oracle) đều dùng để xử lý null khi reconciliation."
+          )}
+        `,
+        quiz: [
+          q("Biểu thức A >> B nghĩa là gì?", ["A chạy sau B", "B chạy sau A", "A và B song song bắt buộc", "Không tạo dependency"], 1, "A >> B nghĩa B phụ thuộc A."),
+          q("Khi viết [A, B] >> C, điều kiện để C chạy mặc định là?", ["A hoặc B xong", "A và B đều success", "Không cần A/B", "C luôn chạy"], 1, "Mặc định trigger_rule là all_success, cần A và B cùng success."),
+          q("XCom phù hợp nhất cho dữ liệu nào?", ["DataFrame 2GB", "Ảnh dashboard", "Metadata nhỏ như row_count", "File parquet lớn"], 2, "XCom nên dùng cho payload nhỏ để tránh quá tải metadata DB."),
+          q("Hàm nào thường dùng để đọc giá trị XCom?", ["xcom_pull", "xcom_fetch_all", "dag_read", "task_get"], 0, "xcom_pull là API phổ biến để lấy XCom."),
+          q("Khi branching, task không chọn thường ở trạng thái gì?", ["success", "queued", "skipped", "up_for_retry"], 2, "Branching sẽ skip nhánh không được chọn."),
+          q("Trigger rule 'all_done' phù hợp cho task nào?", ["Task transform chính", "Cleanup/notification luôn phải chạy", "Task chỉ chạy khi fail", "Task parse DAG"], 1, "all_done chạy dù upstream success hay fail."),
+          q("set_downstream(B) của A tương đương cú pháp nào?", ["A << B", "A >> B", "B >> A", "A | B"], 1, "A.set_downstream(B) tương đương A >> B."),
+          q("TaskGroup mang lại lợi ích chính nào?", ["Tạo process riêng", "Tăng tốc SQL", "Tổ chức DAG dễ đọc", "Thay thế scheduler"], 2, "TaskGroup chủ yếu giúp tổ chức trực quan, không thay đổi engine chạy."),
+          q("Dùng XCom để truyền toàn bộ dataset lớn là?", ["Best practice", "Chấp nhận nếu nén", "Nên tránh", "Bắt buộc"], 2, "Nên tránh vì ảnh hưởng metadata DB và hiệu năng."),
+          q("Giao tiếp giữa 2 DAG khác nhau nên ưu tiên gì?", ["XCom cross-DAG thủ công", "ExternalTaskSensor/Datasets", "Gửi email rồi parse", "Không cần dependency"], 1, "ExternalTaskSensor hoặc Dataset dependency rõ ràng và chuẩn hơn.")
+        ],
+        summary: [
+          "Dependency rõ ràng giúp giảm bug orchestration.",
+          "XCom chỉ dành cho metadata nhỏ.",
+          "Trigger rule là chìa khóa cho cleanup, notification, và merge branch."
+        ],
+        practice: {
+          task: "Thiết kế DAG có 2 nhánh validate và profile, sau đó merge vào load.",
+          steps: [
+            "Dùng dependency fan-out rồi fan-in.",
+            "Truyền row_count từ validate sang publish_metrics qua XCom.",
+            "Thêm cleanup task với trigger_rule='all_done'."
+          ],
+          solution: `
+            ${codeBlock(`extract >> [validate, profile] >> load
+[load, validate, profile] >> cleanup
+
+# cleanup trigger_rule='all_done'
+# publish_metrics lấy xcom_pull(task_ids='validate')`)}
+            <p>Cách này giúp dù nhánh nào fail, bạn vẫn có cleanup + telemetry để điều tra sự cố.</p>
+          `
+        }
+      },
+      {
+        code: "W10.05",
+        title: "Variables, Connections, Secrets",
+        menu: [
+          "Phân biệt Variable vs Connection",
+          "Secrets backend và rotate credential",
+          "Mask thông tin nhạy cảm",
+          "Config theo môi trường"
+        ],
+        objectives: [
+          "Quản lý cấu hình và secret đúng chuẩn security.",
+          "Tránh hardcode credential trong DAG code.",
+          "Biết chiến lược rotate secret không downtime."
+        ],
+        detailHtml: `
+          <p><strong>Variable</strong> dùng cho config không nhạy cảm (ngưỡng cảnh báo, tên schema...). <strong>Connection</strong> chứa thông tin kết nối dịch vụ/DB.</p>
+          ${codeBlock(`# Variable
+airflow variables set alert_threshold "0.98"
+
+# Connection (ví dụ URI)
+# AIRFLOW_CONN_WAREHOUSE_CONN='postgresql://user:pass@host:5432/dwh'`)}
+          <ul>
+            <li>Không hardcode password vào file DAG.</li>
+            <li>Dùng Secrets Backend (Vault/SM/SSM...) để lấy secret runtime.</li>
+            <li>Phân quyền least privilege cho account ETL.</li>
+          </ul>
+          <div class="info-box">Security mặc định: secret chỉ xuất hiện ở nơi cần thiết, có vòng đời rotate rõ ràng và audit truy cập.</div>
+        `,
+        quiz: [
+          q("Variable trong Airflow thường dùng cho gì?", ["Secret database password", "Config không nhạy cảm", "Worker autoscaling", "Kubernetes pod spec"], 1, "Variable phù hợp cho config business/technical không nhạy cảm."),
+          q("Connection trong Airflow chứa gì?", ["UI theme", "Thông tin kết nối dịch vụ", "Lịch chạy cron", "DAG tags"], 1, "Connection lưu host/user/password/schema/extras cho tích hợp."),
+          q("Nơi KHÔNG nên lưu credential là?", ["Secrets backend", "Connection", "Hardcode trong DAG file", "Environment manager"], 2, "Hardcode secret trong code là rủi ro bảo mật cao."),
+          q("Lợi ích chính của Secrets backend là gì?", ["Tăng tốc webserver", "Quản lý secret tập trung + rotate dễ", "Thay scheduler", "Không cần connection"], 1, "Secrets backend giúp kiểm soát truy cập và rotate tập trung."),
+          q("AIRFLOW_CONN_<ID> cho phép gì?", ["Định nghĩa connection qua env var", "Đổi timezone", "Reset DAG state", "Tạo queue"], 0, "Biến môi trường AIRFLOW_CONN_* có thể nạp connection runtime."),
+          q("Trường nào thường dùng cho SSL hoặc tham số nâng cao?", ["task_id", "extras", "owner", "depends_on_past"], 1, "Connection extras chứa JSON cấu hình nâng cao."),
+          q("Nguyên tắc least privilege nghĩa là gì?", ["Mọi task dùng tài khoản admin", "Chỉ cấp quyền tối thiểu cần thiết", "Chia sẻ chung một password", "Không cần audit"], 1, "Giới hạn quyền giảm blast radius khi có sự cố."),
+          q("Mask secret trong UI/log nhằm mục tiêu gì?", ["Đẹp giao diện", "Tránh rò rỉ thông tin nhạy cảm", "Giảm CPU", "Tăng retry"], 1, "Masking giúp không lộ secret ở log/UI."),
+          q("Khi có nhiều môi trường dev/stg/prod, nên làm gì?", ["Hardcode if-else trong mọi task", "Tách config theo môi trường + quản trị tập trung", "Dùng một DB cho tất cả", "Tắt secret"], 1, "Quản lý config tách môi trường giúp release an toàn."),
+          q("Ưu tiên nguồn cấu hình nào cho secret?", ["File DAG plain text", "Secrets backend/connection quản trị", "Comment code", "Tên DAG"], 1, "Secret nên đến từ hệ quản lý bảo mật, không nằm trong mã nguồn.")
+        ],
+        summary: [
+          "Variable cho config, Connection/Secrets cho credential.",
+          "Không hardcode secret vào DAG.",
+          "Chuẩn security tốt giúp vận hành bền và audit rõ."
+        ],
+        practice: {
+          task: "Chuẩn hóa cấu hình cho pipeline dbt_daily ở 3 môi trường dev/stg/prod.",
+          steps: [
+            "Đưa ngưỡng kiểm tra vào Variables.",
+            "Đưa credential vào Connection hoặc Secrets backend.",
+            "Thiết lập naming convention nhất quán (ví dụ warehouse_conn_prod)."
+          ],
+          solution: `
+            <ul>
+              <li>Variable: <code>dq_null_threshold</code>, <code>freshness_hours</code>.</li>
+              <li>Connection: <code>warehouse_conn_dev/stg/prod</code>.</li>
+              <li>Secret rotate: thực hiện theo lịch, tránh phụ thuộc deploy DAG mới.</li>
+            </ul>
+            ${codeBlock(`# ví dụ dùng trong DAG
+conn_id = "warehouse_conn_prod"
+null_threshold = float(Variable.get("dq_null_threshold", 0.01))`)}
+          `
+        }
+      },
+      {
+        code: "W10.06",
+        title: "Sensors & ExternalTaskSensor",
+        menu: [
+          "Poke mode vs reschedule mode",
+          "Timeout, soft_fail, deferrable sensor",
+          "ExternalTaskSensor cho phụ thuộc liên DAG",
+          "Giảm tài nguyên chờ đợi"
+        ],
+        objectives: [
+          "Dùng sensor đúng chế độ để tránh nghẽn worker.",
+          "Thiết lập timeout và fail strategy phù hợp.",
+          "Liên kết DAG phụ thuộc bằng ExternalTaskSensor."
+        ],
+        detailHtml: `
+          <p>Sensor là task chờ điều kiện (file đến, API sẵn sàng, DAG upstream hoàn thành...).</p>
+          ${codeBlock(`from airflow.sensors.external_task import ExternalTaskSensor
+from airflow.sensors.filesystem import FileSensor
+
+wait_file = FileSensor(
+    task_id="wait_orders_file",
+    filepath="/data/in/orders_{{ ds_nodash }}.csv",
+    poke_interval=120,
+    timeout=3600,
+    mode="reschedule"
+)
+
+wait_upstream = ExternalTaskSensor(
+    task_id="wait_upstream_growth",
+    external_dag_id="daily_growth",
+    external_task_id="publish_growth",
+    timeout=1800,
+    mode="reschedule"
+)`)}
+          <ul>
+            <li><strong>poke</strong>: giữ worker slot liên tục trong lúc chờ.</li>
+            <li><strong>reschedule</strong>: nhả slot, phù hợp điều kiện chờ dài.</li>
+            <li><strong>deferrable</strong>: tận dụng Triggerer để tiết kiệm tài nguyên hơn nữa.</li>
+          </ul>
+          ${sqlBlock(
+            "sql-w1006",
+            `SELECT dag_id, task_id, status, waited_seconds
+FROM sensor_wait_audit
+WHERE run_date = CURRENT_DATE
+ORDER BY waited_seconds DESC;`,
+            `SELECT dag_id, task_id, status, waited_seconds
+FROM sensor_wait_audit
+WHERE run_date = TRUNC(SYSDATE)
+ORDER BY waited_seconds DESC;`,
+            "Theo dõi sensor chờ quá lâu để tối ưu lại interval/timeout."
+          )}
+        `,
+        quiz: [
+          q("Sensor dùng để làm gì?", ["Scale DB", "Chờ điều kiện trước khi chạy tiếp", "Render dashboard", "Tạo connection"], 1, "Sensor là task chờ condition readiness."),
+          q("Khác biệt chính của mode='reschedule' là gì?", ["Task chạy nhanh hơn luôn", "Nhả worker slot khi chờ", "Không cần timeout", "Không cần triggerer"], 1, "reschedule giảm chiếm tài nguyên worker."),
+          q("Mode nào thường chiếm worker slot liên tục?", ["reschedule", "poke", "deferrable", "manual"], 1, "poke mode giữ slot trong suốt thời gian chờ."),
+          q("ExternalTaskSensor phù hợp cho kịch bản nào?", ["Chờ task ở DAG khác hoàn thành", "Nén file csv", "Tạo user DB", "Đổi owner DAG"], 0, "ExternalTaskSensor tạo dependency rõ giữa các DAG."),
+          q("timeout của sensor có ý nghĩa gì?", ["Sau thời gian đó sẽ fail nếu chưa đạt điều kiện", "Tự skip toàn DAG", "Tắt scheduler", "Reset metadata"], 0, "timeout bảo vệ pipeline khỏi treo vô hạn."),
+          q("soft_fail=True trên sensor thường dẫn tới gì?", ["Task đánh fail cứng", "Task chuyển skipped khi timeout", "Task luôn success", "Task retry vô hạn"], 1, "soft_fail cho phép chuyển skipped tùy nhu cầu nghiệp vụ."),
+          q("Deferrable sensor giúp giảm tải bằng cách nào?", ["Bỏ qua check", "Đẩy trạng thái chờ sang Triggerer", "Tăng số retry", "Xóa dependency"], 1, "Deferrable giúp worker không bị giữ cho thao tác chờ."),
+          q("HttpSensor phù hợp khi nào?", ["Kiểm tra endpoint API sẵn sàng", "Gộp bảng SQL", "Đọc file local bất kỳ", "Chạy dbt run"], 0, "HttpSensor dùng để polling HTTP endpoint."),
+          q("Nếu sensor chờ file trên NAS chung, cần chú ý gì?", ["Worker có quyền truy cập path đó", "Webserver có CSS", "Scheduler timezone", "XCom key"], 0, "Nếu worker không thấy path, sensor sẽ fail giả."),
+          q("Tối ưu quan trọng nhất khi có nhiều sensor chờ dài là?", ["Đặt poke_interval=1 giây", "Ưu tiên reschedule/deferrable + timeout hợp lý", "Tắt alert", "Bật catchup"], 1, "Giảm tần suất polling và giải phóng slot là then chốt.")
+        ],
+        summary: [
+          "Sensor là công cụ phối hợp phụ thuộc thời gian/thao tác bên ngoài.",
+          "reschedule/deferrable giúp hệ ổn định khi số sensor nhiều.",
+          "timeout rõ ràng giúp tránh DAG treo im lặng."
+        ],
+        practice: {
+          task: "Pipeline orders chỉ chạy khi file đến và upstream DAG quality_daily đã thành công.",
+          steps: [
+            "Dùng FileSensor mode=reschedule.",
+            "Dùng ExternalTaskSensor chờ task quality_daily.publish.",
+            "Đặt timeout + alert khi chờ quá SLA."
+          ],
+          solution: `
+            ${codeBlock(`wait_file >> wait_upstream >> run_orders_pipeline
+
+# timeout nên gắn với SLA nguồn dữ liệu
+# nếu timeout: gửi alert để on-call kiểm tra upstream`)}
+            <p>Thiết kế này ngăn chạy sớm khi dữ liệu đầu vào chưa sẵn sàng.</p>
+          `
+        }
+      },
+      {
+        code: "W10.07",
+        title: "Dynamic DAGs",
+        menu: [
+          "Config-driven DAG factory",
+          "Deterministic task_id",
+          "Parse-time guardrails",
+          "Khi nào nên tách DAG thay vì dynamic"
+        ],
+        objectives: [
+          "Sinh nhiều DAG từ cấu hình mà vẫn dễ vận hành.",
+          "Tránh anti-pattern làm scheduler parse chậm.",
+          "Chọn đúng giữa dynamic DAG và chia DAG tường minh."
+        ],
+        detailHtml: `
+          <p>Dynamic DAG phù hợp khi bạn có nhiều pipeline cùng khuôn mẫu (nhiều region/brand/source).</p>
+          ${codeBlock(`from airflow import DAG
+from datetime import datetime
+
+PIPELINE_CONFIGS = [
+    {"region": "vn", "schedule": "0 6 * * *"},
+    {"region": "sg", "schedule": "0 7 * * *"}
+]
+
+def build_dag(cfg):
+    dag_id = "orders_pipeline_" + cfg["region"]
+    with DAG(
+        dag_id=dag_id,
+        start_date=datetime(2026, 1, 1),
+        schedule=cfg["schedule"],
+        catchup=False
+    ) as dag:
+        ...
+    return dag
+
+for cfg in PIPELINE_CONFIGS:
+    dag_obj = build_dag(cfg)
+    globals()[dag_obj.dag_id] = dag_obj`)}
+          <ul>
+            <li>Task ID và DAG ID phải deterministic để không phá lịch sử run.</li>
+            <li>Tránh gọi API/DB nặng trong lúc parse DAG file.</li>
+            <li>Nếu logic khác biệt quá lớn, tách DAG riêng thay vì nhồi dynamic.</li>
+          </ul>
+          <div class="info-box">Guardrail quan trọng: cấu hình dynamic phải được validate trước khi đưa vào sản xuất.</div>
+        `,
+        quiz: [
+          q("Dynamic DAG phù hợp nhất khi nào?", ["Một pipeline duy nhất", "Nhiều pipeline cùng template", "Không có lịch chạy", "Không có metadata DB"], 1, "Dynamic DAG tiết kiệm công tạo nhiều pipeline giống nhau."),
+          q("Yêu cầu quan trọng với task_id trong dynamic DAG là gì?", ["Ngẫu nhiên mỗi ngày", "Deterministic và ổn định", "Phụ thuộc user click", "Dài càng tốt"], 1, "Task ID ổn định giúp giữ lịch sử run và tránh orphan state."),
+          q("Anti-pattern parse-time phổ biến là gì?", ["Validate schema", "Gọi API/DB nặng khi import DAG", "Đặt owner", "Đặt retries"], 1, "Parse-time phải nhẹ để scheduler không nghẽn."),
+          q("DAG factory thường là gì?", ["Hàm sinh DAG từ config", "UI plugin", "Worker image", "SQL function"], 0, "Factory pattern tạo DAG có cấu trúc nhất quán."),
+          q("Nếu 2 pipeline khác SLA và owner hoàn toàn khác nhau, nên?", ["Nhét chung 1 dynamic DAG", "Tách DAG riêng", "Tắt alert", "Đổi timezone"], 1, "Khác owner/SLA mạnh nên tách để vận hành rõ."),
+          q("Dynamic task mapping khác dynamic DAG ở điểm nào?", ["Mapping sinh task runtime theo dữ liệu run", "Không khác", "Mapping chỉ cho sensor", "Mapping chỉ cho SQL"], 0, "Dynamic task mapping mở rộng task theo input runtime."),
+          q("Tại sao cần kiểm thử import DAG (DagBag test)?", ["Để đổi màu UI", "Đảm bảo DAG parse được trước khi deploy", "Để tăng retry", "Không cần test"], 1, "DagBag test chặn lỗi syntax/import gây DAG mất khỏi scheduler."),
+          q("Cấu hình dynamic nên lưu ở đâu?", ["Hardcode rải rác", "Nguồn cấu hình có version và review", "Comment trong code", "Biến tạm local"], 1, "Cấu hình versioned giúp trace thay đổi và rollback."),
+          q("Rủi ro khi sinh quá nhiều DAG trong 1 file?", ["Scheduler parse chậm và UI nặng", "SQL sai cú pháp", "Connection bị xóa", "XCom mất"], 0, "Quá nhiều DAG có thể ảnh hưởng thời gian parse và độ ổn định."),
+          q("Mục tiêu chính của dynamic DAG là gì?", ["Làm code khó đọc", "Tăng tái sử dụng và giảm lặp", "Không cần monitoring", "Không cần owner"], 1, "Dùng đúng sẽ giảm duplicate code và đồng bộ chuẩn vận hành.")
+        ],
+        summary: [
+          "Dynamic DAG mạnh khi nhiều pipeline cùng mẫu.",
+          "Parse-time phải nhẹ, ID phải ổn định.",
+          "Đừng cố dynamic mọi thứ; tách DAG khi khác biệt lớn."
+        ],
+        practice: {
+          task: "Sinh 2 DAG theo region từ một cấu hình chung, có validate config trước khi build.",
+          steps: [
+            "Tạo danh sách config (region, schedule, owner).",
+            "Viết hàm validate key bắt buộc.",
+            "Build DAG từ factory và đăng ký vào globals()."
+          ],
+          solution: `
+            ${codeBlock(`required_keys = {"region", "schedule", "owner"}
+for cfg in PIPELINE_CONFIGS:
+    if not required_keys.issubset(cfg.keys()):
+        raise ValueError("Config thiếu key bắt buộc")
+
+    dag_obj = build_dag(cfg)
+    globals()[dag_obj.dag_id] = dag_obj`)}
+            <p>Validate sớm giúp fail-fast ở CI thay vì fail lúc production scheduler parse.</p>
+          `
+        }
+      },
+      {
+        code: "W10.08",
+        title: "dbt + Airflow",
+        menu: [
+          "Orchestrate dbt run/test bằng Airflow",
+          "Thứ tự seed -> run -> test",
+          "Gate chất lượng sau dbt",
+          "Quan sát artifact run_results.json"
+        ],
+        objectives: [
+          "Kết hợp dbt và Airflow thành pipeline có kiểm soát.",
+          "Biết thứ tự task dbt chuẩn production.",
+          "Đặt data quality gate sau dbt."
+        ],
+        detailHtml: `
+          <p>Airflow điều phối lịch và dependency; dbt chịu trách nhiệm transform theo model graph.</p>
+          ${codeBlock(`dbt_seed = BashOperator(
+    task_id="dbt_seed",
+    bash_command="dbt seed --profiles-dir . --target prod"
+)
+
+dbt_run = BashOperator(
+    task_id="dbt_run",
+    bash_command="dbt run --profiles-dir . --target prod --select tag:daily"
+)
+
+dbt_test = BashOperator(
+    task_id="dbt_test",
+    bash_command="dbt test --profiles-dir . --target prod --select tag:daily"
+)
+
+dbt_seed >> dbt_run >> dbt_test`)}
+          <ul>
+            <li>Nếu <code>dbt test</code> fail, DAG nên fail để chặn downstream investor metrics.</li>
+            <li>Có thể thêm task parse <code>run_results.json</code> để push telemetry.</li>
+            <li>Data quality SQL bổ sung sau dbt giúp kiểm tra business rule đặc thù.</li>
+          </ul>
+          ${sqlBlock(
+            "sql-w1008",
+            `SELECT COUNT(*) AS null_profit_rows
+FROM mart_profit_daily
+WHERE ds = CURRENT_DATE - INTERVAL '1 day'
+  AND unit_profit IS NULL;`,
+            `SELECT COUNT(*) AS null_profit_rows
+FROM mart_profit_daily
+WHERE ds = TRUNC(SYSDATE) - 1
+  AND unit_profit IS NULL;`,
+            "Sau dbt run/test, thêm SQL gate cho các rule nghiệp vụ nhạy cảm với investor reporting."
+          )}
+        `,
+        quiz: [
+          q("Vì sao thường orchestration dbt bằng Airflow?", ["Để thay dbt compiler", "Để quản lý lịch, dependency, alert tập trung", "Để bỏ test", "Để không cần warehouse"], 1, "Airflow mạnh ở orchestration, còn dbt mạnh ở transform/model."),
+          q("Thứ tự chuẩn phổ biến là?", ["dbt test -> dbt run -> dbt seed", "dbt seed -> dbt run -> dbt test", "dbt run -> dbt seed -> dbt test", "dbt seed -> dbt test -> dbt run"], 1, "Seed nạp dữ liệu seed, run transform, test xác nhận quality."),
+          q("Nếu dbt test fail trong pipeline critical, nên?", ["Vẫn chạy tiếp publish", "Fail DAG và alert", "Bỏ qua test", "Xóa model"], 1, "Fail-fast giúp chặn dữ liệu sai đi tiếp."),
+          q("Selector '--select tag:daily' dùng để?", ["Chạy model có tag daily", "Chạy tất cả model", "Chạy test unit Python", "Chạy DAG daily"], 0, "Tag selector giúp giới hạn phạm vi dbt run/test."),
+          q("dbt source freshness thường chạy khi nào?", ["Trước transform nặng", "Sau khi dashboard publish", "Khi reset scheduler", "Không bao giờ"], 0, "Kiểm freshness sớm tránh tốn tài nguyên cho dữ liệu stale."),
+          q("run_results.json có thể dùng để làm gì?", ["Đổi connection", "Lấy trạng thái model/test để observability", "Parse cron", "Lưu password"], 1, "Artifact này hỗ trợ telemetry và phân tích lỗi."),
+          q("Model incremental trong dbt cần lưu ý gì khi backfill?", ["Không cần biến ngày", "Nên truyền biến phạm vi dữ liệu rõ ràng", "Tắt test", "Bỏ key duy nhất"], 1, "Backfill incremental cần kiểm soát window và key để tránh duplicate."),
+          q("Airflow retries quanh dbt task hữu ích khi nào?", ["Lỗi transient (network/warehouse) tạm thời", "Lỗi logic model cố định", "Sai SQL vĩnh viễn", "Thiếu DAG file"], 0, "Retry phù hợp lỗi tạm thời, không chữa lỗi logic cố định."),
+          q("Sau dbt test, vì sao vẫn thêm SQL check custom?", ["Không cần thiết", "Để kiểm tra rule nghiệp vụ đặc thù chưa có trong dbt test", "Để tăng số task", "Để đổi schema"], 1, "Business rule cụ thể đôi khi cần gate riêng ngoài generic tests."),
+          q("Mục tiêu chính của dbt + Airflow là?", ["Giảm trách nhiệm observability", "Tách rõ transform và orchestration, tăng độ tin cậy", "Bỏ owner", "Chạy không cần lịch"], 1, "Kết hợp đúng giúp pipeline vừa sạch logic vừa chắc vận hành.")
+        ],
+        summary: [
+          "Airflow điều phối, dbt transform; hai công cụ bổ sung nhau.",
+          "dbt test phải là quality gate thật sự.",
+          "Telemetry từ dbt artifact giúp debug nhanh hơn."
+        ],
+        practice: {
+          task: "Xây DAG dbt_daily_profit có seed/run/test và gate SQL null check.",
+          steps: [
+            "Tạo 3 task dbt bằng BashOperator.",
+            "Thêm SQLExecuteQueryOperator kiểm null sau dbt_test.",
+            "Fail pipeline nếu null vượt ngưỡng."
+          ],
+          solution: `
+            ${codeBlock(`dbt_seed >> dbt_run >> dbt_test >> dq_null_check
+
+# dq_null_check có thể dùng CASE WHEN count > threshold THEN raise error`)}
+            <p>Cách này tạo 2 lớp kiểm soát: test mô hình dbt + business quality check cuối pipeline.</p>
+          `
+        }
+      },
+      {
+        code: "W10.09",
+        title: "Retry, Timeout, SLA Miss",
+        menu: [
+          "Retries và retry_exponential_backoff",
+          "execution_timeout vs SLA",
+          "Alert callback và runbook",
+          "Cleanup task với trigger_rule phù hợp"
+        ],
+        objectives: [
+          "Cấu hình reliability chuẩn cho production DAG.",
+          "Hiểu SLA miss không đồng nghĩa task fail.",
+          "Thiết kế alert đủ tín hiệu cho on-call."
+        ],
+        detailHtml: `
+          <p>Reliability trong Airflow cần kết hợp retry, timeout, SLA và alert để tránh silent failure.</p>
+          ${codeBlock(`from datetime import timedelta
+
+default_args = {
+    "retries": 3,
+    "retry_delay": timedelta(minutes=5),
+    "retry_exponential_backoff": True,
+    "max_retry_delay": timedelta(minutes=30)
+}
+
+task = PythonOperator(
+    task_id="load_profit",
+    python_callable=load_profit_fn,
+    execution_timeout=timedelta(minutes=25),
+    sla=timedelta(minutes=40)
+)`)}
+          <ul>
+            <li><strong>execution_timeout:</strong> giới hạn thời gian chạy task.</li>
+            <li><strong>SLA miss:</strong> trễ SLA nhưng task có thể vẫn chạy/chưa fail.</li>
+            <li><strong>on_failure_callback:</strong> gửi alert kèm owner/runbook link.</li>
+          </ul>
+          ${sqlBlock(
+            "sql-w1009",
+            `SELECT dag_id, task_id, run_date, delay_minutes
+FROM sla_breach_audit
+WHERE run_date >= CURRENT_DATE - INTERVAL '7 day'
+ORDER BY delay_minutes DESC;`,
+            `SELECT dag_id, task_id, run_date, delay_minutes
+FROM sla_breach_audit
+WHERE run_date >= TRUNC(SYSDATE) - 7
+ORDER BY delay_minutes DESC;`,
+            "Theo dõi xu hướng SLA miss để tối ưu tài nguyên/lịch hoặc tách pipeline."
+          )}
+        `,
+        quiz: [
+          q("Retries trong Airflow phù hợp cho loại lỗi nào?", ["Lỗi transient tạm thời", "Lỗi logic SQL cố định", "Sai schema vĩnh viễn", "Thiếu DAG file"], 0, "Retry chủ yếu để hấp thụ lỗi tạm thời như network/lock."),
+          q("execution_timeout có tác dụng gì?", ["Giới hạn thời gian chạy task", "Tăng số retries", "Đổi cron schedule", "Bỏ qua alert"], 0, "Task chạy quá timeout sẽ bị fail."),
+          q("SLA miss có nghĩa bắt buộc task fail không?", ["Có", "Không", "Chỉ với sensor", "Chỉ với dbt"], 1, "SLA miss là tín hiệu trễ, không đồng nghĩa fail kỹ thuật."),
+          q("retry_exponential_backoff giúp gì?", ["Giảm dần khoảng chờ retry", "Tăng dần khoảng chờ retry", "Tắt retry", "Không tác dụng"], 1, "Backoff tăng khoảng chờ để giảm áp lực lên hệ thống lỗi."),
+          q("max_retry_delay dùng để?", ["Giới hạn mức tăng tối đa của retry delay", "Tăng số worker", "Đổi owner", "Reset task"], 0, "Tránh delay phình quá lớn không kiểm soát."),
+          q("Task cleanup sau fail/success nên dùng trigger_rule nào?", ["all_success", "all_done", "one_success", "none_failed"], 1, "all_done đảm bảo cleanup chạy trong cả hai trạng thái."),
+          q("Nếu task không idempotent, retry có thể gây gì?", ["Không ảnh hưởng", "Duplicate hoặc sai dữ liệu", "Giảm CPU", "Tăng SLA"], 1, "Retry lặp ghi không idempotent dễ gây nhân bản dữ liệu."),
+          q("on_failure_callback nên chứa thông tin gì?", ["CSS class", "owner + run_id + link runbook", "Tên laptop dev", "Màu DAG"], 1, "Alert có ngữ cảnh giúp on-call xử lý nhanh."),
+          q("Kịch bản nào cần tách retryable và non-retryable error?", ["Mọi task đơn giản", "Khi muốn fail-fast lỗi logic, retry lỗi tạm thời", "Chỉ ở webserver", "Không bao giờ"], 1, "Phân loại lỗi giúp tránh retry vô ích."),
+          q("Bộ cấu hình reliability tốt thường gồm?", ["Chỉ retries", "Retries + timeout + SLA + alert", "Chỉ schedule", "Chỉ pool"], 1, "Cần phối hợp nhiều cơ chế để pipeline bền vững.")
+        ],
+        summary: [
+          "Retry không thay thế thiết kế idempotent.",
+          "Timeout và SLA phục vụ hai mục tiêu khác nhau.",
+          "Alert tốt cần đầy đủ ngữ cảnh để on-call hành động ngay."
+        ],
+        practice: {
+          task: "Nâng độ ổn định cho DAG investor_profit_daily đang hay trễ và fail rải rác.",
+          steps: [
+            "Thiết lập retries + exponential backoff.",
+            "Đặt execution_timeout theo baseline runtime.",
+            "Bật SLA và alert callback tới owner trực ca."
+          ],
+          solution: `
+            ${codeBlock(`default_args = {
+  "retries": 3,
+  "retry_delay": timedelta(minutes=5),
+  "retry_exponential_backoff": True,
+  "max_retry_delay": timedelta(minutes=20)
+}
+
+load_task.execution_timeout = timedelta(minutes=20)
+load_task.sla = timedelta(minutes=30)`)}
+            <p>Sau đó theo dõi 7 ngày: tỷ lệ fail, số SLA miss, median runtime để hiệu chỉnh tiếp.</p>
+          `
+        }
+      },
+      {
+        code: "W10.10",
+        title: "Artifact airflow_dags/",
+        menu: [
+          "Cấu trúc thư mục artifact bắt buộc",
+          "4 DAG mẫu theo roadmap",
+          "README local setup bằng Docker Compose",
+          "Data quality checks và backfill strategy"
+        ],
+        objectives: [
+          "Hiểu đầy đủ bộ artifact cần bàn giao tuần 10-11.",
+          "Biết vai trò từng DAG trong airflow_dags/dags.",
+          "Biết cách tổ chức README để learner tự chạy local."
+        ],
+        detailHtml: `
+          <p>Theo roadmap tuần 10-11, artifact cần có:</p>
+          ${codeBlock(`airflow_dags/
+├── dags/
+│   ├── etl_orders_daily.py
+│   ├── dbt_pipeline.py
+│   ├── data_quality_check.py
+│   └── backfill_historical.py
+└── README.md`)}
+          <p>Gợi ý vai trò:</p>
+          <ul>
+            <li><strong>etl_orders_daily.py:</strong> pipeline ETL chạy hằng ngày.</li>
+            <li><strong>dbt_pipeline.py:</strong> seed/run/test và quality gate.</li>
+            <li><strong>data_quality_check.py:</strong> row count, null ratio, freshness.</li>
+            <li><strong>backfill_historical.py:</strong> xử lý phạm vi ngày lịch sử có kiểm soát.</li>
+          </ul>
+          ${codeBlock(`# README.md nên có
+1) docker compose up -d
+2) airflow webserver/scheduler startup
+3) cách tạo connection/variable
+4) cách trigger DAG daily và backfill`)}
+          ${sqlBlock(
+            "sql-w1010",
+            `SELECT
+  ds,
+  COUNT(*) AS total_rows,
+  SUM(CASE WHEN unit_profit IS NULL THEN 1 ELSE 0 END) AS null_profit_rows
+FROM mart_profit_daily
+GROUP BY ds
+ORDER BY ds DESC
+LIMIT 7;`,
+            `SELECT
+  ds,
+  COUNT(*) AS total_rows,
+  SUM(CASE WHEN unit_profit IS NULL THEN 1 ELSE 0 END) AS null_profit_rows
+FROM mart_profit_daily
+GROUP BY ds
+ORDER BY ds DESC
+FETCH FIRST 7 ROWS ONLY;`,
+            "PostgreSQL dùng LIMIT, Oracle dùng FETCH FIRST ... ROWS ONLY."
+          )}
+        `,
+        quiz: [
+          q("DAG nào trong artifact dùng cho chạy ETL hằng ngày?", ["backfill_historical.py", "etl_orders_daily.py", "data_quality_check.py", "README.md"], 1, "etl_orders_daily.py là DAG daily flow chính."),
+          q("Mục tiêu của data_quality_check.py là gì?", ["Render dashboard", "Kiểm row count/null/freshness", "Tạo user", "Sinh dynamic DAG"], 1, "Đây là DAG kiểm chất lượng dữ liệu."),
+          q("backfill_historical.py thường dùng khi nào?", ["Mọi run hằng ngày", "Nạp lại dữ liệu khoảng ngày lịch sử", "Đổi connection", "Xóa metadata"], 1, "Backfill DAG xử lý khoảng thời gian đã qua."),
+          q("README trong artifact cần ưu tiên nội dung gì?", ["Ảnh nền", "Hướng dẫn chạy local rõ từng bước", "Meme dev", "Không cần ghi gì"], 1, "README tốt giúp learner tự chạy được môi trường."),
+          q("Lý do nên tách DAG quality riêng là gì?", ["Để code dài hơn", "Giảm coupling và cho phép chạy độc lập", "Để ẩn lỗi", "Để bỏ alert"], 1, "Tách quality giúp kiểm định độc lập và vận hành rõ."),
+          q("DAG backfill nên có tham số nào?", ["start_date/end_date phạm vi backfill", "CSS theme", "worker image name", "username UI"], 0, "Phạm vi ngày giúp kiểm soát run và tránh chạy quá rộng."),
+          q("Khi publish artifact học tập, điều nào quan trọng?", ["Code chạy được + cấu trúc rõ + docs đủ", "Chỉ cần file tên đẹp", "Không cần test import DAG", "Không cần owner"], 0, "Artifact phải dùng được thực tế, không chỉ minh họa."),
+          q("Tag DAG theo domain (profit/growth/engagement) giúp gì?", ["Tăng tốc SQL", "Lọc và vận hành theo business area", "Giảm RAM", "Bỏ dependency"], 1, "Tag hỗ trợ quan sát và phân công ownership."),
+          q("Kiểm thử CI tối thiểu cho thư mục dags là gì?", ["Đếm số dòng code", "DagBag import test không lỗi", "Chạy web UI", "Xóa cache"], 1, "DagBag test chặn lỗi parse/import trước deploy."),
+          q("Mục tiêu lớn nhất của bộ artifact tuần 10-11 là?", ["Demo UI Airflow", "Thể hiện orchestration end-to-end có vận hành", "Tăng số file", "Không cần dữ liệu thật"], 1, "Artifact phải thể hiện luồng orchestration thực tế, có quality và backfill.")
+        ],
+        summary: [
+          "Artifact cần đầy đủ DAG daily, dbt pipeline, quality và backfill.",
+          "README tốt là phần bắt buộc để tự học hiệu quả.",
+          "Tư duy bàn giao: chạy được, giám sát được, khôi phục được."
+        ],
+        practice: {
+          task: "Thiết kế nhanh bộ airflow_dags cho team 4 người với ownership rõ ràng.",
+          steps: [
+            "Gán owner chính/phụ cho từng DAG.",
+            "Viết README local setup tối thiểu 5 bước.",
+            "Thêm checklist quality gate trước publish investor metrics."
+          ],
+          solution: `
+            <ul>
+              <li><strong>Ownership:</strong> mỗi DAG có primary + secondary, luân phiên on-call.</li>
+              <li><strong>README:</strong> setup Docker, tạo connection, trigger test, xem log, teardown.</li>
+              <li><strong>Quality gate:</strong> row count, null ratio, freshness phải pass mới publish.</li>
+            </ul>
+            ${codeBlock(`# ví dụ checklist release
+- [ ] etl_orders_daily success
+- [ ] dbt_pipeline success + dbt_test pass
+- [ ] data_quality_check pass
+- [ ] không có SLA miss critical`)}
+          `
+        }
+      },
+      {
+        code: "W10.11",
+        title: "Mini Test + Vận hành thực chiến",
+        menu: [
+          "Ôn tổng hợp toàn bộ tuần 10-11",
+          "Runbook, on-call fairness, holiday coverage",
+          "Checklist trước khi publish metrics",
+          "Mini test 18 câu có chấm điểm"
+        ],
+        objectives: [
+          "Củng cố toàn bộ kiến thức orchestration.",
+          "Biết tổ chức on-call/runbook công bằng cho team 4 người.",
+          "Tự đánh giá mức sẵn sàng qua mini test cuối tuần."
+        ],
+        detailHtml: `
+          <p>Ở production, kiến thức kỹ thuật phải đi cùng vận hành: owner rõ, runbook rõ, escalation rõ.</p>
+          <ul>
+            <li>Mỗi pipeline critical cần <strong>primary + secondary owner</strong>.</li>
+            <li>Lịch on-call nên xoay vòng tuần, cân bằng ngày lễ/cuối tuần.</li>
+            <li>Runbook cần có: impact, nguồn dữ liệu, bước kiểm tra, nơi escalate.</li>
+          </ul>
+          ${codeBlock(`Mẫu lịch 4 người (A/B/C/D):
+- Tuần 1: Primary A, Secondary B
+- Tuần 2: Primary C, Secondary D
+- Tuần 3: Primary B, Secondary A
+- Tuần 4: Primary D, Secondary C
+
+Ngày lễ: đổi ca bù công bằng trong chu kỳ tiếp theo.`)}
+          <div class="info-box">Investor pipelines luôn ưu tiên xử lý cao hơn vì ảnh hưởng báo cáo kinh doanh và uy tín.</div>
+        `,
+        quiz: [
+          q("Khi pipeline critical fail lặp lại, bước đầu tiên nên là gì?", ["Xóa DAG", "Xác định blast radius + owner + runbook", "Tắt alert", "Chạy lại vô hạn"], 1, "Trước tiên phải đánh giá ảnh hưởng và theo runbook chuẩn."),
+          q("Runbook tốt nên có thông tin nào?", ["Chỉ tên DAG", "Impact, owner, kiểm tra nhanh, escalation", "Màu giao diện", "Số dòng code"], 1, "Runbook cần đủ ngữ cảnh để người trực hành động ngay."),
+          q("Lịch on-call công bằng cho team 4 người nên?", ["Một người trực mãi", "Xoay vòng primary/secondary có bù ngày lễ", "Không cần secondary", "Ai rảnh thì làm"], 1, "Xoay vòng có quy tắc giúp giảm quá tải và minh bạch."),
+          q("Pipeline báo cáo investor nên được phân loại ưu tiên nào?", ["Thấp", "Trung bình", "Cao", "Không ưu tiên"], 2, "Pipeline ảnh hưởng báo cáo investor là luồng mức độ ưu tiên cao."),
+          q("Trong nhiều sensor chờ dài, chọn mode nào thường tiết kiệm slot?", ["poke", "reschedule/deferrable", "manual", "none"], 1, "reschedule hoặc deferrable giúp không giữ slot worker lâu."),
+          q("XCom nên chứa gì để vận hành bền?", ["Payload lớn", "Metadata nhỏ và cần thiết", "File nén 1GB", "Image"], 1, "Giữ XCom nhỏ giúp metadata DB ổn định."),
+          q("SLA miss khác task fail ở điểm nào?", ["Giống nhau", "SLA miss là trễ thời hạn, task có thể chưa fail", "SLA miss nghĩa task success chắc chắn", "Task fail nghĩa đúng SLA"], 1, "SLA là chỉ báo thời gian, không phải trạng thái kỹ thuật."),
+          q("Dynamic DAG cần guardrail nào?", ["ID ngẫu nhiên", "Config validate + ID ổn định", "Không test import", "Không owner"], 1, "Guardrail giúp tránh lỗi parse/schedule khó debug."),
+          q("Kết hợp dbt test với SQL quality gate sau đó nhằm gì?", ["Tăng số task cho đẹp", "Chặn dữ liệu sai trước publish", "Giảm observability", "Bỏ runbook"], 1, "Hai lớp kiểm tra giúp giảm rủi ro dữ liệu sai ra ngoài."),
+          q("Nguyên tắc vận hành bền vững nhất là?", ["Ẩn lỗi để tránh ồn", "Fail-fast, observable, có owner rõ", "Retry vô hạn", "Không cần docs"], 1, "Pipeline bền vững cần phát hiện sớm, theo dõi tốt, trách nhiệm rõ.")
+        ],
+        summary: [
+          "Kỹ thuật orchestration chỉ hiệu quả khi có runbook và ownership rõ.",
+          "On-call fairness là yếu tố vận hành dài hạn, không chỉ kỹ thuật.",
+          "Bạn nên làm mini test để kiểm tra mức sẵn sàng production mindset."
+        ],
+        practice: {
+          task: "Thiết kế runbook cho investor_profit_daily và lịch on-call 4 người trong 4 tuần.",
+          steps: [
+            "Nêu impact nếu pipeline trễ > 2 giờ.",
+            "Xác định primary/secondary theo tuần, có phương án ngày lễ.",
+            "Liệt kê 5 bước kiểm tra nhanh trước khi rerun."
+          ],
+          solution: `
+            <p>Mẫu runbook ngắn:</p>
+            <ol>
+              <li>Xác định mức ảnh hưởng dashboard/nhà đầu tư.</li>
+              <li>Kiểm upstream data freshness.</li>
+              <li>Kiểm task fail root cause từ log + metadata.</li>
+              <li>Quyết định rerun/backfill theo khung thời gian ảnh hưởng.</li>
+              <li>Thông báo stakeholder + ghi lại postmortem.</li>
+            </ol>
+            ${codeBlock(`On-call tuần:
+W1: A(primary), B(secondary)
+W2: C(primary), D(secondary)
+W3: B(primary), A(secondary)
+W4: D(primary), C(secondary)`)}
+          `
+        }
+      }
+    ];
+
+    const finalTestQuestions = [
+      q("Thành phần nào quyết định task runnable trong Airflow?", ["Worker", "Scheduler", "Webserver", "Connection"], 1, ""),
+      q("catchup=True thường dùng cho mục tiêu nào?", ["Bỏ run cũ", "Backfill lịch sử còn thiếu", "Giảm số DAG", "Tăng CSS UI"], 1, ""),
+      q("Operator nào chạy SQL qua connection trong DAG?", ["PythonOperator", "BashOperator", "SQLExecuteQueryOperator", "FileSensor"], 2, ""),
+      q("XCom phù hợp nhất cho loại dữ liệu nào?", ["DataFrame lớn", "Metadata nhỏ", "Ảnh", "File 2GB"], 1, ""),
+      q("Thông tin kết nối nhạy cảm nên đặt ở đâu?", ["Hardcode DAG", "Connection/Secrets backend", "Tên task", "README công khai"], 1, ""),
+      q("Mode sensor nào giúp nhả worker slot khi chờ?", ["poke", "reschedule", "manual", "none"], 1, ""),
+      q("Guardrail quan trọng của dynamic DAG là gì?", ["ID ngẫu nhiên", "Config validate + ID ổn định", "Không cần test", "Bỏ owner"], 1, ""),
+      q("Trong pipeline dbt, nếu dbt test fail thì nên?", ["Vẫn publish", "Fail pipeline + alert", "Bỏ test", "Tắt scheduler"], 1, ""),
+      q("execution_timeout áp dụng cho gì?", ["Giới hạn thời gian chạy task", "Giới hạn parse DAG", "Giới hạn login", "Giới hạn số user UI"], 0, ""),
+      q("SLA miss có nghĩa chắc chắn task fail không?", ["Có", "Không", "Chỉ với sensor", "Chỉ với dbt"], 1, ""),
+      q("DAG nào thường dành cho xử lý dữ liệu lịch sử?", ["etl_orders_daily.py", "dbt_pipeline.py", "backfill_historical.py", "README.md"], 2, ""),
+      q("README artifact nên chứa gì trước tiên?", ["Ảnh nền", "Hướng dẫn setup và chạy local", "Danh sách emoji", "Bỏ trống"], 1, ""),
+      q("Pipeline investor metrics bị lỗi nên ưu tiên xử lý mức nào?", ["Thấp", "Trung bình", "Cao", "Không ưu tiên"], 2, ""),
+      q("On-call công bằng cho team 4 người cần gì?", ["Một người trực liên tục", "Xoay vòng primary/secondary + bù ngày lễ", "Không cần secondary", "Ai online thì trực"], 1, ""),
+      q("PostgreSQL và Oracle khác nhau phổ biến ở phần nào khi viết SQL thời gian?", ["Tên bảng luôn khác", "Hàm/interval thời gian", "Không khác gì", "Chỉ khác comment"], 1, ""),
+      q("Vì sao task nên idempotent khi dùng retry?", ["Để tăng màu log", "Để rerun không tạo dữ liệu sai/duplicate", "Để bỏ monitoring", "Để giảm số DAG"], 1, ""),
+      q("ExternalTaskSensor dùng chủ yếu cho mục tiêu nào?", ["Chạy SQL nặng", "Chờ task của DAG khác", "Xóa dữ liệu cũ", "Tạo variable"], 1, ""),
+      q("Mục đầu quan trọng trong runbook sự cố là gì?", ["Màu giao diện", "Impact + owner + cách escalte nhanh", "Số dòng code", "Tên laptop dev"], 1, "")
+    ];
+
+    function renderList(items) {
+      return `<ul>${items.map(item => `<li>${item}</li>`).join("")}</ul>`;
+    }
+
+    function renderMenu(items) {
+      return renderList(items);
+    }
+
+    function renderObjectives(items) {
+      return renderList(items);
+    }
+
+    function renderSummary(items) {
+      return renderList(items);
+    }
+
+    function renderQuiz(questions) {
+      const labels = ["A", "B", "C", "D"];
+      return questions.map((question, qIndex) => {
+        const optionsHtml = question.options.map((opt, optIndex) => {
+          const isCorrect = optIndex === question.correct;
+          const explain = `${isCorrect ? "Đúng. " : "Chưa đúng. "}${question.explanation}`;
+          return `
+            <button
+              class="quiz-option"
+              data-correct="${isCorrect}"
+              data-explanation="${escapeAttr(explain)}"
+              onclick="answerQuiz(this, this.dataset.correct === 'true', this.dataset.explanation)"
+            >${labels[optIndex]}. ${opt}</button>
+          `;
+        }).join("");
+
+        return `
+          <div class="quiz-question">
+            <p>Câu ${qIndex + 1}. ${question.q}</p>
+            <div class="quiz-options">${optionsHtml}</div>
+            <div class="quiz-feedback"></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderPractice(practice) {
+      return `
+        <div class="practice">
+          <p><strong>Bối cảnh:</strong> ${practice.task}</p>
+          ${renderList(practice.steps)}
+          <button class="solution-btn" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution">${practice.solution}</div>
+        </div>
+      `;
+    }
+
+    function renderSection(title, body, open = true) {
+      return `
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">
+            <span>${title}</span>
+            <span class="arrow">${open ? "▾" : "▸"}</span>
+          </div>
+          <div class="section-body" style="display:${open ? "block" : "none"};">
+            ${body}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFinalTest() {
+      const labels = ["A", "B", "C", "D"];
+      const questionsHtml = finalTestQuestions.map((question, index) => `
+        <div class="final-question">
+          <p>${index + 1}. ${question.q}</p>
+          ${question.options.map((option, optIndex) => `
+            <label>
+              <input type="radio" name="final-q-${index}" value="${optIndex}" />
+              ${labels[optIndex]}. ${option}
+            </label>
+          `).join("")}
+        </div>
+      `).join("");
+
+      return `
+        <div class="final-test">
+          <h3>Mini Test Cuối Tuần (18 câu)</h3>
+          <p>Chọn đáp án đúng nhất cho mỗi câu, sau đó bấm chấm điểm.</p>
+          ${questionsHtml}
+          <div class="final-actions">
+            <button onclick="gradeFinalTest()">Chấm điểm</button>
+            <button onclick="resetFinalTest()">Làm lại</button>
+          </div>
+          <div id="final-test-result"></div>
+        </div>
+      `;
+    }
+
+    function renderModule(module, index) {
+      return `
+        <section class="module ${index === 0 ? "active" : ""}" id="module-${index}">
+          <h2>${module.code} · ${module.title}</h2>
+
+          ${renderSection("1) 📋 Menu Tổng Thể", renderMenu(module.menu), true)}
+          ${renderSection("2) 🎯 Mục Đích Module", renderObjectives(module.objectives), true)}
+          ${renderSection("3) 📖 Giải Thích Chi Tiết", module.detailHtml, true)}
+          ${renderSection("4) ❓ Câu Hỏi Ôn Tập", renderQuiz(module.quiz), true)}
+          ${renderSection("5) 📌 Tổng Kết", renderSummary(module.summary), true)}
+          ${renderSection("6) 🔬 Bài Tập Thực Hành", renderPractice(module.practice), false)}
+
+          ${index === modulesData.length - 1 ? renderFinalTest() : ""}
+
+          <div class="nav-buttons">
+            <div>${index > 0 ? `<button onclick="goPrev(${index})">← Module trước</button>` : ""}</div>
+            <div>${index < modulesData.length - 1 ? `<button onclick="goNext(${index})">Module tiếp theo →</button>` : ""}</div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderModules() {
+      const nav = document.getElementById("moduleNav");
+      const host = document.getElementById("modulesHost");
+
+      modulesData.forEach((module, index) => {
+        nav.insertAdjacentHTML(
+          "beforeend",
+          `
+            <button class="nav-item ${index === 0 ? "active" : ""}" onclick="showModule(${index}, this)">
+              <span class="code">${module.code}</span>
+              <span class="name">${module.title}</span>
+            </button>
+          `
+        );
+
+        host.insertAdjacentHTML("beforeend", renderModule(module, index));
+      });
+    }
+
+    function showModule(idx, el) {
+      document.querySelectorAll(".module").forEach((module, index) => {
+        module.classList.toggle("active", index === idx);
+      });
+
+      document.querySelectorAll(".nav-item").forEach((item, index) => {
+        item.classList.toggle("active", index === idx);
+      });
+
+      const activeModule = document.getElementById(`module-${idx}`);
+      if (activeModule) {
+        activeModule.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function goNext(idx) {
+      const next = idx + 1;
+      const navItems = document.querySelectorAll(".nav-item");
+      if (next < navItems.length) showModule(next, navItems[next]);
+    }
+
+    function goPrev(idx) {
+      const prev = idx - 1;
+      const navItems = document.querySelectorAll(".nav-item");
+      if (prev >= 0) showModule(prev, navItems[prev]);
+    }
+
+    function toggleSection(header) {
+      const body = header.nextElementSibling;
+      const arrow = header.querySelector(".arrow");
+      const isOpen = body.style.display !== "none";
+      body.style.display = isOpen ? "none" : "block";
+      arrow.textContent = isOpen ? "▸" : "▾";
+    }
+
+    function answerQuiz(el, correct, explanation) {
+      const question = el.closest(".quiz-question");
+      const options = question.querySelectorAll(".quiz-option");
+      const feedback = question.querySelector(".quiz-feedback");
+
+      options.forEach((btn) => {
+        btn.disabled = true;
+        if (btn.dataset.correct === "true") btn.classList.add("correct");
+      });
+
+      if (!correct) el.classList.add("wrong");
+
+      feedback.style.display = "block";
+      feedback.className = `quiz-feedback ${correct ? "ok" : "bad"}`;
+      feedback.textContent = explanation;
+    }
+
+    function toggleSolution(btn) {
+      const panel = btn.nextElementSibling;
+      const isOpen = panel.style.display === "block";
+      panel.style.display = isOpen ? "none" : "block";
+      btn.textContent = isOpen ? "💡 Xem lời giải" : "Ẩn lời giải";
+    }
+
+    function switchSqlTab(groupId, idx, el) {
+      const sqlBox = document.getElementById(groupId);
+      if (!sqlBox) return;
+
+      const tabs = sqlBox.querySelectorAll(".sql-tab");
+      const panels = sqlBox.querySelectorAll(".sql-panel");
+
+      tabs.forEach((tab, i) => tab.classList.toggle("active", i === idx));
+      panels.forEach((panel, i) => panel.classList.toggle("active", i === idx));
+    }
+
+    function gradeFinalTest() {
+      const labels = ["A", "B", "C", "D"];
+      let score = 0;
+      const wrong = [];
+
+      finalTestQuestions.forEach((question, index) => {
+        const selected = document.querySelector(`input[name="final-q-${index}"]:checked`);
+        if (!selected) {
+          wrong.push(`Câu ${index + 1}: chưa chọn đáp án`);
+          return;
+        }
+
+        const selectedValue = Number(selected.value);
+        if (selectedValue === question.correct) {
+          score += 1;
+        } else {
+          wrong.push(`Câu ${index + 1}: đúng là ${labels[question.correct]} (${question.options[question.correct]})`);
+        }
+      });
+
+      const percent = Math.round((score / finalTestQuestions.length) * 100);
+      const result = document.getElementById("final-test-result");
+
+      result.className = `final-result ${percent >= 80 ? "ok" : "bad"}`;
+      result.innerHTML = `
+        <p><strong>Kết quả:</strong> ${score}/${finalTestQuestions.length} (${percent}%)</p>
+        ${
+          wrong.length
+            ? `<p><strong>Cần ôn lại:</strong></p><ul>${wrong.map(item => `<li>${item}</li>`).join("")}</ul>`
+            : "<p>Bạn trả lời đúng toàn bộ. Sẵn sàng sang project thực hành nâng cao.</p>"
+        }
+      `;
+    }
+
+    function resetFinalTest() {
+      finalTestQuestions.forEach((_, index) => {
+        document.querySelectorAll(`input[name="final-q-${index}"]`).forEach(input => {
+          input.checked = false;
+        });
+      });
+
+      const result = document.getElementById("final-test-result");
+      result.className = "";
+      result.innerHTML = "";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderModules();
+      const firstNav = document.querySelector(".nav-item");
+      if (firstNav) showModule(0, firstNav);
+    });
+  </script>
+</body>
+</html>

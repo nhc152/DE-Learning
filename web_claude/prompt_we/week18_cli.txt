@@ -1,0 +1,262 @@
+Use project rules from .claude.
+
+Current task:
+Upgrade Week18_Flink_Kafka.html into a high-quality tutorial file for Real-time Pipelines with Apache Flink & Kafka in Data Engineering.
+
+The final version should intelligently combine:
+1. strengths of the current file
+2. stronger repository-backed improvements
+3. better teaching quality
+4. more realistic production-grade streaming guidance
+
+Allowed sources only:
+- ./Week18_Flink_Kafka.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not read any other files.
+
+CORE PRINCIPLES:
+- Do NOT blindly overwrite the current file
+- Do NOT assume newer content is always better
+- Treat the current file as valuable content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or incorrect content
+- Final result must feel like one polished tutorial
+
+UPGRADE STRATEGY:
+1. Audit the current file first
+2. Preserve strong current sections
+3. Identify missing streaming / Kafka / Flink topics
+4. Read local repository sources for stronger depth
+5. Merge improvements intelligently
+6. If both old and new versions are useful, combine them
+7. Remove duplicated content
+8. Improve clarity, depth, and practical value
+
+IMPORTANT PRESERVATION RULE:
+If the current version contains strong conceptual explanations, KEEP and enrich them.
+
+Examples:
+- good explanation of Kafka partitioning
+- useful event time vs processing time comparison
+- practical watermark and late data explanation
+- strong session window examples
+- good stateful processing explanation
+- realistic checkpoint / exactly-once discussion
+- useful pipeline artifact structure
+
+CURRENT / TARGET STRUCTURE TO PRESERVE:
+
+- W18.01 – Tổng Quan: Vì Sao Cần Streaming Pipeline
+- W18.02 – Kafka Fundamentals: Topic, Partition, Consumer Group, Offset
+- W18.03 – Flink Architecture: JobManager, TaskManager, Checkpoint
+- W18.04 – Event Time, Processing Time, Watermark & Late Data
+- W18.05 – Windowing: Tumbling, Sliding, Session Windows
+- W18.06 – Stateful Processing & RocksDB State Backend
+- W18.07 – Sessionization với Flink: Group Events Theo Gap
+- W18.08 – Kafka → Flink → Sink: Thiết Kế Pipeline Thực Tế
+- W18.09 – Reliability, Checkpointing, Exactly-Once & Failure Recovery
+- W18.10 – Artifact: flink_jobs/ hoàn chỉnh
+- W18.11 – Mini Test Tổng Kết
+
+TOPICS TO ENSURE STRONG COVERAGE:
+
+W18.01
+- why streaming exists
+- low-latency use cases
+- where batch is insufficient
+- DE responsibilities in streaming systems
+
+W18.02
+- topics
+- partitions
+- consumer groups
+- offsets
+- retention
+- ordering guarantees
+- rebalance basics
+- trade-offs in partitioning
+
+W18.03
+- JobManager
+- TaskManager
+- operators
+- stream execution
+- checkpoints
+- distributed streaming engine mindset
+
+W18.04
+- event time
+- processing time
+- ingestion time
+- watermarks
+- late data
+- allowed lateness
+- correctness vs latency trade-offs
+
+W18.05
+- tumbling windows
+- sliding windows
+- session windows
+- aggregation semantics
+- choosing the right window
+- common mistakes
+
+W18.06
+- keyed state
+- operator state
+- RocksDB
+- checkpointing
+- state durability
+- memory trade-offs
+- state cleanup concerns
+
+W18.07
+- sessionization logic
+- gap-based grouping
+- by-user / by-IP / by-host examples
+- out-of-order event issues
+- practical session analytics use cases
+
+W18.08
+- Kafka source
+- Flink transformation
+- sink design
+- serialization
+- schema consistency
+- PostgreSQL/S3/ClickHouse sink examples
+- end-to-end design trade-offs
+
+W18.09
+- checkpointing
+- restart strategies
+- at-least-once vs exactly-once
+- idempotent sinks
+- recovery behavior
+- operational reliability mindset
+
+W18.10
+- complete flink_jobs artifact
+- session jobs
+- producer mock
+- analysis notes
+- README
+- practical project organization
+
+W18.11
+- final mini test
+
+CODE / STREAMING REQUIREMENTS:
+- Include realistic code/config where relevant
+- Use believable Kafka/Flink examples
+- Include:
+  - Kafka producer mock
+  - watermark examples
+  - window examples
+  - keyed state examples
+  - checkpoint config
+  - sink examples
+- Avoid shallow toy snippets
+
+QUALITY GOALS:
+- Keep Vietnamese output
+- Preserve HTML structure, CSS, layout, and JS interactions
+- Keep compatibility with Week00_Setup.html style
+- Keep required 6-section structure for each module
+- Keep 10 review questions per module
+- Keep final mini test working
+- Improve teaching quality and production realism
+- No placeholders
+- Do not rebuild from scratch unless necessary
+
+EXPECTED RESULT:
+Update only Week18_Flink_Kafka.html
+
+BEFORE EDITING:
+First clearly identify:
+1. Which current sections should be preserved
+2. Which Streaming / Kafka / Flink topics are missing or weak
+3. Which repository-backed improvements should be merged in
+
+Then perform the upgrade.
+
+2.
+Use project rules from .claude.
+
+Review Week18_Flink_Kafka.html after upgrade.
+
+CHECK CONTENT QUALITY:
+- duplicated sections
+- weak explanations
+- poor teaching flow
+- shallow streaming explanations
+- inconsistent wording
+- weak Kafka fundamentals explanation
+- weak Flink architecture explanation
+- weak event time / watermark explanation
+- weak windowing explanation
+- weak stateful processing explanation
+- weak sessionization explanation
+- weak reliability / checkpointing explanation
+- weak artifact guidance
+- Did any strong old section get removed unnecessarily?
+- Is the final file better than before?
+
+CHECK STRUCTURE:
+- broken HTML
+- broken CSS layout
+- missing required 6-section structure in any module
+- incorrect module order
+- unfinished placeholders
+- repeated content
+
+CHECK INTERACTIVITY:
+- broken quiz logic
+- missing 10 review questions in any module
+- broken JavaScript interactions
+- broken navigation
+- broken toggle sections
+- broken solution buttons
+- broken final test grading/reset
+
+CHECK STREAMING / TECHNICAL QUALITY:
+- weak Kafka examples
+- weak watermark examples
+- weak session window examples
+- weak state handling explanation
+- weak checkpoint configuration
+- unrealistic sink examples
+- confusing exactly-once discussion
+- does the tutorial explain correctness vs latency trade-offs?
+
+CHECK TEACHING QUALITY:
+- Is the tutorial teaching streaming for Data Engineers, not generic platform theory?
+- Are trade-offs clearly explained?
+- Are anti-patterns mentioned where useful?
+- Is event-time awareness visible?
+- Is state awareness visible?
+- Is reliability awareness visible?
+- Are examples coherent across modules?
+
+CHECK ARTIFACT QUALITY:
+- Is flink_jobs/ artifact complete and realistic?
+- Do session_by_ip.py and session_by_host.py match the narrative?
+- Is kafka_producer_mock.py useful for local practice?
+- Does README explain checkpointing, windows, sinks, and failure behavior clearly?
+
+FIX RULES:
+- Fix all broken HTML / JS / quiz logic
+- Strengthen weak explanations
+- Remove duplicated content
+- Improve Kafka / Flink / watermark / window / state examples
+- Improve correctness and reliability explanations
+- Preserve strong original content where useful
+- Keep everything in Vietnamese
+- Keep final file polished and cohesive
+
+EXPECTED RESULT:
+Return the improved final content for Week18_Flink_Kafka.html only.

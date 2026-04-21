@@ -1,0 +1,190 @@
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+Nguồn chính:
+- Repo: D:\TaiLieu\Data Engineer\DE Roadmap\DE-Learning\data-engineer-handbook ( được clone từ https://github.com/DataExpert-io/data-engineer-handbook)
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nhiệm vụ:
+Hãy tạo file HTML hoàn chỉnh tên: Week16_Spark.html
+
+Mục tiêu:
+Tạo tutorial HTML tương tác cho chủ đề:
+Tuần 16 – Apache Spark Fundamentals cho Data Engineer
+
+YÊU CẦU NGUỒN THÔNG TIN:
+- Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
+- Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
+- Dùng roadmap để bám đúng scope tuần 16
+- Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
+- Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
+
+YÊU CẦU QUAN TRỌNG:
+- Output phải là tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Phải viết theo mindset của Data Engineer, không phải tutorial PySpark nhập môn quá cơ bản
+- Nội dung phải practical, production-oriented, nhấn mạnh trade-off và optimization
+- Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
+- Không dùng placeholder như "..." hoặc "viết tương tự"
+- Mỗi module phải đầy đủ nội dung thật
+- Nếu chưa fetch được full repo thì phải nói rõ phần nào lấy từ repo trực tiếp, phần nào lấy từ roadmap, phần nào là suy luận hợp lý
+
+CẤU TRÚC FILE PHẢI GIỮ:
+Mỗi module PHẢI có đủ 6 section theo thứ tự:
+1. 📋 Menu Tổng Thể
+2. 🎯 Mục Đích Module
+3. 📖 Giải Thích Chi Tiết
+4. ❓ Câu Hỏi Ôn Tập
+5. 📌 Tổng Kết
+6. 🔬 Bài Tập Thực Hành
+
+FORMAT PHẢI GIỐNG FILE MẪU:
+- Hero banner
+- Badge row
+- Sidebar fixed 290px
+- Main content
+- Modules display:none, active display:block
+- Collapsible sections
+- Terminal-style code blocks
+- Info boxes: tip / warn / note
+- Interactive quiz
+- Practice task có nút xem lời giải
+- Mini test cuối file
+- Responsive mobile
+- Tất cả CSS inline trong <style>
+- Tất cả JS inline trong <script>
+- Không dùng framework ngoài
+
+JAVASCRIPT FUNCTIONS PHẢI CÓ:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+PHẠM VI NỘI DUNG TUẦN 16:
+Tên: Tuần 16 – Apache Spark Fundamentals cho Data Engineer
+File: Week16_Spark.html
+
+Các module bắt buộc:
+- W16.01 – Tổng Quan: Khi Nào Cần Spark
+- W16.02 – Spark Architecture: Driver, Executor, Stage, Task, Shuffle
+- W16.03 – RDD vs DataFrame vs Dataset
+- W16.04 – Transformations, Actions & Lazy Evaluation
+- W16.05 – Join Strategies: Broadcast, Sort-Merge, Shuffle Hash
+- W16.06 – Partitioning, Repartition, Coalesce & partitionBy
+- W16.07 – Bucketing, sortWithinPartitions, Cache & Persistence
+- W16.08 – Spark UI: Đọc DAG và Tìm Bottleneck
+- W16.09 – Unit Testing Spark Transformations
+- W16.10 – Artifact: spark_jobs/ hoàn chỉnh
+- W16.11 – Mini Test Tổng Kết
+
+NỘI DUNG CẦN BAO PHỦ:
+- Khi nào pandas / SQL local không đủ và vì sao Spark xuất hiện
+- Spark như distributed compute engine, không chỉ là “pandas lớn hơn”
+- Spark architecture:
+  - Driver
+  - Executor
+  - Cluster manager
+  - Stage
+  - Task
+  - Shuffle
+  - narrow vs wide transformation
+- RDD vs DataFrame vs Dataset:
+  - khi nào dùng DataFrame
+  - vì sao RDD ít dùng trong DE thông thường
+  - trade-off abstraction vs control
+- Lazy evaluation:
+  - transformations không chạy ngay
+  - actions mới trigger execution
+  - lineage
+  - optimizer mindset
+- Join strategies:
+  - broadcast join
+  - sort-merge join
+  - shuffle hash join
+  - khi nào mỗi loại phù hợp
+  - join skew và vấn đề thực tế
+- Partitioning:
+  - repartition vs coalesce
+  - partitionBy khi ghi file
+  - số lượng partition ảnh hưởng hiệu năng
+  - small files problem
+- Bucketing / sorting / cache:
+  - khi nào bucket hữu ích
+  - sortWithinPartitions để giảm shuffle
+  - khi nào cache/persist hợp lý
+  - anti-pattern khi cache bừa
+- Spark UI:
+  - job / stage / task view
+  - shuffle read / write
+  - skew detection
+  - bottleneck analysis
+- Unit testing:
+  - test transformation functions với fake DataFrame
+  - assert logic output
+  - tách business logic khỏi IO
+- Artifact spark_jobs/ gồm:
+  - broadcast_join_job.py
+  - bucket_join_job.py
+  - aggregation_optimized.py
+  - sort_within_partitions.py
+  - tests/test_transform_functions.py
+  - README.md mô tả job, optimization, test strategy
+
+YÊU CẦU CODE / PYTHON:
+- Ở các phần liên quan, hãy minh họa bằng nội dung thật, không pseudo-code:
+  - SparkSession setup
+  - DataFrame transformations thực tế
+  - join examples
+  - repartition / coalesce examples
+  - write partitioned data example
+  - cache / persist example
+  - unit test example với pytest nếu hợp lý
+- Code nên ưu tiên PySpark
+- Nếu project rules yêu cầu tabs, có thể dùng tab như:
+  - PySpark
+  - SQL
+  - Spark UI Notes
+- Giải thích ngắn gọn sự khác nhau giữa các cách tiếp cận
+
+YÊU CẦU QUIZ:
+- Mỗi module phải có đúng 10 câu hỏi
+- Mỗi câu hỏi có đúng 4 đáp án A/B/C/D
+- Phải có giải thích cho từng đáp án
+- Giải thích đáp án sai phải nói rõ vì sao sai
+
+YÊU CẦU PRACTICE:
+- Mỗi module có bài tập thực hành thực tế
+- Có nút “💡 Xem lời giải”
+- Lời giải phải hữu ích, không sơ sài
+- Practice nên hướng tới optimization, execution reasoning, testing mindset thực tế
+
+YÊU CẦU MINI TEST CUỐI FILE:
+- Module cuối phải có mini test tổng kết
+- 15–20 câu hỏi
+- Có chấm điểm
+- Có reset
+
+YÊU CẦU CHẤT LƯỢNG:
+- Phải sâu, đầy đủ, thực chiến
+- Ưu tiên chất lượng giảng dạy hơn tốc độ
+- Có distributed systems mindset rõ ràng
+- Có performance mindset, shuffle mindset, testing mindset
+- Không quá ngắn gọn
+- Nội dung phải đủ tốt để học như một tutorial thật
+- Phải giúp người học hiểu “tại sao Spark query/job này nhanh hoặc chậm”
+- Phải tránh dạy Spark như một đống API rời rạc
+
+TRƯỚC KHI VIẾT FILE:
+Hãy nói rõ ngắn gọn:
+1. Bạn đã lấy được nội dung nào trực tiếp từ repo
+2. Bạn đang dùng roadmap ở phần nào
+3. Bạn sẽ giữ format nào từ file mẫu
+
+SAU ĐÓ:
+Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week16_Spark.html

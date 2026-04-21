@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 10-11 · Apache Airflow</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 340px; min-width: 340px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--text-muted); }
+  .level-label.l10 { color: var(--accent); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 60px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 1000px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+
+  .tab-group { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 18px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); display: none; }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid, .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Apache Airflow Orchestration · Tuần 10-11</h1>
+  <p>Chuẩn hoá tư duy orchestration production: schedule đúng, task idempotent, data quality rõ, vận hành có runbook.</p>
+  <div class="badge-row">
+    <span class="badge badge-green">11 modules</span>
+    <span class="badge badge-orange">Mỗi module 10 câu ôn tập</span>
+    <span class="badge badge-blue">Mini test cuối tuần</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Menu Tổng Thể</div>
+    <div class="level-label l10">TUẦN 10-11 · AIRFLOW</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W10.01</span>Airflow Architecture</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W10.02</span>DAG Definition & Schedule</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W10.03</span>Core Operators</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W10.04</span>Dependencies & XCom</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W10.05</span>Variables & Secrets</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W10.06</span>Sensors</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W10.07</span>Dynamic DAGs</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W10.08</span>dbt + Airflow</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W10.09</span>Retry, Timeout, SLA</div>
+    <div class="nav-item" onclick="showModule(9,this)"><span class="nav-number">W10.10</span>Artifact airflow_dags</div>
+    <div class="nav-item" onclick="showModule(10,this)"><span class="nav-number">W10.11</span>Mini Test & Operations</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="m0">
+      <div class="module-header">
+        <div class="module-tag">Tuần 10 · W10.01</div>
+        <div class="module-title">Airflow Architecture</div>
+        <div class="module-subtitle">Nắm rõ Scheduler, Executor, Worker, Webserver và Metadata DB ở góc nhìn production.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Vai trò Scheduler, Executor, Worker, Webserver, Metadata DB</li><li>Lifecycle Task Instance</li><li>Idempotent + observability</li><li>Bottleneck khi scale</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Hiểu kiến trúc Airflow ở mức vận hành.</li><li>Biết cách lần vết task fail nhanh.</li><li>Biết vì sao Metadata DB là điểm nghẽn trọng yếu.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <p>Airflow là orchestration engine: điều phối thứ tự và lịch chạy, không thay thế engine transform như dbt/Spark.</p>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Kiến trúc logic</span></div><div class="cmd-body"><pre>Scheduler -> Queue -> Worker
+Webserver <-> Metadata DB
+Triggerer xử lý deferrable task</pre></div></div>
+        <div class="info-box note">Metadata DB chậm sẽ kéo theo Scheduler chậm và UI lag. Tối ưu DB là ưu tiên số 1 khi scale.</div>
+        <div class="tab-group" id="sqlg1"><div class="tab active" onclick="switchTab('sqlg1','sqlg1pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg1','sqlg1or')">Oracle SQL</div></div>
+        <div class="tab-content active" id="sqlg1pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT pipeline_name, MAX(finished_at) AS last_success
+FROM audit_pipeline_run
+WHERE status = 'success'
+GROUP BY pipeline_name
+ORDER BY last_success DESC;</pre></div></div></div>
+        <div class="tab-content" id="sqlg1or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT pipeline_name, MAX(finished_at) AS last_success
+FROM audit_pipeline_run
+WHERE status = 'success'
+GROUP BY pipeline_name
+ORDER BY last_success DESC;</pre></div></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Scheduler làm gì trong Airflow?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Scheduler xét dependency và chọn task runnable.')">A. Xét lịch và đưa task runnable vào queue</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Worker mới là nơi thực thi code task.')">B. Thực thi code task trực tiếp</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Metadata DB lưu thông tin nào quan trọng nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Metadata DB chứa trạng thái DAG/Task.')">A. Trạng thái DAG/Task và lịch sử run</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. DAG file nằm ở filesystem/git, không nằm chính trong metadata DB.')">B. Toàn bộ source DAG Python</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Worker có vai trò gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Worker chạy task instance.')">A. Thực thi task</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Webserver phục vụ giao diện.')">B. Render UI chính</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Webserver đọc dữ liệu trạng thái từ đâu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. UI đọc trạng thái từ metadata DB.')">A. Metadata DB</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Worker không phải nguồn lưu trạng thái chuẩn để UI đọc.')">B. Worker local log</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Điểm khác Scheduler và Executor là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Scheduler quyết định runnable, Executor quyết định cơ chế chạy.')">A. Scheduler quyết định runnable, Executor định cách thực thi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Hai thành phần này không trùng vai trò.')">B. Hoàn toàn giống nhau</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Idempotent task quan trọng vì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Retry/rerun không tạo duplicate sai.')">A. Retry an toàn, không nhân bản dữ liệu sai</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Idempotent không có nghĩa task chạy nhanh hơn.')">B. Luôn làm task chạy nhanh hơn</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Triggerer giúp tối ưu trường hợp nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Deferrable task không giữ worker slot.')">A. Deferrable sensor/task chờ dài</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Triggerer không thay thế transform CPU-bound.')">B. Task compute nặng thay Spark</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Heartbeat mất thường báo hiệu gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có thể component treo/chết.')">A. Component có thể gặp sự cố</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan tới CSS UI.')">B. Lỗi giao diện Webserver</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Bottleneck phổ biến khi scale Airflow?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Metadata DB thường là nút thắt.')">A. Độ trễ metadata DB</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Tên DAG dài không phải bottleneck chính.')">B. Tên DAG quá dài</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Tư duy production cốt lõi cho task là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có owner, audit và idempotent.')">A. Idempotent + owner + audit</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Retry vô hạn không phải best practice.')">B. Retry vô hạn, không cần audit</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Core</strong>Airflow điều phối, không thay transform engine.</div><div class="summary-item"><strong>Nút thắt</strong>Metadata DB ảnh hưởng toàn hệ thống.</div><div class="summary-item"><strong>Vận hành</strong>Task cần idempotent và observable.</div><div class="summary-item"><strong>Outcome</strong>Biết đọc sự cố theo component.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Thiết kế kiến trúc Airflow cho 3 pipeline</div><div class="practice-task-body"><ul><li>Liệt kê owner chính/phụ cho từng DAG.</li><li>Định nghĩa bảng audit tối thiểu.</li><li>Nêu điểm giám sát Scheduler và Worker.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>CREATE TABLE audit_pipeline_run (
+  pipeline_name VARCHAR(120),
+  run_id VARCHAR(120),
+  status VARCHAR(30),
+  started_at TIMESTAMP,
+  finished_at TIMESTAMP,
+  row_count BIGINT
+);</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><div></div><button class="nav-btn primary" onclick="goNext(0)">Sang W10.02</button></div>
+    </div>
+
+    <div class="module" id="m1">
+      <div class="module-header"><div class="module-tag">Tuần 10 · W10.02</div><div class="module-title">DAG Definition & Schedule</div><div class="module-subtitle">Thiết kế lịch chạy đúng data interval, timezone và SLA nghiệp vụ.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>schedule, start_date, catchup</li><li>data interval vs runtime</li><li>backfill strategy</li><li>timezone consistency</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Tránh backlog do cấu hình lịch sai.</li><li>Biết khi nào dùng catchup/backfill.</li><li>Chuẩn hóa lịch theo SLA business.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-header"><span>DAG mẫu</span></div><div class="cmd-body"><pre>with DAG(
+  dag_id="daily_profit_pipeline",
+  start_date=datetime(2026, 1, 1),
+  schedule="0 7 * * 1-5",
+  catchup=False,
+  max_active_runs=1
+) as dag:
+  ...</pre></div></div><div class="info-box warn">Data interval là khoảng dữ liệu chịu trách nhiệm, không phải thời điểm task bắt đầu chạy thực tế.</div><div class="tab-group" id="sqlg2"><div class="tab active" onclick="switchTab('sqlg2','sqlg2pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg2','sqlg2or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg2pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dataset_name, loaded_at
+FROM dataset_freshness
+WHERE loaded_at < NOW() - INTERVAL '1 day';</pre></div></div></div><div class="tab-content" id="sqlg2or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dataset_name, loaded_at
+FROM dataset_freshness
+WHERE loaded_at < SYSTIMESTAMP - INTERVAL '1' DAY;</pre></div></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">start_date nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là mốc scheduler bắt đầu xét lịch.')">A. Mốc logic bắt đầu xét lịch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải thời điểm deploy code.')">B. Giờ deploy code</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">catchup=True dùng cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tạo run lịch sử bị thiếu.')">A. Backfill lịch sử</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải tắt retry.')">B. Tắt retry</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">schedule=None nghĩa là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chỉ chạy manual/trigger.')">A. Không chạy tự động theo lịch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải chạy mỗi giờ.')">B. Chạy hourly</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">max_active_runs=1 giúp gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tránh chồng run gây ghi dữ liệu xung đột.')">A. Giới hạn run đồng thời</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không làm scheduler nhanh hơn trực tiếp.')">B. Tăng tốc parse DAG</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Data interval là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Là cửa sổ dữ liệu logic của run.')">A. Khoảng dữ liệu run chịu trách nhiệm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải giờ bạn click trigger.')">B. Giờ click trigger</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi nào nên backfill?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi thiếu dữ liệu lịch sử hoặc cần tính lại.')">A. Khi có khoảng ngày bị thiếu/cần rerun</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên backfill vô tội vạ.')">B. Luôn luôn backfill mỗi ngày</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Timezone nên xử lý thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần thống nhất timezone hệ thống và DAG.')">A. Thống nhất theo một chuẩn rõ ràng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Mỗi worker một timezone gây lệch dữ liệu.')">B. Mỗi worker chọn timezone riêng</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">depends_on_past=True nghĩa là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Run hiện tại phụ thuộc run trước cùng task.')">A. Cần run trước success mới chạy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan bỏ dependency.')">B. Bỏ dependency</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Near-real-time không cần lịch sử nên?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. catchup=False để tránh backlog không cần.')">A. catchup=False</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. catchup=True có thể tạo backlog lớn.')">B. catchup=True</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Cron 0 6 * * 1-5 là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. 06:00 các ngày làm việc.')">A. 06:00 từ thứ 2 đến thứ 6</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chạy cả tuần 7 ngày.')">B. 06:00 mỗi ngày</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Schedule</strong>Phải bám SLA và data interval.</div><div class="summary-item"><strong>Catchup</strong>Dùng có kiểm soát, không bật mặc định.</div><div class="summary-item"><strong>Timezone</strong>Thống nhất toàn hệ thống.</div><div class="summary-item"><strong>Safety</strong>max_active_runs giảm xung đột dữ liệu.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Thiết kế DAG daily_growth</div><div class="practice-task-body"><ul><li>Lịch chạy 07:00 ngày làm việc.</li><li>catchup=False, max_active_runs=1.</li><li>Tách DAG backfill riêng.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>schedule="0 7 * * 1-5"
+catchup=False
+max_active_runs=1</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(1)">Quay lại W10.01</button><button class="nav-btn primary" onclick="goNext(1)">Sang W10.03</button></div>
+    </div>
+
+    <div class="module" id="m2">
+      <div class="module-header"><div class="module-tag">Tuần 10 · W10.03</div><div class="module-title">Core Operators</div><div class="module-subtitle">Chọn đúng operator và thiết kế task idempotent.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>PythonOperator, BashOperator, SQLExecuteQueryOperator</li><li>TaskFlow API</li><li>Idempotent task</li><li>Pool và retry</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Hiểu khi nào dùng mỗi operator.</li><li>Giảm coupling logic trong DAG file.</li><li>Bảo vệ pipeline trước lỗi transient.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>extract = PythonOperator(...)
+transform = BashOperator(...)
+quality = SQLExecuteQueryOperator(...)
+extract >> transform >> quality</pre></div></div><div class="info-box tip">Task ghi dữ liệu cần idempotent: upsert/merge hoặc partition overwrite có kiểm soát.</div><div class="tab-group" id="sqlg3"><div class="tab active" onclick="switchTab('sqlg3','sqlg3pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg3','sqlg3or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg3pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT order_date, COUNT(*)
+FROM mart_orders
+WHERE order_date = CURRENT_DATE - INTERVAL '1 day'
+GROUP BY order_date;</pre></div></div></div><div class="tab-content" id="sqlg3or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT order_date, COUNT(*)
+FROM mart_orders
+WHERE order_date = TRUNC(SYSDATE) - 1
+GROUP BY order_date;</pre></div></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Operator nào chạy logic Python thuần?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. PythonOperator chạy callable Python.')">A. PythonOperator</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. BashOperator chạy shell command.')">B. BashOperator</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">BashOperator hợp với tác vụ nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. BashOperator phù hợp gọi CLI/script.')">A. Chạy shell script</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để render UI.')">B. Render web UI</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">SQLExecuteQueryOperator dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chạy SQL thông qua conn_id.')">A. Thực thi SQL trên DB</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để parse DAG.')">B. Parse DAG file</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">TaskFlow API hỗ trợ gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Return value có thể đi qua XCom tự động.')">A. Return value thành XCom tự động</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. TaskFlow không loại bỏ dependency.')">B. Không cần dependency</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Pool trong Airflow dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Pool giới hạn concurrency theo resource.')">A. Giới hạn số task dùng chung tài nguyên</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để đổi màu UI.')">B. Đổi theme DAG</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Retry nên đặt ở đâu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có thể đặt ở default_args hoặc từng task.')">A. default_args hoặc task-level</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ cấu hình trong UI.')">B. Chỉ cấu hình trên UI</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Rủi ro khi truyền input không kiểm soát vào BashOperator?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có nguy cơ command injection.')">A. Command injection</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan trực tiếp CSS.')">B. CSS bị lỗi</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Thiết kế logic lớn trong task nên làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách module giúp test và tái sử dụng.')">A. Tách ra module Python riêng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nhồi vào DAG khó bảo trì.')">B. Viết inline tất cả trong DAG</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Idempotent task giúp gì khi retry?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Retry không gây duplicate sai.')">A. Không nhân bản dữ liệu sai</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không tự giảm số DAG.')">B. Giảm số DAG cần thiết</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Gate chất lượng dữ liệu thường đặt ở đâu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đặt sau bước transform/load.')">A. Sau bước load/transform</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đặt trước extract không hiệu quả.')">B. Trước bước extract</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Operator fit</strong>Đúng loại việc, đúng operator.</div><div class="summary-item"><strong>Idempotent</strong>Nền tảng của retry an toàn.</div><div class="summary-item"><strong>Pool</strong>Bảo vệ tài nguyên dùng chung.</div><div class="summary-item"><strong>Quality gate</strong>Chặn dữ liệu rỗng/sai trước downstream.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Chuỗi extract-transform-quality</div><div class="practice-task-body"><ul><li>Dùng PythonOperator cho extract.</li><li>Dùng BashOperator cho transform script.</li><li>Dùng SQLExecuteQueryOperator làm quality gate.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>extract >> transform >> quality_check
+# fail nếu count(*) = 0</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(2)">Quay lại W10.02</button><button class="nav-btn primary" onclick="goNext(2)">Sang W10.04</button></div>
+    </div>
+
+    <div class="module" id="m3">
+      <div class="module-header"><div class="module-tag">Tuần 10 · W10.04</div><div class="module-title">Dependencies & XCom</div><div class="module-subtitle">Thiết kế luồng task rõ, giảm coupling và dùng XCom đúng phạm vi.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Bitshift dependency</li><li>XCom push/pull</li><li>Trigger rules</li><li>Branching/merge</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Vẽ dependency dễ đọc.</li><li>Không lạm dụng XCom cho payload lớn.</li><li>Dùng trigger_rule đúng cho cleanup.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>extract >> [validate, profile] >> load
+cleanup = EmptyOperator(trigger_rule='all_done')</pre></div></div><div class="info-box note">XCom chỉ phù hợp metadata nhỏ: row_count, file_path, status. Không nhét DataFrame lớn.</div><div class="tab-group" id="sqlg4"><div class="tab active" onclick="switchTab('sqlg4','sqlg4pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg4','sqlg4or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg4pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT COALESCE(s.order_date,t.order_date) AS order_date,
+       COALESCE(s.cnt_src,0) AS src_cnt,
+       COALESCE(t.cnt_tgt,0) AS tgt_cnt
+FROM src_daily_count s
+FULL OUTER JOIN tgt_daily_count t
+ON s.order_date=t.order_date;</pre></div></div></div><div class="tab-content" id="sqlg4or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT NVL(s.order_date,t.order_date) AS order_date,
+       NVL(s.cnt_src,0) AS src_cnt,
+       NVL(t.cnt_tgt,0) AS tgt_cnt
+FROM src_daily_count s
+FULL OUTER JOIN tgt_daily_count t
+ON s.order_date=t.order_date;</pre></div></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">A >> B nghĩa là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. B phụ thuộc A.')">A. B chạy sau A</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chiều phụ thuộc ngược lại.')">B. A chạy sau B</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">[A,B] >> C mặc định yêu cầu gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. all_success: A và B đều success.')">A. A và B đều success</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải chỉ một task xong là đủ.')">B. Một trong hai xong là chạy</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">XCom phù hợp cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Metadata nhỏ là use case chuẩn.')">A. Metadata nhỏ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Payload lớn gây quá tải metadata DB.')">B. Dataset 1GB</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Hàm thường dùng đọc XCom?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. xcom_pull là API phổ biến.')">A. xcom_pull</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đây không phải API Airflow.')">B. xcom_fetch_all</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">trigger_rule='all_done' hợp cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cleanup/notification cần chạy dù fail hay success.')">A. Cleanup và notification</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Task business chính thường dùng all_success.')">B. Task transform chính</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">TaskGroup có lợi ích gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tổ chức DAG dễ đọc hơn.')">A. Tổ chức luồng task trực quan</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay đổi engine scheduler.')">B. Thay thế Scheduler</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Branching không chọn nhánh thì trạng thái?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhánh không chọn sẽ skipped.')">A. skipped</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không tự động success.')">B. success</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Cross-DAG dependency nên ưu tiên?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ExternalTaskSensor/Dataset dependency rõ hơn.')">A. ExternalTaskSensor hoặc Dataset</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. XCom cross-DAG thủ công khó vận hành.')">B. XCom thủ công giữa DAG</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">set_downstream(B) của A tương đương?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tương đương A >> B.')">A. A >> B</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. A << B là chiều ngược.')">B. A << B</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Lý do giảm coupling giữa task?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dễ test, dễ thay đổi và giảm blast radius.')">A. Dễ bảo trì và debug</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Coupling cao thường làm DAG khó sửa.')">B. Để viết DAG ngắn bất chấp chất lượng</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Dependency</strong>Rõ ràng giúp giảm lỗi orchestration.</div><div class="summary-item"><strong>XCom</strong>Chỉ dành cho metadata nhỏ.</div><div class="summary-item"><strong>Trigger rule</strong>Rất quan trọng cho cleanup và nhánh merge.</div><div class="summary-item"><strong>Design</strong>Giảm coupling để pipeline bền vững.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Fan-out/Fan-in cho validate và profile</div><div class="practice-task-body"><ul><li>Thiết kế extract >> [validate, profile] >> load.</li><li>Dùng XCom truyền row_count.</li><li>Cleanup trigger_rule='all_done'.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>extract >> [validate, profile] >> load
+[load, validate, profile] >> cleanup</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">Quay lại W10.03</button><button class="nav-btn primary" onclick="goNext(3)">Sang W10.05</button></div>
+    </div>
+
+    <div class="module" id="m4">
+      <div class="module-header"><div class="module-tag">Tuần 10 · W10.05</div><div class="module-title">Variables, Connections, Secrets</div><div class="module-subtitle">Quản lý cấu hình/credential an toàn cho DAG production.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Variable vs Connection</li><li>Secrets backend</li><li>Mask secret</li><li>Config theo môi trường</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Không hardcode credential.</li><li>Thiết kế rotate secret không downtime.</li><li>Chuẩn hóa naming connection theo môi trường.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre># Variable
+airflow variables set alert_threshold "0.98"
+
+# Connection qua env
+AIRFLOW_CONN_WAREHOUSE_CONN='postgresql://user:pass@host:5432/dwh'</pre></div></div><div class="info-box warn">Nguyên tắc: Variable cho config không nhạy cảm, Connection/Secrets backend cho credential.</div><table><tr><th>Thành phần</th><th>Dùng cho</th></tr><tr><td>Variable</td><td>Ngưỡng quality, tên schema, flag cấu hình</td></tr><tr><td>Connection</td><td>Host/user/password/schema/extras</td></tr><tr><td>Secrets backend</td><td>Lưu secret tập trung, rotate định kỳ</td></tr></table></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Variable phù hợp cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Config không nhạy cảm.')">A. Config không nhạy cảm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Password nên đặt ở Connection/Secrets backend.')">B. Password production</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Connection chứa gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Thông tin kết nối dịch vụ.')">A. Host/user/password/extras</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng cho CSS theme.')">B. Cấu hình giao diện UI</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Nơi không nên lưu credential?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không hardcode trong DAG file.')">A. Trong source DAG</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Secrets backend là nơi phù hợp.')">B. Secrets backend</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Lợi ích chính của Secrets backend?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Quản lý tập trung và rotate dễ.')">A. Quản lý và rotate secret tập trung</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để thay scheduler.')">B. Thay vai trò scheduler</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">AIRFLOW_CONN_* cho phép?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Định nghĩa connection bằng environment variable.')">A. Nạp connection runtime qua env</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan reset DAG state.')">B. Reset DAG state</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Connection extras dùng cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chứa cấu hình nâng cao như SSL.')">A. SSL và tham số nâng cao</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để đặt owner.')">B. Tên owner DAG</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Least privilege nghĩa là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chỉ cấp quyền tối thiểu cần thiết.')">A. Quyền tối thiểu cần dùng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dùng admin cho mọi task là rủi ro.')">B. Dùng admin cho toàn bộ pipeline</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Mask secret trong log nhằm?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tránh lộ thông tin nhạy cảm.')">A. Bảo vệ thông tin nhạy cảm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nhằm tăng tốc runtime.')">B. Tăng tốc DAG</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Nhiều môi trường dev/stg/prod nên?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách config rõ ràng theo môi trường.')">A. Tách config + naming convention</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên dùng chung một credential.')">B. Dùng chung toàn bộ credential</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Nguồn cấu hình ưu tiên cho secret?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng hệ quản trị bảo mật chuyên dụng.')">A. Secrets backend/Connection quản trị</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Comment code không an toàn.')">B. Comment trong DAG</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Variable</strong>Cho config không nhạy cảm.</div><div class="summary-item"><strong>Connection</strong>Cho thông tin kết nối.</div><div class="summary-item"><strong>Secrets backend</strong>Cho quản trị secret production.</div><div class="summary-item"><strong>Security</strong>Least privilege + masking + rotate.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Chuẩn hóa config dbt_daily cho dev/stg/prod</div><div class="practice-task-body"><ul><li>Tách Variable: dq_null_threshold, freshness_hours.</li><li>Tách Connection theo env.</li><li>Đề xuất lịch rotate secret.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>conn_id = "warehouse_conn_prod"
+null_threshold = float(Variable.get("dq_null_threshold", 0.01))</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(4)">Quay lại W10.04</button><button class="nav-btn primary" onclick="goNext(4)">Sang W10.06</button></div>
+    </div>
+
+    <div class="module" id="m5">
+      <div class="module-header"><div class="module-tag">Tuần 10 · W10.06</div><div class="module-title">Sensors & ExternalTaskSensor</div><div class="module-subtitle">Giảm nghẽn worker khi chờ điều kiện và phối hợp liên DAG.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>poke vs reschedule</li><li>timeout, soft_fail</li><li>deferrable sensor</li><li>ExternalTaskSensor</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Không để sensor giữ slot worker quá lâu.</li><li>Biết đặt timeout phù hợp SLA.</li><li>Thiết lập dependency liên DAG rõ ràng.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>wait_file = FileSensor(mode="reschedule", poke_interval=120, timeout=3600)
+wait_upstream = ExternalTaskSensor(external_dag_id="daily_growth", mode="reschedule")</pre></div></div><div class="info-box note">reschedule và deferrable giúp nhả slot worker trong thời gian chờ dài.</div><div class="tab-group" id="sqlg6"><div class="tab active" onclick="switchTab('sqlg6','sqlg6pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg6','sqlg6or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg6pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, waited_seconds
+FROM sensor_wait_audit
+WHERE run_date = CURRENT_DATE
+ORDER BY waited_seconds DESC;</pre></div></div></div><div class="tab-content" id="sqlg6or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, waited_seconds
+FROM sensor_wait_audit
+WHERE run_date = TRUNC(SYSDATE)
+ORDER BY waited_seconds DESC;</pre></div></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Sensor dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chờ điều kiện trước khi chạy downstream.')">A. Chờ điều kiện sẵn sàng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để scale DB.')">B. Scale database</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">mode='reschedule' nghĩa là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhả worker slot giữa các lần check.')">A. Nhả slot worker khi chờ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. poke mới giữ slot liên tục.')">B. Giữ slot worker liên tục</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">mode='poke' có đặc điểm?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Giữ slot worker trong lúc chờ.')">A. Chiếm slot worker liên tục</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nhả slot là reschedule/deferrable.')">B. Luôn nhả slot</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">ExternalTaskSensor phù hợp khi?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chờ task ở DAG khác hoàn thành.')">A. Chờ task của DAG upstream</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để nén file csv.')">B. Nén file CSV</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">timeout có ý nghĩa?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Quá thời gian thì fail/skip tùy cấu hình.')">A. Chặn chờ vô hạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không tự reset metadata DB.')">B. Tự reset metadata DB</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">soft_fail=True thường dẫn đến?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Sensor có thể skipped thay vì fail cứng.')">A. skipped khi timeout</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải luôn success.')">B. luôn success</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Deferrable sensor tiết kiệm tài nguyên bằng cách?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đẩy trạng thái chờ sang Triggerer.')">A. Chuyển chờ sang Triggerer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải bằng cách bỏ check điều kiện.')">B. Bỏ qua check</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">HttpSensor dùng cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Poll API endpoint readiness.')">A. Kiểm tra endpoint API</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để viết SQL transform.')">B. Chạy SQL transform</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Sensor file trên NAS cần chú ý gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Worker phải truy cập được path thực tế.')">A. Worker có quyền/path truy cập</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan theme webserver.')">B. Theme webserver</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Tối ưu khi có nhiều sensor chờ dài?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng reschedule/deferrable + timeout hợp lý.')">A. reschedule/deferrable và timeout rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. poke_interval=1s thường gây quá tải.')">B. poke_interval=1 giây cho tất cả</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Sensor</strong>Chờ điều kiện upstream/data source.</div><div class="summary-item"><strong>reschedule</strong>Giảm tắc slot worker.</div><div class="summary-item"><strong>timeout</strong>Ngăn pipeline treo.</div><div class="summary-item"><strong>ExternalTaskSensor</strong>Chuẩn hoá phụ thuộc liên DAG.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Chờ file + chờ DAG upstream</div><div class="practice-task-body"><ul><li>Dùng FileSensor mode=reschedule.</li><li>Dùng ExternalTaskSensor chờ quality_daily.publish.</li><li>Đặt timeout theo SLA.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>wait_file >> wait_upstream >> run_orders_pipeline</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">Quay lại W10.05</button><button class="nav-btn primary" onclick="goNext(5)">Sang W10.07</button></div>
+    </div>
+
+    <div class="module" id="m6">
+      <div class="module-header"><div class="module-tag">Tuần 10 · W10.07</div><div class="module-title">Dynamic DAGs</div><div class="module-subtitle">Tạo DAG theo config nhưng vẫn giữ parse-time nhẹ và ID ổn định.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>DAG factory</li><li>Deterministic dag_id/task_id</li><li>Parse-time guardrails</li><li>Khi nào tách DAG riêng</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Giảm lặp code cho nhiều pipeline cùng mẫu.</li><li>Không để scheduler nghẽn vì parse nặng.</li><li>Biết giới hạn của dynamic DAG.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>def build_dag(cfg):
+  dag_id = f"orders_pipeline_{cfg['region']}"
+  with DAG(dag_id=dag_id, schedule=cfg['schedule'], catchup=False):
+    ...
+  return dag
+
+for cfg in PIPELINE_CONFIGS:
+  globals()[build_dag(cfg).dag_id] = build_dag(cfg)</pre></div></div><div class="info-box warn">Không gọi API/DB nặng ở parse-time. Validate config trước khi tạo DAG.</div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Dynamic DAG phù hợp khi?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhiều pipeline cùng template là use case điển hình.')">A. Nhiều pipeline cùng khuôn mẫu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Một pipeline đơn lẻ có thể không cần dynamic.')">B. Chỉ một DAG đơn giản</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Yêu cầu quan trọng cho task_id?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ID phải deterministic để giữ lịch sử run.')">A. Ổn định và deterministic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. ID ngẫu nhiên phá lịch sử trạng thái.')">B. Random mỗi ngày</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern parse-time phổ biến?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Gọi API/DB nặng lúc import DAG.')">A. Query API/DB nặng khi import</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đặt owner không phải anti-pattern.')">B. Đặt owner cho DAG</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">DAG factory là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Hàm sinh DAG từ config.')">A. Hàm tạo DAG theo cấu hình</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải plugin UI.')">B. Plugin đổi giao diện</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khác owner/SLA quá lớn nên?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách DAG riêng để vận hành rõ.')">A. Tách DAG riêng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nhồi chung dễ rối ownership.')">B. Nhồi chung một DAG động</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">DagBag test dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kiểm tra DAG parse/import trước deploy.')">A. Bắt lỗi import sớm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để đổi cron runtime.')">B. Đổi lịch cron tự động</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Cấu hình dynamic nên lưu ở đâu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần nguồn cấu hình có version/review.')">A. Nguồn versioned có review</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Hardcode rải rác khó kiểm soát.')">B. Hardcode rải rác trong code</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Sinh quá nhiều DAG trong một file có rủi ro?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Parse chậm và UI nặng.')">A. Scheduler parse chậm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không làm SQL syntax tự sai.')">B. SQL syntax tự động sai</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Mục tiêu cốt lõi của dynamic DAG?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tăng tái sử dụng và chuẩn hóa.')">A. Giảm lặp và tăng tái sử dụng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nhằm làm code khó đọc.')">B. Làm code phức tạp hơn</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Guardrail tối thiểu cần có?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Validate config + ID ổn định.')">A. Validate config trước build</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Bỏ test import dễ gây mất DAG trong scheduler.')">B. Bỏ hoàn toàn test import</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Dynamic fit</strong>Dùng khi nhiều pipeline cùng mẫu.</div><div class="summary-item"><strong>ID ổn định</strong>Bảo toàn lịch sử và trạng thái.</div><div class="summary-item"><strong>Parse nhẹ</strong>Không query nặng khi import.</div><div class="summary-item"><strong>Quyết định tách</strong>Tách DAG khi khác biệt owner/SLA lớn.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Sinh 2 DAG theo region từ config</div><div class="practice-task-body"><ul><li>Tạo config gồm region/schedule/owner.</li><li>Validate key bắt buộc.</li><li>Đăng ký DAG vào globals().</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>required = {"region","schedule","owner"}
+if not required.issubset(cfg.keys()):
+  raise ValueError("Thiếu key")</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">Quay lại W10.06</button><button class="nav-btn primary" onclick="goNext(6)">Sang W10.08</button></div>
+    </div>
+
+    <div class="module" id="m7">
+      <div class="module-header"><div class="module-tag">Tuần 10 · W10.08</div><div class="module-title">dbt + Airflow</div><div class="module-subtitle">Kết hợp orchestration của Airflow với transform graph của dbt.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>dbt seed -> run -> test</li><li>Quality gate sau dbt</li><li>run_results.json observability</li><li>Retry cho lỗi transient</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Chuẩn hóa DAG điều phối dbt theo lịch.</li><li>Fail-fast khi dbt test fail.</li><li>Bổ sung SQL gate cho rule nghiệp vụ nhạy cảm.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>dbt_seed >> dbt_run >> dbt_test >> dq_null_check</pre></div></div><p>Airflow điều phối lịch/dependency/alert; dbt chịu trách nhiệm transform model.</p><div class="tab-group" id="sqlg8"><div class="tab active" onclick="switchTab('sqlg8','sqlg8pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg8','sqlg8or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg8pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT COUNT(*) AS null_profit_rows
+FROM mart_profit_daily
+WHERE ds = CURRENT_DATE - INTERVAL '1 day'
+AND unit_profit IS NULL;</pre></div></div></div><div class="tab-content" id="sqlg8or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT COUNT(*) AS null_profit_rows
+FROM mart_profit_daily
+WHERE ds = TRUNC(SYSDATE) - 1
+AND unit_profit IS NULL;</pre></div></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Vì sao orchestration dbt bằng Airflow?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Quản lý lịch, dependency, alert tập trung.')">A. Quản lý lịch và alert tập trung</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để thay dbt compiler.')">B. Thay thế dbt compiler</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Thứ tự thường dùng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. seed -> run -> test.')">A. dbt seed -> dbt run -> dbt test</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đảo thứ tự làm mất ý nghĩa gate.')">B. dbt test -> dbt run -> dbt seed</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">dbt test fail thì nên?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Fail DAG và alert để chặn publish dữ liệu sai.')">A. Fail pipeline + alert</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên publish tiếp.')">B. Vẫn publish downstream</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">--select tag:daily dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chọn model có tag daily.')">A. Chạy phạm vi model theo tag</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải chạy tất cả model.')">B. Bắt buộc chạy toàn bộ model</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">run_results.json hữu ích cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng cho telemetry và phân tích lỗi.')">A. Observability model/test</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để lưu mật khẩu.')">B. Lưu secret kết nối</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Retry quanh dbt task phù hợp khi?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Lỗi transient network/warehouse.')">A. Lỗi tạm thời</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Lỗi logic model cần fix code.')">B. Lỗi SQL logic cố định</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Vì sao thêm SQL custom check sau dbt test?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bắt rule nghiệp vụ đặc thù ngoài generic tests.')">A. Bổ sung business rule đặc thù</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để tăng số task cho đẹp.')">B. Chỉ để tăng số task</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Model incremental khi backfill cần lưu ý?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần giới hạn window và key rõ ràng.')">A. Truyền phạm vi dữ liệu rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể bỏ key duy nhất.')">B. Bỏ unique key</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">dbt source freshness nên chạy khi?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kiểm sớm trước transform nặng.')">A. Trước transform nặng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chạy quá muộn sẽ tốn tài nguyên.')">B. Sau khi publish dashboard</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Mục tiêu dbt + Airflow?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách rõ orchestration và transform, tăng độ tin cậy.')">A. Pipeline rõ vai trò và đáng tin cậy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nhằm bỏ monitoring.')">B. Loại bỏ observability</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Phân vai</strong>Airflow orchestration, dbt transform.</div><div class="summary-item"><strong>Gate</strong>dbt test là chốt chất lượng bắt buộc.</div><div class="summary-item"><strong>SQL custom</strong>Bổ sung rule nghiệp vụ.</div><div class="summary-item"><strong>Telemetry</strong>Đọc artifact để debug nhanh.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Tạo DAG dbt_daily_profit</div><div class="practice-task-body"><ul><li>Tạo 3 task dbt seed/run/test.</li><li>Thêm SQL null-check sau dbt_test.</li><li>Fail khi vượt ngưỡng null.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>dbt_seed >> dbt_run >> dbt_test >> dq_null_check</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">Quay lại W10.07</button><button class="nav-btn primary" onclick="goNext(7)">Sang W10.09</button></div>
+    </div>
+
+    <div class="module" id="m8">
+      <div class="module-header"><div class="module-tag">Tuần 10 · W10.09</div><div class="module-title">Retry, Timeout, SLA Miss</div><div class="module-subtitle">Tăng reliability bằng retries, execution_timeout, SLA và alert callback.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Retry strategy</li><li>execution_timeout vs SLA</li><li>on_failure_callback</li><li>cleanup all_done</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Phân biệt lỗi retryable và non-retryable.</li><li>Hiểu SLA miss không đồng nghĩa fail kỹ thuật.</li><li>Thiết kế alert đủ ngữ cảnh cho on-call.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>default_args = {
+  "retries": 3,
+  "retry_delay": timedelta(minutes=5),
+  "retry_exponential_backoff": True,
+  "max_retry_delay": timedelta(minutes=30)
+}
+
+task.execution_timeout = timedelta(minutes=25)
+task.sla = timedelta(minutes=40)</pre></div></div><div class="info-box note">SLA miss là tín hiệu trễ thời gian; task vẫn có thể đang chạy hoặc hoàn thành muộn.</div><div class="tab-group" id="sqlg9"><div class="tab active" onclick="switchTab('sqlg9','sqlg9pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg9','sqlg9or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg9pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, run_date, delay_minutes
+FROM sla_breach_audit
+WHERE run_date >= CURRENT_DATE - INTERVAL '7 day'
+ORDER BY delay_minutes DESC;</pre></div></div></div><div class="tab-content" id="sqlg9or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, run_date, delay_minutes
+FROM sla_breach_audit
+WHERE run_date >= TRUNC(SYSDATE) - 7
+ORDER BY delay_minutes DESC;</pre></div></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Retry hợp cho loại lỗi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Retry cho lỗi transient tạm thời.')">A. Lỗi transient</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Lỗi logic cố định cần sửa code.')">B. Lỗi logic cố định</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">execution_timeout dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Giới hạn thời gian chạy task.')">A. Chặn task chạy quá lâu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không đổi cron schedule.')">B. Đổi lịch DAG</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">SLA miss có nghĩa task fail ngay?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không bắt buộc fail kỹ thuật.')">A. Không</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải lúc nào cũng fail.')">B. Có, luôn fail</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">retry_exponential_backoff giúp?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tăng dần khoảng chờ retry để giảm áp lực.')">A. Tăng dần delay retry</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải giảm dần delay.')">B. Giảm dần delay retry</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">max_retry_delay là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Giới hạn trần delay retry.')">A. Trần của retry delay</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan số worker.')">B. Số worker tối đa</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Cleanup task nên dùng trigger_rule nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. all_done để luôn chạy.')">A. all_done</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. all_success không đảm bảo cleanup sau fail.')">B. all_success</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Task không idempotent + retry có thể gây?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dễ duplicate/sai dữ liệu.')">A. Duplicate dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không làm pipeline an toàn hơn.')">B. Tăng độ an toàn</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Alert tốt nên có gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. owner + run_id + runbook link.')">A. Ngữ cảnh xử lý: owner/runbook/run_id</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ báo fail chung không đủ hành động.')">B. Chỉ chữ "Task fail"</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi nào cần tách retryable/non-retryable?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Để fail-fast lỗi logic và retry lỗi tạm thời.')">A. Khi cần tránh retry vô ích</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên bỏ qua phân loại lỗi.')">B. Không bao giờ cần phân loại</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Bộ reliability chuẩn gồm?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. retries + timeout + SLA + alert.')">A. Retry + timeout + SLA + alert</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ retries là chưa đủ.')">B. Chỉ retries</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Retry</strong>Không thay thế idempotent design.</div><div class="summary-item"><strong>Timeout</strong>Chặn task treo kéo dài.</div><div class="summary-item"><strong>SLA</strong>Đo độ đúng giờ nghiệp vụ.</div><div class="summary-item"><strong>Alert</strong>Phải đủ ngữ cảnh để xử lý ngay.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Nâng reliability cho investor_profit_daily</div><div class="practice-task-body"><ul><li>Đặt retries + exponential backoff.</li><li>Thêm execution_timeout theo baseline.</li><li>Bật SLA + callback alert.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>retries=3
+retry_exponential_backoff=True
+execution_timeout=timedelta(minutes=20)
+sla=timedelta(minutes=30)</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(8)">Quay lại W10.08</button><button class="nav-btn primary" onclick="goNext(8)">Sang W10.10</button></div>
+    </div>
+
+    <div class="module" id="m9">
+      <div class="module-header"><div class="module-tag">Tuần 10 · W10.10</div><div class="module-title">Artifact airflow_dags/</div><div class="module-subtitle">Chuẩn bàn giao thư mục DAG và tài liệu chạy local cho learner/team.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Cấu trúc artifact bắt buộc</li><li>4 DAG mẫu theo roadmap</li><li>README local setup</li><li>Quality + backfill strategy</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Biết các file bàn giao tối thiểu.</li><li>Hiểu vai trò từng DAG.</li><li>Viết README giúp người mới tự chạy được.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>airflow_dags/
+├── dags/
+│   ├── etl_orders_daily.py
+│   ├── dbt_pipeline.py
+│   ├── data_quality_check.py
+│   └── backfill_historical.py
+└── README.md</pre></div></div><div class="info-box tip">README nên có: docker compose up, tạo connection/variable, trigger test DAG, xem log, teardown.</div><div class="tab-group" id="sqlg10"><div class="tab active" onclick="switchTab('sqlg10','sqlg10pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg10','sqlg10or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg10pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT ds, COUNT(*) total_rows,
+SUM(CASE WHEN unit_profit IS NULL THEN 1 ELSE 0 END) null_profit_rows
+FROM mart_profit_daily
+GROUP BY ds
+ORDER BY ds DESC
+LIMIT 7;</pre></div></div></div><div class="tab-content" id="sqlg10or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT ds, COUNT(*) total_rows,
+SUM(CASE WHEN unit_profit IS NULL THEN 1 ELSE 0 END) null_profit_rows
+FROM mart_profit_daily
+GROUP BY ds
+ORDER BY ds DESC
+FETCH FIRST 7 ROWS ONLY;</pre></div></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">etl_orders_daily.py thường dùng cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là DAG daily ETL chính.')">A. ETL hằng ngày</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Backfill lịch sử thuộc DAG khác.')">B. Chỉ backfill lịch sử</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">data_quality_check.py có mục tiêu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kiểm row count/null/freshness.')">A. Chạy quality gate</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để render dashboard.')">B. Render dashboard</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">backfill_historical.py dùng khi?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nạp lại dữ liệu khoảng ngày lịch sử.')">A. Bổ sung dữ liệu lịch sử</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải run daily mặc định.')">B. Chạy daily cố định</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">README artifact cần ưu tiên nội dung gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Hướng dẫn setup và chạy local rõ từng bước.')">A. Setup + chạy local + verify</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Ảnh minh hoạ không thay thế hướng dẫn thao tác.')">B. Chỉ ảnh minh hoạ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Vì sao nên tách DAG quality riêng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Giảm coupling, chạy độc lập.')">A. Vận hành độc lập và rõ trách nhiệm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để code dài hơn.')">B. Để tăng độ dài code</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">DAG backfill nên có tham số gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. start_date/end_date để kiểm soát phạm vi.')">A. start_date/end_date</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan theme CSS.')">B. Mã màu giao diện</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Kiểm thử CI tối thiểu cho thư mục dags?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. DagBag import test không lỗi.')">A. DagBag import test</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đếm số dòng code không đủ chất lượng.')">B. Đếm số dòng code</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Tag DAG theo domain giúp gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Hỗ trợ lọc vận hành theo business area.')">A. Quan sát theo business area</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không làm SQL nhanh hơn trực tiếp.')">B. Tăng tốc SQL tự động</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Chuẩn artifact tốt là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chạy được, giám sát được, khôi phục được.')">A. Có thể chạy và vận hành thực tế</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ cần tên file đẹp.')">B. Chỉ cần cấu trúc file đẹp</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Mục tiêu tuần 10-11 qua artifact là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Thể hiện orchestration end-to-end có quality/backfill.')">A. Thực chiến orchestration đầy đủ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ demo UI.')">B. Chỉ demo giao diện Airflow</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Artifact đầy đủ</strong>daily + dbt + quality + backfill.</div><div class="summary-item"><strong>README</strong>Bắt buộc để learner tự học.</div><div class="summary-item"><strong>CI</strong>Import test trước deploy.</div><div class="summary-item"><strong>Bàn giao</strong>Ownership và checklist rõ ràng.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Thiết kế bộ airflow_dags cho team 4 người</div><div class="practice-task-body"><ul><li>Gán owner chính/phụ từng DAG.</li><li>Viết README 5 bước chạy local.</li><li>Tạo checklist quality trước publish.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>- [ ] etl_orders_daily success
+- [ ] dbt_pipeline success
+- [ ] data_quality_check pass
+- [ ] không có SLA miss critical</pre></div></div></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(9)">Quay lại W10.09</button><button class="nav-btn primary" onclick="goNext(9)">Sang W10.11</button></div>
+    </div>
+
+    <div class="module" id="m10">
+      <div class="module-header"><div class="module-tag">Tuần 11 · W10.11</div><div class="module-title">Mini Test + Vận hành thực chiến</div><div class="module-subtitle">Củng cố toàn bộ tuần 10-11 với runbook, on-call fairness và mini test cuối tuần.</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Ôn tổng hợp Airflow orchestration</li><li>Runbook và escalation path</li><li>On-call fairness team 4 người</li><li>Mini test 18 câu</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Kết nối kỹ thuật và vận hành.</li><li>Biết phản ứng khi pipeline critical fail.</li><li>Tự đánh giá mức sẵn sàng production mindset.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Mỗi pipeline critical phải có <strong>primary + secondary owner</strong>.</li><li>Runbook cần: impact, kiểm tra nhanh, cách rerun/backfill, escalation.</li><li>Lịch trực nên xoay vòng công bằng, có cơ chế bù ngày lễ.</li></ul><div class="cmd-block"><div class="cmd-body"><pre>W1: A(primary), B(secondary)
+W2: C(primary), D(secondary)
+W3: B(primary), A(secondary)
+W4: D(primary), C(secondary)</pre></div></div><div class="info-box warn">Investor pipeline luôn là ưu tiên cao vì ảnh hưởng trực tiếp báo cáo kinh doanh.</div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Pipeline critical fail lặp lại, bước đầu tiên?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đánh giá impact và theo runbook với owner rõ.')">A. Xác định impact + owner + runbook</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên rerun mù ngay.')">B. Rerun vô hạn ngay lập tức</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Runbook tốt cần có?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Impact, owner, checklist kiểm tra, escalation.')">A. Impact + owner + bước xử lý + escalation</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ tên DAG là không đủ.')">B. Chỉ tên DAG</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">On-call công bằng cho team 4 người là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Xoay vòng primary/secondary có bù ngày lễ.')">A. Rotation rõ ràng và có bù ca</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Một người trực mãi sẽ không bền.')">B. Một người trực liên tục</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Investor pipeline ưu tiên mức nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là luồng ưu tiên cao.')">A. Cao</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Ưu tiên thấp là không phù hợp.')">B. Thấp</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Nhiều sensor chờ dài nên ưu tiên mode?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. reschedule/deferrable tiết kiệm slot hơn poke.')">A. reschedule hoặc deferrable</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. poke thường tốn slot hơn.')">B. poke cho tất cả</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">XCom bền vững nên chứa gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chỉ metadata nhỏ cần thiết.')">A. Metadata nhỏ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Payload lớn gây phình metadata DB.')">B. Payload lớn</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">SLA miss khác task fail thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. SLA miss là trễ thời gian, không luôn fail kỹ thuật.')">A. SLA miss là tín hiệu trễ, không đồng nghĩa fail</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Hai khái niệm không đồng nhất.')">B. SLA miss luôn bằng fail</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Guardrail chính của dynamic DAG?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Validate config và ID ổn định.')">A. Validate config + deterministic ID</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. ID random làm khó truy vết.')">B. ID random</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">dbt test + SQL gate sau đó nhằm?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chặn dữ liệu sai trước publish.')">A. Tăng độ tin cậy dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để tăng số task.')">B. Chỉ để nhiều task hơn</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Nguyên tắc vận hành bền vững nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Fail-fast, observable, owner rõ.')">A. Fail-fast + observable + ownership rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Ẩn lỗi sẽ tạo nợ vận hành.')">B. Giấu lỗi để giảm ồn</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Ops mindset</strong>Kỹ thuật + runbook + ownership.</div><div class="summary-item"><strong>Fairness</strong>On-call bền vững cần rotation rõ.</div><div class="summary-item"><strong>Criticality</strong>Investor pipeline luôn ưu tiên cao.</div><div class="summary-item"><strong>Readiness</strong>Tự kiểm tra bằng mini test cuối tuần.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Viết runbook cho investor_profit_daily</div><div class="practice-task-body"><ul><li>Nêu impact nếu trễ > 2 giờ.</li><li>Liệt kê 5 bước điều tra nhanh.</li><li>Lập lịch trực 4 tuần có bù ngày lễ.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>1) Xác định impact dashboard
+2) Kiểm freshness upstream
+3) Xem root cause từ log/metadata
+4) Quyết định rerun/backfill
+5) Báo stakeholder + ghi postmortem</pre></div></div></div></div></div></div></div>
+
+      <div class="section" id="final-test"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">★</div>Mini Test Cuối Tuần (18 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="test-question" data-q="1" data-correct="B"><div class="test-question-title">1. Thành phần quyết định task runnable?</div><div class="test-options"><label class="test-option"><input type="radio" name="q1" value="A"> A. Worker</label><label class="test-option"><input type="radio" name="q1" value="B"> B. Scheduler</label><label class="test-option"><input type="radio" name="q1" value="C"> C. Webserver</label><label class="test-option"><input type="radio" name="q1" value="D"> D. Connection</label></div></div>
+        <div class="test-question" data-q="2" data-correct="B"><div class="test-question-title">2. catchup=True dùng để?</div><div class="test-options"><label class="test-option"><input type="radio" name="q2" value="A"> A. Bỏ run cũ</label><label class="test-option"><input type="radio" name="q2" value="B"> B. Backfill lịch sử</label><label class="test-option"><input type="radio" name="q2" value="C"> C. Tăng CSS UI</label><label class="test-option"><input type="radio" name="q2" value="D"> D. Tắt retry</label></div></div>
+        <div class="test-question" data-q="3" data-correct="C"><div class="test-question-title">3. Operator chạy SQL qua connection?</div><div class="test-options"><label class="test-option"><input type="radio" name="q3" value="A"> A. PythonOperator</label><label class="test-option"><input type="radio" name="q3" value="B"> B. BashOperator</label><label class="test-option"><input type="radio" name="q3" value="C"> C. SQLExecuteQueryOperator</label><label class="test-option"><input type="radio" name="q3" value="D"> D. FileSensor</label></div></div>
+        <div class="test-question" data-q="4" data-correct="B"><div class="test-question-title">4. XCom phù hợp nhất cho?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> A. DataFrame lớn</label><label class="test-option"><input type="radio" name="q4" value="B"> B. Metadata nhỏ</label><label class="test-option"><input type="radio" name="q4" value="C"> C. File 2GB</label><label class="test-option"><input type="radio" name="q4" value="D"> D. Ảnh</label></div></div>
+        <div class="test-question" data-q="5" data-correct="B"><div class="test-question-title">5. Credential nên đặt ở đâu?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> A. Hardcode DAG</label><label class="test-option"><input type="radio" name="q5" value="B"> B. Connection/Secrets backend</label><label class="test-option"><input type="radio" name="q5" value="C"> C. README</label><label class="test-option"><input type="radio" name="q5" value="D"> D. Tên task</label></div></div>
+        <div class="test-question" data-q="6" data-correct="B"><div class="test-question-title">6. Mode sensor nào nhả worker slot?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> A. poke</label><label class="test-option"><input type="radio" name="q6" value="B"> B. reschedule</label><label class="test-option"><input type="radio" name="q6" value="C"> C. manual</label><label class="test-option"><input type="radio" name="q6" value="D"> D. none</label></div></div>
+        <div class="test-question" data-q="7" data-correct="B"><div class="test-question-title">7. Guardrail quan trọng của dynamic DAG?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> A. ID ngẫu nhiên</label><label class="test-option"><input type="radio" name="q7" value="B"> B. Validate config + ID ổn định</label><label class="test-option"><input type="radio" name="q7" value="C"> C. Không cần test import</label><label class="test-option"><input type="radio" name="q7" value="D"> D. Bỏ owner</label></div></div>
+        <div class="test-question" data-q="8" data-correct="B"><div class="test-question-title">8. dbt test fail trong pipeline critical thì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> A. Vẫn publish</label><label class="test-option"><input type="radio" name="q8" value="B"> B. Fail pipeline + alert</label><label class="test-option"><input type="radio" name="q8" value="C"> C. Tắt scheduler</label><label class="test-option"><input type="radio" name="q8" value="D"> D. Bỏ test</label></div></div>
+        <div class="test-question" data-q="9" data-correct="A"><div class="test-question-title">9. execution_timeout áp dụng cho?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Thời gian chạy task</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Thời gian parse DAG</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Login UI</label><label class="test-option"><input type="radio" name="q9" value="D"> D. Số user</label></div></div>
+        <div class="test-question" data-q="10" data-correct="B"><div class="test-question-title">10. SLA miss có chắc chắn fail không?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. Có</label><label class="test-option"><input type="radio" name="q10" value="B"> B. Không</label><label class="test-option"><input type="radio" name="q10" value="C"> C. Chỉ sensor</label><label class="test-option"><input type="radio" name="q10" value="D"> D. Chỉ dbt</label></div></div>
+        <div class="test-question" data-q="11" data-correct="C"><div class="test-question-title">11. DAG nào thường xử lý dữ liệu lịch sử?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. etl_orders_daily.py</label><label class="test-option"><input type="radio" name="q11" value="B"> B. dbt_pipeline.py</label><label class="test-option"><input type="radio" name="q11" value="C"> C. backfill_historical.py</label><label class="test-option"><input type="radio" name="q11" value="D"> D. README.md</label></div></div>
+        <div class="test-question" data-q="12" data-correct="B"><div class="test-question-title">12. README artifact nên chứa?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. Ảnh nền đẹp</label><label class="test-option"><input type="radio" name="q12" value="B"> B. Setup và chạy local</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Emoji</label><label class="test-option"><input type="radio" name="q12" value="D"> D. Bỏ trống</label></div></div>
+        <div class="test-question" data-q="13" data-correct="C"><div class="test-question-title">13. Investor metrics pipeline lỗi nên ưu tiên?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. Thấp</label><label class="test-option"><input type="radio" name="q13" value="B"> B. Trung bình</label><label class="test-option"><input type="radio" name="q13" value="C"> C. Cao</label><label class="test-option"><input type="radio" name="q13" value="D"> D. Không ưu tiên</label></div></div>
+        <div class="test-question" data-q="14" data-correct="B"><div class="test-question-title">14. On-call công bằng cần?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. Một người trực liên tục</label><label class="test-option"><input type="radio" name="q14" value="B"> B. Rotation primary/secondary + bù lễ</label><label class="test-option"><input type="radio" name="q14" value="C"> C. Không cần secondary</label><label class="test-option"><input type="radio" name="q14" value="D"> D. Ai online thì trực</label></div></div>
+        <div class="test-question" data-q="15" data-correct="B"><div class="test-question-title">15. PostgreSQL và Oracle thường khác ở phần nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Tên bảng luôn khác</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Hàm/interval thời gian</label><label class="test-option"><input type="radio" name="q15" value="C"> C. Không khác gì</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Chỉ khác comment</label></div></div>
+        <div class="test-question" data-q="16" data-correct="B"><div class="test-question-title">16. Vì sao task cần idempotent khi retry?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. Để log đẹp hơn</label><label class="test-option"><input type="radio" name="q16" value="B"> B. Tránh duplicate/sai dữ liệu</label><label class="test-option"><input type="radio" name="q16" value="C"> C. Bỏ monitoring</label><label class="test-option"><input type="radio" name="q16" value="D"> D. Giảm số DAG</label></div></div>
+        <div class="test-question" data-q="17" data-correct="B"><div class="test-question-title">17. ExternalTaskSensor dùng để?</div><div class="test-options"><label class="test-option"><input type="radio" name="q17" value="A"> A. Chạy SQL nặng</label><label class="test-option"><input type="radio" name="q17" value="B"> B. Chờ task DAG khác</label><label class="test-option"><input type="radio" name="q17" value="C"> C. Xóa dữ liệu</label><label class="test-option"><input type="radio" name="q17" value="D"> D. Tạo variable</label></div></div>
+        <div class="test-question" data-q="18" data-correct="B"><div class="test-question-title">18. Mục đầu quan trọng trong runbook sự cố?</div><div class="test-options"><label class="test-option"><input type="radio" name="q18" value="A"> A. Màu giao diện</label><label class="test-option"><input type="radio" name="q18" value="B"> B. Impact + owner + escalation</label><label class="test-option"><input type="radio" name="q18" value="C"> C. Số dòng code</label><label class="test-option"><input type="radio" name="q18" value="D"> D. Tên laptop dev</label></div></div>
+
+        <div class="test-actions"><button class="nav-btn primary" onclick="gradeFinalTest()">Chấm điểm</button><button class="nav-btn" onclick="resetFinalTest()">Làm lại</button></div>
+        <div id="final-test-result" class="test-result"></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(10)">Quay lại W10.10</button><div></div></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function showModule(index, el) {
+  const modules = document.querySelectorAll('.module');
+  const navItems = document.querySelectorAll('.nav-item');
+  modules.forEach((m, i) => m.classList.toggle('active', i === index));
+  navItems.forEach((n, i) => n.classList.toggle('active', i === index));
+  const target = document.getElementById('m' + index);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function goNext(current) {
+  const next = current + 1;
+  const navItems = document.querySelectorAll('.nav-item');
+  if (next < navItems.length) showModule(next, navItems[next]);
+}
+
+function goPrev(current) {
+  const prev = current - 1;
+  const navItems = document.querySelectorAll('.nav-item');
+  if (prev >= 0) showModule(prev, navItems[prev]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const quizItem = el.closest('.quiz-item');
+  const options = quizItem.querySelectorAll('.quiz-opt');
+  const explain = quizItem.querySelector('.quiz-explain');
+
+  options.forEach(o => {
+    o.style.pointerEvents = 'none';
+    if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+      o.classList.add('correct');
+    }
+  });
+  if (!correct) el.classList.add('wrong');
+
+  explain.textContent = (correct ? 'Chính xác. ' : 'Chưa đúng. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? 'Ẩn lời giải' : 'Xem lời giải';
+}
+
+function switchTab(groupId, tabId) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  const tabs = group.querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  const clickedTab = group.querySelector(`[onclick*="${tabId}"]`);
+  if (clickedTab) clickedTab.classList.add('active');
+  const siblings = group.parentElement.querySelectorAll('.tab-content');
+  siblings.forEach(c => c.classList.remove('active'));
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (percent >= 90) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn đã sẵn sàng vận hành Airflow ở mức production mindset.'; }
+  else if (percent >= 80) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Bạn đạt ngưỡng khuyến nghị. Có thể chuyển sang project thực chiến.'; }
+  else if (percent >= 65) { levelText = 'Đạt tối thiểu'; chipClass = 'warn'; guidance = 'Nên ôn lại các module còn yếu trước khi qua tuần tiếp theo.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Hãy quay lại W10.01-W10.10 và luyện thêm bài thực hành.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul>${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đáp án đúng <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng.</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+
+</body>
+</html>

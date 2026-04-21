@@ -1,4 +1,4 @@
-1.
+1. STEP 1
 Use project rules from .claude.
 
 Current task:
@@ -189,7 +189,7 @@ First clearly identify:
 
 Then perform the upgrade.
 
-2.
+2. STEP2 REVIEW 
 Use project rules from .claude.
 
 Review Week13_Cloud_AWS.html after upgrade.

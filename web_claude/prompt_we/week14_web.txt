@@ -1,0 +1,185 @@
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+Nguồn chính:
+- Repo: D:\TaiLieu\Data Engineer\DE Roadmap\DE-Learning\data-engineer-handbook ( được clone từ https://github.com/DataExpert-io/data-engineer-handbook)
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nhiệm vụ:
+Hãy tạo file HTML hoàn chỉnh tên: Week14_Data_Warehouse.html
+
+Mục tiêu:
+Tạo tutorial HTML tương tác cho chủ đề:
+Tuần 14 – Modern Data Warehouse & Lakehouse
+
+YÊU CẦU NGUỒN THÔNG TIN:
+- Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
+- Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
+- Dùng roadmap để bám đúng scope tuần 14
+- Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
+- Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
+
+YÊU CẦU QUAN TRỌNG:
+- Output phải là tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Phải viết theo mindset của Data Engineer / Analytics Engineer, không phải marketing overview
+- Nội dung phải practical, production-oriented, không chỉ giới thiệu tên công cụ
+- Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
+- Không dùng placeholder như "..." hoặc "viết tương tự"
+- Mỗi module phải đầy đủ nội dung thật
+- Nếu chưa fetch được full repo thì phải nói rõ phần nào lấy từ repo trực tiếp, phần nào lấy từ roadmap, phần nào là suy luận hợp lý
+
+CẤU TRÚC FILE PHẢI GIỮ:
+Mỗi module PHẢI có đủ 6 section theo thứ tự:
+1. 📋 Menu Tổng Thể
+2. 🎯 Mục Đích Module
+3. 📖 Giải Thích Chi Tiết
+4. ❓ Câu Hỏi Ôn Tập
+5. 📌 Tổng Kết
+6. 🔬 Bài Tập Thực Hành
+
+FORMAT PHẢI GIỐNG FILE MẪU:
+- Hero banner
+- Badge row
+- Sidebar fixed 290px
+- Main content
+- Modules display:none, active display:block
+- Collapsible sections
+- Terminal-style code blocks
+- Info boxes: tip / warn / note
+- Interactive quiz
+- Practice task có nút xem lời giải
+- Mini test cuối file
+- Responsive mobile
+- Tất cả CSS inline trong <style>
+- Tất cả JS inline trong <script>
+- Không dùng framework ngoài
+
+JAVASCRIPT FUNCTIONS PHẢI CÓ:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+PHẠM VI NỘI DUNG TUẦN 14:
+Tên: Tuần 14 – Modern Data Warehouse & Lakehouse
+File: Week14_Data_Warehouse.html
+
+Các module bắt buộc:
+- W14.01 – Tổng Quan: Từ PostgreSQL sang Modern Data Warehouse
+- W14.02 – Columnar Storage, Partitioning & Clustering
+- W14.03 – Snowflake, BigQuery, Redshift: Khác Nhau Ở Đâu
+- W14.04 – Schema-on-Write vs Schema-on-Read
+- W14.05 – Lakehouse Mindset: Data Lake + Warehouse
+- W14.06 – Apache Iceberg: Table Format, Time Travel, Schema Evolution
+- W14.07 – dbt trên Warehouse: Migration từ PostgreSQL sang Cloud DW
+- W14.08 – Cost Control, Performance Tuning & Query Patterns
+- W14.09 – Artifact: warehouse_migration/ hoàn chỉnh
+- W14.10 – Mini Test Tổng Kết
+
+NỘI DUNG CẦN BAO PHỦ:
+- Vì sao PostgreSQL local không còn đủ khi dữ liệu và workload analytics tăng
+- Vì sao warehouse hiện đại dùng columnar storage
+- Khác nhau giữa row-based OLTP và columnar analytics engines
+- Partitioning, clustering, pruning, materialized view mindset
+- So sánh Snowflake / BigQuery / Redshift theo góc nhìn DE:
+  - compute/storage separation
+  - concurrency
+  - cost model
+  - operational overhead
+  - ecosystem fit
+- Schema-on-write vs schema-on-read:
+  - khi nào strict schema hữu ích
+  - khi nào flexible schema hữu ích
+  - rủi ro của mỗi cách
+- Lakehouse:
+  - vì sao Data Lake thuần không đủ
+  - vì sao Warehouse thuần đôi khi đắt / thiếu linh hoạt
+  - Lakehouse như lớp dung hòa
+- Apache Iceberg:
+  - table format là gì
+  - metadata layers
+  - snapshots
+  - time travel
+  - schema evolution
+  - partition evolution
+  - ACID trên object storage
+- dbt migration:
+  - điều chỉnh source / target profile
+  - model materialization khác nhau
+  - incremental model trên warehouse
+  - source freshness
+  - warehouse-specific optimization mindset
+- Cost & performance:
+  - partition pruning
+  - limit scan bytes
+  - avoid SELECT *
+  - materialized views
+  - file sizing / compaction mindset nếu phù hợp
+  - warehouse cost trade-off
+- Artifact warehouse_migration/ gồm:
+  - dbt_project/
+  - profiles_example/
+  - migration_notes.md
+  - cost_comparison.md
+  - iceberg_demo.md
+  - README.md mô tả kiến trúc, migration steps, cost/performance notes
+
+YÊU CẦU CODE / CONFIG / SQL:
+- Ở các phần liên quan, hãy minh họa bằng nội dung thật, không pseudo-code:
+  - CREATE TABLE ví dụ theo warehouse mindset nếu phù hợp
+  - partition / clustering examples
+  - BigQuery / Snowflake / Redshift SQL examples khi hợp lý
+  - dbt config examples cho materialized table / incremental
+  - source freshness config
+  - example query anti-pattern vs optimized pattern
+  - Iceberg DDL / concept examples nếu hợp lý
+- Nếu project rules yêu cầu tabs, có thể dùng tab như:
+  - PostgreSQL
+  - BigQuery
+  - Snowflake
+  - Redshift
+  - dbt
+- Giải thích ngắn gọn sự khác biệt, không chỉ dán code
+
+YÊU CẦU QUIZ:
+- Mỗi module phải có đúng 10 câu hỏi
+- Mỗi câu hỏi có đúng 4 đáp án A/B/C/D
+- Phải có giải thích cho từng đáp án
+- Giải thích đáp án sai phải nói rõ vì sao sai
+
+YÊU CẦU PRACTICE:
+- Mỗi module có bài tập thực hành thực tế
+- Có nút “💡 Xem lời giải”
+- Lời giải phải hữu ích, không sơ sài
+- Practice nên hướng tới migration / design / cost / performance decision thực tế
+
+YÊU CẦU MINI TEST CUỐI FILE:
+- Module cuối phải có mini test tổng kết
+- 15–20 câu hỏi
+- Có chấm điểm
+- Có reset
+
+YÊU CẦU CHẤT LƯỢNG:
+- Phải sâu, đầy đủ, thực chiến
+- Ưu tiên chất lượng giảng dạy hơn tốc độ
+- Có warehouse mindset rõ ràng
+- Có migration mindset, performance mindset, cost mindset
+- Không quá ngắn gọn
+- Nội dung phải đủ tốt để học như một tutorial thật
+- Phải giúp người học hiểu “tại sao chọn warehouse này thay vì warehouse kia”
+- Phải giải thích rõ sự khác nhau giữa Data Warehouse, Data Lake và Lakehouse
+
+TRƯỚC KHI VIẾT FILE:
+Hãy nói rõ ngắn gọn:
+1. Bạn đã lấy được nội dung nào trực tiếp từ repo
+2. Bạn đang dùng roadmap ở phần nào
+3. Bạn sẽ giữ format nào từ file mẫu
+
+SAU ĐÓ:
+Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week14_Data_Warehouse.html

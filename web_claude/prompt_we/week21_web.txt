@@ -1,0 +1,189 @@
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+Nguồn chính:
+- Repo: D:\TaiLieu\Data Engineer\DE Roadmap\DE-Learning\data-engineer-handbook ( được clone từ https://github.com/DataExpert-io/data-engineer-handbook)
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nhiệm vụ:
+Hãy tạo file HTML hoàn chỉnh tên: Week21_Analytical_Patterns.html
+
+Mục tiêu:
+Tạo tutorial HTML tương tác cho chủ đề:
+Tuần 21 – Analytical Patterns cho Data Engineer
+
+YÊU CẦU NGUỒN THÔNG TIN:
+- Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
+- Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
+- Dùng roadmap để bám đúng scope tuần 21
+- Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
+- Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
+
+YÊU CẦU QUAN TRỌNG:
+- Output phải là tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Phải viết theo mindset của Data Engineer / Analytics Engineer
+- Nội dung phải practical, production-oriented, gắn với bài toán analytics thực tế
+- Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
+- Không dùng placeholder như "..." hoặc "viết tương tự"
+- Mỗi module phải đầy đủ nội dung thật
+- Nếu chưa fetch được full repo thì phải nói rõ phần nào lấy từ repo trực tiếp, phần nào lấy từ roadmap, phần nào là suy luận hợp lý
+
+CẤU TRÚC FILE PHẢI GIỮ:
+Mỗi module PHẢI có đủ 6 section theo thứ tự:
+1. 📋 Menu Tổng Thể
+2. 🎯 Mục Đích Module
+3. 📖 Giải Thích Chi Tiết
+4. ❓ Câu Hỏi Ôn Tập
+5. 📌 Tổng Kết
+6. 🔬 Bài Tập Thực Hành
+
+FORMAT PHẢI GIỐNG FILE MẪU:
+- Hero banner
+- Badge row
+- Sidebar fixed 290px
+- Main content
+- Modules display:none, active display:block
+- Collapsible sections
+- Terminal-style code blocks
+- Info boxes: tip / warn / note
+- Interactive quiz
+- Practice task có nút xem lời giải
+- Mini test cuối file
+- Responsive mobile
+- Tất cả CSS inline trong <style>
+- Tất cả JS inline trong <script>
+- Không dùng framework ngoài
+
+JAVASCRIPT FUNCTIONS PHẢI CÓ:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+PHẠM VI NỘI DUNG TUẦN 21:
+Tên: Tuần 21 – Analytical Patterns cho Data Engineer
+File: Week21_Analytical_Patterns.html
+
+Các module bắt buộc:
+- W21.01 – Tổng Quan: Từ Dữ Liệu Thô đến Analytical Patterns
+- W21.02 – State Change Tracking: Theo Dõi Thay Đổi Trạng Thái Theo Thời Gian
+- W21.03 – GROUPING SETS, ROLLUP, CUBE cho Phân Tích Đa Chiều
+- W21.04 – Streak Analysis & Consecutive Activity Patterns
+- W21.05 – Funnel Analysis: Theo Dõi Conversion Qua Từng Bước
+- W21.06 – Cohort Analysis & Retention
+- W21.07 – Attribution Modeling: First-Touch, Last-Touch, Multi-Touch
+- W21.08 – Analytical Patterns trong Production: Table Design & Performance
+- W21.09 – Artifact: analytical_patterns/ hoàn chỉnh
+- W21.10 – Mini Test Tổng Kết
+
+NỘI DUNG CẦN BAO PHỦ:
+- Analytical patterns là gì:
+  - không chỉ là query ad hoc
+  - là các pattern lặp lại phục vụ KPI, dashboard, experimentation, product insight
+  - cần data model, grain, event definition rõ ràng
+- State change tracking:
+  - theo dõi entity đổi trạng thái theo thời gian
+  - ví dụ user subscription, order status, ticket lifecycle
+  - event table vs current snapshot
+  - SQL pattern để detect transition
+- GROUPING SETS / ROLLUP / CUBE:
+  - phân tích đa chiều
+  - subtotal và grand total
+  - khi nào dùng thay vì nhiều UNION ALL
+  - đọc output đúng cách
+- Streak analysis:
+  - consecutive active days
+  - gap-and-island pattern
+  - user engagement use case
+  - rolling activity patterns
+- Funnel analysis:
+  - event steps
+  - ordered conversion
+  - drop-off per step
+  - session-based vs user-based funnel
+  - pitfalls khi đếm funnel
+- Cohort analysis:
+  - cohort theo first activity / signup / first purchase
+  - retention day 1 / day 7 / day 30
+  - cohort matrix
+  - difference giữa retention và reactivation nếu phù hợp
+- Attribution modeling:
+  - first-touch
+  - last-touch
+  - multi-touch
+  - marketing / product attribution basics
+  - giới hạn của mô hình attribution đơn giản
+- Production considerations:
+  - grain definition
+  - event quality
+  - deduplication
+  - late-arriving events
+  - partitioning / indexing / materialized summaries nếu phù hợp
+- Artifact analytical_patterns/ gồm:
+  - state_change_tracking.sql
+  - grouping_sets_multidim.sql
+  - streak_analysis.sql
+  - funnel_analysis.sql
+  - cohort_retention.sql
+  - attribution_modeling.sql
+  - README.md mô tả use case, assumptions, grain, pitfalls
+
+YÊU CẦU SQL:
+- Ở các phần liên quan, hãy minh họa bằng nội dung thật, không pseudo-code
+- Ưu tiên PostgreSQL SQL
+- Nếu hợp lý, có thể bổ sung thêm warehouse-oriented SQL mindset
+- Bao phủ:
+  - state transition queries
+  - grouping sets queries
+  - streak / gap-and-island queries
+  - funnel queries
+  - cohort matrix queries
+  - attribution logic queries
+- Nếu project rules yêu cầu tabs, có thể dùng tab như:
+  - PostgreSQL
+  - Warehouse SQL
+  - Notes
+- Giải thích ngắn gọn sự khác nhau giữa các cách tiếp cận
+
+YÊU CẦU QUIZ:
+- Mỗi module phải có đúng 10 câu hỏi
+- Mỗi câu hỏi có đúng 4 đáp án A/B/C/D
+- Phải có giải thích cho từng đáp án
+- Giải thích đáp án sai phải nói rõ vì sao sai
+
+YÊU CẦU PRACTICE:
+- Mỗi module có bài tập thực hành thực tế
+- Có nút “💡 Xem lời giải”
+- Lời giải phải hữu ích, không sơ sài
+- Practice nên hướng tới event analytics, KPI logic, retention/funnel/state reasoning thực tế
+
+YÊU CẦU MINI TEST CUỐI FILE:
+- Module cuối phải có mini test tổng kết
+- 15–20 câu hỏi
+- Có chấm điểm
+- Có reset
+
+YÊU CẦU CHẤT LƯỢNG:
+- Phải sâu, đầy đủ, thực chiến
+- Ưu tiên chất lượng giảng dạy hơn tốc độ
+- Có analytics mindset rõ ràng
+- Có event-modeling mindset, conversion mindset, retention mindset
+- Không quá ngắn gọn
+- Nội dung phải đủ tốt để học như một tutorial thật
+- Phải giúp người học hiểu “vì sao query/pattern này đúng cho bài toán business này”
+- Phải tránh biến tutorial thành danh sách query mẫu rời rạc
+
+TRƯỚC KHI VIẾT FILE:
+Hãy nói rõ ngắn gọn:
+1. Bạn đã lấy được nội dung nào trực tiếp từ repo
+2. Bạn đang dùng roadmap ở phần nào
+3. Bạn sẽ giữ format nào từ file mẫu
+
+SAU ĐÓ:
+Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week21_Analytical_Patterns.html

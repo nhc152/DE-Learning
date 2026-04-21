@@ -1,0 +1,245 @@
+1.
+Use project rules from .claude.
+
+Current task:
+Upgrade Week21_Analytical_Patterns.html into a high-quality tutorial file for Analytical Patterns in Data Engineering.
+
+The final version should intelligently combine:
+1. strengths of the current file
+2. stronger repository-backed improvements
+3. better teaching quality
+4. more realistic production-grade analytical pattern guidance
+
+Allowed sources only:
+- ./Week21_Analytical_Patterns.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not read any other files.
+
+CORE PRINCIPLES:
+- Do NOT blindly overwrite the current file
+- Do NOT assume newer content is always better
+- Treat the current file as valuable content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or incorrect content
+- Final result must feel like one polished tutorial
+
+UPGRADE STRATEGY:
+1. Audit the current file first
+2. Preserve strong current sections
+3. Identify missing analytical pattern topics
+4. Read local repository sources for stronger depth
+5. Merge improvements intelligently
+6. If both old and new versions are useful, combine them
+7. Remove duplicated content
+8. Improve clarity, depth, and practical value
+
+IMPORTANT PRESERVATION RULE:
+If the current version contains strong conceptual explanations, KEEP and enrich them.
+
+Examples:
+- good state change tracking explanation
+- useful grouping sets examples
+- practical streak / gap-and-island explanation
+- strong funnel analysis guidance
+- realistic cohort retention logic
+- useful attribution modeling comparisons
+- strong artifact structure
+
+CURRENT / TARGET STRUCTURE TO PRESERVE:
+
+- W21.01 – Tổng Quan: Từ Dữ Liệu Thô đến Analytical Patterns
+- W21.02 – State Change Tracking: Theo Dõi Thay Đổi Trạng Thái Theo Thời Gian
+- W21.03 – GROUPING SETS, ROLLUP, CUBE cho Phân Tích Đa Chiều
+- W21.04 – Streak Analysis & Consecutive Activity Patterns
+- W21.05 – Funnel Analysis: Theo Dõi Conversion Qua Từng Bước
+- W21.06 – Cohort Analysis & Retention
+- W21.07 – Attribution Modeling: First-Touch, Last-Touch, Multi-Touch
+- W21.08 – Analytical Patterns trong Production: Table Design & Performance
+- W21.09 – Artifact: analytical_patterns/ hoàn chỉnh
+- W21.10 – Mini Test Tổng Kết
+
+TOPICS TO ENSURE STRONG COVERAGE:
+
+W21.01
+- what analytical patterns are
+- from raw events to reusable logic
+- why grain and event definitions matter
+- business-facing analytical workflows
+
+W21.02
+- state transition logic
+- entity lifecycle tracking
+- event logs vs snapshots
+- transition detection queries
+- practical business use cases
+
+W21.03
+- grouping sets
+- rollup
+- cube
+- subtotals and totals
+- multidimensional analysis
+- when these beat UNION ALL patterns
+
+W21.04
+- streak analysis
+- consecutive activity
+- gap-and-island
+- rolling engagement patterns
+- realistic product analytics use cases
+
+W21.05
+- funnel step ordering
+- conversion logic
+- drop-off analysis
+- user-based vs session-based funnel
+- pitfalls in funnel counting
+
+W21.06
+- cohort definition
+- retention windows
+- cohort matrix
+- retention vs reactivation
+- practical retention reading
+
+W21.07
+- first-touch attribution
+- last-touch attribution
+- multi-touch basics
+- attribution limitations
+- marketing/product analytics trade-offs
+
+W21.08
+- production considerations
+- grain definition
+- data quality
+- deduplication
+- late-arriving events
+- performance optimization
+- materialized summaries
+
+W21.09
+- complete analytical_patterns artifact
+- SQL files
+- README
+- assumptions and pitfalls
+- realistic project organization
+
+W21.10
+- final mini test
+
+SQL / TECHNICAL REQUIREMENTS:
+- Include realistic SQL where relevant
+- Use believable analytics examples
+- Include:
+  - state transition queries
+  - grouping sets queries
+  - streak queries
+  - funnel queries
+  - cohort queries
+  - attribution queries
+- Avoid shallow toy snippets
+
+QUALITY GOALS:
+- Keep Vietnamese output
+- Preserve HTML structure, CSS, layout, and JS interactions
+- Keep compatibility with Week00_Setup.html style
+- Keep required 6-section structure for each module
+- Keep 10 review questions per module
+- Keep final mini test working
+- Improve teaching quality and production realism
+- No placeholders
+- Do not rebuild from scratch unless necessary
+
+EXPECTED RESULT:
+Update only Week21_Analytical_Patterns.html
+
+BEFORE EDITING:
+First clearly identify:
+1. Which current sections should be preserved
+2. Which Analytical Pattern topics are missing or weak
+3. Which repository-backed improvements should be merged in
+
+Then perform the upgrade.
+
+2.
+Use project rules from .claude.
+
+Review Week21_Analytical_Patterns.html after upgrade.
+
+CHECK CONTENT QUALITY:
+- duplicated sections
+- weak explanations
+- poor teaching flow
+- shallow analytical pattern explanations
+- inconsistent wording
+- weak state change tracking explanation
+- weak grouping sets explanation
+- weak streak analysis explanation
+- weak funnel explanation
+- weak cohort retention explanation
+- weak attribution modeling explanation
+- weak production considerations
+- weak artifact guidance
+- Did any strong old section get removed unnecessarily?
+- Is the final file better than before?
+
+CHECK STRUCTURE:
+- broken HTML
+- broken CSS layout
+- missing required 6-section structure in any module
+- incorrect module order
+- unfinished placeholders
+- repeated content
+
+CHECK INTERACTIVITY:
+- broken quiz logic
+- missing 10 review questions in any module
+- broken JavaScript interactions
+- broken navigation
+- broken toggle sections
+- broken solution buttons
+- broken final test grading/reset
+
+CHECK ANALYTICAL / TECHNICAL QUALITY:
+- weak state transition SQL
+- weak grouping sets examples
+- weak streak / gap-and-island logic
+- weak funnel counting logic
+- weak cohort matrix examples
+- weak attribution examples
+- unrealistic production advice
+- does the tutorial explain why each pattern maps to a specific business question?
+
+CHECK TEACHING QUALITY:
+- Is the tutorial teaching analytical patterns for Data Engineers, not just SQL tricks?
+- Are trade-offs clearly explained?
+- Are anti-patterns mentioned where useful?
+- Is grain awareness visible?
+- Is event-model awareness visible?
+- Is KPI/business interpretation visible?
+- Are examples coherent across modules?
+
+CHECK ARTIFACT QUALITY:
+- Is analytical_patterns/ artifact complete and realistic?
+- Do the SQL files match the narrative?
+- Does README explain assumptions, grain, pitfalls, and use cases clearly?
+- Is the artifact portfolio-worthy?
+
+FIX RULES:
+- Fix all broken HTML / JS / quiz logic
+- Strengthen weak explanations
+- Remove duplicated content
+- Improve SQL examples for state/funnel/cohort/attribution
+- Improve production and business reasoning
+- Preserve strong original content where useful
+- Keep everything in Vietnamese
+- Keep final file polished and cohesive
+
+EXPECTED RESULT:
+Return the improved final content for Week21_Analytical_Patterns.html only.

@@ -1,0 +1,186 @@
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+Nguồn chính:
+- Repo: D:\TaiLieu\Data Engineer\DE Roadmap\DE-Learning\data-engineer-handbook ( được clone từ https://github.com/DataExpert-io/data-engineer-handbook)
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nhiệm vụ:
+Hãy tạo file HTML hoàn chỉnh tên: Week15_Data_Integration.html
+
+Mục tiêu:
+Tạo tutorial HTML tương tác cho chủ đề:
+Tuần 15 – Data Integration & Ingestion Tools
+
+YÊU CẦU NGUỒN THÔNG TIN:
+- Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
+- Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
+- Dùng roadmap để bám đúng scope tuần 15
+- Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
+- Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
+
+YÊU CẦU QUAN TRỌNG:
+- Output phải là tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Phải viết theo mindset của Data Engineer, không phải tool marketing overview
+- Nội dung phải practical, production-oriented, không chỉ liệt kê công cụ
+- Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
+- Không dùng placeholder như "..." hoặc "viết tương tự"
+- Mỗi module phải đầy đủ nội dung thật
+- Nếu chưa fetch được full repo thì phải nói rõ phần nào lấy từ repo trực tiếp, phần nào lấy từ roadmap, phần nào là suy luận hợp lý
+
+CẤU TRÚC FILE PHẢI GIỮ:
+Mỗi module PHẢI có đủ 6 section theo thứ tự:
+1. 📋 Menu Tổng Thể
+2. 🎯 Mục Đích Module
+3. 📖 Giải Thích Chi Tiết
+4. ❓ Câu Hỏi Ôn Tập
+5. 📌 Tổng Kết
+6. 🔬 Bài Tập Thực Hành
+
+FORMAT PHẢI GIỐNG FILE MẪU:
+- Hero banner
+- Badge row
+- Sidebar fixed 290px
+- Main content
+- Modules display:none, active display:block
+- Collapsible sections
+- Terminal-style code blocks
+- Info boxes: tip / warn / note
+- Interactive quiz
+- Practice task có nút xem lời giải
+- Mini test cuối file
+- Responsive mobile
+- Tất cả CSS inline trong <style>
+- Tất cả JS inline trong <script>
+- Không dùng framework ngoài
+
+JAVASCRIPT FUNCTIONS PHẢI CÓ:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+PHẠM VI NỘI DUNG TUẦN 15:
+Tên: Tuần 15 – Data Integration & Ingestion Tools
+File: Week15_Data_Integration.html
+
+Các module bắt buộc:
+- W15.01 – Tổng Quan: ELT, ETL và Vai Trò của Data Integration
+- W15.02 – Airbyte: Connector-Based Ingestion
+- W15.03 – dlt: Python-Native Data Loading
+- W15.04 – Fivetran, Managed ELT & Khi Nào Nên Trả Tiền
+- W15.05 – CDC: Debezium, Log-Based vs Trigger-Based
+- W15.06 – Schema Evolution, Drift & Pipeline Resilience
+- W15.07 – Chọn Công Cụ Nào: Airbyte vs dlt vs Fivetran
+- W15.08 – Artifact: data_ingestion/ hoàn chỉnh
+- W15.09 – Mini Test Tổng Kết
+
+NỘI DUNG CẦN BAO PHỦ:
+- Vai trò của ingestion trong data platform:
+  - source systems → raw layer → staging / warehouse
+  - ingestion không chỉ là copy data
+  - reliability, freshness, schema stability, ownership
+- ELT vs ETL:
+  - vì sao ELT thắng thế với cloud warehouse
+  - khi nào ETL vẫn hợp lý
+  - transform nên đặt ở đâu
+- Airbyte:
+  - connector-based mindset
+  - source / destination / connection
+  - sync mode
+  - full refresh vs incremental
+  - state management basics
+  - custom connector concept
+  - ưu và nhược điểm
+- dlt:
+  - Python-native ingestion
+  - phù hợp cho API, custom business logic, lightweight loading
+  - pipeline pattern
+  - load từ API vào warehouse
+  - incremental loading concept
+  - schema inference / control
+- Fivetran:
+  - managed ELT
+  - ưu điểm về tốc độ triển khai, reliability, maintenance
+  - nhược điểm về cost / control
+  - khi nào startup / team nhỏ / enterprise nên dùng
+- CDC:
+  - Change Data Capture là gì
+  - log-based CDC vs trigger-based CDC
+  - Debezium concept
+  - latency / reliability / source DB impact
+  - use cases thật
+- Schema evolution:
+  - thêm cột mới
+  - đổi type
+  - column missing / renamed
+  - pipeline breakage
+  - contract mindset cho ingestion
+- Decision framework:
+  - khi nào dùng Airbyte
+  - khi nào dùng dlt
+  - khi nào dùng Fivetran
+  - trade-off: cost, speed, flexibility, ops burden
+- Artifact data_ingestion/ gồm:
+  - airbyte/connection_config.json
+  - dlt_pipeline/load_api_to_dw.py
+  - cdc_demo/debezium_config.json
+  - README.md mô tả khi nào dùng Airbyte vs dlt vs Fivetran
+  - architecture.md mô tả flow source → raw → warehouse
+
+YÊU CẦU CODE / CONFIG:
+- Ở các phần liên quan, hãy minh họa bằng nội dung thật, không pseudo-code:
+  - Airbyte connection config example
+  - dlt pipeline Python example
+  - API pagination example
+  - incremental loading example
+  - Debezium config example
+  - schema evolution handling example
+- Nếu project rules yêu cầu tabs, có thể dùng tab như:
+  - Airbyte
+  - Python
+  - JSON
+  - SQL
+- Giải thích ngắn gọn sự khác nhau giữa các cách tiếp cận
+
+YÊU CẦU QUIZ:
+- Mỗi module phải có đúng 10 câu hỏi
+- Mỗi câu hỏi có đúng 4 đáp án A/B/C/D
+- Phải có giải thích cho từng đáp án
+- Giải thích đáp án sai phải nói rõ vì sao sai
+
+YÊU CẦU PRACTICE:
+- Mỗi module có bài tập thực hành thực tế
+- Có nút “💡 Xem lời giải”
+- Lời giải phải hữu ích, không sơ sài
+- Practice nên hướng tới ingestion design, schema drift handling, tool selection thực tế
+
+YÊU CẦU MINI TEST CUỐI FILE:
+- Module cuối phải có mini test tổng kết
+- 15–20 câu hỏi
+- Có chấm điểm
+- Có reset
+
+YÊU CẦU CHẤT LƯỢNG:
+- Phải sâu, đầy đủ, thực chiến
+- Ưu tiên chất lượng giảng dạy hơn tốc độ
+- Có ingestion mindset rõ ràng
+- Có reliability mindset, schema evolution mindset, ops mindset
+- Không quá ngắn gọn
+- Nội dung phải đủ tốt để học như một tutorial thật
+- Phải giúp người học hiểu “tại sao chọn công cụ này thay vì công cụ kia”
+
+TRƯỚC KHI VIẾT FILE:
+Hãy nói rõ ngắn gọn:
+1. Bạn đã lấy được nội dung nào trực tiếp từ repo
+2. Bạn đang dùng roadmap ở phần nào
+3. Bạn sẽ giữ format nào từ file mẫu
+
+SAU ĐÓ:
+Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week15_Data_Integration.html
