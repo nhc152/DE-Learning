@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 8-9 · dbt: Data Build Tool</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 290px; min-width: 290px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--accent2); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 48px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 980px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>⚙️ Tuần 8-9 · dbt: Data Build Tool</h1>
+  <p>Giai đoạn 2 · Core Skills · ELT, Modeling, Testing, Documentation, Snapshot, Macros</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 2 · Core Skills</span>
+    <span class="badge badge-orange">Tuần 8-9 · dbt</span>
+    <span class="badge badge-blue">PostgreSQL + Oracle SQL</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">CHƯƠNG TRÌNH HỌC</div>
+    <div class="level-label">▶ TUẦN 8-9 · DBT</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W8.01</span>dbt là gì & ELT vs ETL</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W8.02</span>Project Structure & Configuration</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W8.03</span>Models: view/table/incremental/ephemeral</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W8.04</span>ref() và source(): Dependency</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W8.05</span>Built-in Tests & Custom Tests</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W8.06</span>Documentation với schema.yml</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W8.07</span>Snapshots: SCD2 bằng dbt</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W8.08</span>Macros & DRY Principle</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W8.09</span>dbt Commands Cheat Sheet</div>
+    <div class="nav-item" onclick="showModule(9,this)"><span class="nav-number">W8.10</span>Artifact: dbt_project/ hoàn chỉnh</div>
+    <div class="nav-item" onclick="showModule(10,this)"><span class="nav-number">W8.11</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="m0">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.01 · dbt là gì & ELT vs ETL</div>
+        <div class="module-subtitle">Định vị dbt trong data platform và production mindset</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:9%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+            <tr><td>B1</td><td>Hiểu dbt là lớp Transform trong ELT</td><td>20 phút</td></tr>
+            <tr><td>B2</td><td>So sánh ELT và ETL theo góc nhìn vận hành</td><td>20 phút</td></tr>
+            <tr><td>B3</td><td>Khóa phạm vi tuần 8-9 đúng roadmap</td><td>15 phút</td></tr>
+            <tr><td>B4</td><td>Thiết lập checklist production mindset</td><td>15 phút</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <ul>
+            <li>Phân biệt rõ dbt với ingestion tool và orchestration tool.</li>
+            <li>Hiểu lý do ELT phù hợp với cloud warehouse trong modern data stack.</li>
+            <li>Nắm đúng scope tuần 8-9 theo roadmap: models, tests, docs, snapshots, macros, commands.</li>
+            <li>Nhận diện mindset production: mọi transform phải version-control và testable.</li>
+            <li>Biết giới hạn nguồn handbook hiện tại về dbt để học có định hướng đúng.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <p>dbt là framework SQL-first cho transformation. Nó không làm Extract và không làm Load, mà tập trung vào Transform trong ELT. Nghĩa là dữ liệu được load vào warehouse trước, sau đó dbt áp dụng logic SQL theo DAG có kiểm soát.</p>
+          <table>
+            <tr><th>Khía cạnh</th><th>ETL truyền thống</th><th>ELT với dbt</th></tr>
+            <tr><td>Thứ tự xử lý</td><td>Transform → Load</td><td>Load → Transform</td></tr>
+            <tr><td>Nơi chạy compute</td><td>ETL server riêng</td><td>Warehouse/Lakehouse</td></tr>
+            <tr><td>Lineage</td><td>Thường rời rạc</td><td>Tự dựng từ ref()/source()</td></tr>
+            <tr><td>Review thay đổi</td><td>Khó đồng bộ</td><td>PR + Git workflow rõ ràng</td></tr>
+          </table>
+
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>ELT flow tối thiểu</span></div>
+            <div class="cmd-body"><pre><span class="prompt">$</span> python ingest_orders.py --target raw.orders
+<span class="prompt">$</span> dbt seed --target dev
+<span class="prompt">$</span> dbt build --select +marts --target dev
+<span class="prompt">$</span> dbt docs generate
+<span class="output">Lineage + test report + docs được cập nhật</span></pre></div>
+          </div>
+
+          <div class="info-box note">📌 <span><strong>Nguồn trực tiếp từ handbook:</strong> hiện chỉ có tham chiếu dbt trong <code>data-engineer-handbook/README.md</code>, <code>books.md</code>, <code>communities.md</code>. Nội dung triển khai chi tiết trong file này bám roadmap tuần 8-9 và thực hành dbt production hợp lý.</span></div>
+          <div class="info-box warn">⚠️ <span>Do handbook chưa có tutorial dbt chi tiết, bạn nên dùng file này như giáo trình thực chiến, đồng thời đối chiếu với docs chính thức dbt khi triển khai thật.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div>
+        <div class="section-content"><div class="quiz-list" data-module="w801"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>Vai trò dbt</strong>dbt = lớp Transform trong ELT, không thay thế ingestion.</div>
+            <div class="summary-item"><strong>ELT ưu thế</strong>Tận dụng compute warehouse để scale logic SQL.</div>
+            <div class="summary-item"><strong>Lineage</strong>Tạo tự động qua dependency ref()/source().</div>
+            <div class="summary-item"><strong>Engineering</strong>Transform code đi qua Git + PR + CI.</div>
+            <div class="summary-item"><strong>Scope tuần 8-9</strong>Models, tests, docs, snapshot, macro, command.</div>
+            <div class="summary-item"><strong>Lưu ý nguồn</strong>Chi tiết dbt được nội suy từ roadmap + thực hành chuẩn.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div>
+        <div class="section-content" style="display:none">
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 1: Chuyển ETL cũ sang ELT + dbt</div>
+            <div class="practice-task-body">
+              <p>Chọn một pipeline ETL bạn từng làm, tách lại thành 2 phần: ingestion vào <code>raw</code> và transformation bằng dbt theo 3 lớp <code>staging → intermediate → marts</code>.</p>
+              <p><strong>Expected output:</strong> Có sơ đồ pipeline mới, danh sách model cần tạo, và danh sách test tối thiểu cho mỗi lớp.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <ul>
+                  <li>Giữ ingestion bằng Python/Airbyte vào raw schema.</li>
+                  <li>Tạo <code>stg_orders</code>, <code>stg_customers</code> cho chuẩn hóa cột.</li>
+                  <li>Tạo <code>int_order_items_enriched</code> cho join logic.</li>
+                  <li>Tạo <code>fct_orders</code>, <code>dim_customers</code> cho output BI.</li>
+                  <li>Gắn test <code>unique/not_null/relationships</code> cho cột khóa.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn" style="visibility:hidden">← Module trước</button>
+        <button class="nav-btn primary" onclick="goNext(0)">Module tiếp theo →</button>
+      </div>
+    </div>
+
+    <div class="module" id="m1">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.02 · Project Structure & Configuration</div>
+        <div class="module-subtitle">Thiết kế thư mục, cấu hình target và bảo mật credentials</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:18%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+          <tr><td>B1</td><td>Dựng cây thư mục dbt_project chuẩn</td><td>15 phút</td></tr>
+          <tr><td>B2</td><td>Cấu hình dbt_project.yml theo layer</td><td>20 phút</td></tr>
+          <tr><td>B3</td><td>Cấu hình profiles.yml cho PostgreSQL + Oracle</td><td>20 phút</td></tr>
+          <tr><td>B4</td><td>Kiểm tra kết nối bằng dbt debug</td><td>10 phút</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Nắm cấu trúc thư mục chuẩn: models/tests/macros/seeds/snapshots.</li>
+          <li>Hiểu vai trò của <code>dbt_project.yml</code> và <code>profiles.yml</code>.</li>
+          <li>Thiết lập target môi trường dev/prod rõ ràng.</li>
+          <li>Bảo vệ credentials bằng <code>env_var()</code>, không hard-code secret.</li>
+          <li>Chuẩn bị nền tảng cho CI/CD và collaboration.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <p>Project structure tốt là điều kiện tiên quyết để scale team. Nếu trộn tất cả model vào một thư mục, bạn sẽ khó review logic, khó tìm lỗi, và khó áp policy testing theo layer.</p>
+
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dbt_project tree</span></div>
+          <div class="cmd-body"><pre>dbt_project/
+  dbt_project.yml
+  packages.yml
+  models/
+    staging/
+    intermediate/
+    marts/
+  tests/
+    generic/
+    singular/
+  macros/
+  seeds/
+  snapshots/</pre></div>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dbt_project.yml</span></div>
+          <div class="cmd-body"><pre>name: 'de_week08_dbt'
+version: '1.0.0'
+config-version: 2
+profile: 'de_week08_profile'
+
+models:
+  de_week08_dbt:
+    staging:
+      +materialized: view
+      +schema: stg
+    intermediate:
+      +materialized: table
+      +schema: int
+    marts:
+      +materialized: table
+      +schema: mart</pre></div>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>profiles.yml (PostgreSQL + Oracle)</span></div>
+          <div class="cmd-body"><pre>de_week08_profile:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: postgres
+      password: "{{ env_var('DBT_PG_PASSWORD') }}"
+      port: 5432
+      dbname: dwh
+      schema: analytics_dev
+      threads: 4
+
+    oracle_dev:
+      type: oracle
+      host: localhost
+      user: analytics
+      password: "{{ env_var('DBT_ORACLE_PASSWORD') }}"
+      port: 1521
+      service: XEPDB1
+      schema: ANALYTICS_DEV
+      threads: 4</pre></div>
+        </div>
+
+        <div class="info-box tip">✅ <span>Luôn chạy <code>dbt debug --target dev</code> trước khi run. Nếu fail ở bước debug mà vẫn cố run, bạn sẽ mất thời gian điều tra lỗi không cần thiết.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w802"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="summary-grid">
+          <div class="summary-item"><strong>Skeleton</strong>Cấu trúc thư mục là hợp đồng kỹ thuật của project.</div>
+          <div class="summary-item"><strong>dbt_project.yml</strong>Định nghĩa cách model được build theo layer.</div>
+          <div class="summary-item"><strong>profiles.yml</strong>Quản lý kết nối theo target môi trường.</div>
+          <div class="summary-item"><strong>Security</strong>Credentials phải đi qua env_var/secret manager.</div>
+          <div class="summary-item"><strong>Cross-DB</strong>Chuẩn bị target riêng cho PostgreSQL và Oracle.</div>
+          <div class="summary-item"><strong>Độ ổn định</strong>Debug sớm để giảm failure dây chuyền.</div>
+        </div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task">
+          <div class="practice-task-header">Bài 1: Khởi tạo project đa target</div>
+          <div class="practice-task-body">
+            <p>Tạo project dbt mới có đủ cấu trúc và cấu hình được cả target PostgreSQL + Oracle.</p>
+            <p><strong>Expected output:</strong> Chạy pass <code>dbt debug --target dev</code> và <code>dbt debug --target oracle_dev</code>.</p>
+            <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+            <div class="solution-box">
+              <ol>
+                <li>Dựng cây thư mục chuẩn như module.</li>
+                <li>Viết <code>dbt_project.yml</code> theo layer.</li>
+                <li>Viết <code>profiles.yml</code> với env_var cho password.</li>
+                <li>Chạy debug lần lượt từng target và ghi log.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(1)">← Module trước</button><button class="nav-btn primary" onclick="goNext(1)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m2">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.03 · Models: view / table / incremental / ephemeral</div>
+        <div class="module-subtitle">Chọn materialization đúng để tối ưu runtime và chi phí</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:27%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+          <tr><td>B1</td><td>Nắm trade-off 4 materializations</td><td>20 phút</td></tr>
+          <tr><td>B2</td><td>Viết incremental model chuẩn</td><td>25 phút</td></tr>
+          <tr><td>B3</td><td>Kiểm tra idempotency sau 2 lần run</td><td>15 phút</td></tr>
+          <tr><td>B4</td><td>So sánh cú pháp PostgreSQL vs Oracle</td><td>15 phút</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Hiểu rõ khi nào dùng view/table/incremental/ephemeral.</li>
+          <li>Viết incremental model với <code>is_incremental()</code> và <code>unique_key</code>.</li>
+          <li>Biết adaptation SQL giữa PostgreSQL và Oracle cho watermark/filter.</li>
+          <li>Xác minh idempotency trước khi áp dụng production schedule.</li>
+          <li>Tránh duplicate và missing data do logic delta sai.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Materialization</th><th>Dùng khi</th><th>Ưu điểm</th><th>Lưu ý</th></tr>
+          <tr><td>view</td><td>staging nhẹ</td><td>Không tốn storage</td><td>Có thể chậm nếu chain view dài</td></tr>
+          <tr><td>table</td><td>marts truy cập nhiều</td><td>Tốc độ đọc ổn định</td><td>Tốn storage, rebuild lâu</td></tr>
+          <tr><td>incremental</td><td>dữ liệu lớn, cập nhật theo thời gian</td><td>Giảm runtime/cost</td><td>Cần key + watermark chuẩn</td></tr>
+          <tr><td>ephemeral</td><td>logic trung gian ngắn</td><td>Không tạo object vật lý</td><td>Debug khó hơn vì compile thành CTE</td></tr>
+        </table>
+
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>fct_orders incremental</span></div>
+          <div class="cmd-body"><pre>{{ config(materialized='incremental', unique_key='order_id') }}
+
+select
+  order_id,
+  customer_id,
+  order_status,
+  order_amount,
+  updated_at
+from {{ ref('int_order_items_enriched') }}
+{% if is_incremental() %}
+where updated_at &gt;= (select max(updated_at) from {{ this }})
+{% endif %}</pre></div>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Watermark filter: PostgreSQL vs Oracle</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
+where updated_at &gt;= (
+  select coalesce(max(updated_at), timestamp '1900-01-01 00:00:00')
+  from {{ this }}
+)
+
+<span class="comment">-- Oracle SQL</span>
+where updated_at &gt;= (
+  select nvl(max(updated_at), timestamp '1900-01-01 00:00:00')
+  from {{ this }}
+)</pre></div>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Validation query sau 2 lần run</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
+select count(*) as row_count, max(updated_at) as max_updated_at
+from mart.fct_orders;
+
+<span class="comment">-- Oracle SQL</span>
+select count(*) as row_count, max(updated_at) as max_updated_at
+from MART.FCT_ORDERS;</pre></div>
+        </div>
+
+        <div class="info-box warn">⚠️ <span>Nếu row_count tăng bất thường khi chạy lại cùng dữ liệu, logic incremental của bạn đang không idempotent.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w803"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>view</strong>Tốt cho staging nhẹ và nhanh triển khai.</div>
+        <div class="summary-item"><strong>table</strong>Tốt cho output cuối truy vấn nhiều.</div>
+        <div class="summary-item"><strong>incremental</strong>Bắt buộc cho bảng lớn cập nhật liên tục.</div>
+        <div class="summary-item"><strong>ephemeral</strong>Giảm object trung gian không cần thiết.</div>
+        <div class="summary-item"><strong>Cross-DB</strong>coalesce vs nvl, LIMIT vs FETCH FIRST.</div>
+        <div class="summary-item"><strong>Idempotency</strong>Luôn test lặp để xác nhận ổn định.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Chuyển fct_orders sang incremental</div><div class="practice-task-body">
+          <p>Đổi model <code>fct_orders</code> từ table sang incremental, chạy 2 lần liên tiếp để kiểm tra tính idempotent.</p>
+          <p><strong>Expected output:</strong> Không phát sinh duplicate <code>order_id</code>, row_count ổn định theo dữ liệu mới.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ol><li>Thêm config incremental + unique_key.</li><li>Thêm điều kiện <code>is_incremental()</code>.</li><li>Run 2 lần liên tiếp.</li><li>Query kiểm tra duplicate theo <code>order_id</code>.</li></ol></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(2)">← Module trước</button><button class="nav-btn primary" onclick="goNext(2)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m3">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.04 · ref() và source(): Dependency Management</div>
+        <div class="module-subtitle">Thiết kế lineage và dependency rõ ràng từ raw đến marts</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:36%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+          <tr><td>B1</td><td>Khai báo sources trong schema.yml</td><td>15 phút</td></tr>
+          <tr><td>B2</td><td>Refactor hard-code sang ref()/source()</td><td>25 phút</td></tr>
+          <tr><td>B3</td><td>Hiểu selector +model / model+</td><td>15 phút</td></tr>
+          <tr><td>B4</td><td>Đọc lineage và impact khi đổi model</td><td>15 phút</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Dùng <code>source()</code> cho bảng raw có metadata/freshness.</li>
+        <li>Dùng <code>ref()</code> cho dependency giữa các model nội bộ.</li>
+        <li>Loại bỏ hard-code schema.table để tăng tính linh hoạt môi trường.</li>
+        <li>Hiểu tác động upstream/downstream khi model thay đổi.</li>
+        <li>Tăng khả năng debug và deploy theo DAG chuẩn.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <p><code>source()</code> là điểm vào của dữ liệu raw; <code>ref()</code> là chuẩn tham chiếu model nội bộ. Khi dùng đúng, dbt dựng được lineage đầy đủ và đảm bảo thứ tự build hợp lý.</p>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>schema.yml cho sources</span></div><div class="cmd-body"><pre>version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: orders
+      - name: customers</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>source() + ref()</span></div><div class="cmd-body"><pre><span class="comment">-- models/staging/stg_orders.sql</span>
+select order_id, customer_id, status as order_status, updated_at
+from {{ source('raw', 'orders') }}
+
+<span class="comment">-- models/marts/fct_orders.sql</span>
+select *
+from {{ ref('int_order_items_enriched') }}</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Dependency selector</span></div><div class="cmd-body"><pre><span class="prompt">$</span> dbt ls --select +fct_orders
+<span class="prompt">$</span> dbt run --select stg_orders+
+<span class="output">Hiển thị upstream/downstream theo DAG</span></pre></div></div>
+
+        <div class="info-box tip">✅ <span>Không hard-code schema.table trong model. Dùng ref/source để deploy an toàn giữa dev, staging, prod.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w804"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>source()</strong>Điểm vào chuẩn cho bảng raw.</div>
+        <div class="summary-item"><strong>ref()</strong>Dependency chuẩn giữa model nội bộ.</div>
+        <div class="summary-item"><strong>Lineage</strong>Tự sinh và dễ truy vết impact.</div>
+        <div class="summary-item"><strong>Selector</strong>Chạy đúng phạm vi +upstream/downstream.</div>
+        <div class="summary-item"><strong>Maintainability</strong>Giảm lỗi do đổi schema/tên bảng.</div>
+        <div class="summary-item"><strong>Deployment</strong>DAG rõ giúp deploy có thứ tự.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Refactor hard-code SQL</div><div class="practice-task-body">
+          <p>Tìm ít nhất 3 model còn hard-code schema.table và chuyển hoàn toàn sang <code>source()</code>/<code>ref()</code>.</p>
+          <p><strong>Expected output:</strong> DAG hiển thị đầy đủ, <code>dbt compile</code> pass, không còn hard-code trong model chính.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul><li>Khai báo source trong YAML trước.</li><li>Thay tất cả from raw.xxx bằng source('raw','xxx').</li><li>Thay join model bằng ref('model_name').</li><li>Chạy <code>dbt ls --select +marts</code> để kiểm tra DAG.</li></ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">← Module trước</button><button class="nav-btn primary" onclick="goNext(3)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m4">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.05 · Built-in Tests & Custom Tests</div>
+        <div class="module-subtitle">Data quality mindset với test theo tầng</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+        <tr><td>B1</td><td>Khai báo 4 built-in tests cốt lõi</td><td>20 phút</td></tr>
+        <tr><td>B2</td><td>Viết custom generic test</td><td>25 phút</td></tr>
+        <tr><td>B3</td><td>Viết singular test cho business rule</td><td>20 phút</td></tr>
+        <tr><td>B4</td><td>Điều tra fail rows trên PG/Oracle</td><td>15 phút</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Áp dụng <code>unique</code>, <code>not_null</code>, <code>accepted_values</code>, <code>relationships</code> đúng ngữ cảnh.</li>
+        <li>Biết viết custom test để bảo vệ rule nghiệp vụ đặc thù.</li>
+        <li>Đọc được test fail output và truy ra nguyên nhân gốc.</li>
+        <li>Biết phân tầng test theo mức độ criticality.</li>
+        <li>Hiểu adaptation test khi chạy trên Oracle.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Built-in tests trong schema.yml</span></div><div class="cmd-body"><pre>version: 2
+
+models:
+  - name: fct_orders
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: order_status
+        tests:
+          - accepted_values:
+              values: ['pending','paid','shipped','cancelled']
+      - name: customer_id
+        tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Custom generic test</span></div><div class="cmd-body"><pre>{% test not_future_date(model, column_name) %}
+select *
+from {{ model }}
+where {{ column_name }} &gt; current_timestamp
+{% endtest %}</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Singular test</span></div><div class="cmd-body"><pre>select *
+from {{ ref('fct_orders') }}
+where order_amount &lt; 0</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Debug test fail: PostgreSQL vs Oracle</span></div><div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
+select order_id, order_amount
+from mart.fct_orders
+where order_amount &lt; 0
+order by updated_at desc
+limit 50;
+
+<span class="comment">-- Oracle SQL</span>
+select order_id, order_amount
+from MART.FCT_ORDERS
+where order_amount &lt; 0
+order by updated_at desc
+fetch first 50 rows only;</pre></div></div>
+
+        <div class="info-box warn">⚠️ <span>Không tắt test để pipeline xanh tạm thời. Mục tiêu là sửa root cause ở logic transform hoặc data source.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w805"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>4 built-in tests</strong>unique/not_null/accepted_values/relationships là nền tảng.</div>
+        <div class="summary-item"><strong>Generic test</strong>Tái sử dụng rule chất lượng giữa nhiều model.</div>
+        <div class="summary-item"><strong>Singular test</strong>Bảo vệ logic nghiệp vụ riêng biệt.</div>
+        <div class="summary-item"><strong>Debugging</strong>Test fail là dữ liệu điều tra, không phải rào cản.</div>
+        <div class="summary-item"><strong>Cross-DB</strong>Kiểm tra cú pháp query điều tra giữa PG/Oracle.</div>
+        <div class="summary-item"><strong>Mindset</strong>Data quality là tiêu chuẩn bắt buộc production.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Nâng coverage test cho fct_orders</div><div class="practice-task-body">
+          <p>Thêm đầy đủ built-in tests và ít nhất 1 generic + 1 singular test cho <code>fct_orders</code>.</p>
+          <p><strong>Expected output:</strong> <code>dbt test --select fct_orders</code> pass hoặc trả về fail rows rõ ràng để xử lý.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ol><li>Viết schema.yml với 4 built-in tests.</li><li>Tạo test generic <code>not_future_date</code>.</li><li>Tạo singular test amount không âm.</li><li>Chạy dbt test và điều tra fail rows.</li></ol></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(4)">← Module trước</button><button class="nav-btn primary" onclick="goNext(4)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m5">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.06 · Documentation với schema.yml</div>
+        <div class="module-subtitle">Documentation mindset: mô tả dữ liệu như một sản phẩm</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:54%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+        <tr><td>B1</td><td>Viết docs model/cột quan trọng</td><td>20 phút</td></tr>
+        <tr><td>B2</td><td>Thêm metadata owner/SLA</td><td>15 phút</td></tr>
+        <tr><td>B3</td><td>Generate + serve docs</td><td>15 phút</td></tr>
+        <tr><td>B4</td><td>Review lineage và business definition</td><td>15 phút</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Hiểu schema.yml là source of truth cho docs + tests.</li>
+        <li>Mô tả model/cột theo business ngắn gọn nhưng chính xác.</li>
+        <li>Gắn owner/SLA để hỗ trợ vận hành và on-call.</li>
+        <li>Dùng docs UI để đọc lineage và impact nhanh.</li>
+        <li>Nâng chất lượng handover và onboarding cho team.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <p>Documentation trong dbt không phải tài liệu rời. Nó sống cùng code và đổi theo PR. Đây là điểm khác biệt lớn giúp data team giảm phụ thuộc vào “tribal knowledge”.</p>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>schema.yml với docs + metadata</span></div><div class="cmd-body"><pre>version: 2
+
+models:
+  - name: dim_customers
+    description: "Dimension khách hàng dạng SCD2 phục vụ retention"
+    meta:
+      owner: "data-platform"
+      sla: "daily-07:00"
+    columns:
+      - name: customer_id
+        description: "Khóa business của khách hàng"
+      - name: dbt_valid_from
+        description: "Thời điểm version bắt đầu hiệu lực"</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Generate docs</span></div><div class="cmd-body"><pre><span class="prompt">$</span> dbt docs generate
+<span class="prompt">$</span> dbt docs serve --port 8088
+<span class="output">Mở http://localhost:8088 để xem docs và lineage</span></pre></div></div>
+
+        <table>
+          <tr><th>Thực hành tốt</th><th>Lợi ích</th></tr>
+          <tr><td>Mô tả business cho mỗi model</td><td>Giảm hiểu sai định nghĩa KPI</td></tr>
+          <tr><td>Mô tả cột critical</td><td>Giảm lỗi join/filter trong phân tích</td></tr>
+          <tr><td>Meta owner + SLA</td><td>Dễ truy trách nhiệm khi incident</td></tr>
+          <tr><td>Regenerate docs theo release</td><td>Lineage phản ánh trạng thái mới nhất</td></tr>
+        </table>
+
+        <div class="info-box note">📌 <span>Với Oracle, đôi lúc cần thêm quyền metadata/catalog để docs hiển thị thông tin đầy đủ như mong muốn.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w806"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>schema.yml</strong>Trung tâm docs, tests và metadata.</div>
+        <div class="summary-item"><strong>Docs-as-code</strong>Tài liệu đi cùng vòng đời code.</div>
+        <div class="summary-item"><strong>Lineage UI</strong>Giúp đọc impact nhanh khi thay đổi model.</div>
+        <div class="summary-item"><strong>Owner/SLA</strong>Tăng clarity trong vận hành production.</div>
+        <div class="summary-item"><strong>Business clarity</strong>Giảm sai lệch định nghĩa metric.</div>
+        <div class="summary-item"><strong>Sustainability</strong>Dễ onboarding thành viên mới.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Viết docs đầy đủ cho marts</div><div class="practice-task-body">
+          <p>Bổ sung docs cho <code>fct_orders</code> và <code>dim_customers</code>, bao gồm mô tả model, mô tả cột critical, owner và SLA.</p>
+          <p><strong>Expected output:</strong> Khi mở dbt docs, cả 2 model hiển thị đầy đủ mô tả và lineage rõ ràng.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul><li>Tạo/ cập nhật schema.yml tại thư mục marts.</li><li>Mô tả rõ cột khóa, cột metric, cột hiệu lực.</li><li>Thêm meta owner/sla.</li><li>Chạy docs generate + serve để review UI.</li></ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">← Module trước</button><button class="nav-btn primary" onclick="goNext(5)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m6">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.07 · Snapshots: SCD2 bằng dbt</div>
+        <div class="module-subtitle">Lưu lịch sử dimension và kiểm soát tính đúng đắn</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:63%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+        <tr><td>B1</td><td>Tạo file snapshot cho customers</td><td>20 phút</td></tr>
+        <tr><td>B2</td><td>Run snapshot theo nhiều vòng dữ liệu</td><td>15 phút</td></tr>
+        <tr><td>B3</td><td>Query row hiện tại và lịch sử</td><td>15 phút</td></tr>
+        <tr><td>B4</td><td>Validation overlap trên PG/Oracle</td><td>20 phút</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Implement SCD2 bằng snapshot strategy phù hợp.</li>
+        <li>Nắm ý nghĩa <code>dbt_valid_from</code>, <code>dbt_valid_to</code>, <code>dbt_scd_id</code>.</li>
+        <li>Kiểm tra bản ghi current và history đúng logic.</li>
+        <li>Viết validation query phát hiện date-range overlap.</li>
+        <li>Hiểu lưu ý hiệu năng snapshot trên Oracle.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>snap_customers_scd2.sql</span></div><div class="cmd-body"><pre>{% snapshot snap_customers_scd2 %}
+{{
+  config(
+    target_schema='snap',
+    unique_key='customer_id',
+    strategy='timestamp',
+    updated_at='updated_at'
+  )
+}}
+
+select
+  customer_id,
+  customer_name,
+  customer_segment,
+  customer_status,
+  updated_at
+from {{ source('raw', 'customers') }}
+
+{% endsnapshot %}</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Query current row</span></div><div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
+select customer_id, customer_name, dbt_valid_from, dbt_valid_to
+from snap.snap_customers_scd2
+where dbt_valid_to is null;
+
+<span class="comment">-- Oracle SQL</span>
+select customer_id, customer_name, dbt_valid_from, dbt_valid_to
+from SNAP.SNAP_CUSTOMERS_SCD2
+where dbt_valid_to is null;</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Validation overlap</span></div><div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
+select a.customer_id
+from snap.snap_customers_scd2 a
+join snap.snap_customers_scd2 b
+  on a.customer_id = b.customer_id
+ and a.dbt_valid_from &lt; coalesce(b.dbt_valid_to, timestamp '9999-12-31 00:00:00')
+ and b.dbt_valid_from &lt; coalesce(a.dbt_valid_to, timestamp '9999-12-31 00:00:00')
+ and a.dbt_scd_id &lt;&gt; b.dbt_scd_id;
+
+<span class="comment">-- Oracle SQL</span>
+select a.customer_id
+from SNAP.SNAP_CUSTOMERS_SCD2 a
+join SNAP.SNAP_CUSTOMERS_SCD2 b
+  on a.customer_id = b.customer_id
+ and a.dbt_valid_from &lt; nvl(b.dbt_valid_to, timestamp '9999-12-31 00:00:00')
+ and b.dbt_valid_from &lt; nvl(a.dbt_valid_to, timestamp '9999-12-31 00:00:00')
+ and a.dbt_scd_id &lt;&gt; b.dbt_scd_id;</pre></div></div>
+
+        <div class="info-box warn">⚠️ <span>Snapshot sai range hiệu lực sẽ phá vỡ báo cáo retention/churn. Luôn có validation overlap và single-current trước khi publish.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w807"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Snapshot</strong>Cách chuẩn để implement SCD2 trong dbt.</div>
+        <div class="summary-item"><strong>Strategy</strong>timestamp/check tùy chất lượng nguồn.</div>
+        <div class="summary-item"><strong>Current row</strong>Thường có <code>dbt_valid_to is null</code>.</div>
+        <div class="summary-item"><strong>Validation</strong>Bắt overlap để đảm bảo lịch sử đúng.</div>
+        <div class="summary-item"><strong>Pipeline order</strong>Nên chạy snapshot trước build marts.</div>
+        <div class="summary-item"><strong>Performance</strong>Tối ưu index để snapshot scale tốt.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Chạy snapshot 2 vòng có thay đổi dữ liệu</div><div class="practice-task-body">
+          <p>Run snapshot lần 1, sửa <code>customer_segment</code> cho vài dòng raw, rồi run snapshot lần 2 để tạo lịch sử SCD2.</p>
+          <p><strong>Expected output:</strong> Mỗi khách hàng có version lịch sử hợp lệ và đúng 1 row current.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ol><li>Chạy <code>dbt snapshot --select snap_customers_scd2</code> lần 1.</li><li>Update dữ liệu raw cho 2-3 customer.</li><li>Chạy snapshot lần 2.</li><li>Query current row + overlap validation để xác nhận.</li></ol></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">← Module trước</button><button class="nav-btn primary" onclick="goNext(6)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m7">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.08 · Macros & DRY Principle</div>
+        <div class="module-subtitle">Giảm lặp SQL và xử lý khác biệt PostgreSQL/Oracle</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+        <tr><td>B1</td><td>Nhận diện logic SQL đang lặp</td><td>15 phút</td></tr>
+        <tr><td>B2</td><td>Viết macro tái sử dụng</td><td>20 phút</td></tr>
+        <tr><td>B3</td><td>Rẽ nhánh target.type cho PG/Oracle</td><td>20 phút</td></tr>
+        <tr><td>B4</td><td>Compile/test macro trước merge</td><td>15 phút</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Áp dụng DRY principle đúng mức trong dbt SQL.</li>
+        <li>Viết macro nhỏ, rõ mục tiêu, dễ review.</li>
+        <li>Gom adaptation PostgreSQL/Oracle vào macro thay vì rải trong model.</li>
+        <li>Giảm lỗi copy-paste khi mở rộng số lượng model.</li>
+        <li>Hiểu khi nào không nên macro hóa để tránh over-engineering.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>macros/normalize_email.sql</span></div><div class="cmd-body"><pre>{% macro normalize_email(col_name) %}
+  lower(trim({{ col_name }}))
+{% endmacro %}</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>macros/date_diff_days.sql</span></div><div class="cmd-body"><pre>{% macro date_diff_days(start_col, end_col) %}
+  {% if target.type == 'postgres' %}
+    ({{ end_col }}::date - {{ start_col }}::date)
+  {% elif target.type == 'oracle' %}
+    trunc({{ end_col }}) - trunc({{ start_col }})
+  {% else %}
+    datediff(day, {{ start_col }}, {{ end_col }})
+  {% endif %}
+{% endmacro %}</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Dùng macro trong model</span></div><div class="cmd-body"><pre>select
+  customer_id,
+  {{ normalize_email('email') }} as email_normalized,
+  {{ date_diff_days('first_order_date', 'last_order_date') }} as lifetime_days
+from {{ ref('stg_customers') }}</pre></div></div>
+
+        <div class="info-box tip">✅ <span>Macro nên ngắn, đơn trách nhiệm. Nếu macro quá dài và điều kiện lồng nhau dày đặc, hãy tách nhỏ để dễ test.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w808"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>DRY</strong>Giảm duplicate SQL và giảm bug copy-paste.</div>
+        <div class="summary-item"><strong>Cross-DB</strong>Ẩn khác biệt engine qua target.type.</div>
+        <div class="summary-item"><strong>Readability</strong>Macro nhỏ giúp review và debug tốt.</div>
+        <div class="summary-item"><strong>Maintainability</strong>Dễ mở rộng model khi project lớn dần.</div>
+        <div class="summary-item"><strong>Testing</strong>Macro vẫn cần compile/run như code production.</div>
+        <div class="summary-item"><strong>Pragmatic</strong>Không macro hóa mọi thứ một cách cực đoan.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Viết macro đa adapter</div><div class="practice-task-body">
+          <p>Viết macro xử lý date diff chạy được cho cả PostgreSQL và Oracle, sau đó thay logic hard-code trong một model intermediate.</p>
+          <p><strong>Expected output:</strong> <code>dbt compile</code> pass ở cả <code>dev</code> và <code>oracle_dev</code>.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul><li>Dùng <code>target.type</code> để tách nhánh SQL.</li><li>PostgreSQL: cast date subtraction.</li><li>Oracle: <code>trunc(date)</code> subtraction.</li><li>Compile ở cả hai target trước khi merge.</li></ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">← Module trước</button><button class="nav-btn primary" onclick="goNext(7)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m8">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.09 · dbt Commands Cheat Sheet</div>
+        <div class="module-subtitle">Bộ lệnh thực chiến cho local dev và production runbook</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:81%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+        <tr><td>B1</td><td>Nắm nhóm lệnh cốt lõi</td><td>15 phút</td></tr>
+        <tr><td>B2</td><td>Thực hành selector cho debug/CI</td><td>20 phút</td></tr>
+        <tr><td>B3</td><td>Thiết kế runbook daily chuẩn</td><td>20 phút</td></tr>
+        <tr><td>B4</td><td>Gắn freshness + docs vào chu kỳ chạy</td><td>15 phút</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Thuộc mục đích từng lệnh dbt quan trọng.</li>
+        <li>Phân biệt <code>dbt run</code> và <code>dbt build</code>.</li>
+        <li>Dùng selector để chạy nhanh đúng phạm vi cần.</li>
+        <li>Biết khi nào dùng <code>--full-refresh</code> có kiểm soát.</li>
+        <li>Viết runbook vận hành có fail-fast rõ ràng.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Lệnh</th><th>Mục đích</th><th>Khi dùng</th></tr>
+          <tr><td>dbt deps</td><td>Tải package</td><td>Đầu pipeline/CI</td></tr>
+          <tr><td>dbt seed</td><td>Load CSV seed</td><td>Dimension tham chiếu nhỏ</td></tr>
+          <tr><td>dbt run</td><td>Build model</td><td>Transform đơn thuần</td></tr>
+          <tr><td>dbt test</td><td>Chạy quality checks</td><td>Gate trước publish</td></tr>
+          <tr><td>dbt snapshot</td><td>Ghi lịch sử SCD2</td><td>Dimension thay đổi chậm</td></tr>
+          <tr><td>dbt build</td><td>Seed+snapshot+run+test</td><td>Lệnh production phổ biến</td></tr>
+          <tr><td>dbt source freshness</td><td>Đánh giá freshness source</td><td>Giám sát SLA ingest</td></tr>
+          <tr><td>dbt docs generate</td><td>Tạo docs artifacts</td><td>Sau build pass</td></tr>
+        </table>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Command chain đề xuất</span></div><div class="cmd-body"><pre><span class="prompt">$</span> dbt deps
+<span class="prompt">$</span> dbt snapshot --select snap_customers_scd2
+<span class="prompt">$</span> dbt build --select +marts --target prod
+<span class="prompt">$</span> dbt source freshness
+<span class="prompt">$</span> dbt docs generate</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Selector thực chiến</span></div><div class="cmd-body"><pre><span class="comment"># model + upstream</span>
+<span class="prompt">$</span> dbt run --select +fct_orders
+
+<span class="comment"># model + downstream</span>
+<span class="prompt">$</span> dbt test --select stg_orders+
+
+<span class="comment"># chỉ phần thay đổi cho CI</span>
+<span class="prompt">$</span> dbt build --select state:modified+</pre></div></div>
+
+        <div class="info-box warn">⚠️ <span>Tránh chạy full-refresh hàng ngày. Chỉ dùng khi có thay đổi logic lớn hoặc chiến dịch backfill được kiểm soát.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w809"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Core commands</strong>deps/seed/run/test/snapshot/build/freshness/docs.</div>
+        <div class="summary-item"><strong>Run vs Build</strong>build là orchestration đầy đủ hơn run.</div>
+        <div class="summary-item"><strong>Selector</strong>Tăng tốc debug và CI rõ rệt.</div>
+        <div class="summary-item"><strong>Freshness</strong>Giám sát độ trễ dữ liệu đầu vào.</div>
+        <div class="summary-item"><strong>Docs</strong>Generate sau build pass để lineage mới nhất.</div>
+        <div class="summary-item"><strong>Cost control</strong>Giảm lạm dụng full-refresh không cần thiết.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Viết runbook dbt daily</div><div class="practice-task-body">
+          <p>Soạn runbook lệnh daily cho môi trường prod kèm điều kiện dừng khi freshness/test fail.</p>
+          <p><strong>Expected output:</strong> Runbook gồm thứ tự lệnh, tiêu chí pass/fail, hành động khi incident.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ol><li>deps</li><li>snapshot</li><li>build +marts</li><li>source freshness</li><li>docs generate</li><li>Nếu fail: dừng publish, gửi alert, mở ticket điều tra.</li></ol></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(8)">← Module trước</button><button class="nav-btn primary" onclick="goNext(8)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m9">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.10 · Artifact: dbt_project/ hoàn chỉnh</div>
+        <div class="module-subtitle">Ghép toàn bộ kỹ năng thành project có thể chạy end-to-end</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+        <tr><td>B1</td><td>Hoàn thiện 5 model bắt buộc</td><td>30 phút</td></tr>
+        <tr><td>B2</td><td>Thêm tests generic/singular</td><td>20 phút</td></tr>
+        <tr><td>B3</td><td>Thêm snapshot + macros</td><td>20 phút</td></tr>
+        <tr><td>B4</td><td>Viết README (lineage, run, coverage)</td><td>20 phút</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Xây đúng artifact scope tuần 8-9 theo roadmap.</li>
+        <li>Đảm bảo project chạy end-to-end với command chain chuẩn.</li>
+        <li>Thể hiện rõ lineage và test coverage trong README.</li>
+        <li>Tích hợp PostgreSQL/Oracle adaptation ở điểm phù hợp.</li>
+        <li>Tạo đầu ra có thể dùng làm portfolio thực chiến.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Artifact tree mục tiêu</span></div><div class="cmd-body"><pre>dbt_project/
+  models/staging/stg_orders.sql
+  models/staging/stg_customers.sql
+  models/intermediate/int_order_items_enriched.sql
+  models/marts/fct_orders.sql
+  models/marts/dim_customers.sql
+  tests/generic/not_future_date.sql
+  tests/singular/fct_orders_amount_non_negative.sql
+  snapshots/snap_customers_scd2.sql
+  macros/normalize_email.sql
+  macros/date_diff_days.sql
+  README.md</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>models/staging/stg_orders.sql</span></div><div class="cmd-body"><pre>{{ config(materialized='view') }}
+
+select
+  order_id,
+  customer_id,
+  status as order_status,
+  cast(order_amount as numeric) as order_amount,
+  updated_at
+from {{ source('raw', 'orders') }}</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>models/intermediate/int_order_items_enriched.sql</span></div><div class="cmd-body"><pre>{{ config(materialized='table') }}
+
+select
+  o.order_id,
+  o.customer_id,
+  c.customer_segment,
+  o.order_status,
+  o.order_amount,
+  o.updated_at
+from {{ ref('stg_orders') }} o
+left join {{ ref('stg_customers') }} c
+  on o.customer_id = c.customer_id</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>README.md tối thiểu</span></div><div class="cmd-body"><pre># Week08 dbt Project
+
+## Lineage
+raw.orders -> stg_orders -> int_order_items_enriched -> fct_orders
+raw.customers -> stg_customers -> snap_customers_scd2 -> dim_customers
+
+## Cách chạy
+1) dbt deps
+2) dbt snapshot --select snap_customers_scd2
+3) dbt build --select +marts
+4) dbt docs generate
+
+## Test coverage
+- unique/not_null/relationships/accepted_values
+- generic + singular tests</pre></div></div>
+
+        <div class="info-box note">📌 <span>Với yêu cầu chạy được trên cả PostgreSQL và Oracle, hãy gom khác biệt function vào macro, giữ logic model chính càng thuần nhất càng tốt.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w810"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Completeness</strong>Đủ model, test, snapshot, macro, README.</div>
+        <div class="summary-item"><strong>Layering</strong>staging → intermediate → marts rõ ràng.</div>
+        <div class="summary-item"><strong>SCD2</strong>dim_customers lấy lịch sử từ snapshot.</div>
+        <div class="summary-item"><strong>Coverage</strong>Generic + singular test bảo vệ output.</div>
+        <div class="summary-item"><strong>Runbook</strong>Cách chạy dự án tái lập được.</div>
+        <div class="summary-item"><strong>Portfolio</strong>Có thể demo trực tiếp khi phỏng vấn.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Build artifact từ thư mục rỗng</div><div class="practice-task-body">
+          <p>Tạo toàn bộ cấu trúc artifact tuần 8-9 và chạy command chain hoàn chỉnh để xác nhận pass.</p>
+          <p><strong>Expected output:</strong> dbt build pass, test pass, docs generate thành công, README đủ lineage + coverage.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ol><li>Tạo đủ 5 model bắt buộc.</li><li>Thêm 2 nhóm tests (generic/singular).</li><li>Thêm snapshot + macros.</li><li>Viết README và chạy deps → snapshot → build → docs.</li></ol></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(9)">← Module trước</button><button class="nav-btn primary" onclick="goNext(9)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m10">
+      <div class="module-header">
+        <div class="module-tag">Tuần 8-9 · Giai đoạn 2</div>
+        <div class="module-title">W8.11 · Mini Test Tổng Kết</div>
+        <div class="module-subtitle">Đánh giá toàn diện kiến thức dbt và readiness cho Airflow</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
+        <tr><td>B1</td><td>Ôn nhanh checklist kiến thức tuần 8-9</td><td>10 phút</td></tr>
+        <tr><td>B2</td><td>Làm quiz ôn tập module</td><td>15 phút</td></tr>
+        <tr><td>B3</td><td>Làm mini test tổng hợp 18 câu</td><td>25 phút</td></tr>
+        <tr><td>B4</td><td>Lập kế hoạch học lại theo câu sai</td><td>15 phút</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Đo mức độ nắm chắc từ concept đến implementation dbt.</li>
+        <li>Kiểm tra khả năng tư duy production thay vì học thuộc lệnh.</li>
+        <li>Xác định module yếu để ôn lại có trọng tâm.</li>
+        <li>Đánh giá readiness trước khi sang Airflow orchestration.</li>
+        <li>Khóa kiến thức tuần 8-9 bằng kế hoạch hành động rõ ràng.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <p>Mini test dưới đây bao phủ toàn bộ chuỗi năng lực tuần 8-9: ELT mindset, project structure, materialization, dependency, testing, documentation, snapshot, macro, commands và artifact delivery.</p>
+        <div class="info-box tip">✅ <span>Điểm cao chưa đủ nếu chưa build được project thật. Sau mini test, hãy dựng lại artifact <code>dbt_project/</code> từ đầu để chuyển kiến thức thành kỹ năng.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w811"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Coverage</strong>Đánh giá đủ các mảng kiến thức dbt cốt lõi.</div>
+        <div class="summary-item"><strong>Scoring</strong>Xác định readiness thực tế trước tuần tiếp theo.</div>
+        <div class="summary-item"><strong>Remediation</strong>Ôn module yếu theo mapping câu sai.</div>
+        <div class="summary-item"><strong>Hands-on</strong>Bắt buộc kèm bài build artifact thực tế.</div>
+        <div class="summary-item"><strong>Production mindset</strong>Ưu tiên độ tin cậy hơn mẹo kỹ thuật ngắn hạn.</div>
+        <div class="summary-item"><strong>Next step</strong>Sẵn sàng tích hợp dbt vào DAG Airflow.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task">
+          <div class="practice-task-header">Mini Test Tổng Kết Tuần 8-9 (18 câu)</div>
+          <div class="practice-task-body">
+            <p>Làm toàn bộ câu hỏi trước khi bấm chấm điểm để phản ánh đúng năng lực hiện tại.</p>
+            <div id="final-test">
+              <div class="test-question" data-q="1" data-correct="B"><div class="test-question-title">Q1. Lệnh nào chạy seed + snapshot + run + test theo DAG?</div><div class="test-options"><label class="test-option"><input type="radio" name="q1" value="A"> A. dbt run</label><label class="test-option"><input type="radio" name="q1" value="B"> B. dbt build</label><label class="test-option"><input type="radio" name="q1" value="C"> C. dbt test</label><label class="test-option"><input type="radio" name="q1" value="D"> D. dbt deps</label></div></div>
+              <div class="test-question" data-q="2" data-correct="B"><div class="test-question-title">Q2. Hàm nào tham chiếu model nội bộ trong dbt?</div><div class="test-options"><label class="test-option"><input type="radio" name="q2" value="A"> A. source()</label><label class="test-option"><input type="radio" name="q2" value="B"> B. ref()</label><label class="test-option"><input type="radio" name="q2" value="C"> C. var()</label><label class="test-option"><input type="radio" name="q2" value="D"> D. env_var()</label></div></div>
+              <div class="test-question" data-q="3" data-correct="C"><div class="test-question-title">Q3. Materialization nào không tạo object vật lý trong warehouse?</div><div class="test-options"><label class="test-option"><input type="radio" name="q3" value="A"> A. table</label><label class="test-option"><input type="radio" name="q3" value="B"> B. view</label><label class="test-option"><input type="radio" name="q3" value="C"> C. ephemeral</label><label class="test-option"><input type="radio" name="q3" value="D"> D. incremental</label></div></div>
+              <div class="test-question" data-q="4" data-correct="B"><div class="test-question-title">Q4. Test nào kiểm tra quan hệ khóa ngoại logic giữa fact và dim?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> A. accepted_values</label><label class="test-option"><input type="radio" name="q4" value="B"> B. relationships</label><label class="test-option"><input type="radio" name="q4" value="C"> C. unique</label><label class="test-option"><input type="radio" name="q4" value="D"> D. not_null</label></div></div>
+              <div class="test-question" data-q="5" data-correct="B"><div class="test-question-title">Q5. Snapshot strategy nào dựa trên cột updated_at?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> A. check</label><label class="test-option"><input type="radio" name="q5" value="B"> B. timestamp</label><label class="test-option"><input type="radio" name="q5" value="C"> C. append_only</label><label class="test-option"><input type="radio" name="q5" value="D"> D. macro</label></div></div>
+              <div class="test-question" data-q="6" data-correct="B"><div class="test-question-title">Q6. Incremental model cần gì để tránh duplicate/missing?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> A. Chỉ cần docs</label><label class="test-option"><input type="radio" name="q6" value="B"> B. unique_key + watermark</label><label class="test-option"><input type="radio" name="q6" value="C"> C. Chỉ cần full-refresh</label><label class="test-option"><input type="radio" name="q6" value="D"> D. Chỉ cần target prod</label></div></div>
+              <div class="test-question" data-q="7" data-correct="B"><div class="test-question-title">Q7. dbt docs generate đọc mô tả model/cột chính từ đâu?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> A. profiles.yml</label><label class="test-option"><input type="radio" name="q7" value="B"> B. schema.yml</label><label class="test-option"><input type="radio" name="q7" value="C"> C. run_results.json</label><label class="test-option"><input type="radio" name="q7" value="D"> D. packages.yml</label></div></div>
+              <div class="test-question" data-q="8" data-correct="A"><div class="test-question-title">Q8. Lệnh nào compile SQL nhưng chưa chạy query lên DB?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> A. dbt compile</label><label class="test-option"><input type="radio" name="q8" value="B"> B. dbt run</label><label class="test-option"><input type="radio" name="q8" value="C"> C. dbt snapshot</label><label class="test-option"><input type="radio" name="q8" value="D"> D. dbt source freshness</label></div></div>
+              <div class="test-question" data-q="9" data-correct="B"><div class="test-question-title">Q9. target.type trong macro dùng để làm gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Tăng thread</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Rẽ nhánh SQL theo adapter</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Tắt test</label><label class="test-option"><input type="radio" name="q9" value="D"> D. Đổi docs path</label></div></div>
+              <div class="test-question" data-q="10" data-correct="A"><div class="test-question-title">Q10. dbt source freshness kiểm tra điều gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. Độ trễ dữ liệu nguồn</label><label class="test-option"><input type="radio" name="q10" value="B"> B. Số lượng model</label><label class="test-option"><input type="radio" name="q10" value="C"> C. Số lượng macro</label><label class="test-option"><input type="radio" name="q10" value="D"> D. Dung lượng docs</label></div></div>
+              <div class="test-question" data-q="11" data-correct="B"><div class="test-question-title">Q11. Khác biệt phổ biến giữa PostgreSQL và Oracle về giới hạn dòng?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. Đều dùng LIMIT</label><label class="test-option"><input type="radio" name="q11" value="B"> B. PG LIMIT, Oracle FETCH FIRST</label><label class="test-option"><input type="radio" name="q11" value="C"> C. Oracle LIMIT, PG TOP</label><label class="test-option"><input type="radio" name="q11" value="D"> D. Không có khác biệt</label></div></div>
+              <div class="test-question" data-q="12" data-correct="B"><div class="test-question-title">Q12. Khi test fail, hành động đúng nhất là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. Tắt test</label><label class="test-option"><input type="radio" name="q12" value="B"> B. Điều tra fail rows và sửa root cause</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Xóa bảng mart</label><label class="test-option"><input type="radio" name="q12" value="D"> D. Bỏ qua pipeline</label></div></div>
+              <div class="test-question" data-q="13" data-correct="B"><div class="test-question-title">Q13. Hard-code schema.table trong model gây vấn đề gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. Không vấn đề</label><label class="test-option"><input type="radio" name="q13" value="B"> B. Giảm linh hoạt dev/prod, khó maintain</label><label class="test-option"><input type="radio" name="q13" value="C"> C. Tăng lineage tự động</label><label class="test-option"><input type="radio" name="q13" value="D"> D. Tăng bảo mật</label></div></div>
+              <div class="test-question" data-q="14" data-correct="B"><div class="test-question-title">Q14. severity: warn thường có nghĩa gì trong dbt test?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. Fail cứng pipeline ngay</label><label class="test-option"><input type="radio" name="q14" value="B"> B. Cảnh báo, xử lý theo policy</label><label class="test-option"><input type="radio" name="q14" value="C"> C. Bỏ qua hoàn toàn</label><label class="test-option"><input type="radio" name="q14" value="D"> D. Chỉ chạy local</label></div></div>
+              <div class="test-question" data-q="15" data-correct="B"><div class="test-question-title">Q15. Chuỗi lệnh daily nào hợp lý nhất?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. docs -> deps -> build</label><label class="test-option"><input type="radio" name="q15" value="B"> B. deps -> snapshot -> build -> docs</label><label class="test-option"><input type="radio" name="q15" value="C"> C. test -> deps -> seed</label><label class="test-option"><input type="radio" name="q15" value="D"> D. build -> snapshot -> deps</label></div></div>
+              <div class="test-question" data-q="16" data-correct="A"><div class="test-question-title">Q16. Bản ghi current trong SCD2 thường có đặc điểm nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. dbt_valid_to is null</label><label class="test-option"><input type="radio" name="q16" value="B"> B. dbt_valid_from is null</label><label class="test-option"><input type="radio" name="q16" value="C"> C. is_deleted = 1</label><label class="test-option"><input type="radio" name="q16" value="D"> D. updated_at = null</label></div></div>
+              <div class="test-question" data-q="17" data-correct="B"><div class="test-question-title">Q17. Custom generic test nên đặt ở đâu?</div><div class="test-options"><label class="test-option"><input type="radio" name="q17" value="A"> A. models/generic</label><label class="test-option"><input type="radio" name="q17" value="B"> B. tests/generic</label><label class="test-option"><input type="radio" name="q17" value="C"> C. snapshots/generic</label><label class="test-option"><input type="radio" name="q17" value="D"> D. docs/generic</label></div></div>
+              <div class="test-question" data-q="18" data-correct="B"><div class="test-question-title">Q18. Sau mini test, bước quan trọng nhất là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q18" value="A"> A. Dừng học ở đây</label><label class="test-option"><input type="radio" name="q18" value="B"> B. Build lại artifact end-to-end</label><label class="test-option"><input type="radio" name="q18" value="C"> C. Chỉ đọc docs</label><label class="test-option"><input type="radio" name="q18" value="D"> D. Chỉ học thêm lệnh</label></div></div>
+
+              <div class="test-actions">
+                <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+                <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+              </div>
+              <div class="test-result" id="final-test-result" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="practice-task">
+          <div class="practice-task-header">Bài 2: Lập kế hoạch ôn theo câu sai</div>
+          <div class="practice-task-body">
+            <p>Dựa trên kết quả mini test, viết kế hoạch 3 buổi: (1) dependency/tests, (2) snapshot/macros, (3) build lại artifact từ đầu.</p>
+            <p><strong>Expected output:</strong> Có checklist từng buổi và tiêu chí pass rõ ràng.</p>
+            <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+            <div class="solution-box">
+              <ul>
+                <li><strong>Buổi 1:</strong> Ôn W8.04 + W8.05, chạy lại test fail và fix.</li>
+                <li><strong>Buổi 2:</strong> Ôn W8.07 + W8.08, chạy snapshot 2 vòng + validate overlap.</li>
+                <li><strong>Buổi 3:</strong> Ôn W8.10, dựng lại artifact rỗng -> dbt build pass.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(10)">← Module trước</button><div style="text-align:center;color:var(--accent2);font-weight:700">🎯 Hoàn thành tuần 8-9 · Sẵn sàng sang Airflow</div></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+  explain.textContent = (correct ? '✓ Chính xác! ' : '✗ Sai. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? '🔼 Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (correctCount >= 16) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn đã nắm tốt dbt tuần 8-9. Có thể chuyển sang tích hợp Airflow.'; }
+  else if (correctCount >= 13) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Bạn đủ nền tảng, nên ôn lại câu sai trước khi mở rộng project.'; }
+  else if (correctCount >= 10) { levelText = 'Đạt'; chipClass = 'warn'; guidance = 'Bạn cần ôn thêm snapshot/tests/macros để tăng độ chắc tay production.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Hãy quay lại W8.03-W8.10 và tự build lại artifact end-to-end.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đúng là <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng! 🎉</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+
+const quizBank = {
+  w801: {
+    myths: [
+      'dbt thay thế hoàn toàn ingestion tool nên không cần pipeline load.',
+      'ELT chỉ là đổi tên ETL, không khác kiến trúc thực tế.',
+      'dbt bắt buộc viết Python, SQL chỉ là phụ.'
+    ],
+    questions: [
+      { q: 'dbt nằm ở bước nào trong ELT?', truth: 'dbt tập trung vào bước Transform sau khi dữ liệu đã được Load vào warehouse.' },
+      { q: 'dbt có thay thế Airbyte/Fivetran không?', truth: 'Không, dbt không thay ingestion mà chỉ quản lý transform logic.' },
+      { q: 'Lợi ích lớn của dbt trong team là gì?', truth: 'Transform SQL đi qua Git/PR/CI, tăng kiểm soát chất lượng.' },
+      { q: 'Vì sao ELT phù hợp cloud DWH?', truth: 'ELT tận dụng compute co giãn của warehouse để xử lý dữ liệu lớn.' },
+      { q: 'Khác biệt ETL và ELT cốt lõi là gì?', truth: 'ETL transform trước load, ELT load trước rồi transform.' },
+      { q: 'Lineage trong dbt được tạo từ đâu?', truth: 'Từ dependency qua ref() và source().' },
+      { q: 'Production mindset của dbt gồm gì?', truth: 'Model phải đi kèm test, docs, và quy trình deploy rõ ràng.' },
+      { q: 'Vì sao roadmap đặt dbt ở giai đoạn 2?', truth: 'Vì đây là kỹ năng lõi nối modeling với quality trước orchestration.' },
+      { q: 'Khi handbook thiếu chi tiết dbt nên làm gì?', truth: 'Bám roadmap và thực hành chuẩn, đồng thời ghi rõ phần nội suy hợp lý.' },
+      { q: 'Lưu ý chính khi dùng dbt với Oracle?', truth: 'Cần kiểm tra adapter/package tương thích và macro adaptation kỹ.' }
+    ]
+  },
+  w802: {
+    myths: [
+      'Nên để mọi model vào cùng một thư mục cho nhanh.',
+      'Có thể commit password vào profiles.yml nếu repo private.',
+      'dbt tự đoán được target nên không cần cấu hình profiles.'
+    ],
+    questions: [
+      { q: 'Cấu trúc project dbt chuẩn nên có gì?', truth: 'Nên tách models/tests/macros/seeds/snapshots rõ ràng.' },
+      { q: 'dbt_project.yml quản lý phần nào?', truth: 'Quản lý cấu hình model path, materialization, schema theo layer.' },
+      { q: 'profiles.yml quản lý phần nào?', truth: 'Quản lý kết nối database theo target môi trường.' },
+      { q: 'Vì sao phải dùng env_var cho password?', truth: 'Để tránh lộ secret trong Git và hỗ trợ vận hành an toàn.' },
+      { q: 'Vì sao cần tách target dev/prod?', truth: 'Để tránh ghi đè nhầm dữ liệu production khi thử nghiệm.' },
+      { q: 'packages.yml dùng khi nào?', truth: 'Dùng để khai báo dependency package như dbt_utils hoặc dbt-expectations.' },
+      { q: 'Layer staging nên làm gì?', truth: 'Chuẩn hóa dữ liệu nguồn theo mapping gần 1:1.' },
+      { q: 'Layer marts nên phục vụ gì?', truth: 'Phục vụ output cuối cho BI và phân tích nghiệp vụ.' },
+      { q: 'Lệnh xác nhận kết nối trước khi run?', truth: 'dbt debug là bước bắt buộc trước khi chạy model.' },
+      { q: 'Dấu hiệu project config tốt là gì?', truth: 'Có thể tái chạy ổn định trên máy khác/CI với cùng cấu hình.' }
+    ]
+  },
+  w803: {
+    myths: [
+      'incremental luôn đúng dù không có unique_key.',
+      'ephemeral có thể query trực tiếp như bảng vật lý.',
+      'view luôn nhanh hơn table trong mọi tình huống.'
+    ],
+    questions: [
+      { q: 'view phù hợp cho layer nào?', truth: 'View phù hợp cho staging nhẹ cần cập nhật nhanh.' },
+      { q: 'table phù hợp cho layer nào?', truth: 'Table phù hợp cho marts cần tốc độ truy vấn ổn định.' },
+      { q: 'incremental yêu cầu cốt lõi là gì?', truth: 'Cần unique_key và watermark filter đáng tin cậy.' },
+      { q: 'ephemeral hoạt động như thế nào?', truth: 'Ephemeral compile thành CTE và không tạo object vật lý.' },
+      { q: 'is_incremental() dùng để làm gì?', truth: 'Tách logic load delta khi bảng đích đã tồn tại.' },
+      { q: 'Khác biệt PG/Oracle cho null fallback?', truth: 'PostgreSQL thường dùng coalesce còn Oracle dùng nvl.' },
+      { q: 'Khác biệt PG/Oracle cho giới hạn dòng?', truth: 'PostgreSQL dùng LIMIT còn Oracle dùng FETCH FIRST.' },
+      { q: 'Khi nào cần full-refresh?', truth: 'Khi thay đổi logic lớn hoặc cần backfill có kiểm soát.' },
+      { q: 'Làm sao kiểm tra duplicate sau incremental?', truth: 'Group by key và tìm count > 1 sau mỗi lần run.' },
+      { q: 'Tiêu chí incremental pass production là gì?', truth: 'Đúng dữ liệu, không trùng, runtime ổn định qua nhiều chu kỳ.' }
+    ]
+  },
+  w804: {
+    myths: [
+      'ref() chỉ là alias text, không ảnh hưởng DAG.',
+      'source() dùng để gọi model nội bộ thay vì bảng raw.',
+      'Hard-code schema sẽ an toàn hơn ref/source.'
+    ],
+    questions: [
+      { q: 'source() nên dùng cho đối tượng nào?', truth: 'Dùng cho bảng raw đã khai báo trong schema.yml.' },
+      { q: 'ref() nên dùng cho đối tượng nào?', truth: 'Dùng cho model nội bộ để dựng dependency graph.' },
+      { q: 'Lợi ích chính của ref() là gì?', truth: 'Giảm hard-code và tăng an toàn khi đổi schema/tên model.' },
+      { q: 'Lineage trong docs lấy từ đâu?', truth: 'Từ network dependency giữa source() và ref().' },
+      { q: '+fct_orders nghĩa là gì?', truth: 'Chọn fct_orders cùng toàn bộ upstream phụ thuộc.' },
+      { q: 'stg_orders+ nghĩa là gì?', truth: 'Chọn stg_orders cùng toàn bộ downstream phụ thuộc.' },
+      { q: 'Layer staging nên giới hạn logic thế nào?', truth: 'Giữ logic đơn giản, chuẩn hóa nguồn gần 1:1.' },
+      { q: 'Layer intermediate mang giá trị gì?', truth: 'Tách join/business logic trung gian để marts gọn hơn.' },
+      { q: 'Layer marts phục vụ ai?', truth: 'Phục vụ BI/reporting/data app ở lớp tiêu thụ cuối.' },
+      { q: 'Dependency management giúp vận hành ra sao?', truth: 'Deploy đúng thứ tự và debug impact nhanh khi model đổi.' }
+    ]
+  },
+  w805: {
+    myths: [
+      'dbt test chỉ trả true/false nên không debug được.',
+      'Chỉ cần test ở marts, staging không cần test.',
+      'relationships test tự sửa dữ liệu sai.'
+    ],
+    questions: [
+      { q: 'unique test dùng để kiểm tra gì?', truth: 'Kiểm tra khóa business không bị trùng bản ghi.' },
+      { q: 'not_null test dùng để kiểm tra gì?', truth: 'Kiểm tra cột bắt buộc không bị null.' },
+      { q: 'accepted_values phù hợp cho cột nào?', truth: 'Phù hợp cho cột enum có tập giá trị hợp lệ hữu hạn.' },
+      { q: 'relationships test kiểm tra gì?', truth: 'Kiểm tra tính toàn vẹn khóa giữa bảng liên quan.' },
+      { q: 'Generic test khác singular test thế nào?', truth: 'Generic tái dùng bằng tham số, singular cho rule đặc thù một lần.' },
+      { q: 'Test fail trả về lợi ích gì?', truth: 'Trả về fail rows để điều tra và sửa root cause.' },
+      { q: 'severity: warn dùng khi nào?', truth: 'Dùng cho rule quan trọng nhưng chưa cần fail cứng pipeline.' },
+      { q: 'Vì sao test theo nhiều layer?', truth: 'Bắt lỗi sớm từ staging trước khi lan đến marts.' },
+      { q: 'dbt-expectations với Oracle cần lưu ý gì?', truth: 'Cần kiểm tra compile/compatibility vì không phải test nào hỗ trợ tốt.' },
+      { q: 'Mục tiêu cuối của testing trong dbt là gì?', truth: 'Đảm bảo dữ liệu tin cậy trước khi phục vụ quyết định business.' }
+    ]
+  },
+  w806: {
+    myths: [
+      'schema.yml chỉ để test, không cần mô tả business.',
+      'dbt docs chỉ chạy được trên dbt Cloud.',
+      'Có lineage là đủ, không cần docs cột.'
+    ],
+    questions: [
+      { q: 'schema.yml giữ vai trò gì?', truth: 'Là nguồn chính cho tests, docs và metadata model/cột.' },
+      { q: 'dbt docs generate tạo ra gì?', truth: 'Tạo artifacts docs và lineage từ trạng thái project hiện tại.' },
+      { q: 'dbt docs serve để làm gì?', truth: 'Mở giao diện docs cục bộ để tra lineage và mô tả dữ liệu.' },
+      { q: 'Vì sao mô tả cột quan trọng?', truth: 'Giảm hiểu sai định nghĩa nghiệp vụ/KPI của cột dữ liệu.' },
+      { q: 'Meta owner dùng để làm gì?', truth: 'Xác định người chịu trách nhiệm model khi có sự cố.' },
+      { q: 'Meta SLA dùng để làm gì?', truth: 'Ghi rõ kỳ vọng thời gian dữ liệu sẵn sàng.' },
+      { q: 'Khi nào nên regenerate docs?', truth: 'Sau mỗi release/build quan trọng để docs luôn cập nhật.' },
+      { q: 'Docs có nên review trong PR không?', truth: 'Có, vì docs phản ánh data contract thay đổi.' },
+      { q: 'Thiếu docs gây rủi ro gì?', truth: 'Tăng onboarding time và tăng nguy cơ dùng sai dữ liệu.' },
+      { q: 'Mindset docs đúng là gì?', truth: 'Documentation là một phần chất lượng sản phẩm dữ liệu.' }
+    ]
+  },
+  w807: {
+    myths: [
+      'Snapshot ghi đè dữ liệu cũ như SCD1.',
+      'Làm SCD2 không cần unique_key vẫn chính xác.',
+      'Snapshot có thể thay thế mọi incremental model.'
+    ],
+    questions: [
+      { q: 'Snapshot trong dbt dùng để làm gì?', truth: 'Lưu lịch sử thay đổi thực thể theo kiểu SCD2.' },
+      { q: 'timestamp strategy phù hợp khi nào?', truth: 'Khi có cột updated_at đáng tin cậy ở source.' },
+      { q: 'check strategy phù hợp khi nào?', truth: 'Khi thiếu updated_at và cần so sánh check_cols.' },
+      { q: 'Dấu hiệu row current trong snapshot?', truth: 'Thường có dbt_valid_to is null.' },
+      { q: 'Vì sao cần unique_key ổn định?', truth: 'Để nhận diện đúng thực thể qua nhiều phiên bản lịch sử.' },
+      { q: 'Validation overlap nhằm mục đích gì?', truth: 'Phát hiện các khoảng hiệu lực chồng lấn sai logic SCD2.' },
+      { q: 'Nên chạy snapshot ở vị trí nào trong pipeline?', truth: 'Nên chạy trước build marts để dim dùng dữ liệu mới nhất.' },
+      { q: 'Snapshot có thay incremental fact không?', truth: 'Không, snapshot phục vụ lịch sử dim còn incremental cho fact delta.' },
+      { q: 'PG/Oracle khác gì ở hàm null fallback?', truth: 'PG thường dùng coalesce còn Oracle thường dùng nvl.' },
+      { q: 'Rủi ro nếu snapshot sai là gì?', truth: 'Làm sai lịch sử khách hàng và sai lệch báo cáo phân tích dài hạn.' }
+    ]
+  },
+  w808: {
+    myths: [
+      'Macro chỉ dùng cho Python model, không áp SQL model.',
+      'Macro càng dài càng tốt vì gom hết vào một chỗ.',
+      'Macro không cần test vì không chạy trực tiếp.'
+    ],
+    questions: [
+      { q: 'Macro giải quyết bài toán gì?', truth: 'Giảm lặp SQL và chuẩn hóa logic tái sử dụng.' },
+      { q: 'Macro dbt viết bằng gì?', truth: 'Viết bằng Jinja để sinh SQL compile-time.' },
+      { q: 'target.type trong macro dùng để làm gì?', truth: 'Rẽ nhánh SQL theo adapter như postgres/oracle.' },
+      { q: 'Lợi ích macro cross-db là gì?', truth: 'Giảm sửa tay khi chạy cùng logic trên nhiều database.' },
+      { q: 'run-operation dùng trong trường hợp nào?', truth: 'Dùng để chạy macro utility ad-hoc ngoài luồng model.' },
+      { q: 'Macro có cần code review không?', truth: 'Có, macro ảnh hưởng trực tiếp SQL chạy production.' },
+      { q: 'Macro quá lớn gây hại gì?', truth: 'Khó đọc, khó test, khó debug khi lỗi phát sinh.' },
+      { q: 'Khi nào không nên tạo macro?', truth: 'Khi logic rất nhỏ, dùng một lần và không cần tái sử dụng.' },
+      { q: 'DRY trong dbt nên hiểu sao?', truth: 'Giảm lặp hợp lý, không over-abstraction.' },
+      { q: 'Cách test macro tốt nhất?', truth: 'Compile/run trên các target liên quan trước khi merge.' }
+    ]
+  },
+  w809: {
+    myths: [
+      'dbt build chỉ là alias của dbt test.',
+      'dbt source freshness thay được toàn bộ test dữ liệu.',
+      'Nên full-refresh mỗi ngày để an toàn tuyệt đối.'
+    ],
+    questions: [
+      { q: 'dbt deps dùng khi nào?', truth: 'Dùng để tải/cập nhật package dependency trước khi build.' },
+      { q: 'dbt run khác dbt build ở điểm nào?', truth: 'dbt run build model, dbt build chạy chuỗi snapshot/run/test.' },
+      { q: 'dbt source freshness đo điều gì?', truth: 'Đo độ trễ dữ liệu nguồn theo SLA đã cấu hình.' },
+      { q: 'dbt compile giúp gì?', truth: 'Giúp phát hiện lỗi SQL/Jinja trước runtime.' },
+      { q: '+model selector nghĩa gì?', truth: 'Chọn model cùng toàn bộ upstream phụ thuộc.' },
+      { q: 'model+ selector nghĩa gì?', truth: 'Chọn model cùng toàn bộ downstream phụ thuộc.' },
+      { q: 'state:modified+ dùng trong bối cảnh nào?', truth: 'Dùng trong CI để chạy phần thay đổi và liên quan.' },
+      { q: 'Khi nào full-refresh là hợp lý?', truth: 'Khi đổi logic lớn hoặc cần rebuild lịch sử có kiểm soát.' },
+      { q: 'Vì sao cần runbook command rõ?', truth: 'Đảm bảo team vận hành nhất quán, giảm lỗi thủ công.' },
+      { q: 'Lệnh nào nên chạy cuối chu kỳ?', truth: 'dbt docs generate nên chạy sau build/test pass.' }
+    ]
+  },
+  w810: {
+    myths: [
+      'Artifact chỉ cần file SQL, không cần README/test.',
+      'SCD2 dim có thể bỏ snapshot và overwrite trực tiếp.',
+      'Project nhỏ không cần tách staging/intermediate/marts.'
+    ],
+    questions: [
+      { q: 'stg_orders/stg_customers có vai trò gì?', truth: 'Chuẩn hóa dữ liệu raw theo nguyên tắc staging 1:1.' },
+      { q: 'int_order_items_enriched dùng để làm gì?', truth: 'Gom join và business logic trung gian tái sử dụng.' },
+      { q: 'fct_orders thuộc layer nào?', truth: 'Thuộc layer marts để phục vụ BI/reporting.' },
+      { q: 'dim_customers lấy dữ liệu từ đâu?', truth: 'Lấy từ snapshot SCD2 để giữ lịch sử thay đổi.' },
+      { q: 'Vì sao cần cả generic và singular tests?', truth: 'Để vừa tái dùng rule chung, vừa kiểm tra rule đặc thù.' },
+      { q: 'README artifact cần gì tối thiểu?', truth: 'Lineage, cách chạy, và test coverage rõ ràng.' },
+      { q: 'Macro trong artifact giúp gì?', truth: 'Gom logic lặp và adaptation theo engine.' },
+      { q: 'Coverage nên tập trung cột nào?', truth: 'Cột khóa, cột trạng thái, và cột metric quan trọng.' },
+      { q: 'Tiêu chí artifact đạt chuẩn là gì?', truth: 'Chạy end-to-end pass và có docs/test đầy đủ.' },
+      { q: 'Giá trị portfolio của artifact nằm ở đâu?', truth: 'Chứng minh khả năng thiết kế + triển khai + kiểm thử thực chiến.' }
+    ]
+  },
+  w811: {
+    myths: [
+      'Điểm mini test cao là đủ, không cần build project thật.',
+      'Có thể bỏ qua module yếu nếu đoán đúng vài câu.',
+      'Mini test chỉ để thuộc lệnh, không liên quan vận hành.'
+    ],
+    questions: [
+      { q: 'Mini test nên bao phủ những gì?', truth: 'Bao phủ đủ model, dependency, test, docs, snapshot, macro, command.' },
+      { q: 'Điểm cao có thay hands-on không?', truth: 'Không, artifact chạy được mới chứng minh năng lực thật.' },
+      { q: 'Dùng câu sai hiệu quả nhất ra sao?', truth: 'Map câu sai về module tương ứng để ôn có trọng tâm.' },
+      { q: 'Vì sao cần cả câu hỏi concept và thực thi?', truth: 'Vì Data Engineer cần cả tư duy hệ thống và kỹ năng thao tác.' },
+      { q: 'Sau test nên làm gì ngay?', truth: 'Dựng lại artifact dbt_project từ đầu để khóa kiến thức.' },
+      { q: 'Reset test hữu ích khi nào?', truth: 'Khi đã ôn module yếu và cần đo lại tiến bộ.' },
+      { q: 'Sai nhóm snapshot thì ôn gì?', truth: 'Quay lại W8.07, luyện lại snapshot + overlap validation.' },
+      { q: 'Sai nhóm commands thì ôn gì?', truth: 'Quay lại W8.09, viết và chạy runbook command daily.' },
+      { q: 'Điều kiện sẵn sàng sang Airflow là gì?', truth: 'Điểm ổn định và tự build artifact pass test end-to-end.' },
+      { q: 'Mục tiêu cuối tuần 8-9 là gì?', truth: 'Có dbt project production-ready làm nền cho orchestration.' }
+    ]
+  }
+};
+
+function renderQuizForModule(moduleKey, container) {
+  const bank = quizBank[moduleKey];
+  if (!bank || !bank.questions || bank.questions.length !== 10) {
+    container.innerHTML = '<div class="info-box warn">⚠️ <span>Quiz module chưa đủ 10 câu theo yêu cầu.</span></div>';
+    return;
+  }
+
+  bank.questions.forEach((item, idx) => {
+    const quizItem = document.createElement('div');
+    quizItem.className = 'quiz-item';
+
+    const question = document.createElement('div');
+    question.className = 'quiz-q';
+    question.textContent = `${idx + 1}. ${item.q}`;
+
+    const options = document.createElement('div');
+    options.className = 'quiz-options';
+
+    const optionData = [
+      {
+        label: `A. ${bank.myths[0]}`,
+        correct: false,
+        explanation: `Sai vì nhận định này trái với nguyên tắc module. Điểm đúng: ${item.truth}`
+      },
+      {
+        label: `B. ${item.truth}`,
+        correct: true,
+        explanation: `Đúng. ${item.truth}`
+      },
+      {
+        label: `C. ${bank.myths[1]}`,
+        correct: false,
+        explanation: `Sai vì nhận định này không phản ánh cách làm đúng trong thực tế. Điểm đúng: ${item.truth}`
+      },
+      {
+        label: `D. ${bank.myths[2]}`,
+        correct: false,
+        explanation: `Sai vì lựa chọn này mâu thuẫn với mục tiêu kỹ thuật của module. Điểm đúng: ${item.truth}`
+      }
+    ];
+
+    optionData.forEach(opt => {
+      const div = document.createElement('div');
+      div.className = 'quiz-opt';
+      div.textContent = opt.label;
+      const exp = opt.explanation.replace(/'/g, "\\'");
+      div.setAttribute('onclick', `answerQuiz(this, ${opt.correct}, '${exp}')`);
+      options.appendChild(div);
+    });
+
+    const explain = document.createElement('div');
+    explain.className = 'quiz-explain';
+
+    quizItem.appendChild(question);
+    quizItem.appendChild(options);
+    quizItem.appendChild(explain);
+    container.appendChild(quizItem);
+  });
+}
+
+function renderAllQuizzes() {
+  const quizContainers = document.querySelectorAll('.quiz-list');
+  quizContainers.forEach(container => {
+    const key = container.dataset.module;
+    renderQuizForModule(key, container);
+  });
+}
+
+renderAllQuizzes();
+</script>
+</body>
+</html>
