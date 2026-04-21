@@ -1,0 +1,66 @@
+Use project rules from .claude.
+
+Current task:
+Polish and strengthen Week03_Data_Cleaning_Claude.html.
+
+The file already has a strong structure.
+Do NOT rebuild or heavily restructure it.
+
+Preserve:
+- current module structure
+- sidebar navigation
+- current visual layout
+- current teaching flow
+- current scope (10 modules)
+
+Focus only on improvements where valuable.
+
+Improve:
+1. Deeper explanations inside each module
+2. Stronger practical examples
+3. Better PostgreSQL + Oracle SQL examples
+4. Better Python / Pandera examples
+5. Better production-grade data cleaning patterns
+6. Sharper wording and clarity
+7. Remove weak or duplicated text
+8. Improve quizzes if weak
+9. Improve mini test quality
+10. Improve artifact guidance
+
+Important:
+The current file is already good.
+Treat it as a near-finished product.
+
+Do not:
+- redesign UI
+- rename modules unnecessarily
+- collapse modules
+- remove good content
+
+Expected result:
+Update only Week03_Data_Cleaning_Claude.html
+
+
+2.
+Use project rules from .claude.
+
+Review Week03_Data_Cleaning_Claude.html.
+
+The file already has a good structure.
+Do not redesign.
+
+Check only high-value issues:
+
+- weak explanations
+- duplicated text
+- poor SQL examples
+- poor Pandera examples
+- weak production guidance
+- weak quizzes
+- broken HTML
+- broken JS
+- layout issues
+- unclear artifact instructions
+- missing edge cases
+
+Fix only where value is clear.

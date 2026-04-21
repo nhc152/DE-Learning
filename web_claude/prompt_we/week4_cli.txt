@@ -2,7 +2,13 @@
 Use project rules from .claude.
 
 Current task:
-Upgrade Week04_Pipeline_Design.html using the full local repository content.
+Polish and strengthen Week04_Pipeline_Design.html.
+
+The file already has a strong structure and useful scope.
+Do NOT rebuild it.
+Do NOT heavily restructure it.
+
+Treat the current file as a near-finished product.
 
 Allowed sources only:
 - ./Week04_Pipeline_Design.html
@@ -10,66 +16,183 @@ Allowed sources only:
 - ./DE_Roadmap_Expert_NHC.md
 - ./PROMPT_Build_DE_Tutorial_HTML.md
 - ./Week00_Setup.html
+- ./.claude/
 
 Do not read any other files.
 
-Upgrade goals:
-- Keep Week04_Pipeline_Design.html as the base file
-- Read the local cloned repository data-engineer-handbook thoroughly for Week 04 relevant topics
-- Enrich the current file with missing or stronger real content from the handbook
-- Add better practical examples, clearer explanations, stronger terminology, and more realistic exercises where useful
-- Align content with actual handbook guidance instead of generic assumptions
-- Keep Vietnamese output
-- Preserve the current HTML structure, CSS style, layout, and JavaScript interactions
-- Keep compatibility with Week00_Setup.html style
-- Include PostgreSQL and Oracle SQL where relevant
-- Remove weak, generic, duplicated, or shallow sections if better repo-backed content is available
+CORE PRINCIPLES:
+- Preserve strong existing content
 - Improve only where value is clear
-- Do not rebuild from scratch
+- Do NOT assume newer content is always better
+- Keep current UI, navigation, and teaching flow
+- Final result must feel like a polished professional tutorial
 
-Focus topics for Week04:
-- pipeline fundamentals
-- DAG
-- idempotency
-- reliability
-- full load vs incremental vs backfill
-- retry patterns
+CURRENT STRUCTURE TO PRESERVE:
+
+- W4.01 – Tổng Quan & Mục Tiêu
+- W4.02 – DAG & Dependency Graph
+- W4.03 – Idempotency
+- W4.04 – Load Strategy: Full vs Incremental vs Backfill
+- W4.05 – Failure Handling & Retry
+- W4.06 – Monitoring & Data Quality Checks
+- W4.07 – SLA, SLO, SLI & Data Contract
+- W4.08 – Bài Thực Hành & Artifact
+- W4.09 – Mini Test Tổng Kết
+
+FOCUS IMPROVEMENTS:
+
+1. Deepen technical explanations inside each module
+2. Add stronger real-world pipeline examples
+3. Improve PostgreSQL + Oracle SQL examples where relevant
+4. Improve production mindset explanations
+5. Improve wording clarity
+6. Remove duplicated or weak text
+7. Improve quizzes if weak
+8. Improve artifact section
+9. Improve mini test quality
+10. Improve transitions between modules
+
+TOPICS TO ENSURE STRONG COVERAGE:
+
+W4.01
+- why pipeline thinking matters
+- pipeline lifecycle
+- producer → transform → consumer mindset
+
+W4.02
+- DAG fundamentals
+- nodes / edges
+- dependency ordering
+- parallelism
+- common dependency mistakes
+
+W4.03
+- idempotency meaning
+- rerun safety
+- duplicate prevention
+- deterministic outputs
+- safe rerun design
+
+W4.04
+- full load
+- incremental load
+- CDC mindset
+- backfill
+- choosing correct strategy
+- cost vs speed vs correctness tradeoffs
+
+W4.05
+- retry logic
+- exponential backoff
 - dead letter queue
 - alerting
-- monitoring
+- transient vs permanent failure
+
+W4.06
 - row count checks
 - null checks
 - freshness checks
-- data contracts
-- SLA, SLO, SLI
-- week4_pipeline_design artifact structure
+- anomaly basics
+- observability mindset
 
-Expected result:
+W4.07
+- SLA
+- SLO
+- SLI
+- data contracts
+- ownership and expectations
+
+W4.08
+- practice pipeline design
+- SQL tasks
+- artifact folder structure
+- runbook / checklist
+
+W4.09
+- final test
+
+SQL REQUIREMENTS:
+- Include PostgreSQL and Oracle SQL where relevant
+- Use SQL comparison tabs if project rules require them
+- Include realistic examples:
+  - incremental filters
+  - dedup checks
+  - freshness checks
+  - reconciliation queries
+  - backfill validation queries
+
+QUALITY GOALS:
+- Keep Vietnamese output
+- Preserve HTML structure, CSS, layout, and JS interactions
+- Keep compatibility with Week00_Setup.html style
+- Keep required 6-section structure for each module
+- Keep quizzes working
+- Keep final test working
+- Improve depth and production realism
+- No placeholders
+
+EXPECTED RESULT:
 Update only Week04_Pipeline_Design.html
 
-The final file should feel like:
-- the current polished file structure
-- but upgraded with real handbook-backed depth and accuracy
+BEFORE EDITING:
+First identify:
+1. Which current sections are already strong
+2. Which weak sections need polishing
+3. Which repository-backed ideas should be merged in
 
-Before editing, identify which files in data-engineer-handbook are most relevant to Week04 and use only those.
+Then perform the polish.
 
 2.
-Review Week04_Pipeline_Design.html after repository upgrade.
+Use project rules from .claude.
 
-Check:
-- duplicated sections
-- broken HTML
-- weak explanations
-- mismatch with handbook concepts
-- inconsistent wording
-- broken quiz logic
-- layout issues
-- missing required 6-section structure in any module
-- missing or weak PostgreSQL / Oracle SQL examples where relevant
-- incorrect module order
-- missing 10 review questions in any module
-- broken JavaScript interactions required by the template
-- unfinished placeholders or repeated content
+Review Week04_Pipeline_Design.html.
 
-Fix only high-value issues.
+The file already has a good structure.
 Do not redesign.
+
+CHECK CONTENT QUALITY:
+- duplicated sections
+- weak explanations
+- poor teaching flow
+- shallow pipeline examples
+- inconsistent wording
+- weak idempotency explanation
+- weak load strategy tradeoffs
+- weak retry / failure handling guidance
+- weak monitoring explanations
+- weak SLA / data contract explanation
+- weak artifact guidance
+- Did any strong section get removed unnecessarily?
+- Is the final file better than before?
+
+CHECK STRUCTURE:
+- broken HTML
+- broken CSS layout
+- missing required 6-section structure
+- incorrect module order
+- repeated content
+- unfinished placeholders
+
+CHECK INTERACTIVITY:
+- broken quiz logic
+- broken navigation
+- broken toggle sections
+- broken solution buttons
+- broken final test grading/reset
+- missing review questions where expected
+
+CHECK SQL QUALITY:
+- weak PostgreSQL examples
+- weak Oracle SQL examples
+- missing SQL comparison tabs if required
+- unrealistic pipeline SQL examples
+- weak validation queries
+
+ACTION RULES:
+- Fix only high-value issues
+- Preserve strong content
+- Do not redesign the whole file
+- Keep style consistent with the project
+
+EXPECTED RESULT:
+Update only Week04_Pipeline_Design.html into a cleaner, stronger, more polished pipeline design tutorial.

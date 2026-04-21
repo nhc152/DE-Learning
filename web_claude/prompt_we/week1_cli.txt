@@ -1,0 +1,207 @@
+1.
+Use project rules from .claude.
+
+Current task:
+Upgrade Week01_SQL_Advanced.html into a high-quality tutorial file for advanced SQL fundamentals in Data Engineering.
+
+The final version should intelligently combine:
+1. strengths of the current file
+2. stronger repository-backed improvements
+3. better teaching quality
+4. practical SQL patterns for real DE work
+
+Allowed sources only:
+- ./Week01_SQL_Advanced.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not read any other files.
+
+CORE PRINCIPLES:
+- Do NOT blindly overwrite the current file
+- Do NOT assume newer content is always better
+- Treat the current file as valuable content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or incorrect content
+- Final result must feel like one polished tutorial
+
+UPGRADE STRATEGY:
+1. Audit the current file first
+2. Preserve strong current sections
+3. Identify missing advanced SQL topics
+4. Read local repository sources for stronger depth
+5. Merge improvements intelligently
+6. If both old and new versions are useful, combine them
+7. Remove duplicated content
+8. Improve clarity, depth, and practical value
+
+IMPORTANT PRESERVATION RULE:
+If the current version contains strong beginner-to-intermediate explanations, KEEP and enrich them.
+
+Examples:
+- JOIN explanations
+- clean SQL tables
+- readable examples
+- practical business scenarios
+- summary comparisons
+- step-by-step logic breakdown
+
+TARGET WEEK01 STRUCTURE:
+
+- W1.01 – SQL Trong Data Engineering: Vai Trò & Mindset
+- W1.02 – Advanced JOINs (INNER / LEFT / SELF / ANTI / SEMI)
+- W1.03 – Window Functions (ROW_NUMBER, RANK, LAG, LEAD)
+- W1.04 – CTE & Query Readability
+- W1.05 – Aggregation Nâng Cao (GROUPING, HAVING, Conditional Aggregation)
+- W1.06 – Data Cleaning bằng SQL
+- W1.07 – Performance Basics (Indexes, Explain Plan, Query Tuning)
+- W1.08 – PostgreSQL vs Oracle SQL Khác Gì Quan Trọng?
+- W1.09 – Practice Case Study
+- W1.10 – Mini Test Tổng Kết
+
+TOPICS TO ENSURE STRONG COVERAGE:
+
+W1.01
+- why SQL is core skill for DE
+- analytics vs engineering SQL
+- correctness + maintainability mindset
+
+W1.02
+- join types
+- anti join
+- semi join
+- duplicate explosion after joins
+- join debugging
+
+W1.03
+- partition by
+- order by
+- row_number
+- rank vs dense_rank
+- lag / lead
+- dedup patterns
+
+W1.04
+- CTE basics
+- multi-step query design
+- readability
+- reusable logic
+
+W1.05
+- advanced group by
+- having
+- case when inside sum/count
+- cohort style metrics
+
+W1.06
+- trim
+- coalesce
+- null handling
+- duplicate detection
+- type casting
+- standardization
+
+W1.07
+- indexes basics
+- scan vs index scan
+- explain plan mindset
+- common tuning mistakes
+
+W1.08
+- LIMIT vs FETCH FIRST
+- SERIAL vs identity/sequence
+- date functions
+- merge/upsert differences
+- syntax adaptation mindset
+
+W1.09
+- real-world sales/orders/customer case
+- build report query
+- dedup + ranking + aggregation
+
+W1.10
+- final test
+
+SQL REQUIREMENTS:
+- Strong examples in BOTH PostgreSQL and Oracle SQL where relevant
+- Use SQL comparison tabs if project rules require them
+- Clearly explain syntax differences
+- Include production-style queries
+- Focus on correctness and readability
+
+QUALITY GOALS:
+- Keep Vietnamese output
+- Preserve HTML structure, CSS, layout, and JS interactions
+- Keep compatibility with Week00_Setup.html style
+- Keep required 6-section structure for each module
+- Keep 10 review questions per module
+- Keep final mini test working
+- Improve teaching quality and practical depth
+- No placeholders
+- Do not rebuild from scratch unless necessary
+
+EXPECTED RESULT:
+Update only Week01_SQL_Advanced.html
+
+BEFORE EDITING:
+First clearly identify:
+1. Which current sections should be preserved
+2. Which advanced SQL topics are missing
+3. Which repository-backed improvements should be merged in
+
+Then perform the upgrade.
+
+2.
+Use project rules from .claude.
+
+Review Week01_SQL_Advanced.html after upgrade.
+
+CHECK CONTENT QUALITY:
+- duplicated sections
+- weak explanations
+- poor teaching flow
+- shallow SQL examples
+- inconsistent wording
+- weak practical scenarios
+- missing important SQL patterns
+- Did any strong old section get removed unnecessarily?
+- Is the final file better than before?
+
+CHECK STRUCTURE:
+- broken HTML
+- broken CSS layout
+- missing required 6-section structure in any module
+- incorrect module order
+- unfinished placeholders
+- repeated content
+
+CHECK INTERACTIVITY:
+- broken quiz logic
+- missing 10 review questions in any module
+- broken JavaScript interactions
+- broken navigation
+- broken toggle sections
+- broken solution buttons
+- broken final test grading/reset
+
+CHECK SQL QUALITY:
+- weak JOIN examples
+- weak window function explanations
+- missing CTE best practices
+- weak performance guidance
+- weak PostgreSQL examples
+- weak Oracle SQL examples
+- missing SQL comparison tabs if required
+- incorrect syntax differences
+
+ACTION RULES:
+- Fix only high-value issues
+- Preserve strong content
+- Do not redesign the whole file
+- Keep style consistent with the project
+
+EXPECTED RESULT:
+Update only Week01_SQL_Advanced.html into a cleaner, stronger, more polished SQL tutorial.

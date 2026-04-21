@@ -1,27 +1,28 @@
 Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
 
 Nguồn chính:
-- Repo: DataExpert-io/data-engineer-handbook
-- File roadmap tôi đính kèm: DE_Roadmap_Expert_NHC.md
-- File cấu trúc tôi đính kèm: PROMPT_Build_DE_Tutorial_HTML.md
-- File format mẫu tham chiếu: Week00_Setup.html
+- Repo: https://github.com/DataExpert-io/data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
 
 Nhiệm vụ:
-Hãy tạo file HTML hoàn chỉnh tên: Week03_Data_Cleaning.html
+Hãy tạo file HTML hoàn chỉnh tên: Week12_Data_Quality.html
 
 Mục tiêu:
 Tạo tutorial HTML tương tác cho chủ đề:
-Tuần 3 – Data Cleaning & Quality
+Tuần 12 – Data Quality & Testing
 
 YÊU CẦU NGUỒN THÔNG TIN:
 - Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
 - Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
-- Dùng roadmap đính kèm để bám đúng scope tuần 3
+- Dùng roadmap để bám đúng scope tuần 12
 - Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
 - Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
 
 YÊU CẦU QUAN TRỌNG:
-- Output phải là tiếng Việt, giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Output phải là tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
 - Phải dùng cả PostgreSQL và Oracle SQL ở các phần liên quan
 - Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
 - Không dùng placeholder như "..." hoặc "viết tương tự"
@@ -36,14 +37,6 @@ Mỗi module PHẢI có đủ 6 section theo thứ tự:
 4. ❓ Câu Hỏi Ôn Tập
 5. 📌 Tổng Kết
 6. 🔬 Bài Tập Thực Hành
-
-Cấu trúc section cụ thể:
-- Section 1: 📋 Menu Tổng Thể        (icon-purpose) — bảng tóm tắt các bước
-- Section 2: 🎯 Mục Đích Module      (icon-purpose) — bullet list mục tiêu
-- Section 3: 📖 Giải Thích Chi Tiết  (icon-detail)  — nội dung + code blocks + tables
-- Section 4: ❓ Câu Hỏi Ôn Tập       (icon-quiz)    — 10 quiz items interactive
-- Section 5: 📌 Tổng Kết             (icon-summary) — summary-grid 2 cột, 6 ô
-- Section 6: 🔬 Bài Tập Thực Hành   (icon-practice)— practice-tasks + solution toggle
 
 FORMAT PHẢI GIỐNG FILE MẪU:
 - Hero banner
@@ -72,39 +65,60 @@ JAVASCRIPT FUNCTIONS PHẢI CÓ:
 - gradeFinalTest()
 - resetFinalTest()
 
-PHẠM VI NỘI DUNG TUẦN 3:
-Tên: Tuần 3 – Data Cleaning & Quality
-File: Week03_Data_Cleaning.html
+PHẠM VI NỘI DUNG TUẦN 12:
+Tên: Tuần 12 – Data Quality & Testing
+File: Week12_Data_Quality.html
 
 Các module bắt buộc:
-- W3.01 – Tổng Quan & Tidy Data Principles
-- W3.02 – Data Profiling: Hiểu Data Trước Khi Làm
-- W3.03 – Xử Lý Missing Values
-- W3.04 – Deduplication Strategies
-- W3.05 – Outlier Detection & Treatment
-- W3.06 – Schema Validation với pandera
-- W3.07 – Artifact: week3_data_cleaning/
-- W3.08 – Mini Test Tổng Kết
+- W12.01 – Tổng Quan: Tại Sao Data Quality Là Sống Còn
+- W12.02 – Testing Pyramid cho Data Engineering
+- W12.03 – Great Expectations: ExpectationSuite & Checkpoints
+- W12.04 – Soda: SQL-Based Checks & scan.yml
+- W12.05 – dbt Tests Nâng Cao & Custom Tests
+- W12.06 – Anomaly Detection Cơ Bản
+- W12.07 – Data Contracts: Schema + SLA giữa Producer và Consumer
+- W12.08 – Artifact: data_quality/ hoàn chỉnh
+- W12.09 – Mini Test Tổng Kết
 
 NỘI DUNG CẦN BAO PHỦ:
-- Tidy Data principles theo tinh thần Hadley Wickham
-- Data profiling trước khi load
-- Missing values: identify, analyze, imputation, dropping, business trade-off
-- Duplicates: exact duplicate, business-key duplicate, window function dedup pattern
-- Outliers: detect, validate, cap/remove/flag, phân biệt outlier thật và data error
-- Wrong data types, schema drift, validation rules
-- Defensive programming: assert, schema validation, fail fast
-- pandera cho schema + business rules validation
-- before/after comparison của cleaning pipeline
-- artifact week3_data_cleaning/ gồm:
-  - profiling_report.ipynb
-  - cleaning_pipeline.py
-  - validation_rules.py
-  - before_after_comparison.md
+- Tại sao data quality là vấn đề production, không chỉ là "check thêm cho đẹp"
+- Testing pyramid cho DE:
+  - unit test cho transform logic
+  - integration test cho pipeline
+  - data quality test cho output
+- Great Expectations:
+  - ExpectationSuite
+  - Checkpoint
+  - data docs
+  - workflow thực tế
+- Soda:
+  - SQL-based checks
+  - scan.yml
+  - khi nào dùng Soda thay vì Great Expectations
+- dbt tests nâng cao:
+  - built-in vs custom tests
+  - dbt-expectations nếu phù hợp
+  - custom macros / test patterns
+- Anomaly detection cơ bản:
+  - row count deviation
+  - null spike
+  - value range anomalies
+  - freshness anomalies
+- Data contracts:
+  - schema contract
+  - SLA giữa producer và consumer
+  - fail-fast mindset
+- Artifact data_quality/ gồm:
+  - great_expectations/expectations/orders_suite.json
+  - great_expectations/checkpoints/daily_check.yml
+  - soda/checks/orders_checks.yml
+  - dbt_tests/custom_test_accepted_range.sql
+  - README.md mô tả test strategy, alerting, fail conditions
 
 YÊU CẦU SQL:
-- Ở những phần liên quan đến profiling, duplicate detection, validation, quality check hoặc load check, hãy minh họa bằng cả PostgreSQL và Oracle SQL nếu hợp lý
+- Ở những phần liên quan đến row count checks, null checks, uniqueness checks, accepted range checks, freshness checks, anomaly validation queries hoặc reconciliation queries, hãy minh họa bằng cả PostgreSQL và Oracle SQL nếu hợp lý
 - Nếu cú pháp khác nhau, trình bày rõ riêng từng block
+- Nếu project rules yêu cầu SQL tabs thì dùng tab PostgreSQL / Oracle SQL thay vì ghi text thuần
 - Giải thích ngắn gọn điểm khác nhau
 
 YÊU CẦU QUIZ:
@@ -127,7 +141,8 @@ YÊU CẦU MINI TEST CUỐI FILE:
 YÊU CẦU CHẤT LƯỢNG:
 - Phải sâu, đầy đủ, thực chiến
 - Ưu tiên chất lượng giảng dạy hơn tốc độ
-- Có ví dụ thực tế cho DE pipeline
+- Có testing mindset rõ ràng
+- Có production mindset, alerting mindset, contract mindset
 - Không quá ngắn gọn
 - Nội dung phải đủ tốt để học như một tutorial thật
 
@@ -138,4 +153,4 @@ Hãy nói rõ ngắn gọn:
 3. Bạn sẽ giữ format nào từ file mẫu
 
 SAU ĐÓ:
-Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week03_Data_Cleaning.html
+Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week12_Data_Quality.html

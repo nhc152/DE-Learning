@@ -1,0 +1,207 @@
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+
+Nguồn chính:
+- Repo: https://github.com/DataExpert-io/data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nhiệm vụ:
+Hãy tạo file HTML hoàn chỉnh tên: Week13_Cloud_AWS.html
+
+Mục tiêu:
+Tạo tutorial HTML tương tác cho chủ đề:
+Tuần 13 – Cloud Platform: AWS cho Data Engineer
+
+YÊU CẦU NGUỒN THÔNG TIN:
+- Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
+- Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
+- Dùng roadmap để bám đúng scope tuần 13
+- Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
+- Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
+
+YÊU CẦU QUAN TRỌNG:
+- Output phải là tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Phải viết theo mindset của Data Engineer, không phải AWS generalist
+- Nội dung phải practical, production-oriented, không chỉ lý thuyết cloud nhập môn
+- Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
+- Không dùng placeholder như "..." hoặc "viết tương tự"
+- Mỗi module phải đầy đủ nội dung thật
+- Nếu chưa fetch được full repo thì phải nói rõ phần nào lấy từ repo trực tiếp, phần nào lấy từ roadmap, phần nào là suy luận hợp lý
+
+CẤU TRÚC FILE PHẢI GIỮ:
+Mỗi module PHẢI có đủ 6 section theo thứ tự:
+1. 📋 Menu Tổng Thể
+2. 🎯 Mục Đích Module
+3. 📖 Giải Thích Chi Tiết
+4. ❓ Câu Hỏi Ôn Tập
+5. 📌 Tổng Kết
+6. 🔬 Bài Tập Thực Hành
+
+FORMAT PHẢI GIỐNG FILE MẪU:
+- Hero banner
+- Badge row
+- Sidebar fixed 290px
+- Main content
+- Modules display:none, active display:block
+- Collapsible sections
+- Terminal-style code blocks
+- Info boxes: tip / warn / note
+- Interactive quiz
+- Practice task có nút xem lời giải
+- Mini test cuối file
+- Responsive mobile
+- Tất cả CSS inline trong <style>
+- Tất cả JS inline trong <script>
+- Không dùng framework ngoài
+
+JAVASCRIPT FUNCTIONS PHẢI CÓ:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+PHẠM VI NỘI DUNG TUẦN 13:
+Tên: Tuần 13 – Cloud Platform: AWS cho Data Engineer
+File: Week13_Cloud_AWS.html
+
+Các module bắt buộc:
+- W13.01 – Tổng Quan: Vì Sao Data Engineer Phải Biết Cloud
+- W13.02 – Amazon S3 cho Data Lake: raw / staging / curated / archive
+- W13.03 – IAM, Roles, Policies & Least Privilege cho Pipeline
+- W13.04 – RDS/Aurora cho Metadata & Operational Database
+- W13.05 – Athena, Redshift & Query Patterns trên AWS
+- W13.06 – CloudWatch, Logging, Monitoring & Alerting
+- W13.07 – AWS Glue Data Catalog & Metadata Layer
+- W13.08 – Infrastructure as Code: terraform/ cho cloud_setup/
+- W13.09 – Cost, Security & Production Design Decisions
+- W13.10 – Artifact: cloud_setup/ hoàn chỉnh
+- W13.11 – Mini Test Tổng Kết
+
+NỘI DUNG CẦN BAO PHỦ:
+- Vì sao DE cần cloud:
+  - local chỉ đủ để học nền tảng
+  - production cần storage, IAM, monitoring, managed services, scalability
+  - move từ local stack sang production-like environment
+- S3 cho Data Lake:
+  - bucket strategy: raw / staging / curated / archive
+  - object storage mindset
+  - partitioning theo date/domain/source
+  - naming convention
+  - lifecycle policy
+  - versioning
+  - encryption
+  - small files problem
+  - anti-pattern khi dùng S3
+- IAM:
+  - user vs group vs role
+  - IAM Role cho EC2 / Airflow / Lambda / Glue / CI/CD
+  - inline policy vs managed policy
+  - least privilege
+  - cross-service access cho data pipeline
+  - ví dụ policy chỉ cho phép đọc raw và ghi curated
+- RDS/Aurora:
+  - khi nào dùng RDS PostgreSQL
+  - Aurora khác gì RDS thường
+  - use cases cho Airflow metadata DB
+  - operational database vs analytical warehouse
+  - backup, Multi-AZ, connection basics
+- Athena vs Redshift:
+  - Athena query trực tiếp trên S3
+  - Redshift như data warehouse managed
+  - khi nào dùng Athena
+  - khi nào dùng Redshift
+  - cost/performance trade-off
+  - external tables / schema-on-read mindset
+- CloudWatch:
+  - log groups, metrics, alarms
+  - log aggregation cho jobs
+  - giám sát pipeline runs
+  - alerting basics
+  - ví dụ metric cho failed jobs / latency / freshness
+- Glue Data Catalog:
+  - catalog tables
+  - crawler concept
+  - schema metadata
+  - relationship giữa S3 + Athena + Glue
+  - khi nào crawler hữu ích, khi nào nên define schema chủ động
+- Terraform / IaC:
+  - tại sao không nên click tay toàn bộ trên console
+  - tổ chức thư mục terraform/
+  - s3_buckets.tf
+  - iam_roles.tf
+  - rds_metadata.tf
+  - variables.tf
+  - outputs.tf
+  - README mô tả kiến trúc, cost estimate, security notes
+- Cost & security:
+  - least privilege
+  - encryption at rest / in transit
+  - bucket public access block
+  - tagging resources
+  - cost estimate mindset
+  - avoid over-provisioning
+  - production design trade-offs
+- Artifact cloud_setup/ gồm:
+  - terraform/s3_buckets.tf
+  - terraform/iam_roles.tf
+  - terraform/rds_metadata.tf
+  - terraform/variables.tf
+  - terraform/outputs.tf
+  - architecture.md
+  - README.md mô tả mục tiêu, kiến trúc, cost estimate, security notes, cách apply
+
+YÊU CẦU CODE / CONFIG:
+- Ở các phần liên quan, hãy minh họa bằng nội dung thật, không pseudo-code:
+  - S3 bucket naming examples
+  - lifecycle rule examples
+  - IAM policy JSON examples
+  - Terraform resources cho S3 / IAM / RDS
+  - Athena CREATE EXTERNAL TABLE ví dụ
+  - CloudWatch alarm ví dụ nếu hợp lý
+- Nếu project rules yêu cầu tabs, có thể dùng tab phù hợp như:
+  - AWS Console
+  - Terraform
+  - AWS CLI
+- Giải thích ngắn gọn sự khác nhau giữa các cách tiếp cận
+
+YÊU CẦU QUIZ:
+- Mỗi module phải có đúng 10 câu hỏi
+- Mỗi câu hỏi có đúng 4 đáp án A/B/C/D
+- Phải có giải thích cho từng đáp án
+- Giải thích đáp án sai phải nói rõ vì sao sai
+
+YÊU CẦU PRACTICE:
+- Mỗi module có bài tập thực hành thực tế
+- Có nút “💡 Xem lời giải”
+- Lời giải phải hữu ích, không sơ sài
+- Practice nên hướng tới production-like design, không quá toy example
+
+YÊU CẦU MINI TEST CUỐI FILE:
+- Module cuối phải có mini test tổng kết
+- 15–20 câu hỏi
+- Có chấm điểm
+- Có reset
+
+YÊU CẦU CHẤT LƯỢNG:
+- Phải sâu, đầy đủ, thực chiến
+- Ưu tiên chất lượng giảng dạy hơn tốc độ
+- Có cloud mindset rõ ràng
+- Có production mindset, security mindset, cost mindset
+- Không quá ngắn gọn
+- Nội dung phải đủ tốt để học như một tutorial thật
+- Phải giúp người học hiểu “tại sao chọn service này thay vì service kia”
+
+TRƯỚC KHI VIẾT FILE:
+Hãy nói rõ ngắn gọn:
+1. Bạn đã lấy được nội dung nào trực tiếp từ repo
+2. Bạn đang dùng roadmap ở phần nào
+3. Bạn sẽ giữ format nào từ file mẫu
+
+SAU ĐÓ:
+Hãy xuất đầy đủ nội dung file HTML hoàn chỉnh Week13_Cloud_AWS.html

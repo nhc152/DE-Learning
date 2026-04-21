@@ -2,16 +2,16 @@
 Use project rules from .claude.
 
 Current task:
-Upgrade Week10_Airflow.html into a high-quality tutorial file for Apache Airflow in Data Engineering.
+Upgrade Week12_Data_Quality.html into a high-quality tutorial file for Data Quality & Testing in Data Engineering.
 
 The final version should intelligently combine:
 1. strengths of the current file
 2. stronger repository-backed improvements
 3. better teaching quality
-4. practical orchestration workflows
+4. practical production-quality testing workflows
 
 Allowed sources only:
-- ./Week10_Airflow.html
+- ./Week12_Data_Quality.html
 - ./data-engineer-handbook/
 - ./DE_Roadmap_Expert_NHC.md
 - ./PROMPT_Build_DE_Tutorial_HTML.md
@@ -31,7 +31,7 @@ CORE PRINCIPLES:
 UPGRADE STRATEGY:
 1. Audit the current file first
 2. Preserve strong current sections
-3. Identify missing Airflow topics
+3. Identify missing Data Quality topics
 4. Read local repository sources for stronger depth
 5. Merge improvements intelligently
 6. If both old and new versions are useful, combine them
@@ -42,105 +42,86 @@ IMPORTANT PRESERVATION RULE:
 If the current version contains strong conceptual explanations, KEEP and enrich them.
 
 Examples:
-- Airflow architecture explanations
-- DAG scheduling examples
-- beginner-friendly operator explanations
-- good dependency diagrams or analogies
-- useful dbt + Airflow orchestration flow
-- clear retry / timeout examples
-- practical artifact explanations
+- testing pyramid explanations
+- practical quality check examples
+- beginner-friendly Great Expectations / Soda comparisons
+- useful dbt test patterns
+- clear anomaly detection explanations
+- strong data contract explanations
+- practical artifact setup guidance
 
 CURRENT / TARGET STRUCTURE TO PRESERVE:
 
-- W10.01 – Airflow Architecture (Scheduler/Executor/Webserver)
-- W10.02 – DAG: Định Nghĩa & Schedule
-- W10.03 – Core Operators (Python/Bash/SQL)
-- W10.04 – Task Dependencies & XCom
-- W10.05 – Variables, Connections & Secrets
-- W10.06 – Sensors & ExternalTaskSensor
-- W10.07 – Dynamic DAGs từ Config
-- W10.08 – Tích Hợp dbt + Airflow
-- W10.09 – Retry, Timeout & SLA Miss
-- W10.10 – Artifact: airflow_dags/ hoàn chỉnh
-- W10.11 – Mini Test Tổng Kết
+- W12.01 – Tổng Quan: Tại Sao Data Quality Là Sống Còn
+- W12.02 – Testing Pyramid cho Data Engineering
+- W12.03 – Great Expectations: ExpectationSuite & Checkpoints
+- W12.04 – Soda: SQL-Based Checks & scan.yml
+- W12.05 – dbt Tests Nâng Cao & Custom Tests
+- W12.06 – Anomaly Detection Cơ Bản
+- W12.07 – Data Contracts: Schema + SLA giữa Producer và Consumer
+- W12.08 – Artifact: data_quality/ hoàn chỉnh
+- W12.09 – Mini Test Tổng Kết
 
 TOPICS TO ENSURE STRONG COVERAGE:
 
-W10.01
-- Scheduler
-- Executor
-- Worker
-- Webserver
-- Metadata DB
-- orchestration lifecycle
+W12.01
+- why data quality matters
+- production failures caused by bad data
+- data trust and business impact
 
-W10.02
-- DAG basics
-- schedule interval
-- cron
-- @daily
-- timedelta
-- catchup
-- backfill concepts
+W12.02
+- unit tests
+- integration tests
+- data quality tests
+- testing pyramid for DE
+- where each layer fits
 
-W10.03
-- PythonOperator
-- BashOperator
-- SQLExecuteQueryOperator
-- task purpose
-- when to use which
+W12.03
+- Great Expectations basics
+- ExpectationSuite
+- Checkpoints
+- data docs
+- operational workflow
+- when GE is useful
 
-W10.04
-- upstream / downstream
-- >>
-- <<
-- XCom basics
-- passing lightweight metadata
-- avoiding misuse of XCom
+W12.04
+- Soda basics
+- SQL-based checks
+- scan.yml
+- lightweight quality checks
+- when to use Soda vs GE
 
-W10.05
-- Variables
-- Connections
-- secrets handling
-- config separation
-- production-safe patterns
+W12.05
+- dbt built-in tests
+- custom tests
+- dbt-expectations
+- test selection
+- production validation workflow
 
-W10.06
-- FileSensor
-- ExternalTaskSensor
-- HttpSensor
-- waiting patterns
-- dependency orchestration across systems
+W12.06
+- anomaly detection basics
+- row count deviation
+- null spikes
+- value range anomalies
+- freshness anomalies
+- baseline comparison mindset
 
-W10.07
-- dynamic DAG generation
-- config-driven pipelines
-- maintainability
-- avoiding DAG explosion
+W12.07
+- data contracts
+- schema expectations
+- SLA commitments
+- producer vs consumer responsibilities
+- fail-fast mindset
 
-W10.08
-- dbt + Airflow orchestration
-- run + test flow
-- sequencing ETL and dbt
-- operational lineage mindset
-
-W10.09
-- retry
-- timeout
-- SLA miss
-- transient vs permanent failures
-- alerting mindset
-
-W10.10
-- airflow_dags artifact structure
-- etl_orders_daily.py
-- dbt_pipeline.py
-- data_quality_check.py
-- backfill_historical.py
+W12.08
+- data_quality artifact structure
+- GE folders
+- Soda checks
+- dbt custom tests
 - README guidance
-- Docker Compose local setup
+- alerting / fail conditions
 
-W10.11
+W12.09
 - final mini test
 
 SQL REQUIREMENTS:
@@ -149,10 +130,11 @@ SQL REQUIREMENTS:
 - Include realistic examples:
   - row count checks
   - null checks
+  - uniqueness checks
+  - accepted range checks
   - freshness checks
   - reconciliation queries
-  - metadata checks
-  - downstream validation queries
+  - anomaly validation queries
 
 QUALITY GOALS:
 - Keep Vietnamese output
@@ -166,12 +148,12 @@ QUALITY GOALS:
 - Do not rebuild from scratch unless necessary
 
 EXPECTED RESULT:
-Update only Week10_Airflow.html
+Update only Week12_Data_Quality.html
 
 BEFORE EDITING:
 First clearly identify:
 1. Which current sections should be preserved
-2. Which Airflow topics are missing or weak
+2. Which Data Quality topics are missing or weak
 3. Which repository-backed improvements should be merged in
 
 Then perform the upgrade.
@@ -179,23 +161,20 @@ Then perform the upgrade.
 2.
 Use project rules from .claude.
 
-Review Week10_Airflow.html after upgrade.
+Review Week12_Data_Quality.html after upgrade.
 
 CHECK CONTENT QUALITY:
 - duplicated sections
 - weak explanations
 - poor teaching flow
-- shallow Airflow examples
+- shallow Data Quality examples
 - inconsistent wording
-- weak architecture explanations
-- weak DAG scheduling explanations
-- weak operator explanations
-- weak XCom explanation
-- weak variables / connections / secrets guidance
-- weak sensors explanation
-- weak dynamic DAG explanation
-- weak dbt integration explanation
-- weak retry / timeout / SLA guidance
+- weak testing pyramid explanations
+- weak Great Expectations explanation
+- weak Soda explanation
+- weak dbt test coverage
+- weak anomaly detection explanation
+- weak data contract explanation
 - weak artifact guidance
 - Did any strong old section get removed unnecessarily?
 - Is the final file better than before?
@@ -223,7 +202,8 @@ CHECK SQL / TECHNICAL QUALITY:
 - missing SQL comparison tabs if required
 - unrealistic validation queries
 - weak row count / freshness / reconciliation examples
-- weak Docker Compose or artifact setup guidance
+- weak Great Expectations or Soda practical examples
+- weak artifact setup guidance
 
 ACTION RULES:
 - Fix only high-value issues
@@ -232,4 +212,4 @@ ACTION RULES:
 - Keep style consistent with the project
 
 EXPECTED RESULT:
-Update only Week10_Airflow.html into a cleaner, stronger, more polished Airflow tutorial.
+Update only Week12_Data_Quality.html into a cleaner, stronger, more polished Data Quality tutorial.

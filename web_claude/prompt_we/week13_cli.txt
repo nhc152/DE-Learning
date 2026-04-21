@@ -1,0 +1,268 @@
+1.
+Use project rules from .claude.
+
+Current task:
+Upgrade Week13_Cloud_AWS.html into a high-quality tutorial file for Cloud Platform on AWS for Data Engineers.
+
+The final version should intelligently combine:
+1. strengths of the current file
+2. stronger repository-backed improvements
+3. better teaching quality
+4. more realistic production-grade cloud design guidance
+
+Allowed sources only:
+- ./Week13_Cloud_AWS.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not read any other files.
+
+CORE PRINCIPLES:
+- Do NOT blindly overwrite the current file
+- Do NOT assume newer content is always better
+- Treat the current file as valuable content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or incorrect content
+- Final result must feel like one polished tutorial
+
+UPGRADE STRATEGY:
+1. Audit the current file first
+2. Preserve strong current sections
+3. Identify missing AWS / Cloud topics
+4. Read local repository sources for stronger depth
+5. Merge improvements intelligently
+6. If both old and new versions are useful, combine them
+7. Remove duplicated content
+8. Improve clarity, depth, and practical value
+
+IMPORTANT PRESERVATION RULE:
+If the current version contains strong conceptual explanations, KEEP and enrich them.
+
+Examples:
+- good S3 layout explanations
+- useful IAM least privilege examples
+- beginner-friendly Athena vs Redshift comparisons
+- practical Terraform structure examples
+- strong CloudWatch monitoring guidance
+- realistic cost/security discussions
+- useful data lake organization tips
+
+CURRENT / TARGET STRUCTURE TO PRESERVE:
+
+- W13.01 – Tổng Quan: Vì Sao Data Engineer Phải Biết Cloud
+- W13.02 – Amazon S3 cho Data Lake: raw / staging / curated / archive
+- W13.03 – IAM, Roles, Policies & Least Privilege cho Pipeline
+- W13.04 – RDS/Aurora cho Metadata & Operational Database
+- W13.05 – Athena, Redshift & Query Patterns trên AWS
+- W13.06 – CloudWatch, Logging, Monitoring & Alerting
+- W13.07 – AWS Glue Data Catalog & Metadata Layer
+- W13.08 – Infrastructure as Code: terraform/ cho cloud_setup/
+- W13.09 – Cost, Security & Production Design Decisions
+- W13.10 – Artifact: cloud_setup/ hoàn chỉnh
+- W13.11 – Mini Test Tổng Kết
+
+TOPICS TO ENSURE STRONG COVERAGE:
+
+W13.01
+- why cloud matters for DE
+- moving from local to production-like environment
+- storage, security, monitoring, scaling
+- responsibilities of a DE in cloud environments
+
+W13.02
+- S3 as object storage
+- bucket layout raw/staging/curated/archive
+- folder/prefix conventions
+- partitioning strategy
+- lifecycle rules
+- encryption
+- versioning
+- small files problem
+- anti-patterns
+
+W13.03
+- IAM fundamentals
+- users, groups, roles
+- role-based access for pipelines
+- least privilege
+- service-to-service access
+- policy examples
+- data access boundaries
+
+W13.04
+- RDS PostgreSQL basics
+- Aurora vs standard RDS
+- metadata DB for Airflow
+- operational DB vs analytical store
+- backup and availability mindset
+- connection patterns
+
+W13.05
+- Athena basics
+- schema-on-read
+- querying S3 data
+- Redshift basics
+- warehouse trade-offs
+- Athena vs Redshift decision framework
+- practical query patterns
+
+W13.06
+- CloudWatch logs
+- metrics
+- alarms
+- monitoring pipeline failures
+- job observability
+- freshness and latency alerting
+
+W13.07
+- Glue Data Catalog
+- crawlers
+- schema metadata
+- S3 + Glue + Athena relationship
+- when to automate schema discovery vs define manually
+
+W13.08
+- Terraform basics
+- repeatable infra
+- folder layout
+- s3_buckets.tf
+- iam_roles.tf
+- rds_metadata.tf
+- variables and outputs
+- safe IaC practices
+
+W13.09
+- cost optimization mindset
+- security defaults
+- encryption
+- blocking public access
+- tagging
+- least privilege
+- design trade-offs
+- over-engineering avoidance
+
+W13.10
+- complete cloud_setup artifact
+- terraform files
+- architecture notes
+- README
+- cost estimate notes
+- security notes
+- how to apply / validate
+
+W13.11
+- final mini test
+
+CODE / CONFIG REQUIREMENTS:
+- Include realistic code/config where relevant
+- Use AWS service examples that are believable and practical
+- Include:
+  - Terraform for S3 / IAM / RDS
+  - IAM policy JSON
+  - Athena external table example
+  - lifecycle rule examples
+  - CloudWatch alarm example if suitable
+- Avoid shallow toy snippets
+
+QUALITY GOALS:
+- Keep Vietnamese output
+- Preserve HTML structure, CSS, layout, and JS interactions
+- Keep compatibility with Week00_Setup.html style
+- Keep required 6-section structure for each module
+- Keep 10 review questions per module
+- Keep final mini test working
+- Improve teaching quality and production realism
+- No placeholders
+- Do not rebuild from scratch unless necessary
+
+EXPECTED RESULT:
+Update only Week13_Cloud_AWS.html
+
+BEFORE EDITING:
+First clearly identify:
+1. Which current sections should be preserved
+2. Which AWS / Cloud topics are missing or weak
+3. Which repository-backed improvements should be merged in
+
+Then perform the upgrade.
+
+2.
+Use project rules from .claude.
+
+Review Week13_Cloud_AWS.html after upgrade.
+
+CHECK CONTENT QUALITY:
+- duplicated sections
+- weak explanations
+- poor teaching flow
+- shallow AWS explanations
+- inconsistent wording
+- weak S3 data lake design explanation
+- weak IAM explanation
+- weak Athena vs Redshift comparison
+- weak CloudWatch explanation
+- weak Glue Data Catalog explanation
+- weak Terraform explanation
+- weak cost/security explanation
+- weak artifact guidance
+- Did any strong old section get removed unnecessarily?
+- Is the final file better than before?
+
+CHECK STRUCTURE:
+- broken HTML
+- broken CSS layout
+- missing required 6-section structure in any module
+- incorrect module order
+- unfinished placeholders
+- repeated content
+
+CHECK INTERACTIVITY:
+- broken quiz logic
+- missing 10 review questions in any module
+- broken JavaScript interactions
+- broken navigation
+- broken toggle sections
+- broken solution buttons
+- broken final test grading/reset
+
+CHECK AWS / TECHNICAL QUALITY:
+- weak Terraform examples
+- weak IAM policy JSON
+- weak Athena external table example
+- unrealistic S3 naming / partitioning strategy
+- weak CloudWatch monitoring examples
+- weak cost estimate discussion
+- weak security defaults
+- confusing service boundaries
+- does the tutorial explain when to use each AWS service?
+
+CHECK TEACHING QUALITY:
+- Is the tutorial teaching cloud for Data Engineers, not generic AWS theory?
+- Are trade-offs clearly explained?
+- Are anti-patterns mentioned where useful?
+- Is production mindset visible?
+- Is least privilege explained practically?
+- Is cost awareness visible?
+- Are examples coherent across modules?
+
+CHECK ARTIFACT QUALITY:
+- Is cloud_setup/ artifact complete and realistic?
+- Do terraform files match the narrative?
+- Does README explain architecture, cost, and security notes clearly?
+- Is architecture.md useful, not generic?
+
+FIX RULES:
+- Fix all broken HTML / JS / quiz logic
+- Strengthen weak explanations
+- Remove duplicated content
+- Improve service comparisons
+- Improve Terraform / IAM / Athena / S3 examples
+- Preserve strong original content where useful
+- Keep everything in Vietnamese
+- Keep final file polished and cohesive
+
+EXPECTED RESULT:
+Return the improved final content for Week13_Cloud_AWS.html only.

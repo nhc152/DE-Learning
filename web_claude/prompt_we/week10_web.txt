@@ -1,10 +1,10 @@
 Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
 
 Nguồn chính:
-- Repo: DataExpert-io/data-engineer-handbook
-- File roadmap tôi đính kèm: DE_Roadmap_Expert_NHC.md
-- File cấu trúc tôi đính kèm: PROMPT_Build_DE_Tutorial_HTML.md
-- File format mẫu tham chiếu: Week00_Setup.html
+- Repo: https://github.com/DataExpert-io/data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
 
 Nhiệm vụ:
 Hãy tạo file HTML hoàn chỉnh tên: Week10_Airflow.html
@@ -16,12 +16,13 @@ Tuần 10-11 – Apache Airflow: Orchestration
 YÊU CẦU NGUỒN THÔNG TIN:
 - Ưu tiên lấy nội dung trực tiếp từ repo data-engineer-handbook
 - Nếu có thể, hãy fetch trực tiếp nội dung các phần liên quan trong repo thay vì chỉ dựa vào snippet search
-- Dùng roadmap đính kèm để bám đúng scope tuần 10-11
+- Dùng roadmap để bám đúng scope tuần 10-11
 - Dùng PROMPT_Build_DE_Tutorial_HTML.md để bám đúng cấu trúc file
 - Dùng Week00_Setup.html làm chuẩn về format, layout, CSS variables, component patterns, và JavaScript interactions
 
 YÊU CẦU QUAN TRỌNG:
-- Output phải là tiếng Việt, giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Output phải là tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
 - Phải dùng cả PostgreSQL và Oracle SQL ở các phần liên quan
 - Phần câu hỏi ôn tập: đúng 10 câu hỏi cho từng module
 - Không dùng placeholder như "..." hoặc "viết tương tự"
@@ -36,14 +37,6 @@ Mỗi module PHẢI có đủ 6 section theo thứ tự:
 4. ❓ Câu Hỏi Ôn Tập
 5. 📌 Tổng Kết
 6. 🔬 Bài Tập Thực Hành
-
-Cấu trúc section cụ thể:
-- Section 1: 📋 Menu Tổng Thể        (icon-purpose) — bảng tóm tắt các bước
-- Section 2: 🎯 Mục Đích Module      (icon-purpose) — bullet list mục tiêu
-- Section 3: 📖 Giải Thích Chi Tiết  (icon-detail)  — nội dung + code blocks + tables
-- Section 4: ❓ Câu Hỏi Ôn Tập       (icon-quiz)    — 10 quiz items interactive
-- Section 5: 📌 Tổng Kết             (icon-summary) — summary-grid 2 cột, 6 ô
-- Section 6: 🔬 Bài Tập Thực Hành   (icon-practice)— practice-tasks + solution toggle
 
 FORMAT PHẢI GIỐNG FILE MẪU:
 - Hero banner
@@ -99,7 +92,7 @@ NỘI DUNG CẦN BAO PHỦ:
 - Sensors: FileSensor, ExternalTaskSensor, HttpSensor
 - Retry, timeout, SLA miss
 - Dynamic DAGs generate từ config
-- Tích hợp dbt + Airflow: DbtRunOperator, DbtTestOperator hoặc pattern tương đương
+- Tích hợp dbt + Airflow
 - README setup local bằng Docker Compose
 - Artifact airflow_dags/ gồm:
   - dags/etl_orders_daily.py
@@ -108,9 +101,10 @@ NỘI DUNG CẦN BAO PHỦ:
   - dags/backfill_historical.py
 
 YÊU CẦU SQL:
-- Ở những phần liên quan đến quality checks, row count validation, freshness checks, metadata checks, load verification hoặc DAG downstream validation, hãy minh họa bằng cả PostgreSQL và Oracle SQL nếu hợp lý
+- Ở những phần liên quan đến row count validation, freshness checks, metadata checks, load verification, quality checks hoặc downstream validation, hãy minh họa bằng cả PostgreSQL và Oracle SQL nếu hợp lý
 - Nếu cú pháp khác nhau, trình bày rõ riêng từng block
-- Giải thích ngắn gọn điểm khác nhau giữa PostgreSQL và Oracle SQL
+- Nếu project rules yêu cầu SQL tabs thì dùng tab PostgreSQL / Oracle SQL thay vì ghi text thuần
+- Giải thích ngắn gọn điểm khác nhau
 
 YÊU CẦU QUIZ:
 - Mỗi module phải có đúng 10 câu hỏi

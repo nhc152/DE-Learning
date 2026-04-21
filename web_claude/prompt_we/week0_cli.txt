@@ -1,0 +1,205 @@
+1.
+Use project rules from .claude.
+
+Current task:
+Upgrade Week00_Setup.html into a stronger foundation file for the whole Data Engineering learning series.
+
+The final version should intelligently combine:
+1. strengths of the current file
+2. stronger repository-backed improvements
+3. better beginner teaching quality
+4. expanded Week00 scope with 10 modules
+
+Allowed sources only:
+- ./Week00_Setup.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week05_Dimensional_Modeling.html
+- ./.claude/
+
+Do not read any other files.
+
+CORE PRINCIPLES:
+- Do NOT blindly overwrite the current file
+- Do NOT assume newer content is always better
+- Treat the current file as valuable content
+- Preserve strong existing explanations, examples, and setup guidance
+- Expand weak or missing areas
+- Final result must feel like one polished tutorial, not patched fragments
+
+UPGRADE STRATEGY:
+1. Audit the current file first
+2. Preserve strong current sections
+3. Identify missing foundation topics
+4. Add stronger beginner guidance
+5. Expand Week00 into 10-module structure
+6. Keep useful old content whenever valuable
+7. Remove duplicated content
+8. Improve clarity, teaching flow, and practical value
+
+IMPORTANT PRESERVATION RULE:
+If the current version contains strong explanations, KEEP and enrich them.
+
+Examples:
+- setup checklist
+- Docker + PostgreSQL guidance
+- Python + VS Code setup
+- Git basics
+- verification steps
+- troubleshooting notes
+- mini test structure
+
+EXPANDED WEEK00 TARGET STRUCTURE:
+
+- W0.01 – Tổng Quan Lộ Trình Học DE
+- W0.02 – Cài VS Code + Extensions Quan Trọng
+- W0.03 – Cài Python + pip + virtualenv
+- W0.04 – Git & GitHub Workflow Cơ Bản
+- W0.05 – PostgreSQL Setup Local
+- W0.06 – Oracle SQL Practice Setup
+- W0.07 – Docker Cơ Bản Cho Người Mới
+- W0.08 – Project Structure Chuẩn
+- W0.09 – Checklist Sẵn Sàng Trước Week01
+- W0.10 – Mini Test Tổng Kết
+
+TOPICS TO ENSURE STRONG COVERAGE:
+
+W0.01
+- roadmap overview
+- how to study effectively
+- tools overview
+
+W0.02
+- VS Code installation
+- essential extensions
+- editor productivity tips
+
+W0.03
+- Python install
+- pip
+- venv / virtualenv
+- package installation
+- running scripts
+
+W0.04
+- git init
+- clone
+- branch
+- commit
+- push
+- GitHub workflow basics
+
+W0.05
+- PostgreSQL local install
+- Docker postgres option
+- connect with DBeaver / pgAdmin
+- create db
+- test query
+
+W0.06
+- Oracle SQL practice options
+- Oracle XE / Free / Docker / remote lab
+- SQL Developer or DBeaver
+- test connection
+- basic Oracle query
+- key syntax differences vs PostgreSQL
+
+W0.07
+- Docker basics
+- image / container / volume / port
+- useful commands
+- running postgres in Docker
+
+W0.08
+- recommended learning folder structure
+- naming convention
+- artifact organization
+- weekly output management
+
+W0.09
+- readiness checklist
+- verify tools installed
+- verify terminal works
+- verify Python works
+- verify DB connections
+- verify Git works
+
+W0.10
+- final mini test
+
+QUALITY GOALS:
+- Keep Vietnamese output
+- Beginner-friendly but professional
+- Preserve HTML structure, CSS, layout, and JS interactions
+- Keep compatibility with future week files
+- Keep required 6-section structure for each module
+- Keep 10 review questions per module
+- Keep final mini test working
+- Include PostgreSQL and Oracle SQL where relevant
+- Improve practical value
+- No placeholders
+- Do not rebuild from scratch unless absolutely necessary
+
+EXPECTED RESULT:
+Update only Week00_Setup.html
+
+BEFORE EDITING:
+First clearly identify:
+1. Which current sections should be preserved
+2. Which missing topics need to be added
+3. How to migrate cleanly into the 10-module structure
+
+Then perform the upgrade.
+
+2.
+Use project rules from .claude.
+
+Review Week00_Setup.html after upgrade.
+
+CHECK CONTENT QUALITY:
+- duplicated sections
+- weak beginner explanations
+- unclear setup steps
+- missing practical guidance
+- poor teaching flow
+- inconsistent wording
+- missing Oracle SQL setup guidance
+- missing project structure guidance
+- missing command line basics where relevant
+- Did any strong old section get removed unnecessarily?
+- Is the final file better than before?
+
+CHECK STRUCTURE:
+- broken HTML
+- broken CSS layout
+- missing required 6-section structure in any module
+- incorrect module order
+- unfinished placeholders
+- repeated content
+
+CHECK INTERACTIVITY:
+- broken quiz logic
+- missing 10 review questions in any module
+- broken JavaScript interactions
+- broken navigation
+- broken toggle sections
+- broken solution buttons
+- broken final test grading/reset
+
+CHECK TECHNICAL CONTENT:
+- weak PostgreSQL setup examples
+- weak Oracle SQL examples
+- unclear Docker commands
+- wrong Python setup commands
+- weak Git workflow examples
+- missing verification steps
+
+ACTION RULES:
+- Fix only high-value issues
+- Preserve strong content
+- Do not redesign the whole file
+- Keep style consistent with the project
+
+EXPECTED RESULT:
+Update only Week00_Setup.html into a cleaner, stronger, more polished foundation file.
