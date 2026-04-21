@@ -245,26 +245,27 @@
       <div class="section">
         <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
         <div class="section-content">
-          <p>dbt là framework SQL-first cho transformation. Nó không làm Extract và không làm Load, mà tập trung vào Transform trong ELT. Nghĩa là dữ liệu được load vào warehouse trước, sau đó dbt áp dụng logic SQL theo DAG có kiểm soát.</p>
+          <p>Trong handbook, phần mạnh nhất trước Week 8-9 là Dimensional + Fact Modeling (SCD, incremental, cumulative). dbt ở tuần này nên được xem là lớp chuẩn hóa các pattern đó thành project có DAG, test, docs và quy trình vận hành rõ ràng.</p>
           <table>
-            <tr><th>Khía cạnh</th><th>ETL truyền thống</th><th>ELT với dbt</th></tr>
-            <tr><td>Thứ tự xử lý</td><td>Transform → Load</td><td>Load → Transform</td></tr>
-            <tr><td>Nơi chạy compute</td><td>ETL server riêng</td><td>Warehouse/Lakehouse</td></tr>
-            <tr><td>Lineage</td><td>Thường rời rạc</td><td>Tự dựng từ ref()/source()</td></tr>
-            <tr><td>Review thay đổi</td><td>Khó đồng bộ</td><td>PR + Git workflow rõ ràng</td></tr>
+            <tr><th>Năng lực từ handbook</th><th>Khi đưa vào dbt</th><th>Giá trị production</th></tr>
+            <tr><td><code>actors_history_scd</code> (SCD2)</td><td>Snapshot + model dim lịch sử</td><td>Giữ lịch sử thay đổi ổn định cho BI</td></tr>
+            <tr><td><code>users_cumulated</code> incremental day-by-day</td><td>Model incremental với <code>is_incremental()</code></td><td>Giảm runtime/cost khi dữ liệu tăng</td></tr>
+            <tr><td>Dedup + fact modeling tuần 2</td><td>Built-in tests + singular tests</td><td>Bắt lỗi dữ liệu sớm trước khi publish</td></tr>
+            <tr><td>Pipeline/runbook mindset</td><td><code>dbt build</code> + freshness + docs</td><td>Deploy nhất quán, dễ debug incident</td></tr>
           </table>
 
           <div class="cmd-block">
-            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>ELT flow tối thiểu</span></div>
-            <div class="cmd-body"><pre><span class="prompt">$</span> python ingest_orders.py --target raw.orders
-<span class="prompt">$</span> dbt seed --target dev
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Flow chuyển từ SQL homework sang dbt workflow</span></div>
+            <div class="cmd-body"><pre><span class="prompt">$</span> python ingest_player_seasons.py --target raw.player_seasons
+<span class="prompt">$</span> python ingest_events.py --target raw.events
 <span class="prompt">$</span> dbt build --select +marts --target dev
+<span class="prompt">$</span> dbt source freshness --select source:raw.*
 <span class="prompt">$</span> dbt docs generate
-<span class="output">Lineage + test report + docs được cập nhật</span></pre></div>
+<span class="output">Model + test + freshness + lineage được cập nhật cùng một chu kỳ</span></pre></div>
           </div>
 
-          <div class="info-box note">📌 <span><strong>Nguồn trực tiếp từ handbook:</strong> hiện chỉ có tham chiếu dbt trong <code>data-engineer-handbook/README.md</code>, <code>books.md</code>, <code>communities.md</code>. Nội dung triển khai chi tiết trong file này bám roadmap tuần 8-9 và thực hành dbt production hợp lý.</span></div>
-          <div class="info-box warn">⚠️ <span>Do handbook chưa có tutorial dbt chi tiết, bạn nên dùng file này như giáo trình thực chiến, đồng thời đối chiếu với docs chính thức dbt khi triển khai thật.</span></div>
+          <div class="info-box note">📌 <span><strong>Căn cứ handbook local:</strong> <code>intermediate-bootcamp/materials/1-dimensional-data-modeling/homework/homework.md</code>, <code>lecture-lab/incremental_scd_query.sql</code>, <code>materials/2-fact-data-modeling/homework/homework.md</code>, <code>lecture-lab/user_cumulated_populate.sql</code>.</span></div>
+          <div class="info-box warn">⚠️ <span>Handbook hiện thiên về modeling SQL; phần dbt trong tuần này cần bám thêm chuẩn docs chính thức để xác nhận adapter/macros theo môi trường thực tế.</span></div>
         </div>
       </div>
 
@@ -299,9 +300,9 @@
               <div class="solution-box">
                 <ul>
                   <li>Giữ ingestion bằng Python/Airbyte vào raw schema.</li>
-                  <li>Tạo <code>stg_orders</code>, <code>stg_customers</code> cho chuẩn hóa cột.</li>
-                  <li>Tạo <code>int_order_items_enriched</code> cho join logic.</li>
-                  <li>Tạo <code>fct_orders</code>, <code>dim_customers</code> cho output BI.</li>
+                  <li>Tạo <code>stg_player_seasons</code>, <code>stg_events</code> cho chuẩn hóa nguồn.</li>
+                  <li>Tạo <code>int_players_current</code> cho logic business trung gian.</li>
+                  <li>Tạo <code>fct_host_activity_monthly</code>, <code>dim_players_scd2</code> cho output BI.</li>
                   <li>Gắn test <code>unique/not_null/relationships</code> cho cột khóa.</li>
                 </ul>
               </div>
@@ -348,28 +349,46 @@
         <p>Project structure tốt là điều kiện tiên quyết để scale team. Nếu trộn tất cả model vào một thư mục, bạn sẽ khó review logic, khó tìm lỗi, và khó áp policy testing theo layer.</p>
 
         <div class="cmd-block">
-          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dbt_project tree</span></div>
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dbt_project tree bám flow handbook</span></div>
           <div class="cmd-body"><pre>dbt_project/
   dbt_project.yml
   packages.yml
   models/
     staging/
+      stg_player_seasons.sql
+      stg_events.sql
     intermediate/
+      int_players_current.sql
+      int_user_activity_daily.sql
     marts/
+      dim_players_scd2.sql
+      fct_host_activity_monthly.sql
   tests/
     generic/
     singular/
   macros/
   seeds/
-  snapshots/</pre></div>
+  snapshots/
+  target/
+    manifest.json
+    run_results.json
+    catalog.json</pre></div>
         </div>
 
         <div class="cmd-block">
-          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dbt_project.yml</span></div>
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dbt_project.yml (staging → marts + artifact paths)</span></div>
           <div class="cmd-body"><pre>name: 'de_week08_dbt'
 version: '1.0.0'
 config-version: 2
 profile: 'de_week08_profile'
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
 
 models:
   de_week08_dbt:
@@ -377,7 +396,7 @@ models:
       +materialized: view
       +schema: stg
     intermediate:
-      +materialized: table
+      +materialized: ephemeral
       +schema: int
     marts:
       +materialized: table
@@ -410,19 +429,26 @@ models:
       threads: 4</pre></div>
         </div>
 
-        <div class="info-box tip">✅ <span>Luôn chạy <code>dbt debug --target dev</code> trước khi run. Nếu fail ở bước debug mà vẫn cố run, bạn sẽ mất thời gian điều tra lỗi không cần thiết.</span></div>
+        <table>
+          <tr><th>Artifact trong <code>target/</code></th><th>Ý nghĩa vận hành</th><th>Dùng khi nào</th></tr>
+          <tr><td><code>manifest.json</code></td><td>Map toàn bộ nodes, refs, lineage</td><td>Phân tích impact trước release</td></tr>
+          <tr><td><code>run_results.json</code></td><td>Kết quả run/test từng node</td><td>Debug pipeline và tổng hợp CI report</td></tr>
+          <tr><td><code>catalog.json</code></td><td>Metadata cột và thống kê object</td><td>Phục vụ dbt docs cho data consumers</td></tr>
+        </table>
+
+        <div class="info-box tip">✅ <span>Luôn chạy <code>dbt debug --target dev</code> trước khi run. Sau mỗi build, review nhanh <code>target/run_results.json</code> để phát hiện node runtime bất thường.</span></div>
       </div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w802"></div></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
         <div class="summary-grid">
-          <div class="summary-item"><strong>Skeleton</strong>Cấu trúc thư mục là hợp đồng kỹ thuật của project.</div>
-          <div class="summary-item"><strong>dbt_project.yml</strong>Định nghĩa cách model được build theo layer.</div>
-          <div class="summary-item"><strong>profiles.yml</strong>Quản lý kết nối theo target môi trường.</div>
+          <div class="summary-item"><strong>Skeleton</strong>Thư mục phản ánh flow staging → intermediate → marts.</div>
+          <div class="summary-item"><strong>dbt_project.yml</strong>Định nghĩa path, materialization, schema và clean-targets.</div>
+          <div class="summary-item"><strong>profiles.yml</strong>Quản lý target dev/prod/adapter theo môi trường.</div>
           <div class="summary-item"><strong>Security</strong>Credentials phải đi qua env_var/secret manager.</div>
-          <div class="summary-item"><strong>Cross-DB</strong>Chuẩn bị target riêng cho PostgreSQL và Oracle.</div>
-          <div class="summary-item"><strong>Độ ổn định</strong>Debug sớm để giảm failure dây chuyền.</div>
+          <div class="summary-item"><strong>Artifact</strong>manifest/run_results/catalog giúp debug và audit release.</div>
+          <div class="summary-item"><strong>Độ ổn định</strong>Debug sớm + đọc artifact để giảm failure dây chuyền.</div>
         </div>
       </div></div>
 
@@ -486,19 +512,24 @@ models:
         </table>
 
         <div class="cmd-block">
-          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>fct_orders incremental</span></div>
-          <div class="cmd-body"><pre>{{ config(materialized='incremental', unique_key='order_id') }}
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>fct_host_activity_monthly incremental (map từ homework fact modeling)</span></div>
+          <div class="cmd-body"><pre>{{ config(materialized='incremental', unique_key=['month','host']) }}
 
-select
-  order_id,
-  customer_id,
-  order_status,
-  order_amount,
-  updated_at
-from {{ ref('int_order_items_enriched') }}
-{% if is_incremental() %}
-where updated_at &gt;= (select max(updated_at) from {{ this }})
-{% endif %}</pre></div>
+with src as (
+  select
+    {{ dbt.date_trunc('month', 'event_time') }} as month,
+    host,
+    count(*) as hit_count,
+    count(distinct user_id) as unique_visitors,
+    max(event_time) as max_event_time
+  from {{ source('raw', 'events') }}
+  where host is not null
+  {% if is_incremental() %}
+    and event_time &gt; (select coalesce(max(max_event_time), timestamp '1900-01-01') from {{ this }})
+  {% endif %}
+  group by 1,2
+)
+select * from src</pre></div>
         </div>
 
         <div class="cmd-block">
@@ -510,15 +541,15 @@ where updated_at &gt;= (select max(updated_at) from {{ this }})
             </div>
             <div id="w803-watermark-pg" class="tab-content active">
               <span class="db-tag db-pg">PostgreSQL</span>
-              <pre>where updated_at &gt;= (
-  select coalesce(max(updated_at), timestamp '1900-01-01 00:00:00')
+              <pre>where event_time &gt; (
+  select coalesce(max(max_event_time), timestamp '1900-01-01 00:00:00')
   from {{ this }}
 )</pre>
             </div>
             <div id="w803-watermark-oracle" class="tab-content">
               <span class="db-tag db-oracle">Oracle SQL</span>
-              <pre>where updated_at &gt;= (
-  select nvl(max(updated_at), timestamp '1900-01-01 00:00:00')
+              <pre>where event_time &gt; (
+  select nvl(max(max_event_time), timestamp '1900-01-01 00:00:00')
   from {{ this }}
 )</pre>
             </div>
@@ -534,37 +565,43 @@ where updated_at &gt;= (select max(updated_at) from {{ this }})
             </div>
             <div id="w803-validate-pg" class="tab-content active">
               <span class="db-tag db-pg">PostgreSQL</span>
-              <pre>select count(*) as row_count, max(updated_at) as max_updated_at
-from mart.fct_orders;</pre>
+              <pre>select month, host, count(*) as dup_cnt
+from mart.fct_host_activity_monthly
+group by 1,2
+having count(*) &gt; 1;</pre>
             </div>
             <div id="w803-validate-oracle" class="tab-content">
               <span class="db-tag db-oracle">Oracle SQL</span>
-              <pre>select count(*) as row_count, max(updated_at) as max_updated_at
-from MART.FCT_ORDERS;</pre>
+              <pre>select month, host, count(*) as dup_cnt
+from MART.FCT_HOST_ACTIVITY_MONTHLY
+group by month, host
+having count(*) &gt; 1;</pre>
             </div>
           </div>
         </div>
 
-        <div class="info-box warn">⚠️ <span>Nếu row_count tăng bất thường khi chạy lại cùng dữ liệu, logic incremental của bạn đang không idempotent.</span></div>
+        <div class="info-box note">📌 <span>Pattern này bám trực tiếp bài tập fact modeling trong handbook: build bảng reduced/incremental theo thời gian thay vì full rebuild mỗi lần chạy.</span></div>
+        <div class="info-box note">📌 <span>Trong model trung tâm dùng cú pháp trung tính adapter; phần khác biệt PostgreSQL/Oracle đặt ở block tab riêng để dễ bảo trì.</span></div>
+        <div class="info-box warn">⚠️ <span>Nếu query duplicate theo <code>(month, host)</code> trả về kết quả, logic incremental của bạn đang không idempotent.</span></div>
       </div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w803"></div></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
-        <div class="summary-item"><strong>view</strong>Tốt cho staging nhẹ và nhanh triển khai.</div>
-        <div class="summary-item"><strong>table</strong>Tốt cho output cuối truy vấn nhiều.</div>
-        <div class="summary-item"><strong>incremental</strong>Bắt buộc cho bảng lớn cập nhật liên tục.</div>
-        <div class="summary-item"><strong>ephemeral</strong>Giảm object trung gian không cần thiết.</div>
-        <div class="summary-item"><strong>Cross-DB</strong>coalesce vs nvl, LIMIT vs FETCH FIRST.</div>
-        <div class="summary-item"><strong>Idempotency</strong>Luôn test lặp để xác nhận ổn định.</div>
+        <div class="summary-item"><strong>view</strong>Phù hợp staging gần nguồn, ít logic nặng.</div>
+        <div class="summary-item"><strong>table</strong>Phù hợp marts cần truy vấn lặp lại ổn định.</div>
+        <div class="summary-item"><strong>incremental</strong>Map trực tiếp pattern cumulative/reduced từ handbook.</div>
+        <div class="summary-item"><strong>ephemeral</strong>Tốt cho logic join nhỏ dùng ở nhiều model.</div>
+        <div class="summary-item"><strong>Cross-DB</strong>coalesce vs nvl, cast/date function cần adapter-aware.</div>
+        <div class="summary-item"><strong>Idempotency</strong>Validate duplicate theo business key sau mỗi run.</div>
       </div></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
-        <div class="practice-task"><div class="practice-task-header">Bài 1: Chuyển fct_orders sang incremental</div><div class="practice-task-body">
-          <p>Đổi model <code>fct_orders</code> từ table sang incremental, chạy 2 lần liên tiếp để kiểm tra tính idempotent.</p>
-          <p><strong>Expected output:</strong> Không phát sinh duplicate <code>order_id</code>, row_count ổn định theo dữ liệu mới.</p>
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Chuyển host_activity_reduced sang incremental dbt</div><div class="practice-task-body">
+          <p>Dựa trên bài tập fact modeling handbook, tạo model <code>fct_host_activity_monthly</code> incremental theo khóa <code>(month, host)</code> và chạy 2 lần liên tiếp để kiểm tra idempotent.</p>
+          <p><strong>Expected output:</strong> Không phát sinh duplicate theo <code>(month, host)</code>, số dòng chỉ tăng khi có event mới.</p>
           <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
-          <div class="solution-box"><ol><li>Thêm config incremental + unique_key.</li><li>Thêm điều kiện <code>is_incremental()</code>.</li><li>Run 2 lần liên tiếp.</li><li>Query kiểm tra duplicate theo <code>order_id</code>.</li></ol></div>
+          <div class="solution-box"><ol><li>Đặt <code>materialized='incremental'</code> và <code>unique_key=['month','host']</code>.</li><li>Dùng watermark <code>event_time</code> trong <code>is_incremental()</code>.</li><li>Run 2 lần liên tiếp với cùng dữ liệu.</li><li>Query duplicate theo <code>month, host</code> để xác nhận idempotent.</li></ol></div>
         </div></div>
       </div></div>
 
@@ -599,26 +636,43 @@ from MART.FCT_ORDERS;</pre>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
         <p><code>source()</code> là điểm vào của dữ liệu raw; <code>ref()</code> là chuẩn tham chiếu model nội bộ. Khi dùng đúng, dbt dựng được lineage đầy đủ và đảm bảo thứ tự build hợp lý.</p>
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>schema.yml cho sources</span></div><div class="cmd-body"><pre>version: 2
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>schema.yml cho sources + freshness (events/player_seasons)</span></div><div class="cmd-body"><pre>version: 2
 
 sources:
   - name: raw
     schema: raw
     tables:
-      - name: orders
-      - name: customers</pre></div></div>
+      - name: events
+        loaded_at_field: event_time
+        freshness:
+          warn_after: {count: 6, period: hour}
+          error_after: {count: 24, period: hour}
+      - name: player_seasons
+        loaded_at_field: game_date
+        freshness:
+          warn_after: {count: 1, period: day}
+          error_after: {count: 2, period: day}</pre></div></div>
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>source() + ref()</span></div><div class="cmd-body"><pre><span class="comment">-- models/staging/stg_orders.sql</span>
-select order_id, customer_id, status as order_status, updated_at
-from {{ source('raw', 'orders') }}
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>source() + ref() theo flow staging → marts</span></div><div class="cmd-body"><pre><span class="comment">-- models/staging/stg_player_seasons.sql</span>
+select player_name, season, pts, ast, reb
+from {{ source('raw', 'player_seasons') }}
 
-<span class="comment">-- models/marts/fct_orders.sql</span>
+<span class="comment">-- models/intermediate/int_players_current.sql</span>
+select
+  player_name,
+  max(season) as current_season,
+  avg(pts) as avg_pts_latest_window
+from {{ ref('stg_player_seasons') }}
+group by 1
+
+<span class="comment">-- models/marts/dim_players_scd2.sql</span>
 select *
-from {{ ref('int_order_items_enriched') }}</pre></div></div>
+from {{ ref('int_players_current') }}</pre></div></div>
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Dependency selector</span></div><div class="cmd-body"><pre><span class="prompt">$</span> dbt ls --select +fct_orders
-<span class="prompt">$</span> dbt run --select stg_orders+
-<span class="output">Hiển thị upstream/downstream theo DAG</span></pre></div></div>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Dependency selector + freshness</span></div><div class="cmd-body"><pre><span class="prompt">$</span> dbt ls --select +dim_players_scd2
+<span class="prompt">$</span> dbt run --select stg_player_seasons+
+<span class="prompt">$</span> dbt source freshness --select source:raw.player_seasons
+<span class="output">Hiển thị upstream/downstream và độ trễ dữ liệu nguồn</span></pre></div></div>
 
         <div class="info-box tip">✅ <span>Không hard-code schema.table trong model. Dùng ref/source để deploy an toàn giữa dev, staging, prod.</span></div>
       </div></div>
@@ -671,32 +725,54 @@ from {{ ref('int_order_items_enriched') }}</pre></div></div>
       </ul></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Built-in tests trong schema.yml</span></div><div class="cmd-body"><pre>version: 2
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Built-in tests trong schema.yml (SCD + fact reduced)</span></div><div class="cmd-body"><pre>version: 2
 
 models:
-  - name: fct_orders
+  - name: dim_players_scd2
     columns:
-      - name: order_id
+      - name: player_name
+        tests: [not_null]
+      - name: dbt_scd_id
         tests: [unique, not_null]
-      - name: order_status
+      - name: scoring_class
         tests:
           - accepted_values:
-              values: ['pending','paid','shipped','cancelled']
-      - name: customer_id
-        tests:
-          - relationships:
-              to: ref('dim_customers')
-              field: customer_id</pre></div></div>
+              values: ['bad','average','good','star']
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Custom generic test</span></div><div class="cmd-body"><pre>{% test not_future_date(model, column_name) %}
-select *
-from {{ model }}
-where {{ column_name }} &gt; current_timestamp
+  - name: fct_host_activity_monthly
+    columns:
+      - name: host
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_events')
+              field: host
+      - name: month
+        tests: [not_null]</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Custom generic test: SCD overlap guard</span></div><div class="cmd-body"><pre>{% test no_scd_overlap(model, business_key, valid_from, valid_to) %}
+with ranges as (
+  select
+    {{ business_key }} as bk,
+    {{ valid_from }} as valid_from,
+    coalesce({{ valid_to }}, timestamp '9999-12-31 00:00:00') as valid_to,
+    dbt_scd_id
+  from {{ model }}
+)
+select a.*
+from ranges a
+join ranges b
+  on a.bk = b.bk
+ and a.valid_from &lt; b.valid_to
+ and b.valid_from &lt; a.valid_to
+ and a.dbt_scd_id &lt;&gt; b.dbt_scd_id
 {% endtest %}</pre></div></div>
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Singular test</span></div><div class="cmd-body"><pre>select *
-from {{ ref('fct_orders') }}
-where order_amount &lt; 0</pre></div></div>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Singular test: consistency reduced fact</span></div><div class="cmd-body"><pre>select *
+from {{ ref('fct_host_activity_monthly') }}
+where hit_count &lt; unique_visitors
+   or hit_count &lt; 0
+   or unique_visitors &lt; 0</pre></div></div>
 
         <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Debug test fail: PostgreSQL vs Oracle</span></div><div class="cmd-body">
           <div class="tab-group" id="w805-debug-tabs">
@@ -705,18 +781,18 @@ where order_amount &lt; 0</pre></div></div>
           </div>
           <div id="w805-debug-pg" class="tab-content active">
             <span class="db-tag db-pg">PostgreSQL</span>
-            <pre>select order_id, order_amount
-from mart.fct_orders
-where order_amount &lt; 0
-order by updated_at desc
+            <pre>select month, host, hit_count, unique_visitors
+from mart.fct_host_activity_monthly
+where hit_count &lt; unique_visitors
+order by month desc
 limit 50;</pre>
           </div>
           <div id="w805-debug-oracle" class="tab-content">
             <span class="db-tag db-oracle">Oracle SQL</span>
-            <pre>select order_id, order_amount
-from MART.FCT_ORDERS
-where order_amount &lt; 0
-order by updated_at desc
+            <pre>select month, host, hit_count, unique_visitors
+from MART.FCT_HOST_ACTIVITY_MONTHLY
+where hit_count &lt; unique_visitors
+order by month desc
 fetch first 50 rows only;</pre>
           </div>
         </div></div>
@@ -728,19 +804,19 @@ fetch first 50 rows only;</pre>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
         <div class="summary-item"><strong>4 built-in tests</strong>unique/not_null/accepted_values/relationships là nền tảng.</div>
-        <div class="summary-item"><strong>Generic test</strong>Tái sử dụng rule chất lượng giữa nhiều model.</div>
-        <div class="summary-item"><strong>Singular test</strong>Bảo vệ logic nghiệp vụ riêng biệt.</div>
-        <div class="summary-item"><strong>Debugging</strong>Test fail là dữ liệu điều tra, không phải rào cản.</div>
+        <div class="summary-item"><strong>Generic test</strong>Tái sử dụng rule chất lượng như SCD overlap guard.</div>
+        <div class="summary-item"><strong>Singular test</strong>Bảo vệ invariants fact như hit_count >= unique_visitors.</div>
+        <div class="summary-item"><strong>Debugging</strong>Test fail trả về fail rows để điều tra root cause.</div>
         <div class="summary-item"><strong>Cross-DB</strong>Kiểm tra cú pháp query điều tra giữa PG/Oracle.</div>
         <div class="summary-item"><strong>Mindset</strong>Data quality là tiêu chuẩn bắt buộc production.</div>
       </div></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
-        <div class="practice-task"><div class="practice-task-header">Bài 1: Nâng coverage test cho fct_orders</div><div class="practice-task-body">
-          <p>Thêm đầy đủ built-in tests và ít nhất 1 generic + 1 singular test cho <code>fct_orders</code>.</p>
-          <p><strong>Expected output:</strong> <code>dbt test --select fct_orders</code> pass hoặc trả về fail rows rõ ràng để xử lý.</p>
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Nâng coverage test cho dim_players_scd2 + fct_host_activity_monthly</div><div class="practice-task-body">
+          <p>Thêm built-in tests cho dim/fact, 1 generic test chống overlap SCD2 và 1 singular test consistency reduced fact.</p>
+          <p><strong>Expected output:</strong> <code>dbt test --select dim_players_scd2 fct_host_activity_monthly</code> pass hoặc trả về fail rows rõ ràng để xử lý.</p>
           <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
-          <div class="solution-box"><ol><li>Viết schema.yml với 4 built-in tests.</li><li>Tạo test generic <code>not_future_date</code>.</li><li>Tạo singular test amount không âm.</li><li>Chạy dbt test và điều tra fail rows.</li></ol></div>
+          <div class="solution-box"><ol><li>Viết schema.yml với unique/not_null/accepted_values/relationships.</li><li>Tạo generic test <code>no_scd_overlap</code>.</li><li>Tạo singular test cho quan hệ <code>hit_count >= unique_visitors</code>.</li><li>Chạy dbt test và điều tra fail rows.</li></ol></div>
         </div></div>
       </div></div>
 
@@ -774,19 +850,36 @@ fetch first 50 rows only;</pre>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
         <p>Documentation trong dbt không phải tài liệu rời. Nó sống cùng code và đổi theo PR. Đây là điểm khác biệt lớn giúp data team giảm phụ thuộc vào “tribal knowledge”.</p>
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>schema.yml với docs + metadata</span></div><div class="cmd-body"><pre>version: 2
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>schema.yml với docs + metadata + source freshness</span></div><div class="cmd-body"><pre>version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: events
+        loaded_at_field: event_time
+        freshness:
+          warn_after: {count: 6, period: hour}
+          error_after: {count: 24, period: hour}
+      - name: player_seasons
+        loaded_at_field: game_date
+        freshness:
+          warn_after: {count: 1, period: day}
+          error_after: {count: 2, period: day}
 
 models:
-  - name: dim_customers
-    description: "Dimension khách hàng dạng SCD2 phục vụ retention"
+  - name: dim_players_scd2
+    description: "Dimension lịch sử player dựa trên pattern SCD2 từ handbook"
     meta:
       owner: "data-platform"
       sla: "daily-07:00"
     columns:
-      - name: customer_id
-        description: "Khóa business của khách hàng"
+      - name: player_name
+        description: "Khóa business của player"
       - name: dbt_valid_from
-        description: "Thời điểm version bắt đầu hiệu lực"</pre></div></div>
+        description: "Thời điểm version bắt đầu hiệu lực"
+      - name: dbt_valid_to
+        description: "Null = version hiện tại"</pre></div></div>
 
         <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Generate docs</span></div><div class="cmd-body"><pre><span class="prompt">$</span> dbt docs generate
 <span class="prompt">$</span> dbt docs serve --port 8088
@@ -797,6 +890,7 @@ models:
           <tr><td>Mô tả business cho mỗi model</td><td>Giảm hiểu sai định nghĩa KPI</td></tr>
           <tr><td>Mô tả cột critical</td><td>Giảm lỗi join/filter trong phân tích</td></tr>
           <tr><td>Meta owner + SLA</td><td>Dễ truy trách nhiệm khi incident</td></tr>
+          <tr><td>Khai báo freshness ở source</td><td>Phát hiện ingest trễ trước khi build marts</td></tr>
           <tr><td>Regenerate docs theo release</td><td>Lineage phản ánh trạng thái mới nhất</td></tr>
         </table>
 
@@ -806,7 +900,7 @@ models:
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w806"></div></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
-        <div class="summary-item"><strong>schema.yml</strong>Trung tâm docs, tests và metadata.</div>
+        <div class="summary-item"><strong>schema.yml</strong>Trung tâm docs, tests, metadata và source freshness.</div>
         <div class="summary-item"><strong>Docs-as-code</strong>Tài liệu đi cùng vòng đời code.</div>
         <div class="summary-item"><strong>Lineage UI</strong>Giúp đọc impact nhanh khi thay đổi model.</div>
         <div class="summary-item"><strong>Owner/SLA</strong>Tăng clarity trong vận hành production.</div>
@@ -815,11 +909,11 @@ models:
       </div></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
-        <div class="practice-task"><div class="practice-task-header">Bài 1: Viết docs đầy đủ cho marts</div><div class="practice-task-body">
-          <p>Bổ sung docs cho <code>fct_orders</code> và <code>dim_customers</code>, bao gồm mô tả model, mô tả cột critical, owner và SLA.</p>
-          <p><strong>Expected output:</strong> Khi mở dbt docs, cả 2 model hiển thị đầy đủ mô tả và lineage rõ ràng.</p>
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Viết docs + freshness cho marts và source</div><div class="practice-task-body">
+          <p>Bổ sung docs cho <code>fct_host_activity_monthly</code> và <code>dim_players_scd2</code>, kèm freshness cho <code>raw.events</code> và <code>raw.player_seasons</code>.</p>
+          <p><strong>Expected output:</strong> Khi mở dbt docs, model có mô tả đầy đủ và freshness status hiển thị rõ cho source.</p>
           <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
-          <div class="solution-box"><ul><li>Tạo/ cập nhật schema.yml tại thư mục marts.</li><li>Mô tả rõ cột khóa, cột metric, cột hiệu lực.</li><li>Thêm meta owner/sla.</li><li>Chạy docs generate + serve để review UI.</li></ul></div>
+          <div class="solution-box"><ul><li>Cập nhật schema.yml tại source và marts.</li><li>Mô tả rõ cột khóa, cột metric, cột hiệu lực SCD.</li><li>Thêm meta owner/sla + freshness warn/error.</li><li>Chạy docs generate + source freshness để review.</li></ul></div>
         </div></div>
       </div></div>
 
@@ -836,7 +930,7 @@ models:
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
         <tr><th>Bước</th><th>Kết quả cần đạt</th><th>Thời gian ước tính</th></tr>
-        <tr><td>B1</td><td>Tạo file snapshot cho customers</td><td>20 phút</td></tr>
+        <tr><td>B1</td><td>Tạo file snapshot cho players</td><td>20 phút</td></tr>
         <tr><td>B2</td><td>Run snapshot theo nhiều vòng dữ liệu</td><td>15 phút</td></tr>
         <tr><td>B3</td><td>Query row hiện tại và lịch sử</td><td>15 phút</td></tr>
         <tr><td>B4</td><td>Validation overlap trên PG/Oracle</td><td>20 phút</td></tr>
@@ -851,23 +945,22 @@ models:
       </ul></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>snap_customers_scd2.sql</span></div><div class="cmd-body"><pre>{% snapshot snap_customers_scd2 %}
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>snap_players_scd2.sql (map từ players_scd pattern handbook)</span></div><div class="cmd-body"><pre>{% snapshot snap_players_scd2 %}
 {{
   config(
     target_schema='snap',
-    unique_key='customer_id',
-    strategy='timestamp',
-    updated_at='updated_at'
+    unique_key='player_name',
+    strategy='check',
+    check_cols=['scoring_class','is_active']
   )
 }}
 
 select
-  customer_id,
-  customer_name,
-  customer_segment,
-  customer_status,
-  updated_at
-from {{ source('raw', 'customers') }}
+  player_name,
+  scoring_class,
+  is_active,
+  current_season
+from {{ ref('int_players_current') }}
 
 {% endsnapshot %}</pre></div></div>
 
@@ -878,14 +971,14 @@ from {{ source('raw', 'customers') }}
           </div>
           <div id="w807-current-pg" class="tab-content active">
             <span class="db-tag db-pg">PostgreSQL</span>
-            <pre>select customer_id, customer_name, dbt_valid_from, dbt_valid_to
-from snap.snap_customers_scd2
+            <pre>select player_name, scoring_class, dbt_valid_from, dbt_valid_to
+from snap.snap_players_scd2
 where dbt_valid_to is null;</pre>
           </div>
           <div id="w807-current-oracle" class="tab-content">
             <span class="db-tag db-oracle">Oracle SQL</span>
-            <pre>select customer_id, customer_name, dbt_valid_from, dbt_valid_to
-from SNAP.SNAP_CUSTOMERS_SCD2
+            <pre>select player_name, scoring_class, dbt_valid_from, dbt_valid_to
+from SNAP.SNAP_PLAYERS_SCD2
 where dbt_valid_to is null;</pre>
           </div>
         </div></div>
@@ -897,20 +990,20 @@ where dbt_valid_to is null;</pre>
           </div>
           <div id="w807-overlap-pg" class="tab-content active">
             <span class="db-tag db-pg">PostgreSQL</span>
-            <pre>select a.customer_id
-from snap.snap_customers_scd2 a
-join snap.snap_customers_scd2 b
-  on a.customer_id = b.customer_id
+            <pre>select a.player_name
+from snap.snap_players_scd2 a
+join snap.snap_players_scd2 b
+  on a.player_name = b.player_name
  and a.dbt_valid_from &lt; coalesce(b.dbt_valid_to, timestamp '9999-12-31 00:00:00')
  and b.dbt_valid_from &lt; coalesce(a.dbt_valid_to, timestamp '9999-12-31 00:00:00')
  and a.dbt_scd_id &lt;&gt; b.dbt_scd_id;</pre>
           </div>
           <div id="w807-overlap-oracle" class="tab-content">
             <span class="db-tag db-oracle">Oracle SQL</span>
-            <pre>select a.customer_id
-from SNAP.SNAP_CUSTOMERS_SCD2 a
-join SNAP.SNAP_CUSTOMERS_SCD2 b
-  on a.customer_id = b.customer_id
+            <pre>select a.player_name
+from SNAP.SNAP_PLAYERS_SCD2 a
+join SNAP.SNAP_PLAYERS_SCD2 b
+  on a.player_name = b.player_name
  and a.dbt_valid_from &lt; nvl(b.dbt_valid_to, timestamp '9999-12-31 00:00:00')
  and b.dbt_valid_from &lt; nvl(a.dbt_valid_to, timestamp '9999-12-31 00:00:00')
  and a.dbt_scd_id &lt;&gt; b.dbt_scd_id;</pre>
@@ -924,7 +1017,7 @@ join SNAP.SNAP_CUSTOMERS_SCD2 b
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
         <div class="summary-item"><strong>Snapshot</strong>Cách chuẩn để implement SCD2 trong dbt.</div>
-        <div class="summary-item"><strong>Strategy</strong>timestamp/check tùy chất lượng nguồn.</div>
+        <div class="summary-item"><strong>Strategy</strong>check/timestamp tùy độ tin cậy dữ liệu nguồn.</div>
         <div class="summary-item"><strong>Current row</strong>Thường có <code>dbt_valid_to is null</code>.</div>
         <div class="summary-item"><strong>Validation</strong>Bắt overlap để đảm bảo lịch sử đúng.</div>
         <div class="summary-item"><strong>Pipeline order</strong>Nên chạy snapshot trước build marts.</div>
@@ -932,11 +1025,11 @@ join SNAP.SNAP_CUSTOMERS_SCD2 b
       </div></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
-        <div class="practice-task"><div class="practice-task-header">Bài 1: Chạy snapshot 2 vòng có thay đổi dữ liệu</div><div class="practice-task-body">
-          <p>Run snapshot lần 1, sửa <code>customer_segment</code> cho vài dòng raw, rồi run snapshot lần 2 để tạo lịch sử SCD2.</p>
-          <p><strong>Expected output:</strong> Mỗi khách hàng có version lịch sử hợp lệ và đúng 1 row current.</p>
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Chạy snapshot 2 vòng cho player scoring_class</div><div class="practice-task-body">
+          <p>Run snapshot lần 1, thay đổi <code>scoring_class</code> hoặc <code>is_active</code> cho vài player trong nguồn, rồi run snapshot lần 2 để tạo lịch sử SCD2.</p>
+          <p><strong>Expected output:</strong> Mỗi player có version lịch sử hợp lệ và đúng 1 row current.</p>
           <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
-          <div class="solution-box"><ol><li>Chạy <code>dbt snapshot --select snap_customers_scd2</code> lần 1.</li><li>Update dữ liệu raw cho 2-3 customer.</li><li>Chạy snapshot lần 2.</li><li>Query current row + overlap validation để xác nhận.</li></ol></div>
+          <div class="solution-box"><ol><li>Chạy <code>dbt snapshot --select snap_players_scd2</code> lần 1.</li><li>Update dữ liệu nguồn cho 2-3 player.</li><li>Chạy snapshot lần 2.</li><li>Query current row + overlap validation để xác nhận.</li></ol></div>
         </div></div>
       </div></div>
 
@@ -968,8 +1061,13 @@ join SNAP.SNAP_CUSTOMERS_SCD2 b
       </ul></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>macros/normalize_email.sql</span></div><div class="cmd-body"><pre>{% macro normalize_email(col_name) %}
-  lower(trim({{ col_name }}))
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>macros/scoring_class_from_pts.sql</span></div><div class="cmd-body"><pre>{% macro scoring_class_from_pts(pts_col) %}
+  case
+    when {{ pts_col }} &gt; 20 then 'star'
+    when {{ pts_col }} &gt; 15 then 'good'
+    when {{ pts_col }} &gt; 10 then 'average'
+    else 'bad'
+  end
 {% endmacro %}</pre></div></div>
 
         <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>macros/date_diff_days.sql</span></div><div class="cmd-body"><pre>{% macro date_diff_days(start_col, end_col) %}
@@ -983,10 +1081,12 @@ join SNAP.SNAP_CUSTOMERS_SCD2 b
 {% endmacro %}</pre></div></div>
 
         <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Dùng macro trong model</span></div><div class="cmd-body"><pre>select
-  customer_id,
-  {{ normalize_email('email') }} as email_normalized,
-  {{ date_diff_days('first_order_date', 'last_order_date') }} as lifetime_days
-from {{ ref('stg_customers') }}</pre></div></div>
+  player_name,
+  avg(pts) as avg_pts,
+  {{ scoring_class_from_pts('avg(pts)') }} as scoring_class,
+  {{ date_diff_days('min(game_date)', 'max(game_date)') }} as active_span_days
+from {{ ref('stg_player_seasons') }}
+group by 1</pre></div></div>
 
         <div class="info-box tip">✅ <span>Macro nên ngắn, đơn trách nhiệm. Nếu macro quá dài và điều kiện lồng nhau dày đặc, hãy tách nhỏ để dễ test.</span></div>
       </div></div>
@@ -996,7 +1096,7 @@ from {{ ref('stg_customers') }}</pre></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
         <div class="summary-item"><strong>DRY</strong>Giảm duplicate SQL và giảm bug copy-paste.</div>
         <div class="summary-item"><strong>Cross-DB</strong>Ẩn khác biệt engine qua target.type.</div>
-        <div class="summary-item"><strong>Readability</strong>Macro nhỏ giúp review và debug tốt.</div>
+        <div class="summary-item"><strong>Modeling reuse</strong>Macro hóa rule scoring_class từ SQL handbook.</div>
         <div class="summary-item"><strong>Maintainability</strong>Dễ mở rộng model khi project lớn dần.</div>
         <div class="summary-item"><strong>Testing</strong>Macro vẫn cần compile/run như code production.</div>
         <div class="summary-item"><strong>Pragmatic</strong>Không macro hóa mọi thứ một cách cực đoan.</div>
@@ -1049,19 +1149,20 @@ from {{ ref('stg_customers') }}</pre></div></div>
           <tr><td>dbt build</td><td>Seed+snapshot+run+test</td><td>Lệnh production phổ biến</td></tr>
           <tr><td>dbt source freshness</td><td>Đánh giá freshness source</td><td>Giám sát SLA ingest</td></tr>
           <tr><td>dbt docs generate</td><td>Tạo docs artifacts</td><td>Sau build pass</td></tr>
+          <tr><td>dbt ls</td><td>Liệt kê node theo selector</td><td>Impact analysis trước release</td></tr>
         </table>
 
         <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Command chain đề xuất</span></div><div class="cmd-body"><pre><span class="prompt">$</span> dbt deps
-<span class="prompt">$</span> dbt snapshot --select snap_customers_scd2
+<span class="prompt">$</span> dbt snapshot --select snap_players_scd2
 <span class="prompt">$</span> dbt build --select +marts --target prod
-<span class="prompt">$</span> dbt source freshness
+<span class="prompt">$</span> dbt source freshness --select source:raw.*
 <span class="prompt">$</span> dbt docs generate</pre></div></div>
 
         <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Selector thực chiến</span></div><div class="cmd-body"><pre><span class="comment"># model + upstream</span>
-<span class="prompt">$</span> dbt run --select +fct_orders
+<span class="prompt">$</span> dbt run --select +fct_host_activity_monthly
 
 <span class="comment"># model + downstream</span>
-<span class="prompt">$</span> dbt test --select stg_orders+
+<span class="prompt">$</span> dbt test --select stg_events+
 
 <span class="comment"># chỉ phần thay đổi cho CI</span>
 <span class="prompt">$</span> dbt build --select state:modified+</pre></div></div>
@@ -1072,7 +1173,7 @@ from {{ ref('stg_customers') }}</pre></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div class="quiz-list" data-module="w809"></div></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
-        <div class="summary-item"><strong>Core commands</strong>deps/seed/run/test/snapshot/build/freshness/docs.</div>
+        <div class="summary-item"><strong>Core commands</strong>deps/seed/run/test/snapshot/build/freshness/docs/ls.</div>
         <div class="summary-item"><strong>Run vs Build</strong>build là orchestration đầy đủ hơn run.</div>
         <div class="summary-item"><strong>Selector</strong>Tăng tốc debug và CI rõ rệt.</div>
         <div class="summary-item"><strong>Freshness</strong>Giám sát độ trễ dữ liệu đầu vào.</div>
@@ -1118,56 +1219,57 @@ from {{ ref('stg_customers') }}</pre></div></div>
 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
         <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Artifact tree mục tiêu</span></div><div class="cmd-body"><pre>dbt_project/
-  models/staging/stg_orders.sql
-  models/staging/stg_customers.sql
-  models/intermediate/int_order_items_enriched.sql
-  models/marts/fct_orders.sql
-  models/marts/dim_customers.sql
-  tests/generic/not_future_date.sql
-  tests/singular/fct_orders_amount_non_negative.sql
-  snapshots/snap_customers_scd2.sql
-  macros/normalize_email.sql
+  models/staging/stg_player_seasons.sql
+  models/staging/stg_events.sql
+  models/intermediate/int_players_current.sql
+  models/marts/dim_players_scd2.sql
+  models/marts/fct_host_activity_monthly.sql
+  tests/generic/no_scd_overlap.sql
+  tests/singular/fct_host_activity_consistency.sql
+  snapshots/snap_players_scd2.sql
+  macros/scoring_class_from_pts.sql
   macros/date_diff_days.sql
   README.md</pre></div></div>
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>models/staging/stg_orders.sql</span></div><div class="cmd-body"><pre>{{ config(materialized='view') }}
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>models/staging/stg_player_seasons.sql</span></div><div class="cmd-body"><pre>{{ config(materialized='view') }}
 
 select
-  order_id,
-  customer_id,
-  status as order_status,
-  cast(order_amount as numeric) as order_amount,
-  updated_at
-from {{ source('raw', 'orders') }}</pre></div></div>
+  player_name,
+  season,
+  pts,
+  ast,
+  reb,
+  game_date
+from {{ source('raw', 'player_seasons') }}</pre></div></div>
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>models/intermediate/int_order_items_enriched.sql</span></div><div class="cmd-body"><pre>{{ config(materialized='table') }}
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>models/intermediate/int_players_current.sql</span></div><div class="cmd-body"><pre>{{ config(materialized='ephemeral') }}
 
 select
-  o.order_id,
-  o.customer_id,
-  c.customer_segment,
-  o.order_status,
-  o.order_amount,
-  o.updated_at
-from {{ ref('stg_orders') }} o
-left join {{ ref('stg_customers') }} c
-  on o.customer_id = c.customer_id</pre></div></div>
+  player_name,
+  max(season) as current_season,
+  {{ scoring_class_from_pts('avg(pts)') }} as scoring_class,
+  max(game_date) as updated_at,
+  true as is_active
+from {{ ref('stg_player_seasons') }}
+group by 1</pre></div></div>
 
         <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>README.md tối thiểu</span></div><div class="cmd-body"><pre># Week08 dbt Project
 
 ## Lineage
-raw.orders -> stg_orders -> int_order_items_enriched -> fct_orders
-raw.customers -> stg_customers -> snap_customers_scd2 -> dim_customers
+raw.player_seasons -> stg_player_seasons -> int_players_current -> snap_players_scd2 -> dim_players_scd2
+raw.events -> stg_events -> fct_host_activity_monthly
 
 ## Cách chạy
 1) dbt deps
-2) dbt snapshot --select snap_customers_scd2
+2) dbt snapshot --select snap_players_scd2
 3) dbt build --select +marts
-4) dbt docs generate
+4) dbt source freshness --select source:raw.*
+5) dbt docs generate
 
 ## Test coverage
 - unique/not_null/relationships/accepted_values
-- generic + singular tests</pre></div></div>
+- generic + singular tests
+- no SCD overlap rule</pre></div></div>
 
         <div class="info-box note">📌 <span>Với yêu cầu chạy được trên cả PostgreSQL và Oracle, hãy gom khác biệt function vào macro, giữ logic model chính càng thuần nhất càng tốt.</span></div>
       </div></div>
@@ -1177,7 +1279,7 @@ raw.customers -> stg_customers -> snap_customers_scd2 -> dim_customers
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
         <div class="summary-item"><strong>Completeness</strong>Đủ model, test, snapshot, macro, README.</div>
         <div class="summary-item"><strong>Layering</strong>staging → intermediate → marts rõ ràng.</div>
-        <div class="summary-item"><strong>SCD2</strong>dim_customers lấy lịch sử từ snapshot.</div>
+        <div class="summary-item"><strong>SCD2</strong>dim_players_scd2 lấy lịch sử từ snapshot.</div>
         <div class="summary-item"><strong>Coverage</strong>Generic + singular test bảo vệ output.</div>
         <div class="summary-item"><strong>Runbook</strong>Cách chạy dự án tái lập được.</div>
         <div class="summary-item"><strong>Portfolio</strong>Có thể demo trực tiếp khi phỏng vấn.</div>
@@ -1478,8 +1580,8 @@ const quizBank = {
       { q: 'ref() nên dùng cho đối tượng nào?', truth: 'Dùng cho model nội bộ để dựng dependency graph.' },
       { q: 'Lợi ích chính của ref() là gì?', truth: 'Giảm hard-code và tăng an toàn khi đổi schema/tên model.' },
       { q: 'Lineage trong docs lấy từ đâu?', truth: 'Từ network dependency giữa source() và ref().' },
-      { q: '+fct_orders nghĩa là gì?', truth: 'Chọn fct_orders cùng toàn bộ upstream phụ thuộc.' },
-      { q: 'stg_orders+ nghĩa là gì?', truth: 'Chọn stg_orders cùng toàn bộ downstream phụ thuộc.' },
+      { q: '+fct_host_activity_monthly nghĩa là gì?', truth: 'Chọn fct_host_activity_monthly cùng toàn bộ upstream phụ thuộc.' },
+      { q: 'stg_events+ nghĩa là gì?', truth: 'Chọn stg_events cùng toàn bộ downstream phụ thuộc.' },
       { q: 'Layer staging nên giới hạn logic thế nào?', truth: 'Giữ logic đơn giản, chuẩn hóa nguồn gần 1:1.' },
       { q: 'Layer intermediate mang giá trị gì?', truth: 'Tách join/business logic trung gian để marts gọn hơn.' },
       { q: 'Layer marts phục vụ ai?', truth: 'Phục vụ BI/reporting/data app ở lớp tiêu thụ cuối.' },
@@ -1540,7 +1642,7 @@ const quizBank = {
       { q: 'Nên chạy snapshot ở vị trí nào trong pipeline?', truth: 'Nên chạy trước build marts để dim dùng dữ liệu mới nhất.' },
       { q: 'Snapshot có thay incremental fact không?', truth: 'Không, snapshot phục vụ lịch sử dim còn incremental cho fact delta.' },
       { q: 'PG/Oracle khác gì ở hàm null fallback?', truth: 'PG thường dùng coalesce còn Oracle thường dùng nvl.' },
-      { q: 'Rủi ro nếu snapshot sai là gì?', truth: 'Làm sai lịch sử khách hàng và sai lệch báo cáo phân tích dài hạn.' }
+      { q: 'Rủi ro nếu snapshot sai là gì?', truth: 'Làm sai lịch sử thực thể và sai lệch báo cáo phân tích dài hạn.' }
     ]
   },
   w808: {
@@ -1588,10 +1690,10 @@ const quizBank = {
       'Project nhỏ không cần tách staging/intermediate/marts.'
     ],
     questions: [
-      { q: 'stg_orders/stg_customers có vai trò gì?', truth: 'Chuẩn hóa dữ liệu raw theo nguyên tắc staging 1:1.' },
-      { q: 'int_order_items_enriched dùng để làm gì?', truth: 'Gom join và business logic trung gian tái sử dụng.' },
-      { q: 'fct_orders thuộc layer nào?', truth: 'Thuộc layer marts để phục vụ BI/reporting.' },
-      { q: 'dim_customers lấy dữ liệu từ đâu?', truth: 'Lấy từ snapshot SCD2 để giữ lịch sử thay đổi.' },
+      { q: 'stg_player_seasons/stg_events có vai trò gì?', truth: 'Chuẩn hóa dữ liệu raw theo nguyên tắc staging 1:1.' },
+      { q: 'int_players_current dùng để làm gì?', truth: 'Gom join và business logic trung gian tái sử dụng.' },
+      { q: 'fct_host_activity_monthly thuộc layer nào?', truth: 'Thuộc layer marts để phục vụ BI/reporting.' },
+      { q: 'dim_players_scd2 lấy dữ liệu từ đâu?', truth: 'Lấy từ snapshot SCD2 để giữ lịch sử thay đổi.' },
       { q: 'Vì sao cần cả generic và singular tests?', truth: 'Để vừa tái dùng rule chung, vừa kiểm tra rule đặc thù.' },
       { q: 'README artifact cần gì tối thiểu?', truth: 'Lineage, cách chạy, và test coverage rõ ràng.' },
       { q: 'Macro trong artifact giúp gì?', truth: 'Gom logic lặp và adaptation theo engine.' },
