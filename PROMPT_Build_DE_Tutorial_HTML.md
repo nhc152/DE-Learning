@@ -706,7 +706,7 @@ Khi dùng prompt bất kỳ tuần nào, Claude phải:
    → Viết đầy đủ mọi section, mọi quiz, mọi code block
 
 2. **Mỗi code block phải chạy được thực tế**
-   → Test mentally trước khi viết — SQL phải valid PostgreSQL, Python phải valid syntax
+   → Test mentally trước khi viết — SQL phải valid PostgreSQL, Oraclesql, Python phải valid syntax
 
 3. **Mỗi quiz phải có đúng 4 đáp án với giải thích riêng cho từng đáp án**
    → Kể cả đáp án sai cũng phải giải thích tại sao sai
@@ -725,6 +725,39 @@ Khi dùng prompt bất kỳ tuần nào, Claude phải:
 7. **Không có lỗi JavaScript**
    → gradeFinalTest() phải reference đúng id="final-test"
    → Số module trong JS phải khớp với số module HTML
+
+## SQL Comparison UI (MANDATORY)
+
+Whenever a lesson compares PostgreSQL and Oracle SQL:
+
+DO NOT write:
+
+-- PostgreSQL
+SELECT ...
+
+-- Oracle SQL
+SELECT ...
+
+INSTEAD render interactive tabs:
+
+[PostgreSQL] [Oracle SQL]
+
+Behavior:
+- Default active: PostgreSQL
+- Clicking tab shows matching code block
+- Hide inactive block
+- Reusable component
+- Multiple SQL tab groups can exist in one page
+
+Required HTML pattern:
+
+<div class="sql-tabs">
+  <button class="sql-tab active">PostgreSQL</button>
+  <button class="sql-tab">Oracle SQL</button>
+</div>
+
+<div class="sql-panel active">...</div>
+<div class="sql-panel">...</div>   
 
 ---
 

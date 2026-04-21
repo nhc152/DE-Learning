@@ -121,6 +121,15 @@ When syntax differs:
 - explain the difference briefly in Vietnamese
 - do not force Oracle examples where the topic is purely Python-only, but do include SQL usage where relevant to DE workflows
 
+When showing SQL examples with multiple databases:
+Always render as tab buttons:
+- PostgreSQL
+- Oracle SQL
+
+Never output plain text headings like:
+-- PostgreSQL
+-- Oracle SQL
+
 ---
 
 ## Quiz Policy

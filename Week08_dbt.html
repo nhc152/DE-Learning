@@ -97,6 +97,17 @@
   .prompt { color: var(--accent2); }
   .comment { color: var(--text-muted); }
   .output { color: var(--accent5); }
+
+  .db-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .db-pg { background: #4169e122; color: #4d9de0; border: 1px solid #4169e155; }
+  .db-oracle { background: #cc000022; color: #f97316; border: 1px solid #cc000055; }
+
+  .tab-group { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 18px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--accent4); border-bottom-color: var(--accent4); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
   code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
 
   .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
@@ -492,28 +503,46 @@ where updated_at &gt;= (select max(updated_at) from {{ this }})
 
         <div class="cmd-block">
           <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Watermark filter: PostgreSQL vs Oracle</span></div>
-          <div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
-where updated_at &gt;= (
+          <div class="cmd-body">
+            <div class="tab-group" id="w803-watermark-tabs">
+              <div class="tab active" onclick="switchTab('w803-watermark-tabs','w803-watermark-pg')">🐘 PostgreSQL</div>
+              <div class="tab" onclick="switchTab('w803-watermark-tabs','w803-watermark-oracle')">🔴 Oracle SQL</div>
+            </div>
+            <div id="w803-watermark-pg" class="tab-content active">
+              <span class="db-tag db-pg">PostgreSQL</span>
+              <pre>where updated_at &gt;= (
   select coalesce(max(updated_at), timestamp '1900-01-01 00:00:00')
   from {{ this }}
-)
-
-<span class="comment">-- Oracle SQL</span>
-where updated_at &gt;= (
+)</pre>
+            </div>
+            <div id="w803-watermark-oracle" class="tab-content">
+              <span class="db-tag db-oracle">Oracle SQL</span>
+              <pre>where updated_at &gt;= (
   select nvl(max(updated_at), timestamp '1900-01-01 00:00:00')
   from {{ this }}
-)</pre></div>
+)</pre>
+            </div>
+          </div>
         </div>
 
         <div class="cmd-block">
           <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Validation query sau 2 lần run</span></div>
-          <div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
-select count(*) as row_count, max(updated_at) as max_updated_at
-from mart.fct_orders;
-
-<span class="comment">-- Oracle SQL</span>
-select count(*) as row_count, max(updated_at) as max_updated_at
-from MART.FCT_ORDERS;</pre></div>
+          <div class="cmd-body">
+            <div class="tab-group" id="w803-validate-tabs">
+              <div class="tab active" onclick="switchTab('w803-validate-tabs','w803-validate-pg')">🐘 PostgreSQL</div>
+              <div class="tab" onclick="switchTab('w803-validate-tabs','w803-validate-oracle')">🔴 Oracle SQL</div>
+            </div>
+            <div id="w803-validate-pg" class="tab-content active">
+              <span class="db-tag db-pg">PostgreSQL</span>
+              <pre>select count(*) as row_count, max(updated_at) as max_updated_at
+from mart.fct_orders;</pre>
+            </div>
+            <div id="w803-validate-oracle" class="tab-content">
+              <span class="db-tag db-oracle">Oracle SQL</span>
+              <pre>select count(*) as row_count, max(updated_at) as max_updated_at
+from MART.FCT_ORDERS;</pre>
+            </div>
+          </div>
         </div>
 
         <div class="info-box warn">⚠️ <span>Nếu row_count tăng bất thường khi chạy lại cùng dữ liệu, logic incremental của bạn đang không idempotent.</span></div>
@@ -669,19 +698,28 @@ where {{ column_name }} &gt; current_timestamp
 from {{ ref('fct_orders') }}
 where order_amount &lt; 0</pre></div></div>
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Debug test fail: PostgreSQL vs Oracle</span></div><div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
-select order_id, order_amount
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Debug test fail: PostgreSQL vs Oracle</span></div><div class="cmd-body">
+          <div class="tab-group" id="w805-debug-tabs">
+            <div class="tab active" onclick="switchTab('w805-debug-tabs','w805-debug-pg')">🐘 PostgreSQL</div>
+            <div class="tab" onclick="switchTab('w805-debug-tabs','w805-debug-oracle')">🔴 Oracle SQL</div>
+          </div>
+          <div id="w805-debug-pg" class="tab-content active">
+            <span class="db-tag db-pg">PostgreSQL</span>
+            <pre>select order_id, order_amount
 from mart.fct_orders
 where order_amount &lt; 0
 order by updated_at desc
-limit 50;
-
-<span class="comment">-- Oracle SQL</span>
-select order_id, order_amount
+limit 50;</pre>
+          </div>
+          <div id="w805-debug-oracle" class="tab-content">
+            <span class="db-tag db-oracle">Oracle SQL</span>
+            <pre>select order_id, order_amount
 from MART.FCT_ORDERS
 where order_amount &lt; 0
 order by updated_at desc
-fetch first 50 rows only;</pre></div></div>
+fetch first 50 rows only;</pre>
+          </div>
+        </div></div>
 
         <div class="info-box warn">⚠️ <span>Không tắt test để pipeline xanh tạm thời. Mục tiêu là sửa root cause ở logic transform hoặc data source.</span></div>
       </div></div>
@@ -833,33 +871,51 @@ from {{ source('raw', 'customers') }}
 
 {% endsnapshot %}</pre></div></div>
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Query current row</span></div><div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
-select customer_id, customer_name, dbt_valid_from, dbt_valid_to
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Query current row</span></div><div class="cmd-body">
+          <div class="tab-group" id="w807-current-tabs">
+            <div class="tab active" onclick="switchTab('w807-current-tabs','w807-current-pg')">🐘 PostgreSQL</div>
+            <div class="tab" onclick="switchTab('w807-current-tabs','w807-current-oracle')">🔴 Oracle SQL</div>
+          </div>
+          <div id="w807-current-pg" class="tab-content active">
+            <span class="db-tag db-pg">PostgreSQL</span>
+            <pre>select customer_id, customer_name, dbt_valid_from, dbt_valid_to
 from snap.snap_customers_scd2
-where dbt_valid_to is null;
-
-<span class="comment">-- Oracle SQL</span>
-select customer_id, customer_name, dbt_valid_from, dbt_valid_to
+where dbt_valid_to is null;</pre>
+          </div>
+          <div id="w807-current-oracle" class="tab-content">
+            <span class="db-tag db-oracle">Oracle SQL</span>
+            <pre>select customer_id, customer_name, dbt_valid_from, dbt_valid_to
 from SNAP.SNAP_CUSTOMERS_SCD2
-where dbt_valid_to is null;</pre></div></div>
+where dbt_valid_to is null;</pre>
+          </div>
+        </div></div>
 
-        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Validation overlap</span></div><div class="cmd-body"><pre><span class="comment">-- PostgreSQL</span>
-select a.customer_id
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Validation overlap</span></div><div class="cmd-body">
+          <div class="tab-group" id="w807-overlap-tabs">
+            <div class="tab active" onclick="switchTab('w807-overlap-tabs','w807-overlap-pg')">🐘 PostgreSQL</div>
+            <div class="tab" onclick="switchTab('w807-overlap-tabs','w807-overlap-oracle')">🔴 Oracle SQL</div>
+          </div>
+          <div id="w807-overlap-pg" class="tab-content active">
+            <span class="db-tag db-pg">PostgreSQL</span>
+            <pre>select a.customer_id
 from snap.snap_customers_scd2 a
 join snap.snap_customers_scd2 b
   on a.customer_id = b.customer_id
  and a.dbt_valid_from &lt; coalesce(b.dbt_valid_to, timestamp '9999-12-31 00:00:00')
  and b.dbt_valid_from &lt; coalesce(a.dbt_valid_to, timestamp '9999-12-31 00:00:00')
- and a.dbt_scd_id &lt;&gt; b.dbt_scd_id;
-
-<span class="comment">-- Oracle SQL</span>
-select a.customer_id
+ and a.dbt_scd_id &lt;&gt; b.dbt_scd_id;</pre>
+          </div>
+          <div id="w807-overlap-oracle" class="tab-content">
+            <span class="db-tag db-oracle">Oracle SQL</span>
+            <pre>select a.customer_id
 from SNAP.SNAP_CUSTOMERS_SCD2 a
 join SNAP.SNAP_CUSTOMERS_SCD2 b
   on a.customer_id = b.customer_id
  and a.dbt_valid_from &lt; nvl(b.dbt_valid_to, timestamp '9999-12-31 00:00:00')
  and b.dbt_valid_from &lt; nvl(a.dbt_valid_to, timestamp '9999-12-31 00:00:00')
- and a.dbt_scd_id &lt;&gt; b.dbt_scd_id;</pre></div></div>
+ and a.dbt_scd_id &lt;&gt; b.dbt_scd_id;</pre>
+          </div>
+        </div></div>
 
         <div class="info-box warn">⚠️ <span>Snapshot sai range hiệu lực sẽ phá vỡ báo cáo retention/churn. Luôn có validation overlap và single-current trước khi publish.</span></div>
       </div></div>
@@ -1286,6 +1342,17 @@ function toggleSolution(btn) {
   const box = btn.nextElementSibling;
   const show = box.classList.toggle('show');
   btn.textContent = show ? '🔼 Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function switchTab(groupId, tabId) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const clicked = group.querySelector(`[onclick*="${tabId}"]`);
+  if (clicked) clicked.classList.add('active');
+  group.parentElement.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
 }
 
 function gradeFinalTest() {

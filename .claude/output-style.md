@@ -85,6 +85,11 @@ Example:
 - Oracle thường dùng `FETCH FIRST ... ROWS ONLY`
 
 ---
+## UI consistency
+Use database toggle tabs for all SQL comparisons.
+Preferred style:
+[PostgreSQL] [Oracle SQL]
+Switch visible code block with JavaScript.
 
 ## UX Writing Style
 Button labels, headings, and section names should be Vietnamese and user-friendly.
