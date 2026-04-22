@@ -21,7 +21,11 @@
       "mcp__ide__readFile",
       "mcp__ide__writeFile",
       "mcp__ide__listDirectory",
-      "Bash(PYTHONIOENCODING=utf-8 python *)"
+      "Bash(PYTHONIOENCODING=utf-8 python *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(wc *)",
+      "mcp__ide__executeCode"
     ],
     "deny": [
       "Bash(del *)",

@@ -1,0 +1,593 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week00_Setup.html`.
+
+Week00 trong roadmap là giai đoạn setup môi trường trước khi bắt đầu toàn bộ lộ trình, gồm Docker, PostgreSQL, Python, Git/GitHub, Spark local, và exit criteria xác minh toàn bộ môi trường. 
+Format chuẩn vẫn phải bám theo master HTML tutorial prompt: hero, sidebar, 6 section/module, collapsible sections, quiz, practice, mini test, dark premium UI. 
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week00_Setup.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 0 – Setup Môi Trường cho Data Engineering
+
+Allowed sources only:
+- ./Week00_Setup.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 00 CORE MISSION:
+This file must act as the strongest foundation for the whole DE-LEARNING series.
+
+The learner should understand:
+- tại sao setup environment là bắt buộc, không phải phần phụ
+- cách chuẩn bị local environment cho toàn roadmap
+- Docker / PostgreSQL / Python / Git / VS Code / Spark local
+- cách verify từng thành phần
+- cách self-check trước khi sang tuần 1
+- cách tạo artifact / screenshot / Git commit để chứng minh setup hoàn tất
+
+The tutorial must feel practical, beginner-friendly, and production-minded.
+
+MANDATORY MODULES:
+- W0.01 – Tổng Quan & Checklist
+- W0.02 – Cài Docker + PostgreSQL
+- W0.03 – Cài Python 3.11+ & VS Code
+- W0.04 – Setup Git & GitHub
+- W0.05 – Chạy thử Spark Local
+- W0.06 – Xác minh toàn bộ & Exit Criteria
+- W0.07 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W0.01
+- why setup matters
+- wrong environment leads to wasted time later
+- roadmap phase overview
+- full week 0 checklist
+- exit criteria mindset
+- what “ready for week 1” really means
+- comparison table of stack by phase
+
+W0.02
+- Docker là gì và vì sao dùng Docker thay vì cài native mọi thứ
+- Docker Desktop / Linux install basics
+- WSL2 note for Windows
+- docker --version
+- docker run hello-world
+- docker compose version
+- PostgreSQL via Docker Compose
+- pgAdmin or SQL client connection
+- SELECT version() verification
+- realistic docker-compose.yml example
+- ports / volumes / credentials explanation
+- anti-patterns:
+  - quên volume
+  - đụng port
+  - quên bật Docker engine
+
+W0.03
+- Python 3.11+ install
+- virtual environment
+- pip basics
+- core packages for DE:
+  pandas, sqlalchemy, psycopg2-binary, requests, jupyter, pyspark
+- preview mention of dbt packages if useful
+- VS Code extensions:
+  Python, SQLTools, Docker, Jupyter, GitLens
+- verify imports
+- connect PostgreSQL from Python with SQLAlchemy
+- explain why venv matters
+- anti-patterns:
+  - cài package global
+  - nhầm interpreter
+  - quên activate venv
+
+W0.04
+- Git basics for learning artifacts
+- git config
+- init repo
+- remote GitHub repo
+- README first commit
+- conventional commits basic usage
+- .gitignore for DE projects
+- SSH key or HTTPS workflow
+- suggested folder structure for roadmap artifacts
+- why commit history matters for portfolio
+- anti-patterns:
+  - commit .venv
+  - không có README
+  - chỉ để code local không push
+
+W0.05
+- Spark là gì ở mức beginner-friendly
+- why Spark appears later but should be smoke-tested now
+- pip install pyspark
+- SparkSession
+- simple DataFrame
+- df.show()
+- spark.version
+- Spark UI localhost:4040
+- JVM / Java note
+- RAM note
+- anti-patterns:
+  - chưa cài Java
+  - nhầm Spark test với production setup
+  - panic vì Spark startup chậm
+
+W0.06
+- full environment verification
+- self-check script idea
+- checklist PASS / FAIL
+- docker ps
+- Python package imports
+- PostgreSQL connectivity
+- Spark smoke test
+- git log / repo exists
+- screenshots to keep as evidence
+- commit artifacts
+- explain exit criteria clearly
+
+W0.07
+- final mini test 20 questions
+- cover all week 0 topics
+- score grading + reset
+- guidance after score
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- realistic local setup tasks
+- verification tasks
+- debugging tasks
+- environment validation tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every code block should be believable and runnable
+- commands should be practical for local learning setup
+- explanations must help a real beginner avoid common setup traps
+- do not overcomplicate with enterprise infrastructure
+- but do keep production mindset where relevant:
+  reproducibility, versioning, verification, repeatability
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- mention common setup traps
+- avoid robotic wording and generic filler
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week00 scope you are using from roadmap
+2. Which format rules you inherit from the HTML standard
+3. Which assumptions you are making for local setup examples
+
+Then output the full final content for:
+./Week00_Setup.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text
+Use project rules from .claude.
+
+Review ./Week00_Setup.html as a senior Data Engineering mentor and learning-product reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- teaching quality
+- beginner friendliness
+- technical correctness
+- practical usefulness
+- production-minded setup guidance
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- common troubleshooting quality
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week00 is taught as setup for a Data Engineering roadmap, not generic developer setup.
+Check relevance of:
+- PostgreSQL readiness
+- Python for DE
+- local Docker workflow
+- Git artifact mindset
+- Spark smoke test
+- verification / exit criteria
+- reproducibility mindset
+
+C. PRACTICAL REALISM
+Check whether the file covers:
+- typical setup failures beginners hit
+- Docker engine / port conflicts / volume persistence
+- Python interpreter confusion
+- venv mistakes
+- Git remote / README / .gitignore issues
+- Spark / Java confusion
+- clear verification commands
+- what to screenshot / commit
+- environment readiness before week 1
+
+D. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- whether the file really feels like a foundation week
+- whether the mini test is useful
+
+E. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- why reproducibility matters
+- why Docker volume matters
+- why venv matters
+- how to verify the active Python interpreter
+- why GitHub history matters for portfolio
+- what exit criteria should look like in practice
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week00 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Practical Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week00_Setup.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week00 becomes the best possible foundation file for the whole DE-LEARNING series.
+
+Allowed sources only:
+- ./Week00_Setup.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- teaching clarity
+- beginner friendliness
+- practical setup quality
+- troubleshooting value
+- reproducibility mindset
+- production mindset
+- portfolio value
+
+PATCH PRIORITIES:
+Dưới đây là báo cáo đánh giá chi tiết cho file `Week00_Setup.html` dưới góc độ một Senior Data Engineering mentor.
+
+# Week00 Review Report
+
+## 1. Executive Summary
+- **score**: 8.0/10
+- **strongest parts**: Giữ được tư duy "Verification-driven" cực mạnh (mỗi tool cài xong đều có script kiểm tra). Giải thích rõ rệt triết lý "tại sao cần làm" thay vì chỉ vứt lệnh. Cấu trúc học tập và tư duy thư mục (`Project Structure`) rất sát với thực tế doanh nghiệp.
+- **biggest weaknesses**: Thiếu trầm trọng các yếu tố cấu thành nên môi trường Big Data chuẩn: Không có WSL2 cho Windows (khiến Docker/Airflow/Spark vật vã ở các module sau), không có công cụ IDE Database chuyên nghiệp (chỉ dùng SQLTools), thiếu mảng Java/Spark setup, và chưa có mô hình chặn lỗi cấu hình Git (thiếu `.gitignore` mẫu).
+- **priority level**: **High**. Bất kỳ lỗi cấu hình nhỏ nào ở Tuần 0 sẽ biến thành technical debt hàng giờ đồng hồ vào các Tuần 5, Tuần 13, đặc biệt là khi động tới Docker và Airflow/Spark.
+
+## 2. What Already Strong
+- **Reproducibility Mindset:** Khẳng định tốt việc dùng `.venv` và `requirements.txt` thay vì cài cắm bừa bãi global.
+- **Kiểm chứng nghiêm ngặt (Exit criteria):** Các script như `verify_python.py` và PostgreSQL smoke test chỉ ra rõ trạng thái sẵn sàng của môi trường. Sinh viên không thể ăn gian tự cho mình qua cửa.
+- **Cross-DB Awareness:** Đưa ra cái nhìn song song giữa PostgreSQL (chuẩn open-source) và Oracle SQL (chuẩn enterprise) ở Tuần 0 là một nước cờ cực kỳ trưởng thành, hiếm khóa học nào trang bị từ sớm.
+- **Kỷ luật lưu trữ (Git/Artifact mindset):** Thường xuyên nhắc nhở commit rõ nghĩa (`setup:`) và push sớm.
+
+## 3. Critical Gaps
+- **Thiếu cài đặt Linux trên Windows (WSL2):** Tuyệt đại đa số data/CLI tool đều là Linux-first. Terminal ở bài viết nhắc đến `PowerShell`. Deploy Data Stack trên PowerShell + Docker Desktop without WSL2 backend là một thảm họa về hiệu năng và network port.
+- **Khuyết mảng Big Data Setup (Java & Spark):** Data Engineering mà không có Java Runtime (11/17) và thư viện PySpark để chạy Smoke Test ngay trên máy local là một thiếu sót lớn. 
+- **Công cụ DB Client nghiệp dư:** VS Code SQLTools xài nhẹ để test thì tốt, nhưng thao tác với warehouse cần ERD diagram, Execution Plan Analysis hay import file csv hàng triệu dòng thì sẽ sập. Cần có DBeaver hoặc DataGrip.
+- **Mức độ an toàn Git (Missing `.gitignore`):** Lỗi kinh điển của DE newbie là push nhầm file backup `.csv` cỡ 3GB hoặc file `.env` lên GitHub. Bài chưa nhấn mạnh `.gitignore` template cho DE.
+
+## 4. Module-by-Module Improvements
+- **W0.02 (VS Code):**
+  - Cần thêm extension `WSL` (Remote - WSL) cho người dùng Windows.
+  - Cần loại bỏ sự phụ thuộc quá nặng vào SQLTools, khuyến nghị cài hẳn DBeaver ở một bước độc lập.
+- **W0.03 (Python/pip):**
+  - Nhấn mạnh sử dụng Command Palette (`Ctrl+Shift+P` > `Python: Select Interpreter`) để chỉ định đúng `.venv`. Đây là chỗ newbie mắc lỗi nhiều nhất.
+- **W0.04 (Git):**
+  - Cung cấp một boilerplate `.gitignore` dành riêng cho dự án data: `__pycache__/`, `.venv/`, `.env`, `data/`, `*.log`, `*.csv`, `*.parquet`.
+- **W0.05/W0.06 (Database):**
+  - Thêm cách ẩn metadata/credentials. Thay vì viết hardcode `POSTGRES_PASSWORD: de_pass` trong docker-compose, hãy dạy tư duy dùng file `.env`.
+- **W0.07 (Docker):**
+  - Warning to trong bài: Phải có file `.wslconfig` trên Windows (giới hạn RAM cho Docker), tránh tình trạng Docker ăn hết 16GB RAM khiến treo máy tính.
+- **(THIẾU Module): Thiết lập Java/Spark Foundation:**
+  - Thêm module **"W0.08X: Data Processing Setup (Java & PySpark)"**, cài đặt JDK 11 hoặc 17, set `JAVA_HOME`, và chạy thử script: `spark.sql("SELECT 1 AS TEST").show()`.
+
+## 5. Practical Upgrades Recommended
+- **Sửa lại Project Structure (`W0.08`):** Thêm thư mục `data/` (ngay lập tức bị ignore bởi Git) để chứa data test local, và thư mục `config/.env`.
+- **Dọn dẹp thảm họa Docker:** Giới thiệu lệnh `docker system prune -a --volumes` vào playbook Troubleshooting khi máy dính phải cache hư hoặc nghẽn ổ C.
+- **Cách verify container network:** Dạy khái niệm port mapping với tư duy "Từ Host (Máy tính của nhà ngươi) -> Xuyên vào 5432 của Container". Nếu port bị chiếm, hướng dẫn đổi `5433:5432` và hệ luỵ tương ứng ở lệnh test.
+
+## 6. Teaching Upgrades Recommended
+- **Quiz:** Cần câu hỏi "Nếu bạn quên thêm thư mục data/ chứa file 5GB parquet vào `.gitignore` rồi commit, chuyện gì sẽ xảy ra với repo của bạn?". Điều này dạy bài học nhớ đời cho newbie.
+- **Thực hành (Practice Tasks):** Ở task verify môi trường, yêu cầu sinh viên chụp **DBeaver interface + Execution Result** thay vì chỉ log shell terminal, giúp làm quen với giao diện enterprise.
+
+## 7. Portfolio Value Assessment
+Bài này đang làm rất tốt nền tảng Portfolio Builder thông qua Artifacts / Git Checklist. Tuy nhiên, nó sẽ trông như một "Backend Web Portfolio" thay vì "Data Engineer Portfolio" nếu các bài test chỉ chạy SELECT đơn giản thay vì in ra `spark-submit success logs` hoặc data transformation schema.
+
+## 8. Top 10 Immediate Patches
+1. **WSL2 Requirement:** Bắt buộc Windows user setup WSL2 (Ubuntu) làm môi trường chạy lệnh và Docker.
+2. **Java + PySpark Smoke Test:** Bổ sung cài đặt JDK (11/17), cấu hình `JAVA_HOME` và script test PySpark để đại diện kiến trúc Big Data.
+3. **Thêm module DBeaver:** Khuyến nghị setup client chuyên nghiệp cho database thay vì chỉ dùng SQLTools.
+4. **Bổ sung DE Template `.gitignore`:** Cần block triệt để các file đuôi `.csv, .parquet, .sqlite` và thư mục `data/`, `.env` lên GitHub.
+5. **Environment Manager (`.env`):** Dạy sử dụng file `.env` kèm `.gitignore` để cấu hình parameter bảo mật cho docker-compose ngay từ đầu.
+6. **Docker Resource Limit:** Viết script/chỉ nam hướng dẫn set RAM limit cho Docker (qua `.wslconfig` đối với Win hoặc resource limits của docker mac).
+7. **VS Code Interpreter Guide:** Thêm screenshot hoặc lệnh cụ thể sử dụng Command Palette cho việc force load virtual enviroment (`.venv`).
+8. **Port Routing Concept:** Đưa một ảnh sơ đồ text hoặc bảng giải thích cơ chế Mapping Port (`5433:5432`) rõ ràng hơn cho SQL client.
+9. **Docker reset command:** Đưa thêm lệnh vạn năng xử lý thảm hoạ hụt bộ nhớ: `docker system prune --volumes`.
+10. **Cập nhật Mini-test:** Đưa các câu hỏi bẫy liên quan tới Java conflict, kích thước file trên GitHub, bảo mật credentials vào bài thi.
+
+## 9. Final Verdict
+- **[patch strongly]**
+Chất lượng truyền đạt HTML và tư duy framework sư phạm đang rất sắc bén, tuy nhiên **NỘI DUNG (Content)** cần được chắp vá mạnh tay vì đang lỡ nhịp định hướng "Data Engineering". Thiếu hụt Spark/Java, hệ điều hành Linux/WSL2 cho Windows, và DB Client chuẩn Enterprise sẽ giảm tính tin cậy của lộ trình đi rõ rệt. Hãy nâng cấp những lỗ hổng kỹ thuật trên.
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade setup commands and verification steps where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and confidence-building
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen why Week00 matters for the whole roadmap
+- improve Docker + PostgreSQL local setup realism
+- improve venv and Python interpreter explanation
+- improve Git + GitHub artifact / repo mindset
+- improve Spark smoke-test explanation without overcomplicating it
+- improve W0.06 verification checklist and exit criteria
+- improve what learners should screenshot / commit
+- improve mini test usefulness
+- improve anti-patterns and troubleshooting notes
+
+EXPECTED RESULT:
+Update only:
+./Week00_Setup.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text
+Review the patched ./Week00_Setup.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week00_Setup.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- overall polish, readability, and confidence-building feel for beginners
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week00_Setup.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week00
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo riêng cho Week00
+
+Week00 rất dễ bị viết thành “hướng dẫn cài đặt chung chung”.
+Bạn nên thêm 1 dòng này vào prompt build hoặc patch:
+
+```text
+Do not turn Week00 into a generic developer setup page.
+Teach it as the foundation layer for a long-term Data Engineering roadmap, with reproducibility, verification, and portfolio mindset.
+```
+
+Dòng này sẽ kéo output về đúng chất DE-LEARNING.
+
+Nếu bạn muốn, mình tiếp tục viết ngay **full bộ prompt theo từng step cho Week02_Python_DE.html**.

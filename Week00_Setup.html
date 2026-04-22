@@ -198,7 +198,7 @@
     <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W0.05</span>PostgreSQL Setup Local</div>
     <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W0.06</span>Oracle SQL Practice Setup</div>
     <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W0.07</span>Docker Cơ Bản Cho Người Mới</div>
-    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W0.08</span>Project Structure Chuẩn</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W0.08</span>Project Structure + Java/PySpark</div>
     <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W0.09</span>Checklist Sẵn Sàng Trước Week01</div>
     <div class="nav-item" onclick="showModule(9,this)"><span class="nav-number">W0.10</span>Mini Test Tổng Kết</div>
   </nav>
@@ -244,10 +244,10 @@
       <tr><th>Giai đoạn</th><th>Tuần</th><th>Trọng tâm</th></tr>
       <tr><td>Foundation</td><td>0-4</td><td>Setup, SQL nâng cao, Python data processing</td></tr>
       <tr><td>Core Batch DE</td><td>5-12</td><td>Data Modeling, dbt, Airflow, quality checks</td></tr>
-      <tr><td>Scale & Platform</td><td>13-20</td><td>Spark, Docker compose nâng cao, cloud cơ bản</td></tr>
-      <tr><td>Production mindset</td><td>21-28</td><td>Monitoring, reliability, capstone pipeline</td></tr>
+      <tr><td>Scale & Platform</td><td>13-20</td><td>Spark, Docker compose nâng cao, cloud cơ bản, warehouse practice</td></tr>
+      <tr><td>Production mindset</td><td>21-28</td><td>Monitoring, reliability, cost/security review, capstone pipeline</td></tr>
     </table>
-    <div class="info-box warn">Nếu bỏ qua chuẩn setup tuần 0, bạn thường mất hàng giờ debug lỗi không liên quan kiến thức chính.</div>
+    <div class="info-box warn">Nếu bỏ qua chuẩn setup tuần 0, bạn thường mất hàng giờ debug lỗi không liên quan kiến thức chính, đặc biệt khi vào các tuần Docker/Airflow/Spark (Week05+ và Week13+).</div>
     <h3>Định nghĩa “qua tuần 0” theo chuẩn thực chiến</h3>
     <ul>
       <li><strong>Tooling pass:</strong> VS Code, Python, Docker, PostgreSQL, Oracle SQL đều chạy được ít nhất một thao tác thật.</li>
@@ -302,7 +302,12 @@ Buổi 3 (2h): Oracle SQL practice + readiness checklist + mini test</pre></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Tạo môi trường code đồng nhất để tránh lỗi do editor.</li><li>Thiết lập extension phục vụ SQL, Python, Docker, Git.</li><li>Giảm thời gian thao tác thủ công bằng format/lint/autocomplete.</li></ul></div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
     <h3>Danh sách extension khuyến nghị</h3>
-    <table><tr><th>Extension</th><th>Vai trò</th></tr><tr><td>Python (ms-python.python)</td><td>Run/debug Python, chọn interpreter</td></tr><tr><td>Pylance</td><td>Type checking và IntelliSense tốt hơn</td></tr><tr><td>SQLTools + driver PostgreSQL</td><td>Query SQL trực tiếp từ VS Code</td></tr><tr><td>Docker</td><td>Quản lý container trực tiếp</td></tr><tr><td>GitLens</td><td>Xem lịch sử thay đổi theo dòng</td></tr><tr><td>YAML</td><td>Hỗ trợ docker-compose, airflow config</td></tr></table>
+    <table><tr><th>Extension</th><th>Vai trò</th></tr><tr><td>Python (ms-python.python)</td><td>Run/debug Python, chọn interpreter</td></tr><tr><td>Pylance</td><td>Type checking và IntelliSense tốt hơn</td></tr><tr><td>SQLTools + driver PostgreSQL</td><td>Query SQL nhanh ngay trong editor</td></tr><tr><td>Docker</td><td>Quản lý container trực tiếp</td></tr><tr><td>GitLens</td><td>Xem lịch sử thay đổi theo dòng</td></tr><tr><td>YAML</td><td>Hỗ trợ docker-compose, airflow config</td></tr><tr><td>Remote - WSL</td><td>Bắt buộc cho Windows để làm việc Linux-first ổn định</td></tr></table>
+    <h3>Khuyến nghị DB client thực chiến</h3>
+    <p>SQLTools phù hợp để query nhanh, nhưng khi vào workload data lớn bạn nên có thêm một DB client chuyên nghiệp như DBeaver để xem execution plan, import/export CSV và quản lý schema trực quan.</p>
+    <div class="cmd-block"><div class="cmd-header"><span>Mục tiêu tối thiểu</span></div><div class="cmd-body"><pre>- Dùng SQLTools: verify query hằng ngày ngay trong VS Code
+- Dùng DBeaver (hoặc DataGrip): thao tác schema, data preview, execution plan khi bài tập phức tạp hơn</pre></div></div>
+    <div class="info-box warn">Không cần bỏ SQLTools. Mục tiêu là bổ sung công cụ enterprise-grade để tránh nghẽn thao tác ở các tuần warehouse và optimization.</div>
     <h3>Workspace settings gợi ý</h3>
     <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>.vscode/settings.json</span></div><div class="cmd-body"><pre>{
   "editor.formatOnSave": true,
@@ -310,16 +315,26 @@ Buổi 3 (2h): Oracle SQL practice + readiness checklist + mini test</pre></div>
   "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
   "python.terminal.activateEnvironment": true
 }</pre></div></div>
-    <div class="info-box note">Nếu dùng macOS/Linux, đổi interpreter path sang <code>.venv/bin/python</code>.</div>
+    <div class="info-box note">Nếu dùng macOS/Linux hoặc WSL, đổi interpreter path sang <code>.venv/bin/python</code>.</div>
+    <h3>Bước bắt buộc tránh lỗi sai interpreter</h3>
+    <ol>
+      <li>Mở Command Palette: <code>Ctrl + Shift + P</code>.</li>
+      <li>Chọn <code>Python: Select Interpreter</code>.</li>
+      <li>Chọn interpreter nằm trong thư mục project: <code>.venv</code>.</li>
+      <li>Mở terminal mới và chạy <code>python -c "import sys; print(sys.executable)"</code> để xác minh path.</li>
+    </ol>
+    <div class="info-box tip">Nếu path không chứa <code>.venv</code>, bạn đang chạy sai môi trường. Sửa ngay trước khi cài thêm package.</div>
     <h3>Checklist verify sau khi cài extension</h3>
     <ul class="checklist">
       <li class="done">Mở file <code>.py</code> thấy IntelliSense của Pylance hoạt động</li>
       <li class="done">Chạy terminal tích hợp và gọi được <code>python --version</code></li>
       <li class="done">SQLTools tạo được connection profile PostgreSQL</li>
+      <li class="done">DBeaver (hoặc DataGrip) kết nối được PostgreSQL local</li>
       <li class="done">Docker extension nhìn thấy container đang chạy</li>
+      <li class="done">Nếu dùng Windows: mở được workspace qua Remote - WSL</li>
     </ul>
     <h3>Lỗi thường gặp và cách xử lý nhanh</h3>
-    <table><tr><th>Triệu chứng</th><th>Nguyên nhân thường gặp</th><th>Cách xử lý</th></tr><tr><td>Run Python báo thiếu package</td><td>Chọn sai interpreter</td><td>Chọn lại interpreter trong Command Palette</td></tr><tr><td>SQLTools không connect DB</td><td>Sai port/credential</td><td>Đối chiếu lại docker-compose và connection profile</td></tr><tr><td>Terminal không tự activate .venv</td><td>Thiếu cấu hình activation</td><td>Bật <code>python.terminal.activateEnvironment</code></td></tr></table>
+    <table><tr><th>Triệu chứng</th><th>Nguyên nhân thường gặp</th><th>Cách xử lý</th></tr><tr><td>Run Python báo thiếu package</td><td>Chọn sai interpreter</td><td>Chọn lại interpreter trong Command Palette</td></tr><tr><td>SQLTools hoặc DBeaver không connect DB</td><td>Sai port/credential</td><td>Đối chiếu lại docker-compose và connection profile</td></tr><tr><td>Terminal không tự activate .venv</td><td>Thiếu cấu hình activation</td><td>Bật <code>python.terminal.activateEnvironment</code></td></tr><tr><td>Docker chạy chậm/không ổn định trên Windows</td><td>Chưa setup WSL2 backend</td><td>Cài WSL2 + Ubuntu, mở project bằng Remote - WSL</td></tr></table>
   </div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
     <div class="quiz-item"><div class="quiz-q">Vì sao nên dùng VS Code workspace settings?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Settings theo project giúp cả team/khóa học đồng nhất.')">A. Đảm bảo cấu hình nhất quán theo từng project</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên chỉ dựa vào cấu hình global.')">B. Chỉ cần cài global settings là đủ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Workspace settings không làm VS Code nhẹ hơn một cách kỳ diệu.')">C. Chủ yếu để tăng tốc phần cứng máy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Bỏ settings dễ làm mỗi project hành xử khác nhau.')">D. Không cần vì mặc định luôn tối ưu</div></div><div class="quiz-explain"></div></div>
@@ -406,7 +421,9 @@ print("Executable:", sys.executable)</pre></div></div></div></div></div></div></
 git config --global user.email "you@example.com"
 ssh-keygen -t ed25519 -C "you@example.com"
 git init
-git add .
+git add README.md
+# sau đó add theo từng file thật sự cần commit
+# ví dụ: git add week00/python/verify_python.py
 git commit -m "setup: initialize week00 foundation"
 git branch -M main
 git remote add origin git@github.com:&lt;user&gt;/de-roadmap-artifacts.git
@@ -424,7 +441,30 @@ git push origin main</pre></div></div>
     <ul><li><code>setup:</code> thay đổi môi trường, cấu hình</li><li><code>feat:</code> thêm tính năng/code mới</li><li><code>fix:</code> sửa lỗi</li><li><code>docs:</code> cập nhật ghi chú học tập</li></ul>
     <div class="info-box warn">Nếu <code>Permission denied (publickey)</code>, kiểm tra lại SSH key đã add vào GitHub và đang dùng remote SSH.</div>
     <h3>Workflow commit thực tế cho người học DE</h3>
-    <table><tr><th>Tình huống</th><th>Nên commit thế nào</th><th>Ví dụ message</th></tr><tr><td>Vừa cấu hình editor</td><td>Commit riêng cấu hình</td><td><code>setup: configure vscode workspace settings</code></td></tr><tr><td>Vừa thêm script verify Python</td><td>Commit riêng script</td><td><code>setup: add python environment verification script</code></td></tr><tr><td>Vừa thêm SQL test</td><td>Commit riêng SQL</td><td><code>setup: add postgres smoke test query</code></td></tr></table>
+    <table><tr><th>Tình huống</th><th>Nên commit thế nào</th><th>Ví dụ message</th></tr><tr><td>Vừa cấu hình editor</td><td>Commit riêng cấu hình</td><td><code>setup: configure vscode workspace settings</code></td></tr><tr><td>Vừa thêm script verify Python</td><td>Commit riêng script</td><td><code>setup: add python environment verification script</code></td></tr><tr><td>Vừa thêm SQL test</td><td>Commit riêng SQL</td><td><code>setup: add postgres smoke test query</code></td></tr><tr><td>Vừa thêm quy tắc ignore dữ liệu lớn</td><td>Commit riêng .gitignore</td><td><code>setup: add data-engineering gitignore baseline</code></td></tr></table>
+    <h3>.gitignore baseline cho Data Engineering</h3>
+    <div class="cmd-block"><div class="cmd-header"><span>.gitignore</span></div><div class="cmd-body"><pre># Python
+__pycache__/
+*.pyc
+.venv/
+
+# Secrets
+.env
+config/.env
+
+# Local data and heavy artifacts
+data/
+*.csv
+*.parquet
+*.sqlite
+*.duckdb
+*.log
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/*.log</pre></div></div>
+    <div class="info-box warn">Nếu lỡ commit file dữ liệu lớn (ví dụ parquet vài GB), repo sẽ phình to và clone/pull rất chậm. Sửa bằng cách bỏ file khỏi lịch sử commit sớm nhất có thể.</div>
     <h3>Checklist trước khi push</h3>
     <ul class="checklist">
       <li class="done">Đã chạy nhanh lệnh chính (python/sql/docker) ít nhất 1 lần</li>
@@ -462,15 +502,22 @@ git push</pre></div></div></div></div></div></div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Có một database local để thực hành SQL xuyên suốt các tuần.</li><li>Hiểu thao tác cơ bản: CREATE TABLE, INSERT, SELECT, index.</li><li>Nắm được khác biệt cú pháp với Oracle SQL ngay từ đầu.</li></ul></div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
     <h3>Khởi động PostgreSQL bằng Docker</h3>
+    <p>Từ tuần 0, bạn nên tách credential sang file <code>.env</code> để không hardcode password trong compose.</p>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>.env (local only, không commit)</span></div><div class="cmd-body"><pre>POSTGRES_USER=de_user
+POSTGRES_PASSWORD=de_pass
+POSTGRES_DB=de_lab
+POSTGRES_HOST_PORT=5432</pre></div></div>
     <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>docker-compose.yml (rút gọn)</span></div><div class="cmd-body"><pre>services:
   postgres:
     image: postgres:15
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: de_user
-      POSTGRES_PASSWORD: de_pass
-      POSTGRES_DB: de_lab
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_HOST_PORT}:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
 volumes:
@@ -509,9 +556,17 @@ SELECT COUNT(*) AS total_checks FROM stg_healthcheck;</pre></div></div>
     <h3>Lệnh verify kết nối PostgreSQL nhanh</h3>
     <div class="cmd-block"><div class="cmd-header"><span>psql verify</span></div><div class="cmd-body"><pre>psql -h localhost -p 5432 -U de_user -d de_lab -c "SELECT version();"
 psql -h localhost -p 5432 -U de_user -d de_lab -c "SELECT COUNT(*) FROM stg_healthcheck;"</pre></div></div>
-    <div class="info-box tip">Nếu bạn map sang port khác (ví dụ 5433), nhớ đổi đúng tham số <code>-p</code> trong lệnh verify.</div>
+    <h3>Mental model port mapping cần nắm chắc</h3>
+    <div class="cmd-block"><div class="cmd-header"><span>Host → Container</span></div><div class="cmd-body"><pre>"5432:5432" nghĩa là:
+- Cổng 5432 trên máy bạn (host)
+- ánh xạ vào cổng 5432 của PostgreSQL trong container
+
+Nếu host đã bận cổng 5432, đổi thành:
+"5433:5432"
+=> Khi connect từ SQL client/psql, bạn phải dùng port 5433.</pre></div></div>
+    <div class="info-box tip">Nếu bạn map sang port khác (ví dụ 5433), nhớ đổi đúng tham số <code>-p</code> trong lệnh verify và trong profile SQL client.</div>
     <h3>Lỗi setup PostgreSQL local thường gặp</h3>
-    <table><tr><th>Lỗi</th><th>Nguyên nhân hay gặp</th><th>Cách xử lý</th></tr><tr><td>Connection refused</td><td>Container chưa chạy hoặc sai port map</td><td>Kiểm tra <code>docker ps</code> và thông số connection</td></tr><tr><td>Authentication failed</td><td>Sai user/password</td><td>Đối chiếu lại env trong compose</td></tr><tr><td>Data mất sau khi restart</td><td>Chưa gắn volume persistent</td><td>Thêm volume cho thư mục data của PostgreSQL</td></tr></table>
+    <table><tr><th>Lỗi</th><th>Nguyên nhân hay gặp</th><th>Cách xử lý</th></tr><tr><td>Connection refused</td><td>Container chưa chạy hoặc sai port map</td><td>Kiểm tra <code>docker ps</code> và thông số connection</td></tr><tr><td>Authentication failed</td><td>Sai user/password hoặc đọc sai .env</td><td>Đối chiếu lại env trong compose và giá trị trong <code>.env</code></td></tr><tr><td>Data mất sau khi restart</td><td>Chưa gắn volume persistent</td><td>Thêm volume cho thư mục data của PostgreSQL</td></tr><tr><td>Port 5432 đã bị chiếm</td><td>Có service DB khác đang dùng port mặc định</td><td>Đổi mapping sang <code>5433:5432</code> và cập nhật lại SQL client</td></tr></table>
   </div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
     <div class="quiz-item"><div class="quiz-q">Port mặc định của PostgreSQL là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. 5432 là port mặc định của PostgreSQL.')">A. 5432</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. 3306 là MySQL mặc định.')">B. 3306</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. 1521 thường gắn với Oracle listener.')">C. 1521</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. 6379 là Redis mặc định.')">D. 6379</div></div><div class="quiz-explain"></div></div>
@@ -593,7 +648,7 @@ SELECT NVL(discount,0) FROM sales FETCH FIRST 5 ROWS ONLY;</pre></div></div></di
 </div>
 
 <div class="module" id="m6">
-  <div class="module-header"><div class="module-tag">Tuần 0 · W0.07</div><div class="module-title">Docker Cơ Bản Cho Người Mới</div><div class="module-subtitle">Hiểu image/container/volume/network và thao tác vận hành cơ bản</div><div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div></div>
+  <div class="module-header"><div class="module-tag">Tuần 0 · W0.07</div><div class="module-title">Docker Cơ Bản Cho Người Mới</div><div class="module-subtitle">Hiểu image/container/volume/network và thao tác vận hành cơ bản ổn định cho stack DE</div><div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Chủ đề</th><th>Mục tiêu</th></tr><tr><td>Image vs Container</td><td>Phân biệt đúng khái niệm</td></tr><tr><td>Volume</td><td>Giữ dữ liệu bền vững</td></tr><tr><td>Compose</td><td>Khởi chạy nhiều service</td></tr><tr><td>Troubleshooting</td><td>Xử lý lỗi khởi động phổ biến</td></tr></table></div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Hiểu Docker để tái lập môi trường đồng nhất giữa các máy.</li><li>Tự thao tác các lệnh thường dùng khi học DE local.</li><li>Biết xử lý sự cố cơ bản: port conflict, container restart loop, volume cũ.</li></ul></div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
@@ -603,7 +658,15 @@ docker logs &lt;container&gt;
 docker exec -it &lt;container&gt; bash
 docker compose up -d
 docker compose down
-docker volume ls</pre></div></div>
+docker volume ls
+docker system df</pre></div></div>
+    <h3>Windows-first note: WSL2 là bắt buộc cho DE stack</h3>
+    <div class="info-box warn">Nếu bạn dùng Windows, nên chạy Docker với backend WSL2 (Ubuntu). Không nên học dài hạn bằng PowerShell-only khi đi vào Airflow/Spark vì dễ gặp lỗi network, volume permission và hiệu năng.</div>
+    <div class="cmd-block"><div class="cmd-header"><span>.wslconfig gợi ý giới hạn tài nguyên Docker</span></div><div class="cmd-body"><pre>[wsl2]
+memory=8GB
+processors=4
+swap=2GB</pre></div></div>
+    <div class="info-box tip">Mục tiêu không phải ép đúng 8GB/4 core, mà là đặt giới hạn rõ để Docker không ăn hết RAM làm treo máy khi chạy nhiều container.</div>
     <h3>Checklist xử lý lỗi nhanh</h3>
     <ul>
       <li><strong>Port conflict:</strong> đổi host port trong compose.</li>
@@ -624,6 +687,11 @@ docker compose logs postgres --tail=100
 docker compose config
 docker ps -a
 # xác minh port đang listen và credentials khớp</pre></div></div>
+    <h3>Khi ổ C đầy hoặc Docker cache lỗi nặng</h3>
+    <div class="cmd-block"><div class="cmd-header"><span>Cleanup có kiểm soát</span></div><div class="cmd-body"><pre>docker system df
+# chỉ chạy khi bạn hiểu sẽ xóa gì
+docker system prune -a --volumes</pre></div></div>
+    <div class="info-box warn">Lệnh prune có thể xóa image/volume không còn dùng. Hãy backup dữ liệu quan trọng trước khi chạy.</div>
   </div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
     <div class="quiz-item"><div class="quiz-q">Image là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Image là khuôn mẫu bất biến để tạo container.')">A. Bản mẫu để tạo container</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Image không phải dữ liệu runtime đang chạy.')">B. Dữ liệu runtime của container</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Image không phải file log runtime.')">C. Log của ứng dụng đang chạy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Image không phải remote Git repository.')">D. Repository GitHub chứa mã nguồn</div></div><div class="quiz-explain"></div></div>
@@ -647,9 +715,9 @@ docker ps -a
 </div>
 
 <div class="module" id="m7">
-  <div class="module-header"><div class="module-tag">Tuần 0 · W0.08</div><div class="module-title">Project Structure Chuẩn</div><div class="module-subtitle">Tổ chức thư mục học tập rõ ràng để tái sử dụng và mở rộng</div><div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div></div>
-  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Nhóm thư mục</th><th>Mục đích</th></tr><tr><td>sql/</td><td>Lưu script SQL theo tuần/chủ đề</td></tr><tr><td>python/</td><td>Lưu script ETL, validate, helper</td></tr><tr><td>docker/</td><td>Lưu compose và cấu hình service</td></tr><tr><td>artifacts/</td><td>Lưu output, screenshot, log verify</td></tr></table></div></div>
-  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Giúp bạn không bị rối file khi dự án tăng dần theo tuần.</li><li>Tăng khả năng review lại kiến thức cũ và tái sử dụng script.</li><li>Chuẩn bị nền cho portfolio có cấu trúc chuyên nghiệp.</li></ul></div></div>
+  <div class="module-header"><div class="module-tag">Tuần 0 · W0.08</div><div class="module-title">Project Structure Chuẩn + Java/PySpark Foundation</div><div class="module-subtitle">Tổ chức thư mục học tập rõ ràng, thêm nền Java/PySpark để không hụt nhịp big data</div><div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div></div>
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Nhóm</th><th>Mục đích</th></tr><tr><td>Project structure</td><td>Chuẩn hóa sql/python/docker/artifacts theo tuần</td></tr><tr><td>Data workspace</td><td>Tạo <code>data/</code> local để test dataset và luôn ignore khỏi Git</td></tr><tr><td>Config management</td><td>Đặt <code>config/.env</code> cho local secret, không commit</td></tr><tr><td>Big data foundation</td><td>Setup Java + PySpark smoke test để sẵn sàng cho Spark module</td></tr></table></div></div>
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Giúp bạn không bị rối file khi dự án tăng dần theo tuần.</li><li>Tăng khả năng review lại kiến thức cũ và tái sử dụng script.</li><li>Thiết lập nền Java/PySpark sớm để tránh vỡ nhịp ở các tuần Spark.</li></ul></div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
     <h3>Cấu trúc gợi ý</h3>
     <div class="cmd-block"><div class="cmd-header"><span>Project tree</span></div><div class="cmd-body"><pre>de-roadmap-artifacts/
@@ -659,13 +727,28 @@ docker ps -a
       oracle/
     python/
     docker/
+    config/
+      .env
+    data/
     docs/
     artifacts/
   week01/
   week02/
   .vscode/
   requirements.txt
-  README.md</pre></div></div>
+  README.md
+  .gitignore</pre></div></div>
+    <div class="info-box note"><span><code>data/</code> dùng cho dataset test local. Giữ ngoài Git để repo nhẹ và tránh lộ dữ liệu nội bộ.</span></div>
+
+    <h3>Foundation Java + PySpark (bắt buộc trước các tuần Spark)</h3>
+    <table><tr><th>Thành phần</th><th>Mức khuyến nghị</th><th>Kiểm tra pass</th></tr><tr><td>JDK</td><td>Java 11 hoặc 17</td><td><code>java -version</code> chạy được</td></tr><tr><td>JAVA_HOME</td><td>Trỏ đúng thư mục JDK</td><td><code>echo $JAVA_HOME</code> (hoặc <code>echo %JAVA_HOME%</code>) có giá trị</td></tr><tr><td>PySpark</td><td>Cài trong <code>.venv</code></td><td><code>python -c "import pyspark"</code> không lỗi</td></tr></table>
+    <div class="cmd-block"><div class="cmd-header"><span>PySpark smoke test tối thiểu</span></div><div class="cmd-body"><pre>from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.master("local[*]").appName("week00-smoke").getOrCreate()
+spark.sql("SELECT 1 AS test_value").show()
+print("Spark smoke test: PASS")
+spark.stop()</pre></div></div>
+    <div class="info-box tip">Mục tiêu tuần 0 chỉ là Spark local chạy được một truy vấn đơn giản. Không cần tối ưu hiệu năng ở bước này.</div>
 
     <h3>Ví dụ đặt tên file SQL đa hệ quản trị</h3>
     <div class="tab-group" id="sql-tabs-w008"><div class="tab active" onclick="switchTab('sql-tabs-w008','w008-pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sql-tabs-w008','w008-oracle')">Oracle SQL</div></div>
@@ -681,6 +764,7 @@ week00/sql/oracle/02_validate_row_count.sql</pre></div></div></div>
       <li>Một tuần có README ngắn: mục tiêu, cách chạy, kết quả mong đợi.</li>
       <li>SQL/Python/Docker tách riêng để người khác mở đúng chỗ ngay.</li>
       <li>Artefact chứng minh kết quả nằm trong thư mục rõ ràng, không rải rác.</li>
+      <li>Có bằng chứng Java/PySpark smoke test trong <code>artifacts/</code> (log hoặc screenshot).</li>
     </ul>
   </div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
@@ -692,17 +776,17 @@ week00/sql/oracle/02_validate_row_count.sql</pre></div></div></div>
     <div class="quiz-item"><div class="quiz-q">Thư mục docker/ có ý nghĩa gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách cấu hình hạ tầng local khỏi code logic.')">A. Lưu cấu hình service local (compose, env mẫu)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để chứa dữ liệu nhị phân lớn.')">B. Chứa toàn bộ dữ liệu export nhị phân</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. docker/ không phải nơi chính cho ghi chú học tập.')">C. Lưu quiz và ghi chú lý thuyết</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. docker/ không thay thế thư mục SQL và Python.')">D. Chứa toàn bộ script SQL và Python</div></div><div class="quiz-explain"></div></div>
     <div class="quiz-item"><div class="quiz-q">Nên lưu script Python ở đâu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách python/ giúp dễ test và tổ chức module.')">A. python/ theo từng tuần và chức năng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên trộn script Python trong sql/.')">B. sql/</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. artifacts chỉ dành cho output bằng chứng, không phải source chính.')">C. artifacts/</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. docs dành cho mô tả, không phải nơi chứa script thực thi.')">D. docs/</div></div><div class="quiz-explain"></div></div>
     <div class="quiz-item"><div class="quiz-q">Lợi ích của cấu trúc chuẩn với tuyển dụng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Repo gọn gàng phản ánh tư duy tổ chức công việc.')">A. Portfolio dễ đọc, thể hiện tính chuyên nghiệp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Cấu trúc tốt vẫn rất quan trọng khi ứng tuyển.')">B. Không mang lại giá trị nào</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Cấu trúc không thay kỹ năng, nhưng giúp trình bày kỹ năng rõ hơn.')">C. Chỉ cần code chạy, cấu trúc không bao giờ quan trọng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Cấu trúc chuẩn không cản sáng tạo; nó giúp mở rộng dễ hơn.')">D. Làm giảm khả năng mở rộng dự án</div></div><div class="quiz-explain"></div></div>
-    <div class="quiz-item"><div class="quiz-q">Nếu file output lớn, nên làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng .gitignore để tránh đẩy file không cần thiết.')">A. Thêm vào .gitignore nếu không cần versioning</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên push mọi file lớn lên repo.')">B. Push tất cả lên GitHub</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nén rồi commit vẫn có thể làm repo phình to.')">C. Nén mọi file rồi commit toàn bộ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Xóa bừa file lớn có thể làm mất bằng chứng cần thiết.')">D. Xóa hết file lớn mà không phân loại</div></div><div class="quiz-explain"></div></div>
-    <div class="quiz-item"><div class="quiz-q">Mục tiêu chính của W0.08?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chuẩn hóa cấu trúc để học dài hạn hiệu quả.')">A. Chuẩn hóa cấu trúc dự án cho 28 tuần học</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải module về dashboard BI.')">B. Học visualization dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. W0.08 tập trung tổ chức project, không phải tối ưu hạ tầng cloud.')">C. Tối ưu chi phí cloud production</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Mục tiêu là tăng tính hệ thống, không phải giảm tài liệu hóa.')">D. Loại bỏ hoàn toàn README và docs</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Nếu file output lớn (ví dụ parquet 5GB), nên làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng .gitignore và quản lý artefact có chủ đích để tránh repo phình to.')">A. Thêm vào .gitignore và chỉ lưu artefact thật sự cần review</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Push file lớn không kiểm soát sẽ làm clone/pull chậm và repo khó bảo trì.')">B. Push tất cả lên GitHub</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nén rồi commit vẫn có thể làm lịch sử repo nặng.')">C. Nén mọi file rồi commit toàn bộ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Xóa bừa file lớn có thể làm mất bằng chứng cần thiết.')">D. Xóa hết file lớn mà không phân loại</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Mục tiêu chính của W0.08?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chuẩn hóa cấu trúc và thêm nền Java/PySpark để học dài hạn hiệu quả.')">A. Chuẩn hóa cấu trúc dự án + có Java/PySpark smoke test</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải module về dashboard BI.')">B. Học visualization dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. W0.08 tập trung tổ chức project và nền Spark local, chưa phải tối ưu cloud.')">C. Tối ưu chi phí cloud production</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Mục tiêu là tăng tính hệ thống, không phải giảm tài liệu hóa.')">D. Loại bỏ hoàn toàn README và docs</div></div><div class="quiz-explain"></div></div>
   </div></div>
-  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Chuẩn tổ chức</strong>Chia theo tuần và theo loại artefact</div><div class="summary-item"><strong>Quản trị rủi ro</strong>Giảm thất lạc file và nhầm lẫn script</div><div class="summary-item"><strong>Khả năng mở rộng</strong>Dễ thêm module mới mà không rối</div><div class="summary-item"><strong>Output</strong>Repo có cấu trúc tuần 0 rõ ràng</div></div></div></div>
-  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Chuẩn hóa cấu trúc repo tuần 0</div><div class="practice-task-body"><p>Tạo đủ thư mục postgres/oracle/python/docker/artifacts cho week00 và di chuyển file đúng vị trí.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem checklist chuẩn hóa</button><div class="solution-box"><ul><li>week00/sql/postgres/ có script test</li><li>week00/sql/oracle/ có script tương đương</li><li>week00/python/ có verify script</li><li>week00/artifacts/ có ảnh hoặc log chứng minh</li></ul></div></div></div></div></div>
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Chuẩn tổ chức</strong>Chia theo tuần và theo loại artefact</div><div class="summary-item"><strong>Quản trị rủi ro</strong>Giảm thất lạc file và nhầm lẫn script</div><div class="summary-item"><strong>Big data foundation</strong>Có Java/PySpark smoke test trước khi vào Spark module</div><div class="summary-item"><strong>Output</strong>Repo có cấu trúc rõ + log Spark smoke test</div></div></div></div>
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Chuẩn hóa cấu trúc repo + Spark foundation</div><div class="practice-task-body"><p>Tạo đủ thư mục postgres/oracle/python/docker/config/data/artifacts cho week00, rồi chạy PySpark smoke test và lưu bằng chứng.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem checklist chuẩn hóa</button><div class="solution-box"><ul><li>week00/sql/postgres/ có script test</li><li>week00/sql/oracle/ có script tương đương</li><li>week00/python/ có verify script và <code>spark_smoke_test.py</code></li><li>week00/config/.env có biến local (không commit)</li><li>week00/data/ có trong .gitignore</li><li>week00/artifacts/ có log hoặc ảnh kết quả spark/sql</li></ul></div></div></div></div></div>
   <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">Quay lại W0.07</button><button class="nav-btn primary" onclick="goNext(7)">Sang W0.09</button></div>
 </div>
 
 <div class="module" id="m8">
   <div class="module-header"><div class="module-tag">Tuần 0 · W0.09</div><div class="module-title">Checklist Sẵn Sàng Trước Week01</div><div class="module-subtitle">Xác minh toàn bộ công cụ, workflow và đầu ra trước khi bắt đầu SQL nâng cao</div><div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div></div>
-  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Nhóm kiểm tra</th><th>Tiêu chí pass</th></tr><tr><td>Editor + Python</td><td>VS Code nhận đúng .venv, chạy script không lỗi</td></tr><tr><td>Database</td><td>PostgreSQL query được, Oracle SQL có kết nối test</td></tr><tr><td>Docker</td><td>Container DB chạy ổn, logs sạch</td></tr><tr><td>GitHub</td><td>Repo có commit tuần 0 rõ ràng</td></tr></table></div></div>
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Nhóm kiểm tra</th><th>Tiêu chí pass</th></tr><tr><td>Editor + Python</td><td>VS Code nhận đúng .venv, chạy script không lỗi</td></tr><tr><td>Database</td><td>PostgreSQL query được, Oracle SQL có kết nối test</td></tr><tr><td>Docker</td><td>Container DB chạy ổn, logs sạch</td></tr><tr><td>Big data foundation</td><td>Java + PySpark smoke test pass</td></tr><tr><td>GitHub</td><td>Repo có commit tuần 0 rõ ràng và không lộ file nhạy cảm</td></tr></table></div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Đảm bảo bạn thực sự sẵn sàng vào Week01, không chỉ "có vẻ" sẵn sàng.</li><li>Tổng hợp bằng chứng kỹ thuật để tự đánh giá khách quan.</li><li>Tạo thói quen pre-flight check trước mỗi giai đoạn lớn.</li></ul></div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
     <h3>Checklist pass trước Week01</h3>
@@ -711,7 +795,9 @@ week00/sql/oracle/02_validate_row_count.sql</pre></div></div></div>
       <li class="done">Docker compose chạy PostgreSQL ổn định</li>
       <li class="done">Query PostgreSQL: <code>SELECT version();</code></li>
       <li class="done">Query Oracle SQL test thành công</li>
+      <li class="done">Java version và PySpark smoke test pass</li>
       <li class="done">Repo GitHub có commit setup rõ ràng</li>
+      <li class="done">.gitignore đã chặn <code>data/</code>, <code>.env</code>, <code>*.parquet</code>, <code>*.csv</code></li>
       <li class="done">Đã làm quiz các module và đọc feedback</li>
     </ul>
 
@@ -722,13 +808,16 @@ week00/sql/oracle/02_validate_row_count.sql</pre></div></div></div>
     "docker_postgres_running",
     "postgres_query_ok",
     "oracle_query_ok",
-    "git_remote_ok"
+    "java_runtime_ok",
+    "pyspark_smoke_ok",
+    "git_remote_ok",
+    "gitignore_data_secret_ok"
 ]
 for c in checks:
     print(f"[PASS] {c}")</pre></div></div>
     <div class="info-box note">Không cần script phức tạp. Quan trọng là kiểm tra đúng thứ và có bằng chứng pass.</div>
     <h3>Ma trận xử lý khi checklist FAIL</h3>
-    <table><tr><th>FAIL ở đâu</th><th>Hành động ngay</th><th>Bằng chứng pass lại</th></tr><tr><td>Python/venv</td><td>Tạo lại .venv và cài lại requirements</td><td>Script verify import chạy OK</td></tr><tr><td>PostgreSQL</td><td>Kiểm tra container + credential + port</td><td>Query <code>SELECT version();</code> trả kết quả</td></tr><tr><td>Oracle SQL</td><td>Kiểm tra kết nối và cú pháp dual/FETCH</td><td>Query test chạy không lỗi</td></tr><tr><td>GitHub push</td><td>Kiểm tra SSH key và remote URL</td><td>Commit mới xuất hiện trên remote</td></tr></table>
+    <table><tr><th>FAIL ở đâu</th><th>Hành động ngay</th><th>Bằng chứng pass lại</th></tr><tr><td>Python/venv</td><td>Tạo lại .venv và cài lại requirements</td><td>Script verify import chạy OK</td></tr><tr><td>PostgreSQL</td><td>Kiểm tra container + credential + port</td><td>Query <code>SELECT version();</code> trả kết quả</td></tr><tr><td>Oracle SQL</td><td>Kiểm tra kết nối và cú pháp dual/FETCH</td><td>Query test chạy không lỗi</td></tr><tr><td>Java/PySpark</td><td>Kiểm tra <code>JAVA_HOME</code> và cài lại <code>pyspark</code> trong .venv</td><td><code>spark.sql("SELECT 1")</code> chạy thành công</td></tr><tr><td>GitHub push</td><td>Kiểm tra SSH key và remote URL</td><td>Commit mới xuất hiện trên remote</td></tr></table>
   </div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
     <div class="quiz-item"><div class="quiz-q">Điều kiện nào cho thấy Python sẵn sàng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Python chạy từ .venv và import package thành công.')">A. Interpreter đúng .venv và chạy script thành công</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ cài Python chưa đủ xác minh.')">B. Chỉ thấy Python trong Add/Remove Programs</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ mở được terminal chưa chứng minh môi trường Python ổn định.')">C. Terminal mở được nhưng chưa chạy script</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ cài extension Python chưa đủ readiness.')">D. Chỉ cài extension Python trong VS Code</div></div><div class="quiz-explain"></div></div>
@@ -743,7 +832,7 @@ for c in checks:
     <div class="quiz-item"><div class="quiz-q">Mục tiêu cuối W0.09 là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đạt readiness checklist đầy đủ để vào Week01 tự tin.')">A. Đạt readiness checklist trước khi sang Week01</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải module viết dashboard.')">B. Xây dashboard KPI</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải mục tiêu tuning hiệu năng production trong tuần 0.')">C. Tối ưu toàn bộ pipeline production</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ tập trung lý thuyết mà bỏ thực hành trái mục tiêu module.')">D. Chỉ học lý thuyết setup</div></div><div class="quiz-explain"></div></div>
   </div></div>
   <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Trọng tâm</strong>Readiness dựa trên kiểm chứng thực tế</div><div class="summary-item"><strong>Bằng chứng</strong>Script pass + commit + query thành công</div><div class="summary-item"><strong>Kỷ luật học</strong>Không pass checklist thì chưa qua tuần</div><div class="summary-item"><strong>Output</strong>Bạn sẵn sàng học SQL nâng cao ở Week01</div></div></div></div>
-  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Tự chấm readiness theo thang PASS/FAIL</div><div class="practice-task-body"><p>Tạo bảng 6 tiêu chí (Python, VS Code, Docker, PostgreSQL, Oracle SQL, GitHub). Mỗi tiêu chí ghi rõ PASS/FAIL và bằng chứng.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem mẫu bảng chấm</button><div class="solution-box"><table><tr><th>Tiêu chí</th><th>Trạng thái</th><th>Bằng chứng</th></tr><tr><td>PostgreSQL query</td><td>PASS</td><td>SELECT version() trả kết quả</td></tr><tr><td>Git push</td><td>PASS</td><td>Commit xuất hiện trên remote</td></tr></table></div></div></div></div></div>
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Tự chấm readiness theo thang PASS/FAIL</div><div class="practice-task-body"><p>Tạo bảng 8 tiêu chí (Python, VS Code, Docker, PostgreSQL, Oracle SQL, Java/PySpark, GitHub, Git hygiene). Mỗi tiêu chí ghi rõ PASS/FAIL và bằng chứng.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem mẫu bảng chấm</button><div class="solution-box"><table><tr><th>Tiêu chí</th><th>Trạng thái</th><th>Bằng chứng</th></tr><tr><td>PostgreSQL query</td><td>PASS</td><td>SELECT version() trả kết quả</td></tr><tr><td>PySpark smoke</td><td>PASS</td><td>SELECT 1 hiển thị trong Spark</td></tr><tr><td>Git push</td><td>PASS</td><td>Commit xuất hiện trên remote</td></tr><tr><td>Git hygiene</td><td>PASS</td><td>.env và data/ không xuất hiện trong git status</td></tr></table></div></div></div></div></div>
   <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(8)">Quay lại W0.08</button><button class="nav-btn primary" onclick="goNext(8)">Sang W0.10</button></div>
 </div>
 
@@ -773,16 +862,16 @@ for c in checks:
       <div class="test-question" data-q="4" data-correct="D"><div class="test-question-title">Q4. virtualenv dùng để?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> Tăng tốc CPU</label><label class="test-option"><input type="radio" name="q4" value="B"> Cài Docker</label><label class="test-option"><input type="radio" name="q4" value="C"> Lưu dữ liệu DB</label><label class="test-option"><input type="radio" name="q4" value="D"> Cô lập package theo project</label></div></div>
       <div class="test-question" data-q="5" data-correct="A"><div class="test-question-title">Q5. Oracle SQL thường dùng bảng nào để select hằng số?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> dual</label><label class="test-option"><input type="radio" name="q5" value="B"> temp</label><label class="test-option"><input type="radio" name="q5" value="C"> meta</label><label class="test-option"><input type="radio" name="q5" value="D"> sys</label></div></div>
       <div class="test-question" data-q="6" data-correct="B"><div class="test-question-title">Q6. Lệnh chạy service Docker nền từ compose?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> docker start</label><label class="test-option"><input type="radio" name="q6" value="B"> docker compose up -d</label><label class="test-option"><input type="radio" name="q6" value="C"> docker boot</label><label class="test-option"><input type="radio" name="q6" value="D"> docker run all</label></div></div>
-      <div class="test-question" data-q="7" data-correct="C"><div class="test-question-title">Q7. Cấu trúc project tốt nên có gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> Một thư mục duy nhất</label><label class="test-option"><input type="radio" name="q7" value="B"> Không phân chia loại file</label><label class="test-option"><input type="radio" name="q7" value="C"> Phân tách sql/python/docker/artifacts</label><label class="test-option"><input type="radio" name="q7" value="D"> Chỉ lưu notebook</label></div></div>
+      <div class="test-question" data-q="7" data-correct="C"><div class="test-question-title">Q7. Cấu trúc project tốt nên có gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> Một thư mục duy nhất</label><label class="test-option"><input type="radio" name="q7" value="B"> Không phân chia loại file</label><label class="test-option"><input type="radio" name="q7" value="C"> Phân tách sql/python/docker/config/data/artifacts</label><label class="test-option"><input type="radio" name="q7" value="D"> Chỉ lưu notebook</label></div></div>
       <div class="test-question" data-q="8" data-correct="D"><div class="test-question-title">Q8. Lệnh thời gian hiện tại trong Oracle SQL?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> SELECT NOW();</label><label class="test-option"><input type="radio" name="q8" value="B"> SELECT CURRENT_DATE;</label><label class="test-option"><input type="radio" name="q8" value="C"> SELECT GETDATE();</label><label class="test-option"><input type="radio" name="q8" value="D"> SELECT SYSTIMESTAMP FROM dual;</label></div></div>
       <div class="test-question" data-q="9" data-correct="A"><div class="test-question-title">Q9. Lệnh xem log container?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> docker logs &lt;container&gt;</label><label class="test-option"><input type="radio" name="q9" value="B"> docker history live</label><label class="test-option"><input type="radio" name="q9" value="C"> docker print</label><label class="test-option"><input type="radio" name="q9" value="D"> docker open</label></div></div>
       <div class="test-question" data-q="10" data-correct="B"><div class="test-question-title">Q10. Bằng chứng pass tuần 0 nên gồm?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> Chỉ screenshot VS Code</label><label class="test-option"><input type="radio" name="q10" value="B"> Query DB + script verify + commit repo</label><label class="test-option"><input type="radio" name="q10" value="C"> Chỉ cài Docker</label><label class="test-option"><input type="radio" name="q10" value="D"> Chỉ đọc docs</label></div></div>
       <div class="test-question" data-q="11" data-correct="C"><div class="test-question-title">Q11. Khi gặp lỗi Permission denied (publickey), cần kiểm tra?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> PostgreSQL port</label><label class="test-option"><input type="radio" name="q11" value="B"> Python version</label><label class="test-option"><input type="radio" name="q11" value="C"> SSH key và remote URL</label><label class="test-option"><input type="radio" name="q11" value="D"> RAM máy</label></div></div>
       <div class="test-question" data-q="12" data-correct="A"><div class="test-question-title">Q12. Extension nào hỗ trợ truy vấn SQL trong VS Code?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> SQLTools</label><label class="test-option"><input type="radio" name="q12" value="B"> Paint</label><label class="test-option"><input type="radio" name="q12" value="C"> Live Share</label><label class="test-option"><input type="radio" name="q12" value="D"> Emmet</label></div></div>
       <div class="test-question" data-q="13" data-correct="D"><div class="test-question-title">Q13. Cú pháp giới hạn dòng trong Oracle SQL hiện đại?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> TOP 10</label><label class="test-option"><input type="radio" name="q13" value="B"> LIMIT 10</label><label class="test-option"><input type="radio" name="q13" value="C"> TAKE 10</label><label class="test-option"><input type="radio" name="q13" value="D"> FETCH FIRST 10 ROWS ONLY</label></div></div>
-      <div class="test-question" data-q="14" data-correct="B"><div class="test-question-title">Q14. File nào giúp bỏ qua file không cần commit?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> .dockerignore</label><label class="test-option"><input type="radio" name="q14" value="B"> .gitignore</label><label class="test-option"><input type="radio" name="q14" value="C"> ignore.txt</label><label class="test-option"><input type="radio" name="q14" value="D"> settings.json</label></div></div>
+      <div class="test-question" data-q="14" data-correct="B"><div class="test-question-title">Q14. Nếu lỡ commit file parquet 5GB, rủi ro chính là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> Repo sẽ tự tối ưu và nhẹ hơn</label><label class="test-option"><input type="radio" name="q14" value="B"> Repo phình to, clone/pull chậm và khó review</label><label class="test-option"><input type="radio" name="q14" value="C"> GitHub tự động bỏ file khỏi lịch sử</label><label class="test-option"><input type="radio" name="q14" value="D"> Không ảnh hưởng vì là file dữ liệu</label></div></div>
       <div class="test-question" data-q="15" data-correct="C"><div class="test-question-title">Q15. Lệnh tạo môi trường ảo chuẩn?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> pip venv create</label><label class="test-option"><input type="radio" name="q15" value="B"> python create venv</label><label class="test-option"><input type="radio" name="q15" value="C"> python -m venv .venv</label><label class="test-option"><input type="radio" name="q15" value="D"> venv init</label></div></div>
-      <div class="test-question" data-q="16" data-correct="A"><div class="test-question-title">Q16. Dấu hiệu nên xem docker logs?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> Container thoát ngay sau khi chạy</label><label class="test-option"><input type="radio" name="q16" value="B"> VS Code mở chậm</label><label class="test-option"><input type="radio" name="q16" value="C"> Git commit thành công</label><label class="test-option"><input type="radio" name="q16" value="D"> Query trả kết quả đúng</label></div></div>
+      <div class="test-question" data-q="16" data-correct="A"><div class="test-question-title">Q16. Trên Windows, điều nào quan trọng để Docker ổn định khi học DE?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> Dùng backend WSL2 và cấu hình tài nguyên phù hợp</label><label class="test-option"><input type="radio" name="q16" value="B"> Chỉ tăng font chữ terminal</label><label class="test-option"><input type="radio" name="q16" value="C"> Bỏ qua WSL2 vì PowerShell là đủ</label><label class="test-option"><input type="radio" name="q16" value="D"> Chạy nhiều container nhất có thể ngay từ đầu</label></div></div>
       <div class="test-question" data-q="17" data-correct="D"><div class="test-question-title">Q17. Lợi ích của commit đều đặn trong lộ trình học?</div><div class="test-options"><label class="test-option"><input type="radio" name="q17" value="A"> Làm máy chạy nhanh hơn</label><label class="test-option"><input type="radio" name="q17" value="B"> Không cần tài liệu nữa</label><label class="test-option"><input type="radio" name="q17" value="C"> Tự động pass phỏng vấn</label><label class="test-option"><input type="radio" name="q17" value="D"> Tạo timeline tiến bộ rõ ràng</label></div></div>
       <div class="test-question" data-q="18" data-correct="B"><div class="test-question-title">Q18. Nếu điểm mini test thấp, bước đúng là?</div><div class="test-options"><label class="test-option"><input type="radio" name="q18" value="A"> Bỏ qua và học tiếp</label><label class="test-option"><input type="radio" name="q18" value="B"> Ôn lại module yếu và làm lại test</label><label class="test-option"><input type="radio" name="q18" value="C"> Đổi editor</label><label class="test-option"><input type="radio" name="q18" value="D"> Xóa repo</label></div></div>
       <div class="test-question" data-q="19" data-correct="A"><div class="test-question-title">Q19. Cú pháp lấy thời gian hiện tại PostgreSQL?</div><div class="test-options"><label class="test-option"><input type="radio" name="q19" value="A"> SELECT NOW();</label><label class="test-option"><input type="radio" name="q19" value="B"> SELECT SYSTIMESTAMP FROM dual;</label><label class="test-option"><input type="radio" name="q19" value="C"> SELECT GETDATE();</label><label class="test-option"><input type="radio" name="q19" value="D"> SELECT DATETIME();</label></div></div>

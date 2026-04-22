@@ -1,0 +1,460 @@
+1.Dùng phần này ở đầu mọi prompt cho Week14.
+
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: D:\TaiLieu\Data Engineer\DE Roadmap\DE-Learning\data-engineer-handbook ( được clone từ https://github.com/DataExpert-io/data-engineer-handbook)
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+- Khi có so sánh SQL engine hoặc syntax khác nhau, ưu tiên trình bày rõ trade-off và dùng tab UI nếu phù hợp
+
+=======================================================
+2.Dùng cho Claude Extension hoặc Claude Code khi tạo / nâng cấp mạnh file Week14.
+
+Use project rules from .claude.
+
+Current task:
+Create a complete standalone HTML tutorial file:
+./Week14_Data_Warehouse.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+Tuần 14 – Modern Data Warehouse & Lakehouse
+
+Allowed sources only:
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+CONTEXT FOR WEEK 14:
+This week belongs to Giai đoạn 3 – Cloud + Big Data.
+Roadmap scope includes:
+- Snowflake hoặc BigQuery: virtual warehouse, query history, cost control
+- Columnar storage: tại sao nhanh hơn row-based cho analytics
+- Clustering, partitioning, materialized views
+- Apache Iceberg: table format, time travel, schema evolution, ACID
+- Data Lakehouse: kết hợp DWH + Data Lake
+- So sánh: Snowflake vs BigQuery vs Databricks vs Redshift
+- Artifact expectations:
+  - migrate dbt project from PostgreSQL to Snowflake/BigQuery
+  - demo time travel with Apache Iceberg
+  - cost comparison report for 3 warehouses under same workload
+
+CORE OBJECTIVE:
+Teach Week14 as a true Data Engineering learning product, not as vendor marketing.
+The learner must understand:
+- why modern warehouses became dominant
+- how columnar analytics differs from OLTP systems
+- how cost/performance trade-offs work
+- where Iceberg and Lakehouse fit
+- how to reason between warehouse options in real teams
+- how to create a portfolio-ready artifact
+
+MANDATORY MODULES:
+- W14.01 – Tổng Quan: Modern Data Warehouse là gì?
+- W14.02 – Columnar Storage, Compute Separation & Query Performance
+- W14.03 – Snowflake / BigQuery Core Concepts
+- W14.04 – Partitioning, Clustering, Materialized Views & Cost Control
+- W14.05 – Apache Iceberg: Table Format, ACID, Time Travel
+- W14.06 – Lakehouse Thinking: Data Lake + Warehouse kết hợp như thế nào
+- W14.07 – So Sánh Snowflake vs BigQuery vs Databricks vs Redshift
+- W14.08 – Artifact: warehouse_lab/ hoàn chỉnh
+- W14.09 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER WELL:
+
+W14.01
+- evolution from traditional warehouse to modern cloud warehouse
+- OLTP vs OLAP mindset
+- why DE teams moved from self-managed warehouse to managed/cloud warehouse
+- query history, workload isolation, elasticity
+- role of warehouse in the modern DE stack
+
+W14.02
+- columnar vs row-based storage
+- why analytics queries benefit from columnar format
+- separation of storage and compute
+- vectorized execution basics
+- scan reduction, pruning, parallelism
+- why this matters for BI / ad-hoc analytics / dbt workloads
+
+W14.03
+- Snowflake basics
+- BigQuery basics
+- warehouse / dataset / schema mental model
+- virtual warehouse / slots / serverless query concepts
+- query history / auditability / warehouse usage visibility
+- DE use cases, not product marketing
+
+W14.04
+- partitioning
+- clustering
+- pruning
+- materialized views
+- cost guardrails
+- bytes scanned mindset
+- query history analysis
+- anti-patterns like over-partitioning or selecting too many columns
+- practical cost control for analytics teams
+
+W14.05
+- Apache Iceberg fundamentals
+- table format vs storage layer
+- schema evolution
+- time travel
+- snapshots / manifests
+- ACID-style table operations
+- why Iceberg matters in lakehouse architecture
+- realistic explanation, beginner-friendly but not shallow
+
+W14.06
+- what lakehouse means
+- how raw/staging/curated layers interact with warehouse/lakehouse tools
+- when not to put everything into the warehouse
+- warehouse + object storage coexistence
+- DE design trade-offs
+- governance / portability / open table format thinking
+
+W14.07
+- Snowflake vs BigQuery vs Databricks vs Redshift
+- ease of use
+- cost control style
+- workload fit
+- ecosystem fit
+- ops burden
+- vendor lock-in considerations
+- team maturity considerations
+- decision matrix with realistic recommendations
+
+W14.08
+- complete artifact:
+  warehouse_lab/
+  ├── dbt_migration/
+  ├── iceberg_demo/
+  ├── sql/
+  ├── cost_report.md
+  ├── architecture.md
+  ├── README.md
+- README should explain architecture, tool choice, cost trade-offs, and learning outcomes
+- include believable code / config / SQL where relevant
+
+W14.09
+- final mini test 15–20 questions
+- scoring + reset logic working
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family design and interaction patterns
+- Hero banner
+- Badge row
+- Fixed sidebar 290px
+- Main content
+- Modules hidden/displayed with active state
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / warn / note info boxes
+- Interactive quizzes
+- Practice section with solution toggle
+- Mini test at final module
+- Responsive mobile
+- All CSS inline in <style>
+- All JS inline in <script>
+- No external framework
+
+JAVASCRIPT FUNCTIONS THAT MUST EXIST:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+CONTENT REQUIREMENTS:
+- Output in Vietnamese
+- Keep English technical terms when natural
+- Must feel like a mentor teaching Data Engineers
+- Practical, production-oriented, portfolio-friendly
+- Explain simply first, then deepen
+- Include trade-offs and anti-patterns
+- Every module must have meaningful practice
+- Every module must have exactly 10 review quiz questions
+- Every quiz question must have 4 options A/B/C/D and explanation
+- Do not use placeholders
+- Do not output shallow vendor overviews
+
+BEFORE WRITING:
+First briefly state:
+1. What Week14 scope you are taking directly from roadmap
+2. What format rules you are inheriting from Week00 / prompt standard
+3. What assumptions you are making where repo coverage is thin
+
+THEN:
+Output the full final content for:
+./Week14_Data_Warehouse.html
+
+
+========================
+3) Prompt review cho Antigravity sau khi build Week14
+
+Use project rules from .claude.
+
+Review ./Week14_Data_Warehouse.html as a senior Data Engineering Architect and learning-product reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- warehouse/lakehouse accuracy
+- teaching quality
+- production realism
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week14 teaches warehouse thinking for Data Engineers, not generic cloud product overview.
+Check relevance of:
+- OLTP vs OLAP
+- columnar storage
+- compute/storage separation
+- dbt workload mindset
+- cost/performance reasoning
+- partitioning/clustering/materialized views
+- warehouse operations
+- time travel and schema evolution
+- lakehouse architecture
+- decision framework across vendors
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- cost control mindset
+- bytes scanned / query history / warehouse usage visibility
+- over-partitioning risks
+- clustering misuse
+- materialized view trade-offs
+- schema evolution pain points
+- open table format benefits
+- governance / portability / lock-in concerns
+- when not to move everything into a warehouse
+- realistic DE use cases
+
+D. ARCHITECTURE / TOOL DECISIONS
+Review whether comparisons are strong enough:
+- Snowflake vs BigQuery
+- Databricks vs warehouse-first platforms
+- Redshift position in the comparison
+- Iceberg role in modern data stack
+- Lakehouse vs classic warehouse boundaries
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W14.08 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- warehouse sizing / compute isolation
+- query history for debugging cost spikes
+- result cache / metadata cache / pruning concepts
+- Iceberg snapshots / time travel examples
+- warehouse vs lakehouse decision boundaries
+- lock-in vs open formats
+- dbt migration considerations
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week14 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+
+====================================
+4) Prompt patch cho Claude Code sau khi nhận review Week14
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week14_Data_Warehouse.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week14 becomes a high-value, portfolio-grade Modern Data Warehouse tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week14_Data_Warehouse.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- technical depth
+- production realism
+- warehouse/lakehouse decision quality
+- teaching clarity
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+[PASTE ANTIGRAVITY REVIEW HERE]
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade examples where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen OLTP vs OLAP explanation
+- make columnar storage explanation clearer and more DE-relevant
+- strengthen compute/storage separation and workload isolation
+- improve cost control discussion with realistic examples
+- improve partitioning/clustering/materialized view trade-offs
+- strengthen Iceberg explanation: schema evolution, time travel, snapshots, ACID table behavior
+- make Lakehouse explanation less buzzwordy and more decision-oriented
+- improve vendor comparison depth: Snowflake vs BigQuery vs Databricks vs Redshift
+- strengthen W14.08 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week14_Data_Warehouse.html
+
+
+=================================
+5) Prompt final review ngắn cho Antigravity
+Dùng sau khi Claude patch xong.
+
+Review the patched ./Week14_Data_Warehouse.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+
+=================================
+6) Prompt QA cuối cho Claude Code
+
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week14_Data_Warehouse.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week14_Data_Warehouse.html only.
+

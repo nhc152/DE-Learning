@@ -1,0 +1,591 @@
+Đúng rồi — lúc nãy mình mới viết **1 prompt build**, chưa phải **full bộ prompt theo từng step**.
+
+Với workflow của bạn, cho **Week01_SQL_Advanced.html** nên có đủ bộ này:
+
+1. **Prompt build ban đầu cho Claude**
+2. **Prompt review cho Antigravity**
+3. **Prompt patch cho Claude Code sau review**
+4. **Prompt final review ngắn cho Antigravity**
+5. **Prompt QA cuối cho Claude Code**
+
+Week01 trong roadmap tập trung vào SQL nâng cao cho DE: window functions, GROUPING SETS / ROLLUP / CUBE, SCD, incremental load, optimization. 
+Format chuẩn cũng phải giữ hero, sidebar, 6 section/module, interactive quiz, practice, mini test theo master prompt. 
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+- SQL policy:
+  - Khi phù hợp phải hỗ trợ cả PostgreSQL và Oracle SQL
+  - Nếu khác cú pháp, hiển thị cả 2 version
+  - Dùng tab buttons:
+    [PostgreSQL] [Oracle SQL]
+  - Không dùng plain heading text để so sánh syntax
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week01_SQL_Advanced.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 1 – SQL Nâng Cao cho Data Engineer
+
+Allowed sources only:
+- ./Week01_SQL_Advanced.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 01 CORE MISSION:
+This file must teach SQL at Data Engineer level, not beginner SQL.
+
+The learner should understand:
+- SQL để build pipeline, không chỉ query report
+- Window functions dùng cho analytics thật
+- SCD Type 1/2/3 cho lịch sử dữ liệu
+- Incremental load & idempotency
+- Query optimization & EXPLAIN
+- Production mindset với large tables
+- Portfolio artifact đủ mạnh để apply job
+
+MANDATORY MODULES:
+- W1.01 – Tổng Quan Tuần & SQL của Data Engineer khác gì?
+- W1.02 – Window Functions Nâng Cao
+- W1.03 – GROUPING SETS, ROLLUP, CUBE
+- W1.04 – Slowly Changing Dimensions (SCD)
+- W1.05 – Incremental Load Patterns
+- W1.06 – Query Optimization & EXPLAIN
+- W1.07 – Artifact: week1_sql_advanced.sql
+- W1.08 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W1.01
+- Analyst SQL vs Data Engineer SQL
+- pipeline mindset
+- historical tracking
+- deduplication
+- incremental processing
+- performance tuning
+- why SQL still matters even with Spark/dbt/cloud tools
+- comparison table: Analyst vs Engineer mindset
+
+W1.02
+- OVER clause
+- PARTITION BY / ORDER BY / frame clause
+- ROW_NUMBER / RANK / DENSE_RANK / NTILE
+- LAG / LEAD
+- SUM OVER / AVG OVER / COUNT OVER
+- ROWS BETWEEN / RANGE BETWEEN / UNBOUNDED PRECEDING
+- running total
+- moving average 7 ngày
+- top N per group
+- compare previous period
+- retention ranking
+- streak analysis
+- dedup latest row per key
+- explain when to use each function
+- use PostgreSQL + Oracle SQL tabs when syntax differs
+
+W1.03
+- many GROUP BY + UNION ALL problem
+- GROUPING SETS
+- ROLLUP
+- CUBE
+- GROUPING() function
+- real reporting examples
+- compare UNION ALL vs GROUPING SETS
+- explain power vs extra result rows trade-off
+
+W1.04
+- why dimensions change
+- why analytics needs history
+- SCD Type 1 / 2 / 3
+- effective_from / effective_to / is_current
+- surrogate key vs natural key
+- realistic SQL examples
+- validation queries
+- anti-patterns:
+  - overlapping date ranges
+  - multiple current rows
+  - missing change detection
+- show PostgreSQL and Oracle SQL variants if syntax differs
+
+W1.05
+- Full load vs Incremental
+- why full load fails at scale
+- watermark columns
+- timestamp incremental
+- partition-based load
+- CDC-based load
+- UPSERT / MERGE
+- INSERT-only append
+- idempotency
+- safe re-run
+- backfill vs daily incremental
+- late arriving data
+- duplicate prevention
+- checkpoint storage concept
+- realistic SQL examples
+- PostgreSQL + Oracle tabs where useful
+
+W1.06
+- why queries get slow
+- scan cost mindset
+- EXPLAIN / EXPLAIN ANALYZE
+- Seq Scan / Index Scan / Bitmap Index Scan
+- Nested Loop / Hash Join / Merge Join
+- Sort / Aggregate
+- actual time / rows / loops
+- common performance problems:
+  - SELECT *
+  - missing indexes
+  - function on indexed column
+  - implicit cast
+  - bad join order
+  - OR misuse
+  - too many subqueries
+- index strategies:
+  - B-tree
+  - Composite index
+  - Partial index
+  - Expression index
+- partition pruning
+- before/after optimization examples
+- explain simple first, then deeper
+
+W1.07
+- build a realistic portfolio artifact:
+  week1_sql_advanced.sql
+- include 10+ sections with comments:
+  01_running_total.sql
+  02_rank_in_category.sql
+  03_lag_lead_compare.sql
+  04_retention_percentile.sql
+  05_streak_analysis.sql
+  06_grouping_sets.sql
+  07_rollup_sales.sql
+  08_scd_type1.sql
+  09_scd_type2.sql
+  10_incremental_load.sql
+  11_explain_optimize.sql
+- include README guidance:
+  - objective
+  - datasets
+  - what each query teaches
+  - lessons learned
+- must feel portfolio-ready
+
+W1.08
+- final mini test: 20 questions
+- cover:
+  - Window functions
+  - Grouping sets
+  - SCD
+  - Incremental load
+  - Optimization
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- realistic dataset scenarios
+- SQL writing tasks
+- debugging tasks
+- optimization tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- generic theory dumps
+- shallow examples
+- filler text
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week01 scope you are using from roadmap
+2. Which format rules you inherit from Week00
+3. Which SQL comparisons need PostgreSQL + Oracle tabs
+
+Then output the full final content for:
+./Week01_SQL_Advanced.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text
+Use project rules from .claude.
+
+Review ./Week01_SQL_Advanced.html as a senior Data Engineering SQL reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- teaching quality
+- SQL correctness
+- production realism
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week01 teaches SQL for Data Engineers, not generic SQL learners.
+Check relevance of:
+- historical tracking
+- deduplication
+- incremental load
+- idempotency
+- performance mindset
+- SCD
+- optimization on large tables
+- realistic reporting/warehouse use cases
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- dedup latest row per key
+- latest-record pattern
+- SCD validation
+- overlapping date range risks
+- backfill vs incremental differences
+- rerun/idempotency mindset
+- late arriving data
+- checkpoint/watermark thinking
+- scan cost mindset
+- explain plan interpretation
+- index trade-offs
+- partition pruning concept
+
+D. SQL ACCURACY
+Review whether explanations and code are strong enough for:
+- window functions
+- frame clauses
+- ranking functions
+- GROUPING SETS / ROLLUP / CUBE
+- SCD Type 1/2/3
+- incremental patterns
+- EXPLAIN / EXPLAIN ANALYZE
+- PostgreSQL vs Oracle SQL syntax separation
+- use of tabs when syntax differs
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W1.07 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- latest row dedup with ROW_NUMBER
+- gap-and-island / streak logic
+- MERGE vs UPSERT nuance
+- validation queries after SCD2 load
+- explain plan misreading
+- index misuse
+- function-on-column anti-pattern
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week01 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week01_SQL_Advanced.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week01 becomes a high-value, portfolio-grade SQL tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week01_SQL_Advanced.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- SQL technical depth
+- Data Engineering realism
+- teaching clarity
+- production mindset
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+[PASTE ANTIGRAVITY REVIEW HERE]
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Preserve or improve PostgreSQL / Oracle tab handling
+8. Upgrade examples where needed
+9. Avoid duplication
+10. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen Analyst SQL vs DE SQL framing
+- improve dedup latest-row examples with ROW_NUMBER
+- improve moving average / frame clause explanation
+- improve GROUPING SETS vs UNION ALL comparison
+- strengthen SCD Type 2 validation queries
+- improve incremental + idempotency realism
+- improve late arriving data explanation
+- improve EXPLAIN interpretation and optimization trade-offs
+- strengthen W1.07 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week01_SQL_Advanced.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text
+Review the patched ./Week01_SQL_Advanced.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week01_SQL_Advanced.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- PostgreSQL / Oracle SQL tabs still work correctly
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week01_SQL_Advanced.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week01
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo để Week01 ra đúng chất hơn
+
+Với Week01, bạn nên thêm 1 dòng nhắc nữa vào prompt build hoặc patch:
+
+```text
+Do not turn Week01 into a generic SQL learning page.
+Teach SQL as a tool for historical modeling, incremental data processing, and production-grade Data Engineering work.
+```
+
+Dòng này rất hữu ích vì nó kéo Claude ra khỏi kiểu tutorial SQL phổ thông.
+
+Nếu bạn muốn, mình sẽ viết tiếp luôn **full bộ 5 prompt cho Week02_Python_DE.html** cùng format này.

@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 14 · Modern Data Warehouse & Lakehouse</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 165px); }
+
+  .sidebar {
+    width: 290px;
+    min-width: 290px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--accent2); }
+  .nav-item { display: block; padding: 8px 14px; cursor: pointer; font-size: 0.8rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 64px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 30px 36px; max-width: 1080px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 22px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.38rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+  .section { margin-bottom: 22px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 16px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .sql-tabs { display: flex; gap: 8px; margin: 10px 0 8px; flex-wrap: wrap; }
+  .sql-tab { padding: 7px 12px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+  .sql-tab.active { color: var(--accent); border-color: var(--accent); background: #1f6feb22; font-weight: 600; }
+  .sql-panel { display: none; }
+  .sql-panel.active { display: block; }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 24px; justify-content: space-between; align-items: center; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Data Engineering Handbook Tutorial</h1>
+  <p>Tuần 14 – Modern Data Warehouse &amp; Lakehouse</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 3 · Cloud &amp; Big Data</span>
+    <span class="badge badge-orange">Warehouse + Lakehouse thực chiến</span>
+    <span class="badge badge-blue">Production Mindset cho DE/Analytics Engineer</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">CHƯƠNG TRÌNH HỌC</div>
+    <div class="level-label">TUẦN 14 · MODERN DATA WAREHOUSE</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W14.01</span>Tổng Quan: Từ PostgreSQL sang Modern Data Warehouse</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W14.02</span>Columnar Storage, Partitioning &amp; Clustering</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W14.03</span>Snowflake, BigQuery, Redshift: Khác Nhau Ở Đâu</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W14.04</span>Schema-on-Write vs Schema-on-Read</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W14.05</span>Lakehouse Mindset: Data Lake + Warehouse</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W14.06</span>Apache Iceberg: Table Format, Time Travel, Schema Evolution</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W14.07</span>dbt trên Warehouse: Migration từ PostgreSQL sang Cloud DW</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W14.08</span>Cost Control, Performance Tuning &amp; Query Patterns</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W14.09</span>Artifact: warehouse_migration/ hoàn chỉnh</div>
+    <div class="nav-item" onclick="showModule(9,this)"><span class="nav-number">W14.10</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="m0">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.01</div>
+        <div class="module-title">Tổng Quan: Từ PostgreSQL sang Modern Data Warehouse</div>
+        <div class="module-subtitle">Hiểu rõ vì sao PostgreSQL local không còn đủ khi analytics scale và concurrency tăng mạnh.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:10%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Hạng mục</th><th>Nội dung</th><th>Ý nghĩa</th></tr>
+          <tr><td>Bối cảnh</td><td>PostgreSQL local tốt cho giai đoạn đầu, workload vừa</td><td>Giảm độ phức tạp khi mới bắt đầu</td></tr>
+          <tr><td>Điểm gãy</td><td>Data volume + dashboard concurrency + query nặng</td><td>Tạo bottleneck về latency và vận hành</td></tr>
+          <tr><td>Hướng đi</td><td>Modern Data Warehouse/Lakehouse</td><td>Scale tốt hơn, quản trị tốt hơn, kiểm soát chi phí</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Phân biệt rõ OLTP mindset và OLAP mindset trong Data Engineering.</li>
+          <li>Giải thích được lý do kỹ thuật và vận hành khi chuyển từ PostgreSQL local sang Cloud DW.</li>
+          <li>Nắm checklist đánh giá “đã đến lúc migrate chưa”.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>OLTP vs OLAP: khác nhau ở mục tiêu tối ưu</h3>
+        <table>
+          <tr><th>Tiêu chí</th><th>OLTP (PostgreSQL app DB)</th><th>OLAP (Cloud Warehouse)</th></tr>
+          <tr><td>Đơn vị công việc</td><td>Insert/Update/Delete nhỏ, liên tục</td><td>Scan/Aggregate trên dữ liệu lớn</td></tr>
+          <tr><td>Mẫu truy vấn</td><td>Lookup theo PK, transaction ngắn</td><td>Join nhiều bảng, GROUP BY theo chiều phân tích</td></tr>
+          <tr><td>Độ trễ mục tiêu</td><td>Mili-giây cho user transaction</td><td>Giây cho phân tích, ưu tiên throughput</td></tr>
+          <tr><td>Kiểu scale</td><td>Scale dọc + tuning thủ công</td><td>Scale compute linh hoạt, tách khỏi storage</td></tr>
+          <tr><td>Rủi ro khi dùng sai</td><td>App DB nghẽn khi analyst chạy query nặng</td><td>Chi phí tăng nhanh nếu thiếu governance query</td></tr>
+        </table>
+
+        <h3>Vì sao PostgreSQL local bắt đầu hụt hơi?</h3>
+        <ul>
+          <li><strong>Compute + storage không tách:</strong> query phân tích nặng có thể ảnh hưởng trực tiếp workload transaction.</li>
+          <li><strong>Concurrency hạn chế:</strong> nhiều analyst cùng chạy dashboard khiến queue time và contention tăng rõ.</li>
+          <li><strong>Ops burden cao:</strong> tuning index/vacuum/backfill/replication tiêu tốn effort lặp lại mỗi tuần.</li>
+          <li><strong>Dữ liệu đa định dạng tăng nhanh:</strong> JSON/Parquet/event logs cần kiến trúc linh hoạt hơn row-store truyền thống.</li>
+        </ul>
+        <div class="info-box warn">⚠️ <span>PostgreSQL không “kém”. Nó rất mạnh cho OLTP và data mart nhỏ. Vấn đề là dùng sai workload khi analytics đã vượt ngưỡng scale.</span></div>
+
+        <h3>Checklist nhận diện điểm chuyển pha</h3>
+        <table>
+          <tr><th>Tín hiệu</th><th>Ngưỡng quan sát gợi ý</th><th>Hành động đề xuất</th></tr>
+          <tr><td>Dashboard chậm</td><td>p95 &gt; 20-30 giây trong giờ cao điểm</td><td>Đánh giá chuyển sang columnar warehouse</td></tr>
+          <tr><td>ETL kéo dài</td><td>Trễ SLA buổi sáng &gt; 3 ngày/tuần</td><td>Áp dụng incremental + tách workload compute</td></tr>
+          <tr><td>Incident vận hành tăng</td><td>&gt; 4 incident dữ liệu/tháng</td><td>Chuẩn hóa managed services + observability</td></tr>
+          <tr><td>Concurrency bão hòa</td><td>Queue time tăng mạnh khi nhiều user BI chạy cùng lúc</td><td>Thiết kế lại theo workload isolation</td></tr>
+        </table>
+
+        <div class="sql-tabs" data-group="sql-m0-signals">
+          <button class="sql-tab active" onclick="switchSqlTab(this,'sql-m0-signals','postgres')">PostgreSQL</button>
+          <button class="sql-tab" onclick="switchSqlTab(this,'sql-m0-signals','oracle')">Oracle SQL</button>
+        </div>
+
+        <div class="sql-panel active" data-group="sql-m0-signals" data-tab="postgres"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgres_migration_signal.sql</span></div><div class="cmd-body"><pre>SELECT query, calls, total_exec_time, mean_exec_time
+FROM pg_stat_statements
+ORDER BY total_exec_time DESC
+LIMIT 20;
+
+SELECT now() - stats_reset AS stats_window
+FROM pg_stat_statements_info;</pre></div></div></div>
+
+        <div class="sql-panel" data-group="sql-m0-signals" data-tab="oracle"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle_migration_signal.sql</span></div><div class="cmd-body"><pre>SELECT sql_id,
+       executions,
+       elapsed_time/1000000 AS elapsed_sec,
+       ROUND(elapsed_time/NULLIF(executions,0)/1000,2) AS avg_ms
+FROM v$sql
+ORDER BY elapsed_time DESC
+FETCH FIRST 20 ROWS ONLY;</pre></div></div></div>
+
+        <div class="info-box note">📌 <span>Trong roadmap expert, migration tốt không phải đổi tool cho nhanh, mà là giảm rủi ro vận hành và giữ KPI đúng sau cutover.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-01"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="summary-grid">
+          <div class="summary-item"><strong>Bản chất vấn đề</strong>OLTP engine bị ép chạy OLAP lớn.</div>
+          <div class="summary-item"><strong>Điểm nghẽn chính</strong>Concurrency, chi phí ops, latency.</div>
+          <div class="summary-item"><strong>Khi nên migrate</strong>Khi SLA và vận hành bắt đầu vỡ.</div>
+          <div class="summary-item"><strong>Đích đến</strong>Warehouse/Lakehouse có scale linh hoạt.</div>
+          <div class="summary-item"><strong>Năng lực cần có</strong>Cost control, modeling, dbt migration.</div>
+          <div class="summary-item"><strong>Kết quả mong đợi</strong>Analytics ổn định, ít chữa cháy hơn.</div>
+        </div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task">
+          <div class="practice-task-header">Đánh giá readiness migration</div>
+          <div class="practice-task-body">
+            <p>Bạn có PostgreSQL 1.5TB, 60 dashboard, SLA 8h sáng. Hãy lập bảng 3 nhóm chỉ số: hiệu năng, vận hành, chi phí và đưa quyết định có nên migrate trong quý tới hay chưa.</p>
+            <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+            <div class="solution-box">
+              <ul>
+                <li>Hiệu năng: p95 query latency, queue time, freshness delay.</li>
+                <li>Vận hành: số incident/tháng, thời gian khắc phục, effort tuning.</li>
+                <li>Chi phí: compute + nhân sự ops + cơ hội mất quyết định kinh doanh do trễ dữ liệu.</li>
+              </ul>
+              <p>Ngưỡng gợi ý: p95 &gt; 30 giây + incident &gt; 4/tháng + backlog tối ưu kéo dài &gt; 6 tuần ⇒ nên lập kế hoạch migration.</p>
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <div class="nav-buttons"><div></div><button class="nav-btn primary" onclick="goNext(0)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m1">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.02</div>
+        <div class="module-title">Columnar Storage, Partitioning &amp; Clustering</div>
+        <div class="module-subtitle">Giảm scan bytes, giảm latency và kiểm soát chi phí bằng data layout chuẩn.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Hạng mục</th><th>Nội dung</th><th>Giá trị</th></tr>
+          <tr><td>Columnar</td><td>Lưu theo cột thay vì row</td><td>Tăng tốc aggregate/query analytics</td></tr>
+          <tr><td>Partitioning</td><td>Chia dữ liệu theo key lớn (date, region)</td><td>Pruning để đọc ít dữ liệu hơn</td></tr>
+          <tr><td>Clustering</td><td>Sắp xếp theo key truy vấn thường dùng</td><td>Tăng locality, giảm scan thừa</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Hiểu columnar vs row-based trong bối cảnh analytics production.</li>
+          <li>Biết chọn partition key/clustering key theo query patterns thật.</li>
+          <li>Nắm tư duy partition pruning và materialized view mindset.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Columnar storage: lợi thế thật sự nằm ở I/O và compression</h3>
+        <table>
+          <tr><th>Khía cạnh</th><th>Row-based</th><th>Columnar</th></tr>
+          <tr><td>Cách đọc dữ liệu</td><td>Đọc theo bản ghi đầy đủ</td><td>Đọc theo cột cần thiết</td></tr>
+          <tr><td>Phù hợp</td><td>OLTP transaction</td><td>OLAP aggregate/join lớn</td></tr>
+          <tr><td>Compression</td><td>Trung bình</td><td>Cao nhờ giá trị cùng kiểu nằm liên tiếp</td></tr>
+          <tr><td>Ảnh hưởng cost</td><td>Dễ đọc dư cột</td><td>Giảm scan bytes nếu truy vấn đúng pattern</td></tr>
+        </table>
+
+        <h3>Partitioning: đúng key thì rẻ, sai key thì tốn</h3>
+        <ul>
+          <li><strong>Nguyên tắc chọn:</strong> ưu tiên cột xuất hiện trong WHERE của 60-80% truy vấn business.</li>
+          <li><strong>Mặc định an toàn:</strong> partition theo <code>event_date</code> hoặc <code>order_date</code> ở bảng fact lớn.</li>
+          <li><strong>Tránh over-partition:</strong> partition quá nhỏ theo user_id/order_id gây nổ metadata và small files.</li>
+        </ul>
+
+        <h3>Clustering: tối ưu locality cho join/group phổ biến</h3>
+        <table>
+          <tr><th>Use case</th><th>Clustering key gợi ý</th><th>Lưu ý</th></tr>
+          <tr><td>Dashboard theo quốc gia/nền tảng</td><td><code>country, platform</code></td><td>Hữu ích khi truy vấn lặp lại theo chiều này</td></tr>
+          <tr><td>Join fact với dimension lớn</td><td><code>customer_id</code> hoặc <code>product_id</code></td><td>Theo dõi skew để tránh cụm dữ liệu lệch</td></tr>
+          <tr><td>Truy vấn theo thời gian + domain</td><td><code>event_date, domain</code></td><td>Kết hợp partition theo ngày + cluster theo domain</td></tr>
+        </table>
+
+        <div class="sql-tabs" data-group="sql-m1-pruning">
+          <button class="sql-tab active" onclick="switchSqlTab(this,'sql-m1-pruning','postgres')">PostgreSQL</button>
+          <button class="sql-tab" onclick="switchSqlTab(this,'sql-m1-pruning','oracle')">Oracle SQL</button>
+        </div>
+
+        <div class="sql-panel active" data-group="sql-m1-pruning" data-tab="postgres"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>partition_pruning_postgres.sql</span></div><div class="cmd-body"><pre>SELECT country, SUM(revenue) AS total_revenue
+FROM fct_orders
+WHERE order_date BETWEEN DATE '2026-04-01' AND DATE '2026-04-07'
+GROUP BY country;
+
+-- Anti-pattern: thiếu filter theo partition key
+SELECT country, SUM(revenue)
+FROM fct_orders
+GROUP BY country;</pre></div></div></div>
+
+        <div class="sql-panel" data-group="sql-m1-pruning" data-tab="oracle"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>partition_pruning_oracle.sql</span></div><div class="cmd-body"><pre>SELECT country, SUM(revenue) AS total_revenue
+FROM fct_orders
+WHERE order_date BETWEEN DATE '2026-04-01' AND DATE '2026-04-07'
+GROUP BY country;
+
+-- Anti-pattern tương tự nếu thiếu filter partition
+SELECT country, SUM(revenue)
+FROM fct_orders
+GROUP BY country;</pre></div></div></div>
+
+        <div class="info-box tip">✅ <span>Không có partition key đúng vĩnh viễn. Mỗi quý nên review top query theo scan bytes để điều chỉnh partition/clustering theo workload mới.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-02"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Columnar</strong>Mạnh cho query analytics diện rộng.</div>
+        <div class="summary-item"><strong>Partition key</strong>Chọn theo filter phổ biến nhất.</div>
+        <div class="summary-item"><strong>Clustering key</strong>Chọn theo join/group/order lặp lại.</div>
+        <div class="summary-item"><strong>Pruning</strong>Không lọc partition = tốn scan.</div>
+        <div class="summary-item"><strong>Materialized view</strong>Phù hợp KPI query lặp lại.</div>
+        <div class="summary-item"><strong>Trade-off</strong>Tối ưu tốt nhưng cần bảo trì layout định kỳ.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Thiết kế partition/clustering cho bảng sự kiện</div><div class="practice-task-body">
+          <p>Bảng <code>fct_events</code> có 7 tỷ dòng/năm. Query thường lọc theo <code>event_date</code>, <code>country</code>, <code>platform</code>. Hãy đề xuất partition key, clustering key và lý do.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Gợi ý: partition theo <code>event_date</code> (day), cluster theo <code>country, platform</code>. Bổ sung bảng aggregate theo ngày để phục vụ dashboard DAU/revenue.</p></div>
+        </div></div>
+      </div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(1)">← Module trước</button><button class="nav-btn primary" onclick="goNext(1)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m2">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.03</div>
+        <div class="module-title">Snowflake, BigQuery, Redshift: Khác Nhau Ở Đâu</div>
+        <div class="module-subtitle">So sánh compute-storage separation, concurrency, cost model và ecosystem fit.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Tiêu chí</th><th>Câu hỏi chính</th><th>Tác động</th></tr>
+          <tr><td>Kiến trúc</td><td>Compute có tách storage không?</td><td>Ảnh hưởng scale và isolation</td></tr>
+          <tr><td>Chi phí</td><td>Pay-per-query hay cluster-time?</td><td>Ảnh hưởng ngân sách và dự báo cost</td></tr>
+          <tr><td>Vận hành</td><td>Managed đến mức nào?</td><td>Ảnh hưởng effort của team DE</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>So sánh 3 nền tảng theo tiêu chí kỹ thuật thực tế.</li>
+          <li>Nắm cách chọn nền tảng dựa trên workload + team skill + cloud strategy.</li>
+          <li>Tránh quyết định theo cảm tính hoặc marketing.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>So sánh thực chiến Snowflake · BigQuery · Redshift</h3>
+        <table>
+          <tr><th>Tiêu chí</th><th>Snowflake</th><th>BigQuery</th><th>Redshift</th></tr>
+          <tr><td>Mô hình compute</td><td>Virtual warehouse, scale theo cụm compute riêng</td><td>Serverless + slot reservation</td><td>Cluster-centric, RA3 tách storage tốt hơn thế hệ cũ</td></tr>
+          <tr><td>Isolation workload</td><td>Mạnh nhờ tách warehouse theo team/domain</td><td>Tốt khi quản trị slot/reservation rõ</td><td>Cần WLM queue/priority hợp lý</td></tr>
+          <tr><td>Mô hình chi phí</td><td>Theo thời gian compute warehouse</td><td>Theo scan bytes hoặc slot cam kết</td><td>Theo node-hour + managed storage</td></tr>
+          <tr><td>Điểm mạnh nổi bật</td><td>Concurrency isolation rõ, multi-cloud</td><td>Đơn giản vận hành, ad-hoc mạnh</td><td>Hợp AWS-first, tích hợp IAM/S3 sâu</td></tr>
+          <tr><td>Rủi ro thường gặp</td><td>Warehouse bật quá lâu gây tốn credit</td><td>Query thiếu guardrail gây bùng scan bytes</td><td>Thiếu tuning WLM/dist/sort gây nghẽn</td></tr>
+        </table>
+
+        <h3>Service boundaries: nhà cung cấp làm gì, đội DE vẫn phải làm gì</h3>
+        <table>
+          <tr><th>Vùng trách nhiệm</th><th>Managed bởi nền tảng</th><th>Đội DE vẫn chịu trách nhiệm</th></tr>
+          <tr><td>Hạ tầng compute</td><td>Provisioning, auto-recovery cơ bản</td><td>Phân lớp workload, sizing/quota hợp lý</td></tr>
+          <tr><td>Storage/metadata</td><td>Durability, replication mặc định</td><td>Data model, partition/cluster strategy</td></tr>
+          <tr><td>Bảo mật</td><td>Tính năng IAM, encryption</td><td>RBAC, masking, row-level policy, audit access</td></tr>
+          <tr><td>Hiệu năng</td><td>Optimizer nền tảng</td><td>Query hygiene, pre-aggregation, cost governance</td></tr>
+        </table>
+
+        <h3>Khung quyết định 4 bước</h3>
+        <ol>
+          <li><strong>Xác định workload chính:</strong> dashboard cố định, ad-hoc, data science, hay mixed workload.</li>
+          <li><strong>Chốt ràng buộc tổ chức:</strong> cloud strategy (AWS/GCP/multi-cloud), skill đội hiện tại, yêu cầu compliance.</li>
+          <li><strong>Benchmark 3 truy vấn đại diện:</strong> heavy join, daily KPI aggregate, ad-hoc exploration.</li>
+          <li><strong>So sánh theo trọng số:</strong> cost predictability, concurrency, ops effort, governance fit.</li>
+        </ol>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>warehouse_selection_matrix.txt</span></div><div class="cmd-body"><pre>- Cost predictability: 30%
+- Concurrency isolation: 25%
+- Ecosystem/cloud fit: 20%
+- Team skill readiness: 15%
+- Governance & compliance: 10%</pre></div></div>
+
+        <div class="info-box note">📌 <span>Không có nền tảng tốt nhất tuyệt đối. Nền tảng đúng là nền tảng giúp workload hiện tại đạt SLA với chi phí dự báo được và đội ngũ vận hành được ổn định.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-03"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Snowflake</strong>Mạnh isolation compute và multi-cluster.</div>
+        <div class="summary-item"><strong>BigQuery</strong>Serverless, tốt cho ad-hoc và GCP.</div>
+        <div class="summary-item"><strong>Redshift</strong>Phù hợp doanh nghiệp AWS-first.</div>
+        <div class="summary-item"><strong>Cost model</strong>Hiểu sai model là vượt ngân sách.</div>
+        <div class="summary-item"><strong>Ops overhead</strong>Ảnh hưởng trực tiếp năng lực đội.</div>
+        <div class="summary-item"><strong>Quyết định đúng</strong>Luôn benchmark workload thực tế.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Chọn nền tảng cho doanh nghiệp thương mại điện tử</div><div class="practice-task-body">
+        <p>Doanh nghiệp dùng AWS, dữ liệu 8TB tăng 25%/tháng, có 150 người dùng BI. Hãy chọn 1 nền tảng chính và nêu 3 lý do kỹ thuật + 2 rủi ro.</p>
+        <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+        <div class="solution-box"><p>Ví dụ: chọn Redshift nếu cần tận dụng AWS stack và đội có kinh nghiệm WLM. Nếu cần isolation mạnh giữa nhiều domain team, cân nhắc Snowflake. Bắt buộc POC 4 tuần để đo latency/cost thật.</p></div>
+      </div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(2)">← Module trước</button><button class="nav-btn primary" onclick="goNext(2)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m3">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.04</div>
+        <div class="module-title">Schema-on-Write vs Schema-on-Read</div>
+        <div class="module-subtitle">Biết khi nào cần linh hoạt, khi nào cần nghiêm ngặt để bảo toàn chất lượng dữ liệu.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Chiến lược</th><th>Khi dùng</th><th>Rủi ro</th></tr>
+          <tr><td>Schema-on-Write</td><td>Curated/Gold layer, BI chính thức</td><td>Giảm linh hoạt ingest</td></tr>
+          <tr><td>Schema-on-Read</td><td>Raw ingest đa định dạng</td><td>Lỗi kiểu dữ liệu phát hiện muộn</td></tr>
+          <tr><td>Kết hợp</td><td>Lakehouse nhiều lớp</td><td>Cần governance và contract rõ</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Phân biệt đúng 2 chiến lược schema trong pipeline hiện đại.</li>
+        <li>Hiểu rủi ro schema drift và cách giảm thiểu bằng tests/contracts.</li>
+        <li>Thiết kế phân tầng dữ liệu hợp lý cho lakehouse.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Schema-on-Write vs Schema-on-Read: khác ở thời điểm kiểm soát chất lượng</h3>
+        <table>
+          <tr><th>Khía cạnh</th><th>Schema-on-Write</th><th>Schema-on-Read</th></tr>
+          <tr><td>Thời điểm validate</td><td>Trước khi ghi vào bảng chuẩn hóa</td><td>Lúc transform hoặc lúc truy vấn</td></tr>
+          <tr><td>Ưu điểm</td><td>Dữ liệu downstream ổn định, dễ tin cậy</td><td>Ingest nhanh, linh hoạt với nguồn thay đổi liên tục</td></tr>
+          <tr><td>Rủi ro</td><td>Giảm tốc độ onboard nguồn mới</td><td>Lỗi schema/type phát hiện muộn nếu thiếu governance</td></tr>
+          <tr><td>Tầng phù hợp</td><td>Gold/serving layer</td><td>Raw và một phần silver</td></tr>
+        </table>
+
+        <h3>Thiết kế thực tế theo Raw/Silver/Gold</h3>
+        <ul>
+          <li><strong>Raw (schema-on-read):</strong> lưu payload gần nguyên bản để không mất tín hiệu nguồn.</li>
+          <li><strong>Silver (hybrid):</strong> parse trường chính, chuẩn hóa timezone/type, tách records lỗi vào quarantine.</li>
+          <li><strong>Gold (schema-on-write):</strong> khóa schema và kiểm soát chặt tests cho KPI chính thức.</li>
+        </ul>
+
+        <h3>Anti-pattern cần tránh</h3>
+        <table>
+          <tr><th>Anti-pattern</th><th>Hậu quả</th><th>Cách sửa</th></tr>
+          <tr><td>Để tất cả mãi ở raw</td><td>Data swamp, BI không tin số liệu</td><td>Thiết kế silver/gold có owner rõ ràng</td></tr>
+          <tr><td>Ép schema cứng quá sớm</td><td>Onboard nguồn mới chậm</td><td>Dùng hybrid: raw linh hoạt, gold chặt</td></tr>
+          <tr><td>Không có contract với producer</td><td>Schema drift phá pipeline âm thầm</td><td>Version schema + test tự động + alert</td></tr>
+        </table>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dbt_schema_contract.yml</span></div><div class="cmd-body"><pre>models:
+  - name: fct_orders
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_id
+        tests: [not_null, unique]
+      - name: order_amount
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0</pre></div></div>
+
+        <div class="info-box warn">⚠️ <span>Schema-on-read không phải “không cần schema”. Nếu thiếu data contract và test gate, pipeline sẽ trả giá bằng incident production.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-04"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Schema-on-write</strong>Chặt chất lượng, phù hợp BI.</div>
+        <div class="summary-item"><strong>Schema-on-read</strong>Linh hoạt ingest, cần governance cao.</div>
+        <div class="summary-item"><strong>Rủi ro chính</strong>Schema drift và lỗi kiểu dữ liệu trễ.</div>
+        <div class="summary-item"><strong>Giải pháp</strong>Data contracts + tests + monitoring.</div>
+        <div class="summary-item"><strong>Lakehouse tốt</strong>Raw linh hoạt, Gold ổn định.</div>
+        <div class="summary-item"><strong>Mindset</strong>Linh hoạt ở đầu vào, nghiêm ngặt ở đầu ra.</div>
+      </div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Thiết kế schema policy cho clickstream</div><div class="practice-task-body">
+        <p>Nguồn clickstream JSON thay đổi schema hàng tuần. Hãy đề xuất policy cho raw/silver/gold và 3 rule test bắt buộc.</p>
+        <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+        <div class="solution-box"><p>Raw giữ nguyên payload; silver parse field chính + quarantine records lỗi; gold schema cố định cho KPI. Rule: <code>not_null(event_id)</code>, <code>accepted_values(device_type)</code>, freshness &lt; 2h.</p></div>
+      </div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">← Module trước</button><button class="nav-btn primary" onclick="goNext(3)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m4">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.05</div>
+        <div class="module-title">Lakehouse Mindset: Data Lake + Warehouse</div>
+        <div class="module-subtitle">Hiểu vì sao lake-only và warehouse-only đều thiếu, và lakehouse là điểm dung hòa.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Mô hình</th><th>Điểm mạnh</th><th>Khoảng trống</th></tr>
+        <tr><td>Lake-only</td><td>Lưu trữ rẻ, ingest linh hoạt</td><td>Dễ thiếu governance/ACID semantics</td></tr>
+        <tr><td>Warehouse-only</td><td>SQL BI mạnh, ổn định</td><td>Kém linh hoạt cho raw đa định dạng lớn</td></tr>
+        <tr><td>Lakehouse</td><td>Hợp nhất ưu điểm hai phía</td><td>Cần metadata + table format chuẩn</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Nắm triết lý lakehouse dựa trên whitepapers trong handbook.</li>
+        <li>Biết lý do kỹ thuật khi chỉ dùng lake hoặc chỉ dùng warehouse sẽ thiếu.</li>
+        <li>Thiết kế kiến trúc nhiều lớp phục vụ cả BI và data science.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Lakehouse là logic kiến trúc, không phải buzzword</h3>
+        <p>Lakehouse xuất phát từ nhu cầu thực tế: doanh nghiệp cần vừa lưu raw data đa định dạng chi phí thấp như data lake, vừa cần độ tin cậy/SQL semantics như warehouse để phục vụ BI và data product ổn định.</p>
+
+        <h3>4 lớp kiến trúc lakehouse điển hình</h3>
+        <table>
+          <tr><th>Lớp</th><th>Mục tiêu</th><th>Công cụ/thực hành thường gặp</th></tr>
+          <tr><td>Storage foundation</td><td>Lưu dữ liệu mở, bền vững, rẻ</td><td>S3/GCS/ADLS + Parquet</td></tr>
+          <tr><td>Table semantics</td><td>ACID, snapshot, schema evolution</td><td>Iceberg/Delta/Hudi</td></tr>
+          <tr><td>Compute/processing</td><td>Transform, quality gate, orchestration</td><td>Spark/Flink/dbt/Airflow</td></tr>
+          <tr><td>Serving/consumption</td><td>BI, semantic layer, data products</td><td>Warehouse engine/BI tool/API</td></tr>
+        </table>
+
+        <h3>Khi nào lakehouse thực sự hợp lý?</h3>
+        <ul>
+          <li>Có nhiều workload cùng khai thác dữ liệu: BI + ad-hoc + data science.</li>
+          <li>Cần tránh lock-in quá chặt vào một engine compute.</li>
+          <li>Cần quản trị thống nhất metadata/lineage qua nhiều domain dữ liệu.</li>
+        </ul>
+
+        <h3>Khi chưa nên dùng lakehouse đầy đủ</h3>
+        <ul>
+          <li>Dữ liệu nhỏ, chỉ có BI cơ bản: warehouse managed thuần có thể đơn giản và hiệu quả hơn.</li>
+          <li>Đội chưa có năng lực metadata/governance: triển khai lakehouse nửa vời dễ thành data swamp.</li>
+        </ul>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>lakehouse_layers.txt</span></div><div class="cmd-body"><pre>raw/      -> ingest nhanh, giữ tín hiệu nguồn
+silver/   -> chuẩn hóa, dedup, quality gate
+gold/     -> metric ổn định, dùng cho BI chính thức
+serving/  -> semantic layer, dashboard, data APIs</pre></div></div>
+
+        <div class="info-box note">📌 <span>Lakehouse mạnh khi bạn quản lý tốt metadata + data contracts. Nếu bỏ phần governance, kiến trúc sẽ mất lợi thế cốt lõi.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-05"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Lake-only</strong>Linh hoạt và rẻ, nhưng dễ thiếu quản trị.</div>
+        <div class="summary-item"><strong>Warehouse-only</strong>Mạnh BI, kém linh hoạt raw scale lớn.</div>
+        <div class="summary-item"><strong>Lakehouse</strong>Hợp nhất storage mở + semantics bảng.</div>
+        <div class="summary-item"><strong>Metadata</strong>Là trái tim của kiến trúc lakehouse.</div>
+        <div class="summary-item"><strong>Layering</strong>Raw/Silver/Gold giúp kiểm soát chất lượng.</div>
+        <div class="summary-item"><strong>Kết quả</strong>Phục vụ tốt cả BI, DS, exploratory analytics.</div>
+      </div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Thiết kế lakehouse cho fintech</div><div class="practice-task-body">
+        <p>Fintech cần dashboard theo giờ và pipeline fraud model theo lịch sử 2 năm. Hãy đề xuất kiến trúc 4 lớp + công cụ cho mỗi lớp.</p>
+        <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+        <div class="solution-box"><p>Ví dụ: Ingestion (Airbyte/dlt) → raw S3/GCS → Iceberg tables cho silver/gold bằng Spark/dbt → serving bằng warehouse engine cho BI + feature extraction cho ML.</p></div>
+      </div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(4)">← Module trước</button><button class="nav-btn primary" onclick="goNext(4)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m5">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.06</div>
+        <div class="module-title">Apache Iceberg: Table Format, Time Travel, Schema Evolution</div>
+        <div class="module-subtitle">Hiểu metadata layers, snapshots, ACID trên object storage và cách vận hành thực tế.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Chủ đề</th><th>Nội dung</th><th>Giá trị</th></tr>
+        <tr><td>Table format</td><td>Catalog → metadata → manifests → data files</td><td>Quản lý bảng lớn chính xác</td></tr>
+        <tr><td>Snapshots</td><td>Mỗi commit tạo trạng thái bất biến</td><td>Audit/rollback/time travel</td></tr>
+        <tr><td>Evolution</td><td>Schema/partition thay đổi dần theo thời gian</td><td>Linh hoạt khi dữ liệu thay đổi</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Nắm cấu trúc metadata nhiều lớp của Iceberg.</li>
+        <li>Hiểu cách time travel/snapshot hỗ trợ debug dữ liệu production.</li>
+        <li>Áp dụng schema evolution, partition evolution và compaction mindset.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Định vị đúng Apache Iceberg</h3>
+        <table>
+          <tr><th>Iceberg là gì?</th><th>Iceberg không phải gì?</th></tr>
+          <tr><td>Open table format quản lý metadata + snapshot cho bảng lớn</td><td>Không phải data warehouse độc lập</td></tr>
+          <tr><td>Lớp semantics giữa object storage và compute engine</td><td>Không thay thế Spark/Trino/warehouse engine</td></tr>
+          <tr><td>Giúp nhiều engine truy cập bảng nhất quán</td><td>Không tự tối ưu nếu thiếu compaction/governance</td></tr>
+        </table>
+
+        <h3>Luồng ghi dữ liệu trong Iceberg (nhìn theo vận hành)</h3>
+        <ol>
+          <li>Engine ghi data files mới (thường Parquet).</li>
+          <li>Tạo manifest + manifest list chứa thống kê file.</li>
+          <li>Commit metadata mới thành snapshot bất biến.</li>
+          <li>Catalog cập nhật pointer sang snapshot mới nhất.</li>
+        </ol>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>iceberg_table_demo.sql</span></div><div class="cmd-body"><pre>CREATE TABLE IF NOT EXISTS lakehouse.matches_bucketed (
+  match_id STRING,
+  playlist_id STRING,
+  completion_date TIMESTAMP
+)
+USING iceberg
+PARTITIONED BY (days(completion_date), bucket(16, match_id));
+
+SELECT * FROM lakehouse.matches_bucketed VERSION AS OF 123456789;
+
+ALTER TABLE lakehouse.matches_bucketed ADD COLUMN map_name STRING;</pre></div></div>
+
+        <h3>Metadata layers và ý nghĩa performance</h3>
+        <table>
+          <tr><th>Layer</th><th>Vai trò</th><th>Nếu quản trị kém sẽ xảy ra gì</th></tr>
+          <tr><td>Catalog</td><td>Điểm vào metadata hiện hành</td><td>Khó audit lineage và rollback</td></tr>
+          <tr><td>Metadata JSON</td><td>Schema, partition spec, snapshot id</td><td>Schema drift khó kiểm soát</td></tr>
+          <tr><td>Manifest list / Manifest</td><td>Thống kê file để prune nhanh</td><td>Manifest phình to làm planning chậm</td></tr>
+          <tr><td>Data files</td><td>Dữ liệu vật lý</td><td>Small-file explosion, latency tăng</td></tr>
+        </table>
+
+        <div class="info-box tip">✅ <span>Compaction + expire snapshots theo chính sách retention là hai việc vận hành bắt buộc nếu muốn Iceberg chạy ổn định lâu dài.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-06"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Iceberg</strong>Open table format cho lakehouse hiện đại.</div>
+        <div class="summary-item"><strong>Snapshot</strong>Giúp audit và time travel rõ ràng.</div>
+        <div class="summary-item"><strong>Schema evolution</strong>Thay đổi cột an toàn hơn.</div>
+        <div class="summary-item"><strong>Partition evolution</strong>Đổi strategy theo workload mới.</div>
+        <div class="summary-item"><strong>ACID trên object storage</strong>Tăng độ tin cậy pipeline.</div>
+        <div class="summary-item"><strong>Vận hành</strong>Compaction + metadata hygiene định kỳ.</div>
+      </div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Thiết kế Iceberg cho event lớn</div><div class="practice-task-body">
+        <p>Dataset game event 400M bản ghi/ngày, filter theo ngày và join theo <code>match_id</code>. Hãy đề xuất DDL Iceberg + kế hoạch compaction.</p>
+        <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+        <div class="solution-box"><p>Partition theo <code>days(event_time)</code>, bucket theo <code>match_id</code> (16/32 tùy cardinality), compaction chạy hàng ngày với target file size 128-512MB theo engine.</p></div>
+      </div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">← Module trước</button><button class="nav-btn primary" onclick="goNext(5)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m6">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.07</div>
+        <div class="module-title">dbt trên Warehouse: Migration từ PostgreSQL sang Cloud DW</div>
+        <div class="module-subtitle">Migrate an toàn với dual-run, source freshness, incremental và warehouse-specific optimization.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Bước</th><th>Hành động</th><th>Mục tiêu</th></tr>
+        <tr><td>1</td><td>Chuẩn hóa source + tests ở hệ cũ</td><td>Tạo baseline tin cậy</td></tr>
+        <tr><td>2</td><td>Tạo profile target DW + dual-run</td><td>So sánh số liệu trước cutover</td></tr>
+        <tr><td>3</td><td>Áp dụng incremental/materialization phù hợp</td><td>Tối ưu cost + latency</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Nắm quy trình migrate dbt project từ PostgreSQL sang cloud DW.</li>
+        <li>Hiểu source/target profile, materialization, incremental strategy.</li>
+        <li>Áp dụng source freshness và optimization theo từng warehouse.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Lộ trình migrate dbt thực tế (tránh big-bang)</h3>
+        <table>
+          <tr><th>Phase</th><th>Mục tiêu</th><th>Deliverable bắt buộc</th></tr>
+          <tr><td>0 · Baseline</td><td>Khóa định nghĩa KPI trên hệ cũ</td><td>Snapshot số liệu chuẩn + test hiện có</td></tr>
+          <tr><td>1 · Dual target</td><td>Chạy song song PostgreSQL và DW</td><td>profiles.yml tách env, CI chạy 2 target</td></tr>
+          <tr><td>2 · Reconcile</td><td>Đối soát row count/KPI/null rate</td><td>Báo cáo sai lệch theo ngày</td></tr>
+          <tr><td>3 · Cutover theo domain</td><td>Chuyển từng domain có kiểm soát</td><td>Runbook rollback cho từng domain</td></tr>
+          <tr><td>4 · Hardening</td><td>Tối ưu cost/performance sau cutover</td><td>Guardrail cost + freshness alerts</td></tr>
+        </table>
+
+        <h3>Profile mẫu: tách môi trường, không hardcode secrets</h3>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>profiles_example/profiles.yml</span></div><div class="cmd-body"><pre>analytics_project:
+  target: prod_dw
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: "{{ env_var('DBT_DEV_USER') }}"
+      pass: "{{ env_var('DBT_DEV_PASS') }}"
+      dbname: analytics
+      schema: public
+    prod_dw:
+      type: snowflake
+      account: "{{ env_var('DBT_SF_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SF_USER') }}"
+      password: "{{ env_var('DBT_SF_PASSWORD') }}"
+      role: TRANSFORMER
+      warehouse: WH_TRANSFORM
+      database: ANALYTICS
+      schema: MART</pre></div></div>
+
+        <h3>Đối soát số liệu trước cutover</h3>
+        <div class="sql-tabs" data-group="sql-mig-1">
+          <button class="sql-tab active" onclick="switchSqlTab(this,'sql-mig-1','postgres')">PostgreSQL</button>
+          <button class="sql-tab" onclick="switchSqlTab(this,'sql-mig-1','oracle')">Oracle SQL</button>
+          <button class="sql-tab" onclick="switchSqlTab(this,'sql-mig-1','dbt')">dbt</button>
+        </div>
+
+        <div class="sql-panel active" data-group="sql-mig-1" data-tab="postgres"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgres_reconcile.sql</span></div><div class="cmd-body"><pre>SELECT date_trunc('day', order_date) AS d,
+       COUNT(*) AS row_count,
+       SUM(net_revenue) AS revenue
+FROM mart.fct_orders
+GROUP BY 1
+ORDER BY 1 DESC;</pre></div></div></div>
+
+        <div class="sql-panel" data-group="sql-mig-1" data-tab="oracle"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle_reconcile.sql</span></div><div class="cmd-body"><pre>SELECT TRUNC(order_date) AS d,
+       COUNT(*) AS row_count,
+       SUM(net_revenue) AS revenue
+FROM mart.fct_orders
+GROUP BY TRUNC(order_date)
+ORDER BY d DESC;</pre></div></div></div>
+
+        <div class="sql-panel" data-group="sql-mig-1" data-tab="dbt"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>models/marts/fct_orders.sql</span></div><div class="cmd-body"><pre>{{ config(materialized='incremental', unique_key='order_id') }}
+SELECT *
+FROM {{ ref('stg_orders') }}
+{% if is_incremental() %}
+WHERE updated_at > (SELECT COALESCE(MAX(updated_at), '1970-01-01') FROM {{ this }})
+{% endif %}</pre></div></div></div>
+
+        <div class="info-box note">📌 <span>Migration dbt thành công khi số liệu đúng trước, rồi mới tối ưu cost/performance. Đừng đảo ngược thứ tự này.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-07"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Baseline trước migration</strong>Source + tests ổn định trên hệ cũ.</div>
+        <div class="summary-item"><strong>Dual-run</strong>Giảm rủi ro sai KPI khi cutover.</div>
+        <div class="summary-item"><strong>Profiles</strong>Tách dev/prod, tránh hardcode secrets.</div>
+        <div class="summary-item"><strong>Incremental</strong>Giảm cost với bảng lớn cập nhật dần.</div>
+        <div class="summary-item"><strong>Freshness</strong>Kiểm soát độ trễ dữ liệu nguồn.</div>
+        <div class="summary-item"><strong>Cutover tốt</strong>Có rollback plan + success metrics.</div>
+      </div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Viết migration checklist cho dbt project</div><div class="practice-task-body">
+        <p>Project có 50 models trên PostgreSQL. Hãy lập checklist migration sang Cloud DW gồm: kiểm thử dữ liệu, kiểm soát chi phí, rollback.</p>
+        <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+        <div class="solution-box"><ol><li>Đóng băng KPI logic + baseline metrics.</li><li>Dual-run và đối soát mỗi ngày.</li><li>Alert scan bytes/compute credits.</li><li>Giữ hệ cũ chạy song song 1 sprint để rollback nếu cần.</li></ol></div>
+      </div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">← Module trước</button><button class="nav-btn primary" onclick="goNext(6)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m7">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.08</div>
+        <div class="module-title">Cost Control, Performance Tuning &amp; Query Patterns</div>
+        <div class="module-subtitle">Tối ưu scan bytes, file layout và query pattern để giữ hiệu năng bền vững.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Nhóm</th><th>Thực hành</th><th>Kết quả</th></tr>
+        <tr><td>Query hygiene</td><td>Không SELECT *, filter partition key</td><td>Giảm scan bytes</td></tr>
+        <tr><td>Precompute</td><td>Materialized view/aggregate table</td><td>Dashboard nhanh và rẻ hơn</td></tr>
+        <tr><td>Storage hygiene</td><td>Compaction + file size chuẩn</td><td>Truy vấn ổn định dài hạn</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Xây playbook cost/performance cho cloud warehouse và lakehouse.</li>
+        <li>Biết ưu tiên tối ưu theo tác động thực tế thay vì tối ưu cảm tính.</li>
+        <li>Kết nối mindset Spark performance (broadcast/bucket/sortWithinPartitions) vào warehouse tuning.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Cost control: đo đúng trước khi tối ưu</h3>
+        <table>
+          <tr><th>Nhóm chỉ số</th><th>Nên theo dõi</th><th>Mục tiêu vận hành</th></tr>
+          <tr><td>Hiệu năng truy vấn</td><td>p50/p95 latency, queue time</td><td>Giữ dashboard SLA ổn định</td></tr>
+          <tr><td>Chi phí</td><td>Scan bytes, credits/slot time theo domain</td><td>Dự báo và khóa budget theo tuần/tháng</td></tr>
+          <tr><td>Hiệu suất dữ liệu</td><td>Pruning ratio, bytes scanned/rows returned</td><td>Phát hiện query waste sớm</td></tr>
+        </table>
+
+        <h3>Playbook tối ưu theo thứ tự ưu tiên</h3>
+        <ol>
+          <li><strong>Giảm scan không cần thiết:</strong> bỏ <code>SELECT *</code>, filter partition key bắt buộc.</li>
+          <li><strong>Giảm data trung gian:</strong> filter trước khi join, pre-aggregate KPI lặp lại.</li>
+          <li><strong>Tối ưu layout:</strong> điều chỉnh partition/clustering, compaction định kỳ.</li>
+          <li><strong>Đặt guardrail:</strong> quota theo team, alert khi vượt ngưỡng scan/credit.</li>
+        </ol>
+
+        <h3>Ví dụ before/after truy vấn</h3>
+        <div class="sql-tabs" data-group="sql-m7-cost">
+          <button class="sql-tab active" onclick="switchSqlTab(this,'sql-m7-cost','postgres')">PostgreSQL</button>
+          <button class="sql-tab" onclick="switchSqlTab(this,'sql-m7-cost','oracle')">Oracle SQL</button>
+        </div>
+
+        <div class="sql-panel active" data-group="sql-m7-cost" data-tab="postgres"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>cost_tuning_postgres.sql</span></div><div class="cmd-body"><pre>-- Nên làm: filter theo thời gian + chỉ lấy cột cần
+SELECT order_date, country, SUM(net_revenue) AS revenue
+FROM mart.fct_orders
+WHERE order_date BETWEEN DATE '2026-04-01' AND DATE '2026-04-30'
+GROUP BY order_date, country;
+
+-- Không nên: quét rộng + cột dư
+SELECT *
+FROM mart.fct_orders
+ORDER BY created_at DESC;</pre></div></div></div>
+
+        <div class="sql-panel" data-group="sql-m7-cost" data-tab="oracle"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>cost_tuning_oracle.sql</span></div><div class="cmd-body"><pre>-- Nên làm: filter partition và chọn cột cần dùng
+SELECT order_date, country, SUM(net_revenue) AS revenue
+FROM mart.fct_orders
+WHERE order_date BETWEEN DATE '2026-04-01' AND DATE '2026-04-30'
+GROUP BY order_date, country;
+
+-- Không nên: full scan không giới hạn nhu cầu
+SELECT *
+FROM mart.fct_orders
+ORDER BY created_at DESC;</pre></div></div></div>
+
+        <h3>Cost/performance trade-off cần nhìn rõ</h3>
+        <table>
+          <tr><th>Quyết định</th><th>Lợi ích</th><th>Đổi lại</th></tr>
+          <tr><td>Tăng pre-aggregation</td><td>Dashboard nhanh hơn, rẻ hơn</td><td>Tăng complexity pipeline/refresh</td></tr>
+          <tr><td>Clustering sâu</td><td>Giảm scan cho query lặp lại</td><td>Tăng chi phí bảo trì layout</td></tr>
+          <tr><td>Reservation/quota chặt</td><td>Dự báo ngân sách tốt</td><td>Ad-hoc peak có thể chậm nếu set quá thấp</td></tr>
+        </table>
+
+        <div class="info-box tip">✅ <span>Tối ưu warehouse không phải tối ưu một query. Mục tiêu đúng là tối ưu toàn bộ workload trong giới hạn SLA và ngân sách đã chốt.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-08"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Scan bytes</strong>Là đòn bẩy cost lớn nhất.</div>
+        <div class="summary-item"><strong>Join strategy</strong>Filter sớm, giảm data trung gian.</div>
+        <div class="summary-item"><strong>Materialized view</strong>Tốt cho KPI lặp lại ổn định.</div>
+        <div class="summary-item"><strong>Compaction</strong>Bắt buộc khi file nhỏ bùng nổ.</div>
+        <div class="summary-item"><strong>Monitoring</strong>Query review định kỳ để tránh vượt budget.</div>
+        <div class="summary-item"><strong>Trade-off</strong>Hiệu năng cao thường tăng complexity.</div>
+      </div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Tối ưu 2 query dashboard chậm</div><div class="practice-task-body">
+        <p>Query A chạy 95 giây, Query B chạy 130 giây. Hãy liệt kê 5 hành động tối ưu theo thứ tự ưu tiên và giải thích.</p>
+        <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+        <div class="solution-box"><ol><li>Thêm filter partition key bắt buộc.</li><li>Bỏ SELECT *.</li><li>Giảm cardinality trước khi join.</li><li>Tạo bảng aggregate/materialized view.</li><li>Compaction + điều chỉnh clustering.</li></ol></div>
+      </div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">← Module trước</button><button class="nav-btn primary" onclick="goNext(7)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m8">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.09</div>
+        <div class="module-title">Artifact: warehouse_migration/ hoàn chỉnh</div>
+        <div class="module-subtitle">Đóng gói output tuần 14 thành portfolio có thể review, chạy lại và trình bày trade-off.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Thành phần</th><th>Mục tiêu</th><th>Output</th></tr>
+        <tr><td>dbt_project/</td><td>Transform + tests + lineage</td><td>Models chạy được</td></tr>
+        <tr><td>profiles_example/</td><td>Hướng dẫn cấu hình môi trường</td><td>Không lộ secrets</td></tr>
+        <tr><td>migration_notes/cost/iceberg/README</td><td>Giải thích thiết kế và benchmark</td><td>Portfolio-ready</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Tạo artifact đúng chuẩn yêu cầu tuần 14.</li>
+        <li>Thể hiện năng lực thiết kế + vận hành + giao tiếp kỹ thuật.</li>
+        <li>Chuẩn hóa output để dùng khi phỏng vấn hoặc review nội bộ.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>warehouse_migration/ structure</span></div><div class="cmd-body"><pre>warehouse_migration/
+├── dbt_project/
+│   ├── models/
+│   ├── tests/
+│   └── macros/
+├── profiles_example/
+│   └── profiles.yml
+├── migration_notes.md
+├── cost_comparison.md
+├── iceberg_demo.md
+└── README.md</pre></div></div>
+
+        <h3>Checklist chất lượng cho từng artifact</h3>
+        <table>
+          <tr><th>File</th><th>Nội dung tối thiểu</th><th>Dấu hiệu đạt chuẩn thực chiến</th></tr>
+          <tr><td>migration_notes.md</td><td>As-is/to-be, cutover plan, rollback, risk register</td><td>Có tiêu chí go/no-go rõ và owner theo từng bước</td></tr>
+          <tr><td>cost_comparison.md</td><td>Giả định workload + benchmark theo cùng khối lượng dữ liệu</td><td>Có kết luận kèm điều kiện áp dụng, không kết luận tuyệt đối</td></tr>
+          <tr><td>iceberg_demo.md</td><td>DDL, snapshot query, schema evolution, compaction policy</td><td>Nêu rõ Iceberg là table format và engine dùng để chạy demo</td></tr>
+          <tr><td>README.md</td><td>Mục tiêu, kiến trúc, cách chạy, test plan, lesson learned</td><td>Người mới có thể chạy lại từ đầu trong môi trường sạch</td></tr>
+        </table>
+
+        <h3>Template nội dung gợi ý cho review kỹ thuật</h3>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>migration_notes.md (outline)</span></div><div class="cmd-body"><pre>1. Scope migration (domain/bảng/KPI)
+2. As-is vs To-be architecture
+3. Dual-run & reconcile plan
+4. Cutover checklist + rollback triggers
+5. Success metrics sau 7/30 ngày</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>cost_comparison.md (outline)</span></div><div class="cmd-body"><pre>1. Workload profile (query mix, concurrency, data growth)
+2. Cost model từng nền tảng (giả định rõ)
+3. Benchmark latency + cost trên cùng bài test
+4. Rủi ro chi phí và guardrail đề xuất
+5. Khuyến nghị theo bối cảnh tổ chức</pre></div></div>
+
+        <div class="info-box note">📌 <span>Artifact tốt phải explainable: người review hiểu bạn chọn kiến trúc nào, vì sao chọn, và nếu sai thì rollback thế nào.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-09"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Artifact chuẩn</strong>Giúp review nhanh và tái sử dụng tốt.</div>
+        <div class="summary-item"><strong>Nội dung bắt buộc</strong>Đủ dbt, profiles, notes, benchmark, demo.</div>
+        <div class="summary-item"><strong>Giá trị nghề nghiệp</strong>Thể hiện năng lực end-to-end.</div>
+        <div class="summary-item"><strong>Kỹ năng trình bày</strong>README rõ làm tăng chất lượng portfolio.</div>
+        <div class="summary-item"><strong>Production mindset</strong>Có cutover/rollback và success metrics.</div>
+        <div class="summary-item"><strong>Kết thúc tuần</strong>Có output commitable và explainable.</div>
+      </div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Viết README outline cho artifact</div><div class="practice-task-body">
+        <p>Hãy viết dàn ý README gồm 6 mục: Mục tiêu, Kiến trúc, Cách chạy, Kiểm thử, Benchmark cost/performance, Lessons learned.</p>
+        <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+        <div class="solution-box"><ol><li>Problem statement và scope.</li><li>As-is/to-be architecture.</li><li>Commands chạy dbt + warehouse setup.</li><li>Data quality và freshness checks.</li><li>Bảng benchmark trước/sau migration.</li><li>Trade-off + next steps.</li></ol></div>
+      </div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(8)">← Module trước</button><button class="nav-btn primary" onclick="goNext(8)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m9">
+      <div class="module-header">
+        <div class="module-tag">Tuần 14 · W14.10</div>
+        <div class="module-title">Mini Test Tổng Kết</div>
+        <div class="module-subtitle">Đánh giá readiness triển khai Modern Data Warehouse &amp; Lakehouse ở môi trường production.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Phần</th><th>Nội dung</th><th>Mục tiêu</th></tr>
+        <tr><td>Ôn tập nhanh</td><td>Tóm tắt kiến thức module 1-9</td><td>Khóa lại tư duy cốt lõi</td></tr>
+        <tr><td>Quiz module</td><td>10 câu interactive</td><td>Kiểm tra hiểu biết tức thời</td></tr>
+        <tr><td>Mini test cuối</td><td>16 câu chấm điểm tự động</td><td>Đánh giá readiness trước tuần 15</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Tự đo lường mức độ nắm vững kiến trúc warehouse/lakehouse.</li>
+        <li>Nhận diện lỗ hổng trước khi học Data Integration ở tuần 15.</li>
+        <li>Rèn tư duy giải thích trade-off thay vì học thuộc công cụ.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <p>Hãy làm mini test trong 20-30 phút, không tra cứu. Sau khi chấm điểm, ghi lại 3 điểm yếu để ôn trong 7 ngày tiếp theo.</p>
+        <div class="info-box tip">✅ <span>Điểm cao quan trọng, nhưng quan trọng hơn là bạn giải thích được vì sao chọn kiến trúc/công cụ đó.</span></div>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>retrospective_template.txt</span></div><div class="cmd-body"><pre>1) Mình nắm chắc điểm nào nhất?
+2) Điểm mơ hồ nhất là gì?
+3) Hành động tuần tới để cải thiện?</pre></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-w14-10"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Nội dung đã phủ</strong>Warehouse, lakehouse, Iceberg, dbt migration, cost tuning.</div>
+        <div class="summary-item"><strong>Mốc đạt tốt</strong>≥ 80%: sẵn sàng học tuần 15.</div>
+        <div class="summary-item"><strong>Mốc cần ôn</strong>65-79%: ôn theo điểm yếu rồi test lại.</div>
+        <div class="summary-item"><strong>Mốc cảnh báo</strong>&lt; 65%: học lại module nền tảng.</div>
+        <div class="summary-item"><strong>Quan trọng nhất</strong>Hiểu trade-off, không học thuộc tool.</div>
+        <div class="summary-item"><strong>Bước tiếp theo</strong>Cập nhật backlog học + artifact tuần mới.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Lập kế hoạch 7 ngày bù kiến thức</div><div class="practice-task-body">
+          <p>Sau khi mini test, chọn 2 chủ đề yếu nhất (ví dụ: Iceberg + cost tuning). Lập lịch học 7 ngày, mỗi ngày 60-90 phút, có output cụ thể.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Gợi ý: 2 ngày đọc docs + 3 ngày lab + 1 ngày benchmark + 1 ngày viết retrospective. Output cuối: notes + SQL/scripts + bảng so sánh before/after.</p></div>
+        </div></div>
+
+        <div id="final-test">
+          <div class="test-question" data-q="1" data-correct="B"><div class="test-question-title">Q1. Lý do kỹ thuật chính để rời PostgreSQL local khi analytics scale?</div><div class="test-options"><label class="test-option"><input type="radio" name="q1" value="A"> A. Thiếu SQL</label><label class="test-option"><input type="radio" name="q1" value="B"> B. Compute-storage coupling và concurrency bottleneck</label><label class="test-option"><input type="radio" name="q1" value="C"> C. Không có index</label><label class="test-option"><input type="radio" name="q1" value="D"> D. Không có backup</label></div></div>
+          <div class="test-question" data-q="2" data-correct="A"><div class="test-question-title">Q2. Lợi thế lớn nhất của columnar storage cho BI?</div><div class="test-options"><label class="test-option"><input type="radio" name="q2" value="A"> A. Giảm I/O khi chỉ đọc một số cột</label><label class="test-option"><input type="radio" name="q2" value="B"> B. Tăng write TPS OLTP</label><label class="test-option"><input type="radio" name="q2" value="C"> C. Thay partitioning</label><label class="test-option"><input type="radio" name="q2" value="D"> D. Không cần thống kê</label></div></div>
+          <div class="test-question" data-q="3" data-correct="C"><div class="test-question-title">Q3. Partition pruning hoạt động tốt khi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q3" value="A"> A. ORDER BY nhiều cột</label><label class="test-option"><input type="radio" name="q3" value="B"> B. SELECT * toàn bảng</label><label class="test-option"><input type="radio" name="q3" value="C"> C. WHERE lọc theo partition key</label><label class="test-option"><input type="radio" name="q3" value="D"> D. Không có WHERE</label></div></div>
+          <div class="test-question" data-q="4" data-correct="D"><div class="test-question-title">Q4. Cost model phổ biến của BigQuery?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> A. Node-hour cố định</label><label class="test-option"><input type="radio" name="q4" value="B"> B. Số dashboard</label><label class="test-option"><input type="radio" name="q4" value="C"> C. Số user</label><label class="test-option"><input type="radio" name="q4" value="D"> D. Scan bytes hoặc slot reservation</label></div></div>
+          <div class="test-question" data-q="5" data-correct="A"><div class="test-question-title">Q5. Điểm mạnh concurrency của Snowflake?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> A. Virtual warehouses/multi-cluster</label><label class="test-option"><input type="radio" name="q5" value="B"> B. Single cluster bắt buộc</label><label class="test-option"><input type="radio" name="q5" value="C"> C. Không hỗ trợ SQL</label><label class="test-option"><input type="radio" name="q5" value="D"> D. Không tách compute-storage</label></div></div>
+          <div class="test-question" data-q="6" data-correct="B"><div class="test-question-title">Q6. Schema-on-read phù hợp nhất cho tầng nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> A. Gold mart</label><label class="test-option"><input type="radio" name="q6" value="B"> B. Raw ingest semi-structured</label><label class="test-option"><input type="radio" name="q6" value="C"> C. Semantic layer chuẩn hóa</label><label class="test-option"><input type="radio" name="q6" value="D"> D. Dashboard final</label></div></div>
+          <div class="test-question" data-q="7" data-correct="C"><div class="test-question-title">Q7. Lakehouse dung hòa tốt nhất điều gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> A. Bỏ governance</label><label class="test-option"><input type="radio" name="q7" value="B"> B. Chỉ phục vụ streaming</label><label class="test-option"><input type="radio" name="q7" value="C"> C. Data lake linh hoạt + warehouse ổn định</label><label class="test-option"><input type="radio" name="q7" value="D"> D. Loại bỏ mọi chi phí</label></div></div>
+          <div class="test-question" data-q="8" data-correct="B"><div class="test-question-title">Q8. Snapshot trong Iceberg dùng để?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> A. Tối ưu UI</label><label class="test-option"><input type="radio" name="q8" value="B"> B. Time travel/audit version</label><label class="test-option"><input type="radio" name="q8" value="C"> C. Mã hóa dữ liệu</label><label class="test-option"><input type="radio" name="q8" value="D"> D. Tự sửa data</label></div></div>
+          <div class="test-question" data-q="9" data-correct="D"><div class="test-question-title">Q9. Schema evolution trong Iceberg cho phép gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Không đổi schema</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Chỉ đổi tên file</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Rewrite toàn bộ bắt buộc</label><label class="test-option"><input type="radio" name="q9" value="D"> D. Thay đổi schema an toàn theo thời gian</label></div></div>
+          <div class="test-question" data-q="10" data-correct="A"><div class="test-question-title">Q10. Bước an toàn trước cutover dbt migration?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. Dual-run và reconcile KPI</label><label class="test-option"><input type="radio" name="q10" value="B"> B. Xóa hệ cũ</label><label class="test-option"><input type="radio" name="q10" value="C"> C. Bỏ test</label><label class="test-option"><input type="radio" name="q10" value="D"> D. Chuyển hết sang ephemeral</label></div></div>
+          <div class="test-question" data-q="11" data-correct="C"><div class="test-question-title">Q11. Materialized view nên dùng khi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. Query ad-hoc một lần</label><label class="test-option"><input type="radio" name="q11" value="B"> B. Logic liên tục đổi</label><label class="test-option"><input type="radio" name="q11" value="C"> C. KPI query lặp lại</label><label class="test-option"><input type="radio" name="q11" value="D"> D. Không cần refresh</label></div></div>
+          <div class="test-question" data-q="12" data-correct="D"><div class="test-question-title">Q12. Biện pháp giảm scan bytes hiệu quả?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. Màn hình 4K</label><label class="test-option"><input type="radio" name="q12" value="B"> B. Đổi tên bảng</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Thêm CTE vô tội vạ</label><label class="test-option"><input type="radio" name="q12" value="D"> D. Tránh SELECT * và lọc partition key</label></div></div>
+          <div class="test-question" data-q="13" data-correct="B"><div class="test-question-title">Q13. Small files thường gây gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. Không ảnh hưởng</label><label class="test-option"><input type="radio" name="q13" value="B"> B. Metadata overhead và query chậm</label><label class="test-option"><input type="radio" name="q13" value="C"> C. Tăng độ chính xác</label><label class="test-option"><input type="radio" name="q13" value="D"> D. Giảm cost ngay</label></div></div>
+          <div class="test-question" data-q="14" data-correct="A"><div class="test-question-title">Q14. File bắt buộc trong artifact warehouse_migration?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. cost_comparison.md</label><label class="test-option"><input type="radio" name="q14" value="B"> B. avatar.png</label><label class="test-option"><input type="radio" name="q14" value="C"> C. slides.pptx</label><label class="test-option"><input type="radio" name="q14" value="D"> D. random.txt</label></div></div>
+          <div class="test-question" data-q="15" data-correct="C"><div class="test-question-title">Q15. Source freshness trong dbt dùng để?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Tạo role</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Đổi schema tự động</label><label class="test-option"><input type="radio" name="q15" value="C"> C. Theo dõi độ trễ dữ liệu nguồn</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Nén file parquet</label></div></div>
+          <div class="test-question" data-q="16" data-correct="D"><div class="test-question-title">Q16. Mindset từ Spark homework liên hệ trực tiếp DW tuning?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. Chỉ học syntax</label><label class="test-option"><input type="radio" name="q16" value="B"> B. Bỏ qua join strategy</label><label class="test-option"><input type="radio" name="q16" value="C"> C. Không cần sort strategy</label><label class="test-option"><input type="radio" name="q16" value="D"> D. Broadcast/bucket/sort ảnh hưởng mạnh hiệu năng</label></div></div>
+
+          <div class="test-actions">
+            <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+            <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+          </div>
+          <div class="test-result" id="final-test-result" style="display:none"></div>
+        </div>
+      </div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(9)">← Module trước</button><div style="color:var(--accent2);font-weight:700">Hoàn thành Tuần 14 · Sẵn sàng sang W15</div></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+  explain.textContent = (correct ? 'Chính xác. ' : 'Chưa đúng. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const isShow = box.classList.toggle('show');
+  btn.textContent = isShow ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function switchSqlTab(btn, group, tab) {
+  const wrap = btn.closest('.section-content');
+  wrap.querySelectorAll(`.sql-tabs[data-group="${group}"] .sql-tab`).forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  wrap.querySelectorAll(`.sql-panel[data-group="${group}"]`).forEach(p => p.classList.remove('active'));
+  const target = wrap.querySelector(`.sql-panel[data-group="${group}"][data-tab="${tab}"]`);
+  if (target) target.classList.add('active');
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (percent >= 90) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn đã nắm rất chắc tư duy Modern Data Warehouse & Lakehouse.'; }
+  else if (percent >= 80) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Bạn sẵn sàng bước sang Tuần 15 – Data Integration.'; }
+  else if (percent >= 65) { levelText = 'Đạt tối thiểu'; chipClass = 'warn'; guidance = 'Nên ôn lại W14.03, W14.06, W14.08 rồi làm lại mini test.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Hãy quay lại các module trọng tâm trước khi qua tuần mới.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đáp án đúng <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng.</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+
+const quizData = {
+  "w14-01": [
+    { q: "Khi analytics scale, giới hạn kỹ thuật phổ biến của PostgreSQL local là gì?", o: [
+      ["Thiếu SQL chuẩn", false, "Sai vì PostgreSQL hỗ trợ SQL rất đầy đủ."],
+      ["Compute-storage coupling và nghẽn concurrency", true, "Đúng vì workload OLAP lớn dễ đụng trần tài nguyên."],
+      ["Không có index", false, "Sai vì PostgreSQL có nhiều loại index."],
+      ["Không thể backup", false, "Sai vì backup là tính năng cơ bản."]
+    ]},
+    { q: "Dấu hiệu nào cho thấy nên xem xét migration?", o: [
+      ["Dashboard p95 dưới 2 giây", false, "Sai vì đây là tín hiệu tốt."],
+      ["Incident vận hành và query chậm tăng liên tục", true, "Đúng vì phản ánh bottleneck thực tế."],
+      ["Data chỉ vài GB", false, "Sai vì quy mô này thường chưa áp lực lớn."],
+      ["Không có user BI", false, "Sai vì chưa có nhu cầu concurrency."]
+    ]},
+    { q: "Mục tiêu chính của migration tuần 14 là gì?", o: [
+      ["Đổi màu dashboard", false, "Sai vì đây không phải bài toán hạ tầng dữ liệu."],
+      ["Tăng scale, governance và cost control", true, "Đúng là mục tiêu cốt lõi."],
+      ["Loại bỏ SQL", false, "Sai vì SQL vẫn trung tâm."],
+      ["Dừng toàn bộ pipeline", false, "Sai vì migration cần liên tục."]
+    ]},
+    { q: "Sự khác nhau giữa OLTP và OLAP chủ yếu là gì?", o: [
+      ["OLTP cho transaction nhỏ, OLAP cho scan/aggregate lớn", true, "Đúng theo mục tiêu tối ưu của mỗi hệ."],
+      ["OLTP không cần schema", false, "Sai vì OLTP cần schema chặt."],
+      ["OLAP không dùng SQL", false, "Sai vì SQL rất quan trọng."],
+      ["Hai loại giống nhau", false, "Sai hoàn toàn."]
+    ]},
+    { q: "Ai chịu ảnh hưởng mạnh khi concurrency tăng?", o: [
+      ["Nhóm analyst chạy query đồng thời", true, "Đúng vì cạnh tranh tài nguyên xảy ra ở đây."],
+      ["Người không truy cập dữ liệu", false, "Sai vì không tạo tải."],
+      ["Team thiết kế UI", false, "Sai vì không trực tiếp query warehouse."],
+      ["Chỉ bộ phận HR", false, "Sai vì không liên quan kỹ thuật."]
+    ]},
+    { q: "Chiến lược migration an toàn nhất là?", o: [
+      ["Cutover big-bang trong một đêm", false, "Sai vì rủi ro cao."],
+      ["Dual-run và đối soát KPI", true, "Đúng vì giảm rủi ro sai lệch dữ liệu."],
+      ["Bỏ test để nhanh", false, "Sai vì migration càng cần test."],
+      ["Xóa hệ cũ trước", false, "Sai vì mất rollback path."]
+    ]},
+    { q: "Metric hữu ích để quan sát bottleneck là?", o: [
+      ["p95 query latency", true, "Đúng vì phản ánh tail latency người dùng cảm nhận."],
+      ["Số màu biểu đồ", false, "Sai vì không liên quan runtime."],
+      ["Số commit frontend", false, "Sai vì không đo query engine."],
+      ["Độ dài tên schema", false, "Sai vì không phản ánh hiệu năng."]
+    ]},
+    { q: "Vì sao cần gắn migration với năng lực đội ngũ?", o: [
+      ["Để có slide đẹp", false, "Sai vì không tạo năng lực vận hành."],
+      ["Để đội có skill dbt/cloud/cost control đồng bộ", true, "Đúng vì migration là bài toán con người + hệ thống."],
+      ["Để khỏi cần docs", false, "Sai vì docs càng quan trọng."],
+      ["Để bỏ governance", false, "Sai nguy hiểm."]
+    ]},
+    { q: "Sau khi migrate, PostgreSQL local còn vai trò không?", o: [
+      ["Còn, cho dev/sandbox hoặc use case transactional", true, "Đúng, không phải bỏ toàn bộ."],
+      ["Không, phải xoá ngay", false, "Sai vì còn nhiều use case hợp lý."],
+      ["Chỉ dùng cho ảnh", false, "Sai vì không phải chức năng chính."],
+      ["Chỉ chạy trên Windows", false, "Sai vì PostgreSQL đa nền tảng."]
+    ]},
+    { q: "Mục tiêu cuối của W14.01 là?", o: [
+      ["Nắm lý do business + kỹ thuật cho migration", true, "Đúng để làm nền cho các module sau."],
+      ["Chỉ học lý thuyết cloud", false, "Sai vì cần hướng thực hành."],
+      ["Bỏ hẳn SQL", false, "Sai."],
+      ["Chỉ quan tâm vendor marketing", false, "Sai."]
+    ]}
+  ],
+  "w14-02": [
+    { q: "Columnar storage mạnh nhất trong trường hợp nào?", o: [["Query analytics đọc ít cột, aggregate lớn", true, "Đúng vì giảm I/O đáng kể."],["OLTP update từng row", false, "Sai vì row-store thường phù hợp hơn."],["Lưu ảnh PNG", false, "Sai không phải lợi thế chính."],["Game loop realtime", false, "Sai phạm vi."]] },
+    { q: "Partition pruning diễn ra khi?", o: [["WHERE lọc theo partition key", true, "Đúng vì engine bỏ qua partition không cần."],["SELECT * không WHERE", false, "Sai dễ quét toàn bảng."],["Đổi tên cột", false, "Sai không liên quan optimizer."],["Chỉ ORDER BY", false, "Sai không kích hoạt pruning."]] },
+    { q: "Clustering key nên chọn theo?", o: [["Cột thường dùng trong join/group/filter", true, "Đúng theo access pattern."],["Cột ngẫu nhiên", false, "Sai vì không tạo locality."],["Cột ít dùng nhất", false, "Sai."],["Tên cột dài nhất", false, "Sai."]] },
+    { q: "Vì sao nên tránh SELECT * trên warehouse?", o: [["Vì tăng scan bytes không cần thiết", true, "Đúng trực tiếp tác động cost và latency."],["Vì SQL không hỗ trợ", false, "Sai vì vẫn hỗ trợ."],["Vì không chạy được", false, "Sai."],["Vì làm query nhanh hơn", false, "Sai ngược thực tế."]] },
+    { q: "Materialized view phù hợp cho?", o: [["KPI query lặp lại ổn định", true, "Đúng để giảm compute lặp."],["Ad-hoc query 1 lần", false, "Sai lợi ích thấp."],["DDL migration", false, "Sai phạm vi."],["User permission", false, "Sai."]] },
+    { q: "Rủi ro partition quá chi tiết là gì?", o: [["Nổ metadata và small files", true, "Đúng trade-off phổ biến."],["Luôn nhanh hơn vô hạn", false, "Sai vì có overhead."],["Không ảnh hưởng gì", false, "Sai."],["Giảm chi phí mãi mãi", false, "Sai không tuyệt đối."]] },
+    { q: "Query tối ưu scan thường có đặc điểm?", o: [["Filter partition + chọn đúng cột", true, "Đúng pattern chuẩn."],["Cross join trước", false, "Sai."],["Không WHERE", false, "Sai."],["ORDER BY toàn history", false, "Sai."]] },
+    { q: "Compression tốt hơn trong columnar vì?", o: [["Dữ liệu cùng kiểu nằm gần nhau", true, "Đúng giúp nén hiệu quả."],["Tên cột ngắn", false, "Sai."],["SQL đẹp hơn", false, "Sai."],["Do partition tự động", false, "Sai vì khác vấn đề."]] },
+    { q: "Nếu đa số query lọc theo ngày, partition key nên là?", o: [["event_date", true, "Đúng theo query pattern."],["random_uuid", false, "Sai."],["description", false, "Sai."],["amount_text", false, "Sai."]] },
+    { q: "Mục tiêu W14.02 là?", o: [["Thiết kế data layout để giảm cost/latency", true, "Đúng trọng tâm."],["Chỉ học syntax", false, "Sai."],["Bỏ partition", false, "Sai."],["Bỏ query review", false, "Sai."]] }
+  ],
+  "w14-03": [
+    { q: "Điểm nổi bật của Snowflake là?", o: [["Virtual warehouse tách compute", true, "Đúng cho isolation tốt."],["Chỉ chạy một cloud", false, "Sai."],["Không hỗ trợ SQL", false, "Sai."],["Không có cost control", false, "Sai."]] },
+    { q: "BigQuery thường tính chi phí theo?", o: [["Scan bytes hoặc slot reservation", true, "Đúng mô hình phổ biến."],["Số dashboard", false, "Sai."],["Số user", false, "Sai."],["RAM trình duyệt", false, "Sai."]] },
+    { q: "Redshift hợp với bối cảnh nào?", o: [["AWS-first và cần tích hợp sâu IAM/S3", true, "Đúng ecosystem fit."],["Không có đội vận hành", false, "Sai vì vẫn cần tuning nhất định."],["Chỉ dữ liệu nhỏ", false, "Sai."],["Không cần WLM", false, "Sai."]] },
+    { q: "Concurrency isolation nghĩa là?", o: [["Tách tài nguyên compute giữa workloads", true, "Đúng tránh nghẽn chéo."],["Mở nhiều tab trình duyệt", false, "Sai."],["Xóa queue hoàn toàn", false, "Sai."],["Không liên quan hiệu năng", false, "Sai."]] },
+    { q: "Ops overhead thường thấp hơn ở nhóm nào?", o: [["Serverless/managed cao", true, "Đúng vì giảm tự quản trị."],["Tự build engine", false, "Sai."],["Local laptop", false, "Sai."],["Không monitoring", false, "Sai."]] },
+    { q: "Tiêu chí không thể bỏ qua khi chọn warehouse?", o: [["Team skill fit", true, "Đúng tool tốt nhưng đội không vận hành được vẫn thất bại."],["Logo đẹp", false, "Sai."],["Tên ngắn", false, "Sai."],["Số sticker", false, "Sai."]] },
+    { q: "BigQuery mạnh ở workload nào?", o: [["Ad-hoc analytics lớn", true, "Đúng đặc trưng mạnh."],["OLTP transaction", false, "Sai."],["Frontend rendering", false, "Sai."],["Game server", false, "Sai."]] },
+    { q: "Snowflake multi-cluster giúp gì?", o: [["Scale concurrency tốt hơn", true, "Đúng."],["Thay modeling", false, "Sai."],["Bỏ test", false, "Sai."],["Bỏ security", false, "Sai."]] },
+    { q: "Redshift cost thường gắn với?", o: [["Node-hour và cụm", true, "Đúng theo cluster model."],["Số markdown", false, "Sai."],["Số branch git", false, "Sai."],["Độ sáng màn hình", false, "Sai."]] },
+    { q: "Kết quả mong đợi W14.03 là?", o: [["Chọn nền tảng dựa workload + cost + fit", true, "Đúng."],["Chọn theo quảng cáo", false, "Sai."],["Bỏ benchmark", false, "Sai."],["Migrate ngay không POC", false, "Sai."]] }
+  ],
+  "w14-04": [
+    { q: "Schema-on-write là gì?", o: [["Áp schema trước khi publish dữ liệu", true, "Đúng."],["Không cần schema", false, "Sai."],["Chỉ cho frontend", false, "Sai."],["Chỉ lưu ảnh", false, "Sai."]] },
+    { q: "Schema-on-read hợp khi nào?", o: [["Ingest raw semi-structured cần linh hoạt", true, "Đúng."],["Gold KPI ổn định", false, "Sai thường nên schema-on-write."],["Không có metadata", false, "Sai nguy hiểm."],["Bỏ test", false, "Sai."]] },
+    { q: "Rủi ro lớn của schema-on-read?", o: [["Lỗi type/schema phát hiện muộn", true, "Đúng."],["Không ingest được", false, "Sai thường ingest nhanh hơn."],["Không dùng SQL", false, "Sai."],["Không lưu parquet", false, "Sai."]] },
+    { q: "Chiến lược kết hợp hợp lý?", o: [["Raw linh hoạt, Gold nghiêm ngặt", true, "Đúng cho lakehouse chuẩn."],["Tất cả raw mãi mãi", false, "Sai."],["Tất cả cứng ngay từ đầu", false, "Sai giảm linh hoạt."],["Không phân tầng", false, "Sai."]] },
+    { q: "Data contract giúp gì?", o: [["Giảm schema drift giữa producer-consumer", true, "Đúng."],["Tăng bug", false, "Sai."],["Thay monitoring", false, "Sai."],["Chỉ cho ML", false, "Sai."]] },
+    { q: "Curated layer nên ưu tiên gì?", o: [["Tests not_null/unique/relationships", true, "Đúng đảm bảo trust."],["Không test", false, "Sai."],["Chỉ test UI", false, "Sai phạm vi."],["Lưu nguyên raw", false, "Sai mục tiêu."]] },
+    { q: "Schema drift là gì?", o: [["Nguồn đổi cấu trúc làm downstream lỗi", true, "Đúng."],["CPU nóng", false, "Sai."],["Đổi màu chart", false, "Sai."],["Tăng commit", false, "Sai."]] },
+    { q: "Nguồn thêm cột mới nên làm gì?", o: [["Version schema + update mapping + test", true, "Đúng cách production."],["Bỏ qua", false, "Sai."],["Xóa bảng", false, "Sai."],["Tắt pipeline", false, "Sai."]] },
+    { q: "Layer nào phù hợp schema-on-read nhất?", o: [["Raw", true, "Đúng."],["Gold", false, "Sai."],["Semantic metric", false, "Sai."],["Dashboard final", false, "Sai."]] },
+    { q: "Mục tiêu W14.04?", o: [["Chọn strategy schema theo rủi ro và nhu cầu", true, "Đúng."],["Bỏ schema", false, "Sai."],["Chỉ học cú pháp", false, "Sai."],["Bỏ governance", false, "Sai."]] }
+  ],
+  "w14-05": [
+    { q: "Lake-only thường thiếu điều gì?", o: [["Governance/table semantics đầy đủ", true, "Đúng ở nhiều hệ thống truyền thống."],["Khả năng lưu file", false, "Sai vì lake mạnh điểm này."],["Scale storage", false, "Sai."],["Ingest đa nguồn", false, "Sai."]] },
+    { q: "Warehouse-only hạn chế ở đâu?", o: [["Linh hoạt raw đa định dạng với cost thấp", true, "Đúng."],["SQL analytics", false, "Sai vì là điểm mạnh."],["BI integration", false, "Sai."],["Role-based access", false, "Sai."]] },
+    { q: "Lakehouse dung hòa điều gì?", o: [["Storage mở + governance + SQL hiệu quả", true, "Đúng."],["Bỏ metadata", false, "Sai."],["Chỉ streaming", false, "Sai."],["Chỉ startup", false, "Sai."]] },
+    { q: "Open table format trong lakehouse giúp?", o: [["Snapshot/evolution/interoperability", true, "Đúng."],["Thay dashboard", false, "Sai."],["Tăng bug", false, "Sai."],["Chặn ad-hoc", false, "Sai."]] },
+    { q: "Gold layer nên có?", o: [["Schema ổn định + quality tests", true, "Đúng."],["Raw JSON nguyên bản", false, "Sai."],["Không lineage", false, "Sai."],["Không ownership", false, "Sai."]] },
+    { q: "Whitepaper lakehouse dùng để?", o: [["Hiểu nền tảng kiến trúc và trade-off", true, "Đúng."],["Thay thực hành", false, "Sai."],["Học CSS", false, "Sai."],["Viết frontend", false, "Sai."]] },
+    { q: "Lợi ích thực tế của lakehouse?", o: [["Phục vụ đồng thời BI và data science", true, "Đúng."],["Không tốn tiền", false, "Sai."],["Không cần modeling", false, "Sai."],["Không cần security", false, "Sai."]] },
+    { q: "Rủi ro nếu chỉ có lake thiếu governance?", o: [["Data swamp", true, "Đúng."],["Data tự sạch", false, "Sai."],["Không lưu parquet", false, "Sai."],["Query luôn nhanh hơn", false, "Sai."]] },
+    { q: "Lakehouse mindset hợp với tổ chức nào?", o: [["Đa workload, cần linh hoạt và scale", true, "Đúng."],["Không có dữ liệu", false, "Sai."],["Chỉ làm frontend", false, "Sai."],["Mọi tổ chức bất chấp context", false, "Sai."]] },
+    { q: "Mục tiêu W14.05?", o: [["Tư duy kiến trúc dung hòa thay vì cực đoan", true, "Đúng."],["Bỏ warehouse", false, "Sai."],["Bỏ lake", false, "Sai."],["Chỉ lý thuyết", false, "Sai."]] }
+  ],
+  "w14-06": [
+    { q: "Apache Iceberg là gì?", o: [["Open table format cho object storage", true, "Đúng."],["BI tool", false, "Sai."],["OS", false, "Sai."],["CSS framework", false, "Sai."]] },
+    { q: "Snapshot trong Iceberg dùng để?", o: [["Theo dõi version dữ liệu/time travel", true, "Đúng."],["Nén ảnh", false, "Sai."],["Thay encryption", false, "Sai."],["Viết business logic", false, "Sai."]] },
+    { q: "Time travel hữu ích khi nào?", o: [["Audit/debug/rollback dữ liệu", true, "Đúng."],["Tăng wifi", false, "Sai."],["Đổi icon UI", false, "Sai."],["Xóa metadata", false, "Sai."]] },
+    { q: "Schema evolution nghĩa là?", o: [["Đổi schema theo thời gian có kiểm soát", true, "Đúng."],["Không đổi schema", false, "Sai."],["Rewrite toàn bảng bắt buộc", false, "Sai."],["Chỉ đổi tên file", false, "Sai."]] },
+    { q: "Partition evolution giúp gì?", o: [["Đổi strategy partition theo workload mới", true, "Đúng."],["Loại partition", false, "Sai."],["Luôn rewrite full ngay", false, "Sai."],["Không ảnh hưởng performance", false, "Sai."]] },
+    { q: "Metadata layers trong Iceberg để làm gì?", o: [["Quản lý file/snapshot hiệu quả hơn", true, "Đúng."],["Trang trí dashboard", false, "Sai."],["Tạo API mobile", false, "Sai."],["Xóa data files", false, "Sai."]] },
+    { q: "Small files gây tác hại nào?", o: [["Tăng metadata overhead và query chậm", true, "Đúng."],["Không tác hại", false, "Sai."],["Luôn tốt", false, "Sai."],["Chỉ ảnh hưởng frontend", false, "Sai."]] },
+    { q: "Notebook bucket-joins-in-iceberg thể hiện gì?", o: [["USING iceberg + PARTITIONED BY + bucket", true, "Đúng theo nội dung notebook."],["React component", false, "Sai."],["Tableau chart", false, "Sai."],["CSS animation", false, "Sai."]] },
+    { q: "ACID trên object storage mang lại gì?", o: [["Đọc/ghi nhất quán và an toàn hơn", true, "Đúng."],["Không cần transaction", false, "Sai."],["Không cần metadata", false, "Sai."],["Không cần backup", false, "Sai."]] },
+    { q: "Mục tiêu W14.06?", o: [["Hiểu sâu table format để vận hành lakehouse", true, "Đúng."],["Chỉ học SELECT", false, "Sai."],["Bỏ cost", false, "Sai."],["Không practice", false, "Sai."]] }
+  ],
+  "w14-07": [
+    { q: "Bước đầu khi migration dbt nên là?", o: [["Chuẩn hóa source + tests trên hệ cũ", true, "Đúng tạo baseline."],["Cutover ngay", false, "Sai."],["Xóa model", false, "Sai."],["Bỏ freshness", false, "Sai."]] },
+    { q: "Incremental materialization phù hợp khi?", o: [["Bảng lớn cập nhật dần + có unique key", true, "Đúng."],["Bảng nhỏ rewrite toàn bộ", false, "Sai thường không cần incremental."],["Không có cột theo dõi thay đổi", false, "Sai khó đảm bảo đúng."],["Chỉ muốn code ngắn", false, "Sai."]] },
+    { q: "Source freshness dùng để?", o: [["Theo dõi độ trễ dữ liệu nguồn", true, "Đúng."],["Đổi password", false, "Sai."],["Tăng dashboard", false, "Sai."],["Tối ưu CSS", false, "Sai."]] },
+    { q: "Dual-run migration nghĩa là?", o: [["Chạy song song hệ cũ/mới để đối soát", true, "Đúng."],["Mở 2 IDE", false, "Sai."],["Dùng 2 DB ngẫu nhiên", false, "Sai."],["Bỏ rollback", false, "Sai."]] },
+    { q: "Unique key trong incremental giúp?", o: [["Giảm duplicate và hỗ trợ upsert", true, "Đúng."],["Thay test", false, "Sai."],["Không cần watermark", false, "Sai."],["Tăng màu code", false, "Sai."]] },
+    { q: "Profiles dbt nên quản lý như nào?", o: [["Tách env + không commit secrets", true, "Đúng."],["Hardcode password", false, "Sai."],["1 config cho mọi env", false, "Sai."],["Không cần role/warehouse", false, "Sai."]] },
+    { q: "KPI parity nghĩa là?", o: [["KPI trên hệ mới khớp logic hệ cũ", true, "Đúng."],["Tên bảng giống", false, "Sai chưa đủ."],["Số dòng code bằng nhau", false, "Sai."],["Màu chart giống", false, "Sai."]] },
+    { q: "Optimization warehouse trong dbt có thể gồm?", o: [["Config partition/cluster + incremental strategy", true, "Đúng."],["Bỏ query plan", false, "Sai."],["Dùng ephemeral cho mọi model", false, "Sai."],["Không test sau run", false, "Sai."]] },
+    { q: "Kết thúc migration cần gì?", o: [["Rollback plan + success metrics", true, "Đúng."],["Không tài liệu", false, "Sai."],["Không theo dõi cost", false, "Sai."],["Không freshness", false, "Sai."]] },
+    { q: "Mục tiêu W14.07?", o: [["Migrate dbt an toàn, có test và tối ưu", true, "Đúng."],["Chỉ chạy theo trend", false, "Sai."],["Bỏ best practices", false, "Sai."],["Bỏ lineage", false, "Sai."]] }
+  ],
+  "w14-08": [
+    { q: "Đòn bẩy giảm chi phí scan hiệu quả nhất?", o: [["Chọn cột cần + filter partition", true, "Đúng."],["SELECT *", false, "Sai."],["Đổi tên cột", false, "Sai."],["Tăng brightness", false, "Sai."]] },
+    { q: "Materialized view hợp khi?", o: [["Query KPI lặp lại cao", true, "Đúng."],["Ad-hoc một lần", false, "Sai."],["Logic đổi liên tục", false, "Sai."],["Không có refresh", false, "Sai."]] },
+    { q: "Compaction nhằm mục tiêu?", o: [["Giảm small files và metadata scan", true, "Đúng."],["Xóa dữ liệu cũ", false, "Sai."],["Ẩn lỗi data quality", false, "Sai."],["Tăng file nhỏ", false, "Sai."]] },
+    { q: "Join pattern tốt là?", o: [["Filter trước, join sau", true, "Đúng."],["Join lớn trước", false, "Sai."],["Cross join mặc định", false, "Sai."],["Không điều kiện join", false, "Sai."]] },
+    { q: "Liên hệ Spark homework với DW tuning?", o: [["Broadcast/bucket/sort mindset giống tối ưu query", true, "Đúng."],["Không liên quan", false, "Sai."],["Chỉ cho frontend", false, "Sai."],["Chỉ học syntax", false, "Sai."]] },
+    { q: "Guardrail tốt cho cost control?", o: [["Budget alert + query quota", true, "Đúng."],["Tắt logging", false, "Sai."],["Không query review", false, "Sai."],["Cho query vô hạn", false, "Sai."]] },
+    { q: "Trade-off phổ biến khi tối ưu mạnh?", o: [["Tăng complexity vận hành", true, "Đúng."],["Không trade-off", false, "Sai."],["Luôn giảm tốc độ", false, "Sai."],["Mất dữ liệu", false, "Sai cực đoan."]] },
+    { q: "Khi nào nên tránh full history recompute?", o: [["KPI lặp lại có thể incremental/pre-aggregate", true, "Đúng."],["Dataset nhỏ", false, "Sai không cần phức tạp."],["Không có lịch", false, "Sai ngữ cảnh."],["Chưa có dữ liệu", false, "Sai."]] },
+    { q: "Mục tiêu hiệu năng nên gắn với?", o: [["SLA/SLI + budget", true, "Đúng production mindset."],["Cảm giác cá nhân", false, "Sai."],["Ý thích tool", false, "Sai."],["Số slide", false, "Sai."]] },
+    { q: "Kết quả mong đợi W14.08?", o: [["Có playbook cost/performance dùng được ngay", true, "Đúng."],["Thuộc benchmark không context", false, "Sai."],["Bỏ monitoring", false, "Sai."],["Bỏ query review", false, "Sai."]] }
+  ],
+  "w14-09": [
+    { q: "Artifact tuần 14 phải gồm?", o: [["dbt_project, profiles, notes, cost, iceberg, README", true, "Đúng theo yêu cầu."],["Chỉ SQL file", false, "Sai."],["Chỉ ảnh", false, "Sai."],["Không README", false, "Sai."]] },
+    { q: "migration_notes nên có gì?", o: [["As-is/to-be, cutover, rollback", true, "Đúng cốt lõi."],["Meme", false, "Sai."],["Không success metrics", false, "Sai."],["Không scope", false, "Sai."]] },
+    { q: "cost_comparison cần lưu ý gì?", o: [["So sánh cùng workload và giả định rõ", true, "Đúng để kết luận có giá trị."],["So sánh ngẫu nhiên", false, "Sai."],["Không cần số liệu", false, "Sai."],["Không cần khuyến nghị", false, "Sai."]] },
+    { q: "iceberg_demo nên có mục nào?", o: [["Snapshot/time travel/evolution demo", true, "Đúng."],["UI animation", false, "Sai."],["Playlist nhạc", false, "Sai."],["Logo", false, "Sai."]] },
+    { q: "README artifact quan trọng vì?", o: [["Giúp người khác chạy lại và review quyết định", true, "Đúng."],["Trang trí repo", false, "Sai."],["Thay test", false, "Sai."],["Không cần nếu code tốt", false, "Sai."]] },
+    { q: "Portfolio tốt thể hiện gì?", o: [["Thiết kế + vận hành + trade-off", true, "Đúng."],["Chỉ syntax", false, "Sai."],["Chỉ screenshot", false, "Sai."],["Không lessons learned", false, "Sai."]] },
+    { q: "profiles_example có vai trò gì?", o: [["Hướng dẫn config mà không lộ secrets", true, "Đúng."],["Commit password thật", false, "Sai nguy hiểm."],["Tăng số file", false, "Sai."],["Bỏ setup", false, "Sai."]] },
+    { q: "Production mindset thể hiện qua?", o: [["Rollback + success metrics + quality checks", true, "Đúng."],["Tên file đẹp", false, "Sai."],["Nhiều emoji", false, "Sai."],["Không runbook", false, "Sai."]] },
+    { q: "Artifact nên được kiểm thử thế nào?", o: [["Run lại từ môi trường sạch theo README", true, "Đúng reproducibility."],["Chỉ chạy máy tác giả", false, "Sai."],["Không test", false, "Sai."],["Chỉ đọc code", false, "Sai."]] },
+    { q: "Mục tiêu W14.09?", o: [["Bộ warehouse_migration hoàn chỉnh, commitable", true, "Đúng."],["Chỉ tạo slide", false, "Sai."],["Không tài liệu", false, "Sai."],["Không chạy lại được", false, "Sai."]] }
+  ],
+  "w14-10": [
+    { q: "Mục tiêu mini test tuần 14 là gì?", o: [["Đo readiness thực chiến", true, "Đúng."],["Thi đua điểm", false, "Sai."],["Thay thực hành", false, "Sai."],["Bỏ retrospective", false, "Sai."]] },
+    { q: "Nếu điểm dưới 75% nên làm gì?", o: [["Ôn module yếu và test lại", true, "Đúng."],["Qua tuần mới ngay", false, "Sai."],["Xóa notes", false, "Sai."],["Bỏ test", false, "Sai."]] },
+    { q: "Readiness tốt cần điều gì?", o: [["Điểm ổn + giải thích được trade-off", true, "Đúng."],["Thuộc tên tool", false, "Sai chưa đủ."],["Nhiều tab mở", false, "Sai."],["Không practice", false, "Sai."]] },
+    { q: "Sau test nên làm gì?", o: [["Ghi backlog 2-3 điểm yếu", true, "Đúng giúp cải thiện có hệ thống."],["Bỏ qua", false, "Sai."],["Chỉ xem điểm tổng", false, "Sai."],["Không update plan", false, "Sai."]] },
+    { q: "Hàm chấm điểm mini test là?", o: [["gradeFinalTest()", true, "Đúng yêu cầu kỹ thuật."],["scoreNow()", false, "Sai."],["submitQuiz()", false, "Sai."],["finalCheck()", false, "Sai."]] },
+    { q: "Hàm reset mini test là?", o: [["resetFinalTest()", true, "Đúng yêu cầu kỹ thuật."],["resetAll()", false, "Sai."],["clearQuiz()", false, "Sai."],["restart()", false, "Sai."]] },
+    { q: "Vì sao cần quiz module + mini test cuối?", o: [["Quiz kiểm tra phần nhỏ, mini test kiểm tra tổng hợp", true, "Đúng."],["Để file dài hơn", false, "Sai."],["Không có lý do", false, "Sai."],["Thay docs", false, "Sai."]] },
+    { q: "Ưu điểm đánh giá định lượng là gì?", o: [["Theo dõi tiến bộ qua thời gian", true, "Đúng."],["Không cần phản hồi", false, "Sai."],["Không cần phân tích lỗi", false, "Sai."],["Không cần practice", false, "Sai."]] },
+    { q: "Sai câu về cost tuning nên ôn lại module nào?", o: [["W14.08", true, "Đúng trọng tâm."],["W14.01", false, "Sai trọng tâm."],["W14.04", false, "Sai trọng tâm."],["W14.10", false, "Sai vì đây là module test."]] },
+    { q: "Mục tiêu cuối W14.10 là?", o: [["Xác nhận sẵn sàng sang W15", true, "Đúng."],["Làm cho đủ", false, "Sai."],["Bỏ kiến thức cũ", false, "Sai."],["Không liên quan roadmap", false, "Sai."]] }
+  ]
+};
+
+function renderQuiz(moduleKey, targetId) {
+  const target = document.getElementById(targetId);
+  const questions = quizData[moduleKey];
+  if (!target || !questions) return;
+
+  target.innerHTML = questions.map((item) => {
+    const opts = item.o.map((opt, i) => {
+      const label = ['A', 'B', 'C', 'D'][i];
+      const safeExp = String(opt[2]).replace(/'/g, "&#39;");
+      return `<div class="quiz-opt" onclick="answerQuiz(this, ${opt[1]}, '${safeExp}')">${label}. ${opt[0]}</div>`;
+    }).join('');
+
+    return `<div class="quiz-item"><div class="quiz-q">${item.q}</div><div class="quiz-options">${opts}</div><div class="quiz-explain"></div></div>`;
+  }).join('');
+}
+
+function renderAllQuizzes() {
+  renderQuiz('w14-01', 'quiz-w14-01');
+  renderQuiz('w14-02', 'quiz-w14-02');
+  renderQuiz('w14-03', 'quiz-w14-03');
+  renderQuiz('w14-04', 'quiz-w14-04');
+  renderQuiz('w14-05', 'quiz-w14-05');
+  renderQuiz('w14-06', 'quiz-w14-06');
+  renderQuiz('w14-07', 'quiz-w14-07');
+  renderQuiz('w14-08', 'quiz-w14-08');
+  renderQuiz('w14-09', 'quiz-w14-09');
+  renderQuiz('w14-10', 'quiz-w14-10');
+}
+
+renderAllQuizzes();
+</script>
+</body>
+</html>

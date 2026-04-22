@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 13 · Cloud AWS</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --accent2: #3fb950;
+  --accent3: #f78166;
+  --accent4: #d2a8ff;
+  --accent5: #ffa657;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --code-bg: #0d1117;
+  --highlight: #388bfd26;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+}
+.hero {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+  border-bottom: 2px solid var(--accent);
+  padding: 40px 24px 30px;
+  text-align: center;
+}
+.hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); }
+.hero p { color: var(--text-muted); margin-top: 8px; }
+.badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid;
+}
+.badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+.badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+.badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+.container { display: flex; min-height: calc(100vh - 160px); }
+.sidebar {
+  width: 290px;
+  min-width: 290px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.sidebar-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 0 16px 12px;
+}
+.nav-item {
+  display: block;
+  padding: 7px 14px;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  font-size: 0.79rem;
+  color: var(--text-muted);
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+  background: var(--highlight);
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 700;
+}
+.nav-number { display: inline-block; width: 60px; font-family: monospace; font-size: 0.7rem; color: var(--text-muted); }
+.main { flex: 1; padding: 26px 34px; max-width: 1060px; }
+.module { display: none; }
+.module.active { display: block; }
+.module-header {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 22px 26px;
+  margin-bottom: 22px;
+  position: relative;
+}
+.module-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent);
+}
+.module-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.module-title { font-size: 1.35rem; font-weight: 800; }
+.module-subtitle { font-size: 0.9rem; color: var(--text-muted); }
+.progress-bar {
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 4px;
+  margin-top: 14px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 4px;
+}
+.section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface2);
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.section-content { padding: 18px; background: var(--surface); }
+.section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+.section-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-purpose { background: #1f6feb33; }
+.icon-detail { background: #2ea04326; }
+.icon-quiz { background: #d2940026; }
+.icon-summary { background: #6e40c926; }
+.icon-practice { background: #f7816626; }
+p { font-size: 0.88rem; margin-bottom: 10px; }
+ul, ol { padding-left: 20px; margin-bottom: 10px; }
+li { font-size: 0.88rem; margin-bottom: 4px; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.82rem; }
+th {
+  background: var(--surface2);
+  padding: 8px 10px;
+  text-align: left;
+  border: 1px solid var(--border);
+  color: var(--accent);
+}
+td { padding: 8px 10px; border: 1px solid var(--border); }
+.cmd-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+.cmd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: 'Courier New', monospace;
+}
+.cmd-dots { display: flex; gap: 5px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-red { background: #f7816680; }
+.dot-yellow { background: #ffa65780; }
+.dot-green { background: #3fb95080; }
+.cmd-body { padding: 12px; }
+pre {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--text);
+}
+code {
+  font-family: 'Courier New', monospace;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--accent4);
+}
+.prompt { color: var(--accent2); font-weight: 700; }
+.comment { color: var(--text-muted); }
+.output { color: var(--accent5); }
+.info-box {
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 10px 0;
+  border: 1px solid;
+  display: flex;
+  gap: 8px;
+  font-size: 0.84rem;
+}
+.info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+.info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+.info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+.info-box span { color: var(--text); }
+.quiz-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.quiz-q { font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; }
+.quiz-options { display: flex; flex-direction: column; gap: 6px; }
+.quiz-opt {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  background: var(--bg);
+}
+.quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+.quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+.quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+.quiz-explain {
+  display: none;
+  font-size: 0.81rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+.quiz-explain.show { display: block; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.summary-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.82rem;
+}
+.summary-item strong { display: block; color: var(--accent); margin-bottom: 4px; }
+.practice-task {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.practice-task-header {
+  padding: 10px 14px;
+  background: #d2940015;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--accent5);
+}
+.practice-task-body { padding: 14px; }
+.solution-toggle {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--accent2);
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.solution-box { display: none; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+.solution-box.show { display: block; }
+.nav-buttons { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
+.nav-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+.sql-tabs {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 10px 0 6px;
+}
+.sql-tab {
+  border: none;
+  border-right: 1px solid var(--border);
+  padding: 8px 14px;
+  background: var(--surface2);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.sql-tab:last-child { border-right: none; }
+.sql-tab.active { background: var(--highlight); color: var(--accent); font-weight: 700; }
+.sql-panel { display: none; }
+.sql-panel.active { display: block; }
+.test-question {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+.test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+.test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+.test-question-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; }
+.test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.test-option { font-size: 0.82rem; display: flex; align-items: center; gap: 6px; }
+.test-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.test-result {
+  display: none;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+}
+.score-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 8px; font-size: 0.77rem; }
+.score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+.score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+.score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { padding: 14px; }
+  .summary-grid, .test-options { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>Data Engineering Handbook Tutorial</h1>
+  <p>Tuần 13 · Cloud Platform trên AWS cho Data Engineer</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 3 · Cloud + Big Data</span>
+    <span class="badge badge-orange">AWS Core Services cho DE</span>
+    <span class="badge badge-blue">Production · Security · Cost Mindset</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">CHƯƠNG TRÌNH HỌC</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W13.01</span>Vì sao DE phải biết Cloud</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W13.02</span>S3 Data Lake Design</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W13.03</span>IAM & Least Privilege</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W13.04</span>Glue Data Catalog</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W13.05</span>Athena vs Redshift</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W13.06</span>RDS/Aurora Metadata Layer</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W13.07</span>CloudWatch Monitoring</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W13.08</span>Terraform cho cloud_setup</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W13.09</span>Cost & Security Decisions</div>
+    <div class="nav-item" onclick="showModule(9,this)"><span class="nav-number">W13.10</span>Artifact cloud_setup hoàn chỉnh</div>
+    <div class="nav-item" onclick="showModule(10,this)"><span class="nav-number">W13.11</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+    <div class="module active" id="m0">
+      <div class="module-header">
+        <div class="module-tag">Tuần 13 · W13.01</div>
+        <div class="module-title">W13.01 – Tổng Quan: Vì Sao Data Engineer Phải Biết Cloud</div>
+        <div class="module-subtitle">Module 1/11 · đặt nền tảng tư duy production cho tuần 13.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:9%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <tr><th>Phần</th><th>Nội dung</th><th>Kết quả học được</th></tr>
+            <tr><td>Cloud-first mindset</td><td>Tại sao pipeline DE chuyển lên cloud</td><td>Hiểu đúng động lực business + vận hành</td></tr>
+            <tr><td>Service boundaries</td><td>S3, IAM, Athena, Redshift, Glue, CloudWatch</td><td>Không trộn vai trò dịch vụ</td></tr>
+            <tr><td>Trade-off</td><td>Speed vs Cost vs Security vs Reliability</td><td>Ra quyết định thực tế thay vì học thuộc tên dịch vụ</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <ul>
+            <li>Xác định tuần 13 tập trung cho Data Engineer, không phải lý thuyết AWS tổng quát.</li>
+            <li>Hiểu khác biệt giữa triển khai demo và triển khai có thể vận hành production.</li>
+            <li>Nhìn dịch vụ AWS dưới góc nhìn pipeline: ingest, transform, serve, monitor, govern.</li>
+            <li>Chốt checklist trước khi đi vào từng dịch vụ cụ thể ở module sau.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <p>Cloud giúp Data Engineer rút ngắn thời gian đưa pipeline vào vận hành vì hạ tầng được quản trị bởi managed services. Nhưng tốc độ triển khai chỉ có ý nghĩa khi đi cùng kiểm soát cost, phân quyền chặt, và observability rõ ràng.</p>
+          <table>
+            <tr><th>Góc nhìn</th><th>Cách học sai thường gặp</th><th>Cách học đúng cho DE</th></tr>
+            <tr><td>Service selection</td><td>Chọn dịch vụ vì đang phổ biến</td><td>Chọn theo workload: batch, ad-hoc, serving latency</td></tr>
+            <tr><td>Security</td><td>Cấp quyền rộng để chạy nhanh</td><td>Role tách theo job + đường dẫn S3 cụ thể</td></tr>
+            <tr><td>Cost</td><td>Chỉ nhìn tổng bill tháng</td><td>Đo theo pipeline và theo domain dữ liệu</td></tr>
+            <tr><td>Operations</td><td>Chỉ log khi có lỗi</td><td>Thiết kế metric, alarm, runbook ngay từ đầu</td></tr>
+          </table>
+          <div class="info-box tip">Tip <span>Tư duy tuần 13: mỗi dịch vụ AWS phải trả lời được câu hỏi "Nó giải quyết bottleneck nào của pipeline?".</span></div>
+          <div class="info-box warn">Lưu ý <span>Anti-pattern phổ biến: build data lake lớn trước, nhưng không có naming chuẩn, không có owner, không có cost tag.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div>
+        <div class="section-content"><div id="quiz-m0"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>Cloud-first</strong>Cloud là đòn bẩy vận hành, không chỉ là nơi lưu file.</div>
+            <div class="summary-item"><strong>Service boundaries</strong>Mỗi dịch vụ có ranh giới rõ, tránh chồng chéo trách nhiệm.</div>
+            <div class="summary-item"><strong>Least privilege</strong>Phân quyền là bắt buộc từ ngày đầu, không để cuối dự án.</div>
+            <div class="summary-item"><strong>Cost visibility</strong>Đo chi phí theo workload mới tối ưu đúng chỗ.</div>
+            <div class="summary-item"><strong>Observability</strong>Không có metric/alarm đồng nghĩa không có production readiness.</div>
+            <div class="summary-item"><strong>Kết quả</strong>Sẵn sàng học sâu từng thành phần AWS theo ngữ cảnh DE.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div>
+        <div class="section-content" style="display:none">
+          <div class="practice-task">
+            <div class="practice-task-header">Bài tập W13.01</div>
+            <div class="practice-task-body">
+              <p>Viết 1 decision note ngắn cho pipeline đơn hàng: chọn S3 + Athena hay chọn Redshift làm lớp query chính. Nêu rõ dữ liệu, tần suất query, SLA, chi phí dự kiến.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button>
+              <div class="solution-box">
+                <p>Gợi ý: nếu query ad-hoc, khối lượng lớn nhưng không yêu cầu latency thấp ổn định thì S3 + Athena hợp lý. Nếu dashboard truy cập dày, concurrency cao, cần performance ổn định thì Redshift thường phù hợp hơn.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons"><div></div><button class="nav-btn primary" onclick="goNext(0)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m1">
+      <div class="module-header">
+        <div class="module-tag">Tuần 13 · W13.02</div>
+        <div class="module-title">W13.02 – Amazon S3 cho Data Lake: raw / staging / curated / archive</div>
+        <div class="module-subtitle">Module 2/11 · thiết kế data lake thực tế thay vì ví dụ toy.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:18%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <tr><th>Phần</th><th>Nội dung</th><th>Mục tiêu</th></tr>
+            <tr><td>Zone strategy</td><td>raw/staging/curated/archive</td><td>Kiểm soát vòng đời dữ liệu</td></tr>
+            <tr><td>Naming & partition</td><td>bucket/prefix/domain/source/dt/hour</td><td>Dễ query, dễ governance</td></tr>
+            <tr><td>Lifecycle & security</td><td>Storage class, encryption, block public access</td><td>Tối ưu cost + giảm rủi ro</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <ul>
+            <li>Thiết kế S3 data lake có cấu trúc đủ dùng cho batch lẫn reprocessing.</li>
+            <li>Áp dụng naming convention nhất quán theo domain và môi trường.</li>
+            <li>Tránh partition anti-pattern gây chi phí scan cao ở Athena.</li>
+            <li>Đặt security defaults cho bucket từ đầu dự án.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <p>S3 là object storage trung tâm của nhiều pipeline DE trên AWS. Thiết kế tốt không chỉ là tạo bucket, mà là chuẩn hóa zone, partition, file size, retention và access boundaries để Athena/Glue chạy ổn định khi dữ liệu tăng mạnh.</p>
+
+          <h3>1) Zone design thực dụng</h3>
+          <table>
+            <tr><th>Zone</th><th>Dữ liệu chứa</th><th>Retention gợi ý</th><th>Người dùng chính</th></tr>
+            <tr><td>raw</td><td>Bản gốc từ source, chưa biến đổi</td><td>90-365 ngày</td><td>Ingestion + forensics</td></tr>
+            <tr><td>staging</td><td>Dữ liệu đã chuẩn schema bước đầu</td><td>30-90 ngày</td><td>Transform jobs</td></tr>
+            <tr><td>curated</td><td>Dataset phục vụ BI/ML đã kiểm thử</td><td>theo policy sản phẩm</td><td>Analytics/serving</td></tr>
+            <tr><td>archive</td><td>Dữ liệu lâu năm, truy cập hiếm</td><td>nhiều năm</td><td>Compliance/audit</td></tr>
+          </table>
+
+          <h3>2) Naming, partition và Small File Problem</h3>
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>S3 key convention</span></div>
+            <div class="cmd-body"><pre>s3://de-learning-raw-ap-southeast-1-prod/
+  domain=commerce/source=erp/entity=orders/
+  dt=2026-04-22/hour=13/part-0001.parquet</pre></div>
+          </div>
+          <p>Partition theo <code>dt</code> và <code>hour</code> thường cân bằng giữa tốc độ query và số lượng file. Không nên partition theo <code>user_id</code> hoặc <code>transaction_id</code> vì cardinality quá cao.</p>
+          <p><strong>Small File Problem:</strong> hàng triệu file vài KB/MB khiến Athena phải mở rất nhiều object, tăng metadata overhead, tăng thời gian lập kế hoạch query và scan cost không cần thiết.</p>
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>compaction guideline</span></div>
+            <div class="cmd-body"><pre>Mục tiêu file Parquet sau compaction:
+- Workload vừa: 128MB - 256MB/file
+- Workload lớn: 256MB - 512MB/file
+
+Pattern:
+raw nhiều file nhỏ -> job compaction theo dt/hour -> curated file lớn ổn định</pre></div>
+          </div>
+
+          <h3>3) Lifecycle, Intelligent-Tiering và network path</h3>
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>lifecycle policy production-minded</span></div>
+            <div class="cmd-body"><pre>{
+  "Rules": [
+    {
+      "ID": "raw-tiering-and-cleanup",
+      "Filter": {"Prefix": "domain=commerce/"},
+      "Status": "Enabled",
+      "Transitions": [
+        {"Days": 30, "StorageClass": "INTELLIGENT_TIERING"}
+      ],
+      "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 7},
+      "Expiration": {"Days": 365}
+    }
+  ]
+}</pre></div>
+          </div>
+          <p>Dùng <strong>S3 VPC Gateway Endpoint</strong> cho EC2/Airflow/ETL trong private subnet giúp traffic tới S3 đi nội bộ AWS, tránh đi qua NAT Gateway không cần thiết.</p>
+
+          <div class="info-box note">Ghi chú <span>S3 data lake tốt phải có: versioning, block public access, SSE-KMS, tag owner/cost-center, lifecycle rõ theo zone, compaction định kỳ.</span></div>
+          <div class="info-box warn">Lưu ý <span>Anti-pattern tốn tiền: mọi job private subnet đọc/ghi S3 qua NAT Gateway. Với lưu lượng lớn, NAT data processing fee tăng nhanh và khó phát hiện sớm.</span></div>
+        </div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m1"></div></div></div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>Zone rõ ràng</strong>raw/staging/curated/archive giúp kiểm soát lifecycle tốt hơn.</div>
+            <div class="summary-item"><strong>Naming chuẩn</strong>Domain/source/entity/dt/hour giúp truy vết và query nhất quán.</div>
+            <div class="summary-item"><strong>Partition đúng</strong>Ưu tiên thời gian và cột truy vấn chính, tránh high cardinality.</div>
+            <div class="summary-item"><strong>Lifecycle</strong>Chuyển storage class theo tuổi dữ liệu để giảm bill.</div>
+            <div class="summary-item"><strong>Security default</strong>Block public + SSE-KMS + versioning là baseline.</div>
+            <div class="summary-item"><strong>Kết quả</strong>Nền tảng data lake sẵn sàng cho Athena/Glue ở module sau.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div>
+        <div class="section-content" style="display:none">
+          <div class="practice-task">
+            <div class="practice-task-header">Bài tập W13.02</div>
+            <div class="practice-task-body">
+              <p>Thiết kế key layout cho domain payment gồm 3 luồng: transactions, refunds, disputes. Yêu cầu: hỗ trợ query theo ngày, reprocess theo source, và lifecycle khác nhau giữa raw và curated.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button>
+              <div class="solution-box"><p>Gợi ý: giữ prefix chuẩn <code>domain=payment/source=.../entity=.../dt=YYYY-MM-DD/hour=HH/</code>. Dùng bucket policy tách quyền read raw và write curated theo role riêng.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(1)">← Module trước</button><button class="nav-btn primary" onclick="goNext(1)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m2">
+      <div class="module-header">
+        <div class="module-tag">Tuần 13 · W13.03</div>
+        <div class="module-title">W13.03 – IAM, Roles, Policies & Least Privilege cho Pipeline</div>
+        <div class="module-subtitle">Module 3/11 · hardening phần quyền truy cập.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:27%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Kết quả</th></tr><tr><td>Identity model</td><td>User/Role/Policy/STS</td><td>Hiểu ranh giới xác thực và ủy quyền</td></tr><tr><td>Least privilege</td><td>Chỉ cấp quyền theo action + resource + condition</td><td>Giảm blast radius khi key hoặc job lỗi</td></tr><tr><td>Policy review</td><td>Deny by default, test theo use case</td><td>Policy dùng được thật, không quá rộng</td></tr></table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Áp dụng least privilege thực tế cho pipeline Data Engineering.</li><li>Viết IAM policy JSON chặt chẽ, có điều kiện prefix/path cụ thể.</li><li>Phân tách role theo workload: ingestion, transform, analytics.</li><li>Tránh anti-pattern dùng role admin cho ETL jobs.</li></ul></div></div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <p>Role theo workload giúp giảm rủi ro lan rộng khi một job bị lỗi hoặc bị lộ credential. Trong thực tế, ingestion job không cần quyền đọc curated, và BI query role không nên có quyền ghi raw.</p>
+          <h3>Role split gợi ý</h3>
+          <table>
+            <tr><th>Role</th><th>Quyền cần có</th><th>Không nên có</th></tr>
+            <tr><td>de-ingest-role</td><td>PutObject vào raw prefix, GetObject từ source landing</td><td>DeleteObject toàn bucket</td></tr>
+            <tr><td>de-transform-role</td><td>Read raw/staging, write curated, Glue update table</td><td>IAM policy modify</td></tr>
+            <tr><td>de-analytics-role</td><td>Athena query, read curated, read Glue catalog</td><td>Write raw/staging</td></tr>
+          </table>
+
+          <h3>sts:AssumeRole và Trust Relationship</h3>
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>trust_policy_data_access_role.json</span></div>
+            <div class="cmd-body"><pre>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::123456789012:role/airflow-ec2-role"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}</pre></div>
+          </div>
+          <p>Pipeline thực tế: Airflow chạy trên EC2 bằng <code>airflow-ec2-role</code>, mỗi DAG task gọi STS để <code>AssumeRole</code> sang <code>de-data-access-role</code>, nhận temporary credentials theo session ngắn, rồi mới đọc/ghi đúng prefix S3.</p>
+
+          <h3>IAM policy JSON thực tế (ingestion)</h3>
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>iam_policy_ingest.json</span></div>
+            <div class="cmd-body"><pre>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowListSpecificPrefix",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::de-learning-raw-ap-southeast-1-prod",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": ["domain=commerce/source=erp/*"]
+        }
+      }
+    },
+    {
+      "Sid": "AllowPutOnlyToIngressPath",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:AbortMultipartUpload"],
+      "Resource": "arn:aws:s3:::de-learning-raw-ap-southeast-1-prod/domain=commerce/source=erp/*"
+    }
+  ]
+}</pre></div>
+          </div>
+
+          <div class="info-box tip">Tip <span>Temporary credentials qua STS an toàn hơn access key dài hạn: có thời hạn, xoay vòng tự động, giảm blast radius nếu lộ thông tin.</span></div>
+          <div class="info-box warn">Lưu ý <span>Anti-pattern nghiêm trọng: lưu access key tĩnh trong Airflow variable hoặc file cấu hình. Khi key bị lộ, kẻ tấn công có thể dùng lâu dài nếu không rotate kịp.</span></div>
+        </div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m2"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Role separation</strong>Tách role theo workload để giảm blast radius.</div><div class="summary-item"><strong>Least privilege</strong>Action + resource + condition phải cụ thể.</div><div class="summary-item"><strong>Deny by default</strong>Không dùng wildcard rộng nếu không có lý do mạnh.</div><div class="summary-item"><strong>Policy quality</strong>Sid rõ nghĩa giúp review và audit dễ.</div><div class="summary-item"><strong>Operational safety</strong>Giảm nguy cơ xóa nhầm hoặc rò rỉ dữ liệu.</div><div class="summary-item"><strong>Kết quả</strong>Pipeline an toàn hơn mà vẫn vận hành được.</div></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập W13.03</div><div class="practice-task-body"><p>Viết policy cho role chỉ được đọc curated của domain sales và chạy Athena query. Không được quyền ghi S3.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><p>Gợi ý: Allow <code>s3:GetObject</code> trên curated prefix, <code>athena:StartQueryExecution/GetQueryResults</code>, và chỉ <code>s3:PutObject</code> ở query result bucket riêng nếu cần.</p></div></div></div></div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(2)">← Module trước</button><button class="nav-btn primary" onclick="goNext(2)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m3">
+      <div class="module-header">
+        <div class="module-tag">Tuần 13 · W13.06</div>
+        <div class="module-title">W13.06 – RDS/Aurora cho Metadata & Operational Database</div>
+        <div class="module-subtitle">Module 6/11 · chọn đúng DB cho metadata pipeline.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Điểm chính</th></tr><tr><td>Use case</td><td>Metadata DB cho Airflow/job runs</td><td>Không dùng S3 thay metadata transactional</td></tr><tr><td>RDS vs Aurora</td><td>Chi phí, HA, read scaling</td><td>Chọn theo SLA và tải thật</td></tr><tr><td>SQL vận hành</td><td>Query trạng thái pipeline, backlog, retry</td><td>Theo dõi sức khỏe hệ thống</td></tr></table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Phân biệt khi nào chọn RDS PostgreSQL, khi nào nâng lên Aurora.</li><li>Thiết kế schema metadata phục vụ observability pipeline.</li><li>Viết query vận hành cho cả PostgreSQL và Oracle SQL.</li><li>Xác định backup, retention, và chỉ số monitor quan trọng.</li></ul></div></div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <p>Metadata DB không chứa dữ liệu fact lớn mà chứa trạng thái chạy job, row counts, thời gian bắt đầu/kết thúc, error code. Đây là lớp dữ liệu quyết định khả năng debug và vận hành.</p>
+          <p>Khi số ETL jobs tăng, vấn đề thường gặp là <strong>connection exhaustion</strong>: mỗi job mở nhiều session, DB chạm giới hạn kết nối, query treo dây chuyền và pipeline fail dù CPU chưa cao.</p>
+
+          <h3>RDS hay Aurora?</h3>
+          <table>
+            <tr><th>Tiêu chí</th><th>RDS PostgreSQL</th><th>Aurora PostgreSQL-Compatible</th></tr>
+            <tr><td>Chi phí baseline</td><td>Thấp hơn</td><td>Cao hơn</td></tr>
+            <tr><td>HA/failover</td><td>Tốt cho nhu cầu vừa</td><td>Tốt hơn khi SLA nghiêm ngặt</td></tr>
+            <tr><td>Read scaling</td><td>Giới hạn hơn</td><td>Hỗ trợ read replicas linh hoạt hơn</td></tr>
+            <tr><td>Khi phù hợp</td><td>Workload metadata vừa, team nhỏ</td><td>Multi-team, tải cao, yêu cầu failover nhanh</td></tr>
+          </table>
+
+          <h3>Schema metadata mẫu</h3>
+          <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>pipeline_runs schema</span></div><div class="cmd-body"><pre>run_id, pipeline_name, run_date, status,
+started_at, ended_at, processed_rows,
+failed_step, error_code, retry_count</pre></div></div>
+
+          <h3>Truy vấn vận hành (PostgreSQL / Oracle SQL)</h3>
+          <div class="sql-tabs">
+            <button class="sql-tab active">PostgreSQL</button>
+            <button class="sql-tab">Oracle SQL</button>
+          </div>
+          <div class="sql-panel active">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql</span></div><div class="cmd-body"><pre>SELECT pipeline_name,
+       run_date,
+       status,
+       processed_rows,
+       ended_at - started_at AS duration
+FROM pipeline_runs
+WHERE run_date &gt;= CURRENT_DATE - INTERVAL '7 day'
+ORDER BY run_date DESC, pipeline_name;</pre></div></div>
+          </div>
+          <div class="sql-panel">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql</span></div><div class="cmd-body"><pre>SELECT pipeline_name,
+       run_date,
+       status,
+       processed_rows,
+       (ended_at - started_at) * 24 * 60 AS duration_minutes
+FROM pipeline_runs
+WHERE run_date &gt;= TRUNC(SYSDATE) - 7
+ORDER BY run_date DESC, pipeline_name;</pre></div></div>
+          </div>
+
+          <h3>Kết nối DB ở production: RDS Proxy / PgBouncer</h3>
+          <table>
+            <tr><th>Giải pháp</th><th>Khi phù hợp</th><th>Lợi ích chính</th></tr>
+            <tr><td>RDS Proxy</td><td>Workload AWS-native, muốn managed pooling</td><td>Giảm connection churn, failover mượt hơn cho client</td></tr>
+            <tr><td>PgBouncer</td><td>Cần kiểm soát pooling chi tiết ở PostgreSQL</td><td>Giảm số session thật vào DB, ổn định khi burst job</td></tr>
+          </table>
+          <p>Nguyên tắc: nhiều job ETL chỉ nên mượn connection ngắn hạn qua pool, không giữ session mở quá lâu theo vòng đời DAG/task.</p>
+
+          <div class="info-box note">Ghi chú <span>Ít nhất phải monitor: CPU utilization, free storage, active connections, failover events.</span></div>
+        </div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m3"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Metadata DB</strong>Lưu trạng thái job, không thay thế data lake.</div><div class="summary-item"><strong>RDS vs Aurora</strong>Chọn theo SLA, HA, concurrency và ngân sách.</div><div class="summary-item"><strong>Schema tối thiểu</strong>Phải có run status, duration, error_code, retry_count.</div><div class="summary-item"><strong>Connection pooling</strong>RDS Proxy/PgBouncer giúp tránh connection exhaustion khi ETL burst.</div><div class="summary-item"><strong>Backup</strong>Retention và restore test không được bỏ qua.</div><div class="summary-item"><strong>Kết quả</strong>Pipeline dễ debug và giảm MTTR khi sự cố.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập W13.06</div><div class="practice-task-body"><p>Thiết kế query daily health report: số run thành công/thất bại, duration p95, và pipeline có retry nhiều nhất.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><p>Gợi ý: group theo <code>pipeline_name, run_date</code>, tính tỷ lệ fail, dùng percentile function hoặc bucket approximation theo engine.</p></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">← Module trước</button><button class="nav-btn primary" onclick="goNext(5)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m4">
+      <div class="module-header"><div class="module-tag">Tuần 13 · W13.05</div><div class="module-title">W13.05 – Athena, Redshift & Query Patterns trên AWS</div><div class="module-subtitle">Module 5/11 · so sánh dịch vụ query đúng ngữ cảnh.</div><div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Quyết định</th></tr><tr><td>Athena</td><td>Serverless query trên S3, pay-per-scan</td><td>Phù hợp ad-hoc / exploratory</td></tr><tr><td>Redshift</td><td>Warehouse MPP cho concurrency cao</td><td>Phù hợp dashboard/BI ổn định</td></tr><tr><td>Patterns</td><td>Format/partition/compression/workgroup</td><td>Giảm cost và tăng predictability</td></tr></table></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Giải thích rõ khi nào dùng Athena, khi nào dùng Redshift.</li><li>Viết external table Athena thực tế cho data lake partitioned.</li><li>Hiểu giới hạn concurrency/cost của từng hướng.</li><li>Tránh nhầm lẫn rằng một dịch vụ có thể thay thế mọi workload query.</li></ul></div></div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <tr><th>Tiêu chí</th><th>Athena</th><th>Redshift</th></tr>
+            <tr><td>Mô hình chi phí</td><td>Trả theo dữ liệu scan</td><td>Trả theo cụm/capacity + storage</td></tr>
+            <tr><td>Best use case</td><td>Ad-hoc query, kiểm tra dữ liệu nhanh</td><td>BI workload dày, latency ổn định</td></tr>
+            <tr><td>Hiệu năng phụ thuộc</td><td>Format + partition + filter</td><td>Sort key, dist style, vacuum/tuning</td></tr>
+            <tr><td>Risk phổ biến</td><td>Scan quá lớn vì SELECT *</td><td>Chi phí cố định cao nếu under-utilized</td></tr>
+          </table>
+
+          <h3>Redshift Spectrum và Redshift Serverless</h3>
+          <table>
+            <tr><th>Thành phần</th><th>Khi dùng</th><th>Điểm mạnh</th><th>Trade-off</th></tr>
+            <tr><td>Redshift Spectrum</td><td>Cần join dữ liệu warehouse với dữ liệu lớn còn nằm ở S3</td><td>Giảm nhu cầu nạp hết dữ liệu vào cluster</td><td>Hiệu năng phụ thuộc layout file S3 và external schema</td></tr>
+            <tr><td>Redshift Serverless</td><td>Workload BI biến động, muốn giảm vận hành cụm thủ công</td><td>Co giãn dễ hơn, giảm overhead quản cluster</td><td>Nếu workload luôn cao và ổn định, cost có thể kém tối ưu hơn capacity được quy hoạch trước</td></tr>
+          </table>
+
+          <h3>Decision matrix: ad-hoc vs BI vs hybrid</h3>
+          <table>
+            <tr><th>Workload</th><th>Dịch vụ khuyến nghị</th><th>Lý do</th></tr>
+            <tr><td>Ad-hoc / exploratory</td><td>Athena</td><td>Trả theo scan, linh hoạt, không cần giữ warehouse luôn bật</td></tr>
+            <tr><td>BI dashboard concurrency cao</td><td>Redshift (provisioned hoặc serverless)</td><td>Latency ổn định hơn, tối ưu cho serving analytics liên tục</td></tr>
+            <tr><td>Hybrid</td><td>Athena + Redshift + Spectrum</td><td>Athena cho khám phá, Redshift cho BI, Spectrum để bridge dữ liệu S3 khi cần</td></tr>
+          </table>
+
+          <h3>Athena external table mẫu mạnh hơn</h3>
+          <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>athena_external_table.sql</span></div><div class="cmd-body"><pre>CREATE EXTERNAL TABLE IF NOT EXISTS raw_orders (
+  order_id string,
+  customer_id string,
+  order_ts timestamp,
+  total_amount decimal(18,2),
+  payment_status string
+)
+PARTITIONED BY (
+  dt string,
+  source string
+)
+STORED AS PARQUET
+LOCATION 's3://de-learning-raw-ap-southeast-1-prod/domain=commerce/entity=orders/'
+TBLPROPERTIES ('parquet.compression'='SNAPPY');
+
+MSCK REPAIR TABLE raw_orders;</pre></div></div>
+
+          <h3>Query pattern tối ưu cost cho Athena</h3>
+          <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>athena_query_pattern.sql</span></div><div class="cmd-body"><pre>SELECT dt,
+       payment_status,
+       SUM(total_amount) AS gmv
+FROM raw_orders
+WHERE dt BETWEEN '2026-04-01' AND '2026-04-07'
+  AND source = 'erp'
+GROUP BY dt, payment_status
+ORDER BY dt, payment_status;</pre></div></div>
+
+          <div class="info-box tip">Tip <span>Với Athena, tối ưu lớn nhất thường đến từ: Parquet + partition pruning + tránh SELECT * + workgroup có bytes scan quota.</span></div>
+          <div class="info-box note">Ghi chú <span>Cost/performance trade-off: Athena rẻ khi query không đều; Redshift/Redshift Serverless thường hiệu quả hơn cho BI truy cập dày và SLA latency rõ.</span></div>
+          <div class="info-box warn">Lưu ý <span>Anti-pattern: dùng Athena cho dashboard realtime nhiều người dùng cùng lúc và kỳ vọng độ trễ ổn định như warehouse chuyên dụng.</span></div>
+        </div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m4"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Athena phù hợp</strong>Ad-hoc và exploration trên S3 với chi phí linh hoạt.</div><div class="summary-item"><strong>Redshift phù hợp</strong>BI concurrency cao, yêu cầu hiệu năng ổn định.</div><div class="summary-item"><strong>External table</strong>Thiết kế partition đúng giúp giảm scan cost mạnh.</div><div class="summary-item"><strong>Query discipline</strong>Filter theo partition và chỉ chọn cột cần dùng.</div><div class="summary-item"><strong>Service boundary</strong>Athena không thay thế toàn bộ warehouse workload.</div><div class="summary-item"><strong>Kết quả</strong>Biết chọn engine theo mục tiêu kỹ thuật và tài chính.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập W13.05</div><div class="practice-task-body"><p>Cho workload: 200 query ad-hoc/ngày và 40 dashboard refresh/phút. Hãy đề xuất kiến trúc Athena/Redshift kết hợp và nêu trade-off.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><p>Gợi ý: ad-hoc dùng Athena trên curated S3, dashboard chính dùng Redshift để đảm bảo latency/concurrency; đồng thời giữ pipeline đồng bộ từ curated sang Redshift theo lịch.</p></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(4)">← Module trước</button><button class="nav-btn primary" onclick="goNext(4)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m5">
+      <div class="module-header"><div class="module-tag">Tuần 13 · W13.07</div><div class="module-title">W13.07 – CloudWatch, Logging, Monitoring & Alerting</div><div class="module-subtitle">Module 7/11 · biến pipeline thành hệ thống quan sát được.</div><div class="progress-bar"><div class="progress-fill" style="width:64%"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Mục tiêu</th></tr><tr><td>Logging</td><td>Chuẩn hóa log fields</td><td>Truy vết lỗi nhanh</td></tr><tr><td>Metrics</td><td>freshness, row_count, failure_rate, latency</td><td>Đo sức khỏe pipeline theo số liệu</td></tr><tr><td>Alerting</td><td>Alarm có owner và runbook</td><td>Giảm thời gian phản ứng incident</td></tr></table></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Xây monitoring cho DE pipeline theo hành động cụ thể, không phải cảnh báo chung chung.</li><li>Tạo alarm có ngưỡng rõ, tránh alert noise.</li><li>Liên kết metric với business impact: dữ liệu trễ, dữ liệu thiếu, dữ liệu sai.</li><li>Thiết kế dashboard vận hành dùng được cho on-call.</li></ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><p>CloudWatch mạnh khi bạn chuyển log thành metric và metric thành cảnh báo có owner. Mục tiêu không phải có nhiều alarm, mà là có alarm đúng lúc, đúng người, đúng hành động.</p><h3>Custom metrics tối thiểu cho pipeline DE</h3><table><tr><th>Metric</th><th>Ý nghĩa</th><th>Ngưỡng ví dụ</th><th>Hành động</th></tr><tr><td>freshness_minutes</td><td>Độ trễ dữ liệu so với SLA</td><td>&gt; 90 phút</td><td>Kiểm tra ingest và upstream</td></tr><tr><td>pipeline_success</td><td>Run thành công (1) / thất bại (0)</td><td>&lt; 1 ở kỳ chạy hiện tại</td><td>Escalate on-call và kiểm tra step lỗi</td></tr><tr><td>processed_rows</td><td>Sản lượng records đã xử lý</td><td>Giảm &gt; 40% so baseline</td><td>Xác minh source outage/schema change</td></tr><tr><td>job_duration_minutes</td><td>Tăng runtime bất thường</td><td>&gt; p95 * 1.5</td><td>Kiểm tra bottleneck compute/io</td></tr></table><h3>Ví dụ push custom metrics bằng boto3</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>emit_metrics.py</span></div><div class="cmd-body"><pre>import boto3
+from datetime import datetime
+
+cw = boto3.client("cloudwatch", region_name="ap-southeast-1")
+
+cw.put_metric_data(
+    Namespace="DE/Pipeline",
+    MetricData=[
+        {
+            "MetricName": "pipeline_success",
+            "Dimensions": [{"Name": "pipeline", "Value": "commerce_orders_daily"}],
+            "Timestamp": datetime.utcnow(),
+            "Value": 1,
+            "Unit": "Count"
+        },
+        {
+            "MetricName": "processed_rows",
+            "Dimensions": [{"Name": "pipeline", "Value": "commerce_orders_daily"}],
+            "Timestamp": datetime.utcnow(),
+            "Value": 1250342,
+            "Unit": "Count"
+        },
+        {
+            "MetricName": "freshness_minutes",
+            "Dimensions": [{"Name": "pipeline", "Value": "commerce_orders_daily"}],
+            "Timestamp": datetime.utcnow(),
+            "Value": 42,
+            "Unit": "None"
+        }
+    ]
+)</pre></div></div><h3>Ví dụ alarm cấu hình rõ hành động</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>cloudwatch_alarm_example.tf</span></div><div class="cmd-body"><pre>resource "aws_cloudwatch_metric_alarm" "freshness_alarm" {
+  alarm_name          = "de-commerce-freshness-over-90m"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "freshness_minutes"
+  namespace           = "DE/Pipeline"
+  period              = 300
+  statistic           = "Maximum"
+  threshold           = 90
+  alarm_description   = "Data freshness vượt SLA 90 phút"
+  alarm_actions       = [aws_sns_topic.oncall_alert.arn]
+  dimensions = {
+    pipeline = "commerce_orders_daily"
+    env      = "prod"
+  }
+}</pre></div></div><div class="info-box note">Ghi chú <span>Mỗi alarm cần có owner và runbook URL. Nếu không, cảnh báo chỉ tạo stress mà không tạo giá trị.</span></div><div class="info-box warn">Lưu ý <span>Anti-pattern: tạo 50 alarm nhưng không có threshold dựa trên baseline lịch sử. Kết quả là alert fatigue và bỏ sót incident thật.</span></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m5"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Custom metrics</strong>Chuẩn hóa pipeline_success, processed_rows, freshness_minutes.</div><div class="summary-item"><strong>Alarm actionable</strong>Ngưỡng rõ + owner + runbook.</div><div class="summary-item"><strong>Noise control</strong>Giảm false positive để giữ on-call hiệu quả.</div><div class="summary-item"><strong>Business linkage</strong>Metric phải phản ánh impact dữ liệu.</div><div class="summary-item"><strong>Terraform friendly</strong>Alarm nên được version-control bằng IaC.</div><div class="summary-item"><strong>Kết quả</strong>Giảm MTTR và tăng độ tin cậy pipeline.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập W13.07</div><div class="practice-task-body"><p>Thiết kế 3 alarm bắt buộc cho pipeline daily_sales và mô tả ai sẽ xử lý từng alarm trong 15 phút đầu.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><p>Gợi ý: freshness alarm, fail-streak alarm, row-drop alarm. Owner đầu tiên là on-call DE, escalation sang upstream owner khi phát hiện source issue.</p></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">← Module trước</button><button class="nav-btn primary" onclick="goNext(6)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m6">
+      <div class="module-header"><div class="module-tag">Tuần 13 · W13.04</div><div class="module-title">W13.04 – AWS Glue Data Catalog & Metadata Layer</div><div class="module-subtitle">Module 4/11 · quản trị metadata dùng chung cho query engine.</div><div class="progress-bar"><div class="progress-fill" style="width:36%"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Kết quả</th></tr><tr><td>Catalog role</td><td>Metadata trung tâm cho Athena/ETL</td><td>Schema nhất quán giữa team</td></tr><tr><td>Crawler vs manual DDL</td><td>Tự động nhận schema hay kiểm soát thủ công</td><td>Chọn chiến lược phù hợp mức thay đổi schema</td></tr><tr><td>Governance</td><td>Versioning, owner tag, naming table</td><td>Giảm rủi ro schema drift</td></tr></table></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Hiểu Glue Catalog là lớp metadata, không phải nơi lưu dữ liệu file.</li><li>Thiết kế database/table naming nhất quán theo domain và layer.</li><li>Tránh crawler chạy vô tội vạ gây thay đổi schema ngoài ý muốn.</li><li>Liên kết Glue Catalog với Athena và Redshift Spectrum theo một metadata plane thống nhất.</li></ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><p>Glue Data Catalog là danh bạ metadata cho data lake: tên bảng, cột, partition, location S3. Nếu quản lý tốt, team phân tích và team hạ tầng dùng chung một "nguồn sự thật" về schema.</p><h3>Naming chuẩn gợi ý</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>catalog naming</span></div><div class="cmd-body"><pre>Database: dlk_commerce_raw, dlk_commerce_curated
+Table: orders_raw, orders_curated_daily
+Prefix S3: s3://.../domain=commerce/entity=orders/...</pre></div></div><h3>Crawler hay manual DDL?</h3><table><tr><th>Phương án</th><th>Khi phù hợp</th><th>Rủi ro</th><th>Cách giảm rủi ro</th></tr><tr><td>Crawler tự động</td><td>Nhiều nguồn mới, onboarding nhanh</td><td>Schema thay đổi bất ngờ</td><td>Giới hạn path, tách môi trường, lịch chạy kiểm soát</td></tr><tr><td>DDL thủ công</td><td>Dataset quan trọng, cần ổn định</td><td>Tốn công bảo trì</td><td>Quản lý bằng IaC/SQL migration</td></tr></table><h3>Ví dụ tạo database/table bằng Terraform</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>glue_catalog.tf</span></div><div class="cmd-body"><pre>resource "aws_glue_catalog_database" "commerce_raw" {
+  name = "dlk_commerce_raw"
+}
+
+resource "aws_glue_catalog_table" "orders_raw" {
+  name          = "orders_raw"
+  database_name = aws_glue_catalog_database.commerce_raw.name
+  table_type    = "EXTERNAL_TABLE"
+  parameters = {
+    classification = "parquet"
+  }
+  storage_descriptor {
+    location      = "s3://de-learning-raw-ap-southeast-1-prod/domain=commerce/entity=orders/"
+    input_format  = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+    output_format = "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+  }
+}</pre></div></div><div class="info-box note">Ghi chú <span>Catalog table cần owner rõ và quy trình thay đổi schema (change request) để tránh breaking change cho dashboard.</span></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m6"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Catalog role</strong>Glue quản metadata, không thay S3 storage.</div><div class="summary-item"><strong>Naming thống nhất</strong>Database/table theo domain + layer rõ ràng.</div><div class="summary-item"><strong>Crawler control</strong>Crawler mạnh nhưng phải giới hạn phạm vi.</div><div class="summary-item"><strong>Schema governance</strong>Change process giúp tránh breaking downstream.</div><div class="summary-item"><strong>IaC alignment</strong>Định nghĩa catalog bằng Terraform giúp repeatable.</div><div class="summary-item"><strong>Kết quả</strong>Team query dữ liệu thống nhất và an toàn hơn.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập W13.04</div><div class="practice-task-body"><p>Thiết kế chuẩn đặt tên cho 3 domain: commerce, marketing, finance với 2 layer raw và curated trong Glue Catalog.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><p>Gợi ý: database dạng <code>dlk_{domain}_{layer}</code>, table dạng <code>{entity}_{granularity}</code> và giữ mapping với prefix S3 tương ứng.</p></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">← Module trước</button><button class="nav-btn primary" onclick="goNext(3)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m7">
+      <div class="module-header"><div class="module-tag">Tuần 13 · W13.08</div><div class="module-title">W13.08 – Infrastructure as Code: terraform/ cho cloud_setup/</div><div class="module-subtitle">Module 8/11 · biến hạ tầng thành mã có thể review.</div><div class="progress-bar"><div class="progress-fill" style="width:73%"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Mục tiêu</th></tr><tr><td>Terraform structure</td><td>providers, variables, modules, env</td><td>Dễ bảo trì và review</td></tr><tr><td>Core resources</td><td>S3, IAM, Glue, Athena, CloudWatch</td><td>Khớp narrative kiến trúc</td></tr><tr><td>Workflow</td><td>fmt/validate/plan/apply</td><td>Triển khai an toàn, giảm sai sót</td></tr></table></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Viết Terraform đủ thực tế để tạo cloud_setup artifact.</li><li>Tránh hardcode secret và tránh apply trực tiếp không plan.</li><li>Đảm bảo terraform code bám sát kiến trúc data lake tuần 13.</li><li>Hiểu cách tách state và module theo môi trường dev/prod.</li></ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><h3>Cấu trúc thư mục terraform gợi ý</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>cloud_setup/terraform</span></div><div class="cmd-body"><pre>terraform/
+  versions.tf
+  providers.tf
+  backend.tf
+  variables.tf
+  locals.tf
+  s3.tf
+  iam.tf
+  glue.tf
+  athena.tf
+  cloudwatch.tf
+  outputs.tf
+  env/
+    dev.tfvars
+    prod.tfvars</pre></div></div><h3>Remote state: backend "s3" + DynamoDB locking</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>backend.tf</span></div><div class="cmd-body"><pre>terraform {
+  backend "s3" {
+    bucket         = "de-learning-terraform-state"
+    key            = "cloud_setup/prod/terraform.tfstate"
+    region         = "ap-southeast-1"
+    dynamodb_table = "de-learning-terraform-locks"
+    encrypt        = true
+  }
+}</pre></div></div><p><strong>Vì sao local tfstate nguy hiểm trong team:</strong> dễ conflict khi nhiều người apply, khó audit lịch sử thay đổi, và có thể chứa dữ liệu nhạy cảm nếu xử lý output/attribute không cẩn thận.</p><h3>Ví dụ variables và tagging chuẩn</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>variables.tf</span></div><div class="cmd-body"><pre>variable "project" { type = string }
+variable "environment" { type = string }
+variable "region" { type = string }
+
+locals {
+  common_tags = {
+    project     = var.project
+    environment = var.environment
+    owner       = "data-platform"
+    cost_center = "de-learning"
+  }
+}</pre></div></div><h3>Ví dụ resource S3 có security defaults</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>s3.tf</span></div><div class="cmd-body"><pre>resource "aws_s3_bucket" "raw" {
+  bucket = "${var.project}-raw-${var.region}-${var.environment}"
+  tags   = local.common_tags
+}
+
+resource "aws_s3_bucket_versioning" "raw" {
+  bucket = aws_s3_bucket.raw.id
+  versioning_configuration { status = "Enabled" }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "raw" {
+  bucket = aws_s3_bucket.raw.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "aws:kms"
+    }
+  }
+}</pre></div></div><div class="info-box tip">Tip <span>Terraform mạnh nhất khi mọi thay đổi hạ tầng đi qua pull request: có diff, có review, có rollback plan.</span></div><div class="info-box warn">Lưu ý <span>Anti-pattern: dùng local state trong team hoặc commit <code>terraform.tfstate</code>; rất dễ gây state drift và khóa chéo khi nhiều người deploy.</span></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m7"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>IaC mindset</strong>Hạ tầng là mã, không thao tác tay.</div><div class="summary-item"><strong>Structure rõ</strong>Tách file theo resource và mục tiêu nghiệp vụ.</div><div class="summary-item"><strong>Security defaults</strong>SSE-KMS, versioning, tag bắt buộc ngay trong code.</div><div class="summary-item"><strong>State hygiene</strong>Không commit state, quản trị backend rõ ràng.</div><div class="summary-item"><strong>Workflow chuẩn</strong>fmt, validate, plan trước apply.</div><div class="summary-item"><strong>Kết quả</strong>Hạ tầng repeatable, reviewable, audit-friendly.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập W13.08</div><div class="practice-task-body"><p>Viết tối thiểu 3 file Terraform: <code>s3.tf</code>, <code>iam.tf</code>, <code>outputs.tf</code> cho môi trường dev và nêu cách mở rộng lên prod.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><p>Gợi ý: dùng <code>*.tfvars</code> tách môi trường, giữ logic chung trong module và truyền biến environment để tránh copy-paste code.</p></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">← Module trước</button><button class="nav-btn primary" onclick="goNext(7)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m8">
+      <div class="module-header"><div class="module-tag">Tuần 13 · W13.09</div><div class="module-title">W13.09 – Cost, Security & Production Design Decisions</div><div class="module-subtitle">Module 9/11 · tổng hợp trade-off để ra quyết định kiến trúc.</div><div class="progress-bar"><div class="progress-fill" style="width:82%"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Điểm ra quyết định</th></tr><tr><td>Cost model</td><td>Storage, query, compute, transfer</td><td>Tối ưu theo workload thật</td></tr><tr><td>Security baseline</td><td>Encryption, IAM, audit logging</td><td>Giảm rủi ro pháp lý/vận hành</td></tr><tr><td>Decision records</td><td>Lý do chọn dịch vụ + trade-off</td><td>Dễ bảo trì khi team mở rộng</td></tr></table></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Xây khung quyết định có thể lặp lại cho các dự án DE trên cloud.</li><li>Lượng hóa chi phí thay vì cảm giác.</li><li>Kết nối security controls với risk thực tế.</li><li>Viết design decision ngắn gọn nhưng đủ thông tin hành động.</li></ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><h3>Khung 4 câu hỏi trước khi chọn dịch vụ</h3><ol><li>Workload chính là gì: ad-hoc, scheduled BI, hay near real-time?</li><li>SLA/latency yêu cầu bao nhiêu và có thay đổi theo mùa vụ không?</li><li>Ngân sách tháng và mức độ biến động chấp nhận được?</li><li>Rủi ro bảo mật nào không thể chấp nhận (PII, tài chính, tuân thủ)?</li></ol><h3>Bảng chi phí tham chiếu theo thành phần</h3><table><tr><th>Thành phần</th><th>Driver chi phí chính</th><th>Cách tối ưu thực dụng</th></tr><tr><td>S3 storage</td><td>Dung lượng + storage class</td><td>Lifecycle, nén Parquet, xóa dữ liệu trung gian</td></tr><tr><td>Athena</td><td>Dữ liệu scan</td><td>Partition pruning, chọn cột cần thiết, workgroup quota</td></tr><tr><td>Redshift</td><td>Compute giờ chạy</td><td>Reserved capacity, scaling theo giờ cao điểm</td></tr><tr><td>Data transfer</td><td>Cross-region / internet egress + NAT processing</td><td>Đặt compute gần dữ liệu, hạn chế copy không cần thiết, ưu tiên endpoint nội bộ</td></tr></table><h3>NAT Gateway hidden bill và placement theo AZ/region</h3><ul><li>Workload private subnet đọc S3 qua NAT liên tục sẽ tạo khoản phí lớn theo GB, kể cả khi compute không tăng.</li><li>Dùng S3 VPC Endpoint giảm luồng qua NAT cho traffic S3 nội bộ.</li><li>Đặt dịch vụ cùng region và ưu tiên cùng AZ khi phù hợp giúp giảm data transfer cross-AZ/cross-region không cần thiết.</li></ul><h3>Security baseline tuần 13</h3><ul><li>S3 Block Public Access bật toàn cục.</li><li>Encryption at rest: SSE-KMS cho bucket chứa dữ liệu nghiệp vụ.</li><li>Least privilege cho role pipeline theo prefix cụ thể.</li><li>CloudTrail/CloudWatch logs bật để audit thao tác nhạy cảm.</li><li>Không lưu secret trong code, dùng Secrets Manager hoặc Parameter Store tùy mức nhạy cảm và nhu cầu rotation.</li></ul><h3>Tagging bắt buộc để quản trị chi phí và ownership</h3><table><tr><th>Tag</th><th>Ví dụ</th><th>Mục đích</th></tr><tr><td>cost_center</td><td>de-learning</td><td>Phân bổ chi phí theo domain/team</td></tr><tr><td>owner</td><td>data-platform</td><td>Xác định nhóm chịu trách nhiệm khi có incident/bill spike</td></tr><tr><td>environment</td><td>dev/prod</td><td>Tách bạch ngân sách và chính sách vận hành</td></tr></table><div class="info-box note">Ghi chú <span>Decision record tốt luôn ghi: bối cảnh, lựa chọn, phương án bị loại, trade-off, rủi ro còn tồn tại và kế hoạch giảm rủi ro.</span></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m8"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Decision discipline</strong>Chọn dịch vụ bằng dữ liệu workload, không theo cảm tính.</div><div class="summary-item"><strong>Cost awareness</strong>Tối ưu theo driver chi phí của từng dịch vụ.</div><div class="summary-item"><strong>Security baseline</strong>Encryption, IAM, audit là điều kiện tối thiểu.</div><div class="summary-item"><strong>Trade-off clarity</strong>Mọi lựa chọn đều có giá phải trả, cần ghi rõ.</div><div class="summary-item"><strong>Production mindset</strong>Tính đến incident và vận hành ngay khi thiết kế.</div><div class="summary-item"><strong>Kết quả</strong>Có khung quyết định tái sử dụng cho các tuần tiếp theo.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập W13.09</div><div class="practice-task-body"><p>Viết decision record 1 trang cho bài toán: dữ liệu 2TB/ngày, dashboard refresh 5 phút/lần, ngân sách cố định. Chọn kiến trúc và nêu 3 rủi ro còn lại.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><p>Gợi ý: kết hợp S3 + Athena cho exploration và Redshift cho serving dashboard; rủi ro thường gặp gồm chi phí vượt dự kiến, schema drift, và quyền truy cập quá rộng.</p></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(8)">← Module trước</button><button class="nav-btn primary" onclick="goNext(8)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m9">
+      <div class="module-header"><div class="module-tag">Tuần 13 · W13.10</div><div class="module-title">W13.10 – Artifact: cloud_setup/ hoàn chỉnh</div><div class="module-subtitle">Module 10/11 · ghép toàn bộ thành artifact có thể commit.</div><div class="progress-bar"><div class="progress-fill" style="width:91%"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Kỳ vọng</th></tr><tr><td>Thư mục artifact</td><td>terraform, sql, docs</td><td>Người khác clone về hiểu và chạy được</td></tr><tr><td>README</td><td>kiến trúc, cost, security, cách chạy</td><td>Tài liệu hành động được</td></tr><tr><td>architecture.md</td><td>luồng dữ liệu và service boundaries</td><td>Không generic, bám đúng use case</td></tr></table></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Hoàn thiện cloud_setup artifact đủ thực tế cho portfolio.</li><li>Đảm bảo narrative trong README khớp với terraform files.</li><li>Cung cấp truy vấn kiểm chứng và checklist vận hành sau deploy.</li><li>Giữ chuẩn tài liệu ngắn gọn nhưng đủ dùng cho reviewer kỹ thuật.</li></ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><h3>Cấu trúc artifact hoàn chỉnh</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>cloud_setup/</span></div><div class="cmd-body"><pre>cloud_setup/
+  terraform/
+    versions.tf
+    providers.tf
+    backend.tf
+    variables.tf
+    s3.tf
+    iam.tf
+    glue.tf
+    athena.tf
+    cloudwatch.tf
+    outputs.tf
+    env/dev.tfvars
+    env/prod.tfvars
+  sql/
+    athena_external_tables.sql
+    validation_queries.sql
+  monitoring/
+    cloudwatch_metrics.md
+    alarm_runbook.md
+  architecture.md
+  cost_model.md
+  security.md
+  README.md</pre></div></div><h3>README nên có gì</h3><ul><li>Mục tiêu kiến trúc và phạm vi môi trường.</li><li>Sơ đồ luồng dữ liệu: source → S3 raw → transform → curated → Athena/Redshift.</li><li>Cách chạy Terraform an toàn: init, validate, plan, apply.</li><li>Ước lượng chi phí và điểm cần theo dõi sau deploy.</li><li>Security notes: IAM boundaries, encryption, secret handling, audit logs.</li></ul><h3>Ví dụ phần validation query</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>validation_queries.sql</span></div><div class="cmd-body"><pre>SELECT dt, COUNT(*) AS row_cnt
+FROM curated_orders
+WHERE dt = '2026-04-22'
+GROUP BY dt;
+
+SELECT payment_status, SUM(total_amount) AS gmv
+FROM curated_orders
+WHERE dt BETWEEN '2026-04-20' AND '2026-04-22'
+GROUP BY payment_status;</pre></div></div><div class="info-box tip">Tip <span>Artifact mạnh là artifact trả lời được 3 câu: kiến trúc gì, chi phí ra sao, bảo mật như thế nào và ai vận hành khi có sự cố.</span></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m9"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Artifact completeness</strong>Phải có code + query + docs, không chỉ screenshot.</div><div class="summary-item"><strong>Narrative consistency</strong>README phải khớp với terraform và architecture.</div><div class="summary-item"><strong>Validation</strong>Có query xác nhận dữ liệu sau deploy.</div><div class="summary-item"><strong>Cost clarity</strong>Nêu rõ giả định và driver chi phí chính.</div><div class="summary-item"><strong>Security clarity</strong>Nêu ranh giới IAM và encryption strategy.</div><div class="summary-item"><strong>Kết quả</strong>cloud_setup đủ chất lượng để đưa vào portfolio.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập W13.10</div><div class="practice-task-body"><p>Soạn README 1 trang cho artifact cloud_setup, trong đó bắt buộc có: architecture summary, cost notes, security notes, test plan sau deploy.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><p>Gợi ý: theo cấu trúc Overview → Architecture → Terraform Steps → Validation SQL → Cost/Security → Known Limitations.</p></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(9)">← Module trước</button><button class="nav-btn primary" onclick="goNext(9)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m10">
+      <div class="module-header"><div class="module-tag">Tuần 13 · W13.11</div><div class="module-title">W13.11 – Mini Test Tổng Kết</div><div class="module-subtitle">Module 11/11 · kiểm tra mức sẵn sàng trước tuần 14.</div><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Mục tiêu</th></tr><tr><td>Review quiz</td><td>10 câu ôn tập tổng quan module 11</td><td>Củng cố mindset trước mini test</td></tr><tr><td>Mini test cuối tuần</td><td>16 câu bao phủ toàn bộ tuần 13</td><td>Đo readiness thực tế</td></tr><tr><td>Kế hoạch tiếp theo</td><td>Dựa theo điểm mạnh/yếu</td><td>Ôn đúng phần còn yếu</td></tr></table></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Đánh giá mức hiểu dịch vụ AWS trong ngữ cảnh Data Engineering.</li><li>Phát hiện lỗ hổng kiến thức trước khi sang tuần Data Warehouse.</li><li>Tạo thói quen tự đo lường năng lực theo tiêu chí cụ thể.</li><li>Chuyển điểm số thành hành động ôn tập có kế hoạch.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><p>Mini test không thay thế thực hành. Nó giúp bạn biết mình yếu ở đâu: thiết kế S3, policy IAM, chọn Athena/Redshift, monitoring hay Terraform. Ngưỡng khuyến nghị để qua tuần 14 là từ 75%.</p><div class="info-box note">Ghi chú <span>Nếu dưới 60%: nên ôn lại W13.02, W13.03, W13.05, W13.08 trước khi tiếp tục.</span></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m10"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Coverage</strong>Mini test bao phủ toàn bộ năng lực tuần 13.</div><div class="summary-item"><strong>Threshold</strong>Khuyến nghị đạt từ 75% để sang tuần 14.</div><div class="summary-item"><strong>Action nếu thấp điểm</strong>Ôn module nền tảng trước khi mở rộng kiến thức.</div><div class="summary-item"><strong>Action nếu đạt</strong>Có thể chuyển sang Data Warehouse với nền tảng tốt.</div><div class="summary-item"><strong>Mindset</strong>Luôn gắn điểm số với kế hoạch cải thiện cụ thể.</div><div class="summary-item"><strong>Kết quả</strong>Biết rõ điểm mạnh và điểm cần nâng cấp.</div></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập W13.11</div><div class="practice-task-body"><p>Sau khi làm mini test, lập kế hoạch ôn tập 3 ngày: mỗi ngày tập trung một nhóm kỹ năng còn yếu và ghi KPI học tập.</p><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><p>Ví dụ: Ngày 1 S3 + IAM, Ngày 2 Athena/Glue, Ngày 3 Terraform + CloudWatch; KPI là hoàn thành 1 bài thực hành có review.</p></div></div></div>
+
+      <div id="final-test">
+        <div class="test-question" data-q="1" data-correct="B"><div class="test-question-title">Câu 1. Small File Problem trong S3 gây tác động chính nào cho Athena?</div><div class="test-options"><label class="test-option"><input type="radio" name="q1" value="A"> A. Tăng bảo mật mặc định</label><label class="test-option"><input type="radio" name="q1" value="B"> B. Tăng metadata overhead, query chậm và tốn chi phí hơn</label><label class="test-option"><input type="radio" name="q1" value="C"> C. Giảm số lượng object phải đọc</label><label class="test-option"><input type="radio" name="q1" value="D"> D. Không ảnh hưởng vì Athena tự sửa</label></div></div>
+        <div class="test-question" data-q="2" data-correct="A"><div class="test-question-title">Câu 2. Mục tiêu file Parquet sau compaction thường nằm ở dải nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q2" value="A"> A. 128MB - 512MB</label><label class="test-option"><input type="radio" name="q2" value="B"> B. 1KB - 50KB</label><label class="test-option"><input type="radio" name="q2" value="C"> C. 2MB - 5MB cố định</label><label class="test-option"><input type="radio" name="q2" value="D"> D. Không cần quan tâm kích thước file</label></div></div>
+        <div class="test-question" data-q="3" data-correct="C"><div class="test-question-title">Câu 3. Vì sao private workload truy cập S3 nên ưu tiên VPC Endpoint thay vì NAT?</div><div class="test-options"><label class="test-option"><input type="radio" name="q3" value="A"> A. Để thay IAM policy</label><label class="test-option"><input type="radio" name="q3" value="B"> B. Để tăng số lượng subnet</label><label class="test-option"><input type="radio" name="q3" value="C"> C. Giảm NAT processing cost và giữ traffic nội bộ AWS</label><label class="test-option"><input type="radio" name="q3" value="D"> D. Vì S3 chỉ chạy qua NAT</label></div></div>
+        <div class="test-question" data-q="4" data-correct="D"><div class="test-question-title">Câu 4. sts:AssumeRole giúp điều gì trong pipeline?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> A. Tạo bảng Glue tự động</label><label class="test-option"><input type="radio" name="q4" value="B"> B. Tắt CloudTrail</label><label class="test-option"><input type="radio" name="q4" value="C"> C. Bỏ cần trust policy</label><label class="test-option"><input type="radio" name="q4" value="D"> D. Nhận temporary credentials để mượn quyền theo session</label></div></div>
+        <div class="test-question" data-q="5" data-correct="A"><div class="test-question-title">Câu 5. Trust relationship trong IAM định nghĩa gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> A. Principal nào được phép assume role</label><label class="test-option"><input type="radio" name="q5" value="B"> B. Partition strategy của S3</label><label class="test-option"><input type="radio" name="q5" value="C"> C. Threshold CloudWatch alarm</label><label class="test-option"><input type="radio" name="q5" value="D"> D. Dist key của Redshift</label></div></div>
+        <div class="test-question" data-q="6" data-correct="B"><div class="test-question-title">Câu 6. Redshift Spectrum phù hợp nhất khi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> A. Khi muốn thay thế hoàn toàn S3 data lake</label><label class="test-option"><input type="radio" name="q6" value="B"> B. Khi cần query/join dữ liệu ở S3 từ Redshift</label><label class="test-option"><input type="radio" name="q6" value="C"> C. Khi cần chạy OLTP transaction</label><label class="test-option"><input type="radio" name="q6" value="D"> D. Khi không dùng metadata catalog</label></div></div>
+        <div class="test-question" data-q="7" data-correct="C"><div class="test-question-title">Câu 7. Workload BI biến động mạnh và muốn giảm quản trị cụm, nên cân nhắc gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> A. Chỉ dùng Athena cho dashboard concurrency cao</label><label class="test-option"><input type="radio" name="q7" value="B"> B. Chỉ dùng RDS cho analytics</label><label class="test-option"><input type="radio" name="q7" value="C"> C. Redshift Serverless</label><label class="test-option"><input type="radio" name="q7" value="D"> D. Tăng wildcard IAM</label></div></div>
+        <div class="test-question" data-q="8" data-correct="B"><div class="test-question-title">Câu 8. RDS connection exhaustion thường xuất hiện khi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> A. Chỉ khi bucket S3 đầy</label><label class="test-option"><input type="radio" name="q8" value="B"> B. Nhiều ETL jobs mở session đồng thời vượt ngưỡng</label><label class="test-option"><input type="radio" name="q8" value="C"> C. Khi dùng Glue Catalog</label><label class="test-option"><input type="radio" name="q8" value="D"> D. Khi bật KMS encryption</label></div></div>
+        <div class="test-question" data-q="9" data-correct="D"><div class="test-question-title">Câu 9. Giải pháp nào giúp giảm connection churn cho PostgreSQL metadata DB?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Tăng số file CSV</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Tắt retry của ETL</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Chỉ dùng SELECT *</label><label class="test-option"><input type="radio" name="q9" value="D"> D. RDS Proxy hoặc PgBouncer</label></div></div>
+        <div class="test-question" data-q="10" data-correct="A"><div class="test-question-title">Câu 10. API boto3 nào dùng để gửi custom metric CloudWatch?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. put_metric_data</label><label class="test-option"><input type="radio" name="q10" value="B"> B. start_query_execution</label><label class="test-option"><input type="radio" name="q10" value="C"> C. assume_role</label><label class="test-option"><input type="radio" name="q10" value="D"> D. create_bucket</label></div></div>
+        <div class="test-question" data-q="11" data-correct="C"><div class="test-question-title">Câu 11. Trong Terraform, backend "s3" + DynamoDB lock chủ yếu để làm gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. Tăng tốc query Athena</label><label class="test-option"><input type="radio" name="q11" value="B"> B. Thay thế CI/CD</label><label class="test-option"><input type="radio" name="q11" value="C"> C. Quản remote state an toàn và tránh apply chồng chéo</label><label class="test-option"><input type="radio" name="q11" value="D"> D. Tạo IAM users</label></div></div>
+        <div class="test-question" data-q="12" data-correct="D"><div class="test-question-title">Câu 12. Rủi ro lớn khi team dùng local tfstate là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. Terraform chạy nhanh hơn quá mức</label><label class="test-option"><input type="radio" name="q12" value="B"> B. Giảm khả năng drift</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Tự động mã hóa secret tốt hơn</label><label class="test-option"><input type="radio" name="q12" value="D"> D. Dễ conflict/state drift và có nguy cơ lộ dữ liệu nhạy cảm</label></div></div>
+        <div class="test-question" data-q="13" data-correct="B"><div class="test-question-title">Câu 13. Tag nào trực tiếp giúp phân bổ chi phí theo team/domain?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. region</label><label class="test-option"><input type="radio" name="q13" value="B"> B. cost_center</label><label class="test-option"><input type="radio" name="q13" value="C"> C. browser</label><label class="test-option"><input type="radio" name="q13" value="D"> D. tab_color</label></div></div>
+        <div class="test-question" data-q="14" data-correct="A"><div class="test-question-title">Câu 14. Với secret của pipeline, lựa chọn tốt hơn hardcode trong code là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. Secrets Manager hoặc Parameter Store</label><label class="test-option"><input type="radio" name="q14" value="B"> B. Ghi trực tiếp vào README</label><label class="test-option"><input type="radio" name="q14" value="C"> C. Để trong file SQL</label><label class="test-option"><input type="radio" name="q14" value="D"> D. Để trong commit message</label></div></div>
+        <div class="test-question" data-q="15" data-correct="C"><div class="test-question-title">Câu 15. Cấu trúc artifact nào phản ánh portfolio production-grade hơn?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Chỉ terraform/ và 1 ảnh kiến trúc</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Chỉ README và screenshot</label><label class="test-option"><input type="radio" name="q15" value="C"> C. terraform/, sql/, monitoring/, architecture.md, cost_model.md, security.md</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Chỉ notebook cá nhân</label></div></div>
+        <div class="test-question" data-q="16" data-correct="D"><div class="test-question-title">Câu 16. Nguyên tắc cốt lõi khi thiết kế cloud cho DE là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. Tối ưu một chiều duy nhất</label><label class="test-option"><input type="radio" name="q16" value="B"> B. Chọn dịch vụ đắt nhất để an toàn</label><label class="test-option"><input type="radio" name="q16" value="C"> C. Chọn theo trend thị trường</label><label class="test-option"><input type="radio" name="q16" value="D"> D. Cân bằng speed, cost, security, reliability</label></div></div>
+
+        <div class="test-actions">
+          <button class="nav-btn primary" onclick="gradeFinalTest()">Chấm điểm mini test</button>
+          <button class="nav-btn" onclick="resetFinalTest()">Làm lại từ đầu</button>
+        </div>
+        <div class="test-result" id="final-test-result" style="display:none"></div>
+      </div>
+      </div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(10)">← Module trước</button><div style="color:var(--accent2);font-weight:700">Hoàn thành Week13.</div></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+const moduleFlow = ['m0', 'm1', 'm2', 'm6', 'm4', 'm3', 'm5', 'm7', 'm8', 'm9', 'm10'];
+const orderedModules = moduleFlow.map(id => document.getElementById(id)).filter(Boolean);
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  if (orderedModules[idx]) orderedModules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < orderedModules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const t = header.querySelector('.section-toggle');
+  const hidden = content.style.display === 'none';
+  content.style.display = hidden ? 'block' : 'none';
+  t.textContent = hidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.dataset.correct === 'true') o.classList.add('correct');
+    });
+  }
+  explain.textContent = (correct ? 'Chính xác. ' : 'Chưa đúng. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? 'Ẩn lời giải' : 'Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrong = [], miss = [];
+
+  questions.forEach(q => {
+    const n = q.dataset.q;
+    const c = q.dataset.correct;
+    const s = q.querySelector(`input[name="q${n}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+
+    if (!s) {
+      q.classList.add('unanswered');
+      miss.push(n);
+      return;
+    }
+
+    answeredCount++;
+    if (s.value === c) {
+      q.classList.add('correct');
+      correctCount++;
+    } else {
+      q.classList.add('wrong');
+      wrong.push({ q: n, s: s.value, c });
+    }
+  });
+
+  const total = questions.length;
+  const pct = total ? Math.round(correctCount * 100 / total) : 0;
+  let level = 'Cần củng cố', chip = 'warn', guide = 'Nên ôn thêm trước khi sang tuần 14.';
+
+  if (pct >= 90) {
+    level = 'Xuất sắc'; chip = 'good'; guide = 'Bạn nắm rất chắc tuần 13.';
+  } else if (pct >= 75) {
+    level = 'Đạt yêu cầu'; chip = 'good'; guide = 'Bạn có thể chuyển sang tuần 14.';
+  } else if (pct < 60) {
+    level = 'Cần học lại'; chip = 'bad'; guide = 'Ôn lại W13.02, W13.03, W13.05, W13.08.';
+  }
+
+  const missHtml = miss.length ? `<p><strong>Câu chưa trả lời:</strong> Q${miss.join(', Q')}</p>` : '';
+  const wrongHtml = wrong.length
+    ? `<p><strong>Câu sai:</strong></p><ul>${wrong.map(i => `<li>Q${i.q}: chọn ${i.s}, đúng là ${i.c}</li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng.</strong></p>';
+
+  result.innerHTML = `<div class='score-row'><span class='score-chip ${chip}'>Điểm: ${correctCount}/${total}</span><span class='score-chip'>Tỷ lệ: ${pct}%</span><span class='score-chip ${chip}'>Mức: ${level}</span><span class='score-chip'>Đã trả lời: ${answeredCount}/${total}</span></div><p>${guide}</p>${missHtml}${wrongHtml}`;
+  result.style.display = 'block';
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+
+(function setupSqlTabs() {
+  document.querySelectorAll('.sql-tabs').forEach(group => {
+    const tabs = group.querySelectorAll('.sql-tab');
+    const panels = [];
+    let n = group.nextElementSibling;
+    while (n && n.classList.contains('sql-panel')) {
+      panels.push(n);
+      n = n.nextElementSibling;
+    }
+    tabs.forEach((tab, i) => tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      if (panels[i]) panels[i].classList.add('active');
+    }));
+  });
+})();
+
+const quizBank = {
+  m0: [
+    {q:'Vì sao Data Engineer cần cloud-first mindset?', opts:[['A. Vì pipeline cần scale và vận hành linh hoạt',1,'Đúng vì cloud giúp scale theo tải và giảm nợ hạ tầng.'],['B. Vì cloud tự sửa chất lượng dữ liệu',0,'Sai vì chất lượng dữ liệu vẫn cần logic kiểm thử.'],['C. Vì cloud thay được data modeling',0,'Sai vì modeling vẫn là năng lực cốt lõi.'],['D. Vì cloud không cần monitoring',0,'Sai vì production bắt buộc observability.']]},
+    {q:'Service boundary đúng là gì?', opts:[['A. Dùng một dịch vụ cho mọi việc',0,'Sai vì gây quá tải và khó quản trị.'],['B. Chia dịch vụ theo vai trò ingest/store/query/monitor',1,'Đúng vì giúp hệ thống rõ trách nhiệm.'],['C. Chỉ quan tâm dịch vụ rẻ nhất',0,'Sai vì cần cân bằng SLA và rủi ro.'],['D. Luôn chọn dịch vụ mới nhất',0,'Sai vì cần chọn theo workload.']]},
+    {q:'Trade-off nào đúng trong tuần 13?', opts:[['A. Chỉ tối ưu chi phí',0,'Sai vì có thể phá SLA và reliability.'],['B. Chỉ tối ưu tốc độ',0,'Sai vì có thể tăng rủi ro bảo mật/cost.'],['C. Cân bằng speed, cost, security, reliability',1,'Đúng vì đây là khung quyết định thực tế.'],['D. Không cần trade-off nếu dùng managed service',0,'Sai vì managed service vẫn có giới hạn.']]},
+    {q:'Dấu hiệu thiếu production mindset là gì?', opts:[['A. Có runbook và owner rõ',0,'Sai vì đây là dấu hiệu tốt.'],['B. Có metric và alarm theo SLA',0,'Sai vì đây là thực hành tốt.'],['C. Chỉ demo chạy được một lần',1,'Đúng vì production cần ổn định lặp lại.'],['D. Có decision log',0,'Sai vì decision log là điểm cộng.']]},
+    {q:'Cloud giúp giảm nợ vận hành ở điểm nào?', opts:[['A. Managed services',1,'Đúng vì giảm gánh quản trị hạ tầng.'],['B. Bỏ hẳn kiểm thử dữ liệu',0,'Sai vì kiểm thử vẫn bắt buộc.'],['C. Bỏ IAM policy',0,'Sai vì bảo mật không thể bỏ qua.'],['D. Không cần backup',0,'Sai vì backup vẫn thiết yếu.']]},
+    {q:'Mục tiêu học tuần 13 là gì?', opts:[['A. Học thuộc mọi lệnh AWS CLI',0,'Sai vì trọng tâm là thiết kế hệ thống.'],['B. Thiết kế cloud cho DE có thể vận hành',1,'Đúng vì đây là mục tiêu tuần 13.'],['C. Chỉ làm quiz, không cần thực hành',0,'Sai vì thực hành là phần bắt buộc.'],['D. Chỉ học UI dashboard',0,'Sai vì không đúng phạm vi module.']]},
+    {q:'Cost visibility đúng là gì?', opts:[['A. Chỉ nhìn tổng bill cuối tháng',0,'Sai vì không thấy driver chi phí.'],['B. Theo dõi cost theo pipeline/domain',1,'Đúng vì hỗ trợ tối ưu có mục tiêu.'],['C. Không cần tag tài nguyên',0,'Sai vì tag giúp phân tích cost.'],['D. Đợi vượt ngân sách mới kiểm tra',0,'Sai vì phản ứng quá muộn.']]},
+    {q:'Observability cho DE cần gì?', opts:[['A. Chỉ log lỗi cuối job',0,'Sai vì thiếu metric và trạng thái.'],['B. Log + metric + alarm + owner',1,'Đúng vì đầy đủ chu trình phản ứng.'],['C. Chỉ dashboard đẹp',0,'Sai vì thiếu hành động incident.'],['D. Tắt log để tiết kiệm',0,'Sai vì mất khả năng điều tra lỗi.']]},
+    {q:'Khi nào kiến trúc cloud lành mạnh?', opts:[['A. Quyền truy cập tách theo role',1,'Đúng vì giảm blast radius.'],['B. Mọi job dùng chung admin role',0,'Sai vì rủi ro rất cao.'],['C. Không có naming convention',0,'Sai vì khó governance và truy vết.'],['D. Không có backup plan',0,'Sai vì mất an toàn vận hành.']]},
+    {q:'Bước nên làm trước module 2?', opts:[['A. Chốt naming/zone/security nguyên tắc',1,'Đúng vì module S3 cần nền tảng này.'],['B. Tạo bucket ngẫu nhiên rồi sửa sau',0,'Sai vì dễ tích lũy nợ kỹ thuật.'],['C. Bỏ qua thiết kế để chạy nhanh',0,'Sai vì sửa sau thường tốn hơn.'],['D. Chỉ tập trung học syntax',0,'Sai vì thiếu bối cảnh kiến trúc.']]}
+  ],
+  m1: [
+    {q:'Mục tiêu chính của zone raw là gì?', opts:[['A. Lưu dữ liệu gốc để truy vết và reprocess',1,'Đúng vì raw cần giữ bản gốc.'],['B. Lưu báo cáo BI đã tổng hợp',0,'Sai vì đó thường là curated/serving.'],['C. Lưu IAM policy',0,'Sai vì IAM không nằm trong data zone.'],['D. Lưu alarm',0,'Sai vì alarm thuộc monitoring.']]},
+    {q:'Small File Problem là gì?', opts:[['A. Có nhiều file rất nhỏ làm tăng metadata overhead khi query',1,'Đúng, Athena tốn thời gian mở nhiều object và tăng chi phí scan.'],['B. File quá lớn trên 1GB',0,'Sai, vấn đề chính là quá nhiều file nhỏ.'],['C. Bucket name quá dài',0,'Sai.'],['D. Dữ liệu không mã hóa',0,'Sai, đó là vấn đề security khác.']]},
+    {q:'Target file size Parquet sau compaction thường là?', opts:[['A. 128MB - 512MB tùy workload',1,'Đúng, đây là dải thực dụng cho nhiều workload analytics.'],['B. 1KB - 10KB',0,'Sai vì vẫn là small-file pattern.'],['C. 5MB cố định cho mọi bảng',0,'Sai thường quá nhỏ.'],['D. Không cần quan tâm kích thước file',0,'Sai vì ảnh hưởng mạnh tới hiệu năng/cost.']]},
+    {q:'Compaction trong data lake dùng để?', opts:[['A. Gộp file nhỏ thành file lớn ổn định hơn cho query',1,'Đúng giúp giảm overhead và scan inefficiency.'],['B. Tăng số lượng thư mục partition',0,'Sai.'],['C. Thay thế Glue Catalog',0,'Sai.'],['D. Tắt lifecycle policy',0,'Sai.']]},
+    {q:'Khi nào nên cân nhắc S3 Intelligent-Tiering?', opts:[['A. Data access pattern khó dự đoán, tần suất truy cập thay đổi',1,'Đúng vì Intelligent-Tiering phù hợp dữ liệu có mức truy cập biến thiên.'],['B. Dữ liệu luôn nóng 24/7',0,'Sai có thể không cần tiering tự động.'],['C. Chỉ để tăng tốc Athena',0,'Sai không phải mục tiêu chính.'],['D. Thay cho encryption',0,'Sai hoàn toàn.']]},
+    {q:'AbortIncompleteMultipartUpload giúp gì?', opts:[['A. Dọn các upload dở dang để tránh rác và phí lưu trữ',1,'Đúng, nhất là khi job/network thất bại giữa chừng.'],['B. Tăng IAM quyền admin',0,'Sai.'],['C. Tạo partition mới tự động',0,'Sai.'],['D. Tăng tốc độ crawl Glue',0,'Sai.']]},
+    {q:'Vì sao dùng S3 VPC Gateway Endpoint thay vì qua NAT cho S3 traffic?', opts:[['A. Giảm NAT data processing cost và giữ traffic nội bộ AWS',1,'Đúng cả về cost và security path.'],['B. Để tăng số IAM users',0,'Sai.'],['C. Để thay CloudWatch',0,'Sai.'],['D. Vì endpoint bắt buộc cho mọi workload',0,'Sai không phải lúc nào cũng bắt buộc nhưng thường nên có.']]},
+    {q:'Anti-pattern partition phổ biến?', opts:[['A. Partition theo user_id/cardinality cao',1,'Đúng vì gây nhiều file nhỏ.'],['B. Partition theo dt/hour cho event data',0,'Sai vì thường hợp lý.'],['C. Dùng Parquet',0,'Sai vì Parquet thường tốt cho analytics.'],['D. Có naming convention',0,'Sai vì đây là thực hành tốt.']]},
+    {q:'Format nào phù hợp analytics trên S3?', opts:[['A. Parquet nén',1,'Đúng vì columnar + tiết kiệm scan cost.'],['B. TXT raw không schema',0,'Sai vì query kém hiệu quả.'],['C. Nhiều file CSV nhỏ',0,'Sai vì overhead cao.'],['D. File nhị phân tự phát triển',0,'Sai vì khó tương thích công cụ.']]},
+    {q:'Kết quả mong đợi sau module S3 là gì?', opts:[['A. Có data lake design có thể vận hành',1,'Đúng vì mục tiêu là thiết kế production-ready.'],['B. Chỉ tạo 1 bucket trống',0,'Sai vì thiếu kiến trúc và governance.'],['C. Chỉ học lý thuyết không thực hành',0,'Sai vì thiếu năng lực thực chiến.'],['D. Không cần security/cost notes',0,'Sai vì đây là phần bắt buộc.']]}
+  ],
+  m2: [
+    {q:'Least privilege nghĩa là gì?', opts:[['A. Cấp quyền rộng để tránh lỗi',0,'Sai vì tăng blast radius.'],['B. Chỉ cấp quyền đủ cho tác vụ cụ thể',1,'Đúng là nguyên tắc cốt lõi.'],['C. Tất cả dùng admin',0,'Sai và rất rủi ro.'],['D. Không cần role separation',0,'Sai vì khó kiểm soát.']]},
+    {q:'sts:AssumeRole dùng để làm gì?', opts:[['A. Cấp temporary credentials bằng cách assume role đích',1,'Đúng, đây là cơ chế chuẩn để mượn quyền theo phiên.'],['B. Tạo bucket S3 tự động',0,'Sai.'],['C. Mã hóa object',0,'Sai.'],['D. Tắt CloudTrail',0,'Sai.']]},
+    {q:'Trust relationship định nghĩa điều gì?', opts:[['A. Ai được phép assume role',1,'Đúng, trust policy kiểm soát principal được ủy quyền.'],['B. Chỉ action trên S3 object',0,'Sai đó là permission policy.'],['C. Cấu trúc partition table',0,'Sai.'],['D. Ngưỡng alarm CloudWatch',0,'Sai.']]},
+    {q:'Trong pipeline Airflow trên EC2, cách an toàn là?', opts:[['A. EC2 role assume data-access role qua STS khi cần',1,'Đúng giảm dùng key tĩnh và thu hẹp quyền theo phiên.'],['B. Lưu access key lâu dài trong DAG code',0,'Sai rất nguy hiểm.'],['C. Dùng một admin key cho mọi DAG',0,'Sai tăng blast radius.'],['D. Disable IAM để chạy nhanh',0,'Sai.']]},
+    {q:'Vì sao temporary credentials mạnh hơn access keys tĩnh?', opts:[['A. Có thời hạn, dễ rotate, giảm blast radius khi lộ',1,'Đúng đây là lợi ích chính.'],['B. Vì luôn có toàn quyền admin',0,'Sai.'],['C. Vì không cần trust policy',0,'Sai.'],['D. Vì không cần audit',0,'Sai.']]},
+    {q:'Policy statement tốt nên thế nào?', opts:[['A. Một statement chứa mọi action',0,'Sai vì khó review/audit.'],['B. Statement theo mục tiêu rõ + Sid rõ nghĩa',1,'Đúng giúp maintain policy tốt.'],['C. Dùng wildcard * cho mọi resource',0,'Sai vì quá rộng.'],['D. Không dùng condition',0,'Sai vì mất khả năng giới hạn path.']]},
+    {q:'Condition s3:prefix dùng để?', opts:[['A. Giới hạn ListBucket theo đường dẫn',1,'Đúng giúp siết phạm vi truy cập.'],['B. Mã hóa object tự động',0,'Sai vì encryption ở config khác.'],['C. Tối ưu query Athena',0,'Sai vì query optimization khác.'],['D. Tạo Glue table',0,'Sai vì không liên quan.']]},
+    {q:'Anti-pattern IAM nghiêm trọng nhất?', opts:[['A. Role tách theo workload',0,'Sai vì đây là thực hành tốt.'],['B. Policy có review định kỳ',0,'Sai vì đây là điểm cộng.'],['C. s3:* trên * cho ETL role',1,'Đúng vì quá rộng và nguy hiểm.'],['D. Dùng temporary credentials',0,'Sai vì thường tốt hơn long-lived key.']]},
+    {q:'Kiểm tra policy trước production nên làm gì?', opts:[['A. Chạy test theo use case thực tế',1,'Đúng để xác nhận đủ quyền nhưng không dư.'],['B. Bỏ review để nhanh',0,'Sai vì tăng rủi ro.'],['C. Chỉ nhìn bằng mắt không test',0,'Sai vì dễ sót lỗi ngữ cảnh.'],['D. Chờ incident mới sửa',0,'Sai vì hậu quả cao.']]},
+    {q:'Mục tiêu cuối module IAM là gì?', opts:[['A. Hệ thống phân quyền thực dụng và an toàn',1,'Đúng theo trọng tâm module.'],['B. Ghi nhớ mọi action IAM',0,'Sai vì không thực tế.'],['C. Cấp quyền admin tạm thời lâu dài',0,'Sai vì trái least privilege.'],['D. Bỏ tách role để đơn giản',0,'Sai vì đơn giản giả tạo.']]}
+  ],
+  m3: [
+    {q:'Metadata DB dùng để?', opts:[['A. Lưu trạng thái chạy pipeline',1,'Đúng và rất quan trọng cho ops.'],['B. Lưu toàn bộ raw TB dữ liệu',0,'Sai vì raw ở S3.'],['C. Thay thế warehouse analytics',0,'Sai vì vai trò khác.'],['D. Quản IAM policy',0,'Sai vì IAM tách biệt.']]},
+    {q:'Connection exhaustion trong RDS/Aurora thường xảy ra khi nào?', opts:[['A. Nhiều ETL jobs mở session đồng thời vượt giới hạn kết nối',1,'Đúng, đây là tình huống production rất phổ biến.'],['B. Chỉ khi storage đầy',0,'Sai.'],['C. Chỉ khi thiếu IAM role',0,'Sai.'],['D. Khi đổi vùng AWS',0,'Sai.']]},
+    {q:'Giải pháp phù hợp để giảm connection churn?', opts:[['A. Dùng RDS Proxy hoặc PgBouncer',1,'Đúng để pool kết nối và ổn định tải.'],['B. Tăng số file S3',0,'Sai.'],['C. Tắt retry trong pipeline',0,'Sai.'],['D. Chạy mọi query bằng Athena',0,'Sai khác boundary.']]},
+    {q:'Khi nào RDS PostgreSQL thường phù hợp?', opts:[['A. Workload metadata vừa, ngân sách hạn chế',1,'Đúng là case điển hình.'],['B. Cần failover cực nhanh multi-read lớn',0,'Sai thường nghiêng Aurora hơn.'],['C. Lưu object file lớn',0,'Sai vì đó là S3 use case.'],['D. Chạy dashboard realtime nặng',0,'Sai không phải điểm mạnh chính.']]},
+    {q:'Khi nào cân nhắc Aurora?', opts:[['A. Chỉ vì đang hot',0,'Sai vì cần workload-driven.'],['B. Khi SLA HA cao và tải tăng',1,'Đúng theo ưu thế Aurora.'],['C. Khi không cần HA',0,'Sai vì không cần thì khó biện minh chi phí.'],['D. Khi muốn bỏ backup',0,'Sai vì backup vẫn bắt buộc.']]},
+    {q:'Schema pipeline_runs cần cột nào?', opts:[['A. run_id, status, started_at, ended_at, processed_rows',1,'Đúng là tối thiểu để vận hành.'],['B. Chỉ pipeline_name',0,'Sai vì không đủ debug.'],['C. Chỉ error_message',0,'Sai vì thiếu tracking run thành công.'],['D. Chỉ created_at',0,'Sai vì thiếu thông tin vận hành.']]},
+    {q:'Chỉ số monitor DB quan trọng?', opts:[['A. CPU, storage, connection',1,'Đúng cho vận hành DB.'],['B. Màu giao diện console',0,'Sai hoàn toàn.'],['C. Số lượng folder S3',0,'Sai không trực tiếp cho DB.'],['D. Số tab trình duyệt',0,'Sai.']]},
+    {q:'Khác biệt LIMIT giữa PostgreSQL và Oracle SQL?', opts:[['A. Cả hai dùng TOP',0,'Sai.'],['B. PostgreSQL LIMIT, Oracle FETCH FIRST',1,'Đúng cho cú pháp phổ biến hiện đại.'],['C. Oracle không giới hạn dòng',0,'Sai.'],['D. PostgreSQL bắt buộc FETCH FIRST',0,'Sai không bắt buộc.']]},
+    {q:'Backup retention dùng để?', opts:[['A. Khôi phục khi xóa nhầm/lỗi dữ liệu',1,'Đúng mục tiêu cốt lõi.'],['B. Tăng tốc query ngay',0,'Sai vì không trực tiếp.'],['C. Thay thế alerting',0,'Sai vai trò khác nhau.'],['D. Bỏ kiểm thử',0,'Sai.']]},
+    {q:'Kết quả học đúng của module RDS/Aurora?', opts:[['A. Chọn được engine và kiểm soát connection pool cho ETL',1,'Đúng vì pooling là phần production bắt buộc.'],['B. Chỉ thuộc lệnh tạo user',0,'Sai chưa đủ năng lực.'],['C. Bỏ qua monitoring DB',0,'Sai.'],['D. Dùng S3 thay metadata DB',0,'Sai boundary.']]}
+  ],
+  m4: [
+    {q:'Athena phù hợp nhất cho?', opts:[['A. Ad-hoc query trên S3',1,'Đúng theo design của Athena.'],['B. OLTP transaction',0,'Sai.'],['C. Stateful stream processing',0,'Sai.'],['D. IAM policy management',0,'Sai.']]},
+    {q:'Redshift thường phù hợp khi?', opts:[['A. Dashboard concurrency cao, cần latency ổn định',1,'Đúng là điểm mạnh warehouse MPP.'],['B. Chỉ query vài lần/tháng',0,'Sai có thể lãng phí.'],['C. Chỉ lưu file raw',0,'Sai đó là S3 role.'],['D. Không cần schema',0,'Sai.']]},
+    {q:'Redshift Spectrum cho phép gì?', opts:[['A. Query/join dữ liệu ở S3 từ Redshift',1,'Đúng giúp hybrid query mà không nạp hết dữ liệu.'],['B. Thay IAM policy engine',0,'Sai.'],['C. Tạo VPC endpoint',0,'Sai.'],['D. Tắt metadata catalog',0,'Sai.']]},
+    {q:'Redshift Serverless phù hợp khi nào?', opts:[['A. Workload BI biến động, muốn giảm quản trị cụm',1,'Đúng theo lợi ích serverless.'],['B. Chỉ để chạy OLTP',0,'Sai.'],['C. Khi không cần phân tích dữ liệu',0,'Sai.'],['D. Khi muốn bỏ security controls',0,'Sai.']]},
+    {q:'Driver chi phí chính của Athena là gì?', opts:[['A. Số GB/TB dữ liệu scan',1,'Đúng và rất quan trọng.'],['B. Số user IAM',0,'Sai.'],['C. Số bucket S3',0,'Sai trực tiếp.'],['D. Số alarm CloudWatch',0,'Sai.']]},
+    {q:'Cách giảm scan Athena?', opts:[['A. Parquet + partition + filter partition',1,'Đúng hiệu quả nhất.'],['B. CSV không nén + SELECT *',0,'Sai tăng scan.'],['C. Bỏ where clause',0,'Sai.'],['D. Tắt workgroup',0,'Sai không giúp tối ưu scan.']]},
+    {q:'Anti-pattern query Athena?', opts:[['A. Query theo dt và source',0,'Sai vì đây là tốt.'],['B. SELECT * trên bảng lớn không filter',1,'Đúng gây chi phí cao.'],['C. Chọn cột cần thiết',0,'Sai vì đây là tốt.'],['D. Dùng Parquet',0,'Sai vì tốt.']]},
+    {q:'Decision matrix đúng cho workload hybrid là?', opts:[['A. Athena cho ad-hoc, Redshift cho BI, Spectrum bridge dữ liệu S3',1,'Đúng mô hình hybrid production phổ biến.'],['B. Chỉ dùng Athena cho mọi thứ',0,'Sai dễ vỡ SLA dashboard.'],['C. Chỉ dùng Redshift cho exploration ngắn hạn',0,'Sai thường tốn kém.'],['D. Bỏ Glue Catalog',0,'Sai vì metadata rất quan trọng.']]},
+    {q:'Workgroup Athena giúp gì?', opts:[['A. Quản quota scan và governance query',1,'Đúng giúp kiểm soát cost.'],['B. Quản key KMS cho IAM',0,'Sai vai trò khác.'],['C. Tạo bucket tự động',0,'Sai.'],['D. Chạy Spark job',0,'Sai.']]},
+    {q:'Kết quả mong đợi module 5?', opts:[['A. Biết chọn Athena/Redshift/Spectrum/Serverless theo ad-hoc, BI, hybrid',1,'Đúng trọng tâm mở rộng của module.'],['B. Chỉ học cú pháp SELECT',0,'Sai quá nông.'],['C. Bỏ cost discussion',0,'Sai vì cost là trục chính.'],['D. Không cần service boundary',0,'Sai.']]}
+  ],
+  m5: [
+    {q:'Mục tiêu của observability trong DE?', opts:[['A. Phát hiện và xử lý incident nhanh',1,'Đúng mục tiêu chính.'],['B. Tăng số lượng log không mục tiêu',0,'Sai vì tạo nhiễu.'],['C. Chỉ để trình bày dashboard đẹp',0,'Sai không đủ.'],['D. Thay thế data validation',0,'Sai vai trò khác.']]},
+    {q:'Metric nào phản ánh freshness theo module mới?', opts:[['A. freshness_minutes',1,'Đúng là custom metric freshness trong ví dụ.'],['B. số lượng IAM users',0,'Sai.'],['C. số file markdown',0,'Sai.'],['D. số tab browser',0,'Sai.']]},
+    {q:'Metric nào thể hiện run pipeline thành công/thất bại?', opts:[['A. pipeline_success',1,'Đúng đây là metric trạng thái run cơ bản.'],['B. aws_account_id',0,'Sai.'],['C. s3_bucket_count',0,'Sai.'],['D. object_last_modified',0,'Sai.']]},
+    {q:'Metric nào phản ánh sản lượng dữ liệu xử lý?', opts:[['A. processed_rows',1,'Đúng để theo dõi volume pipeline.'],['B. iam_policy_count',0,'Sai.'],['C. nat_gateway_count',0,'Sai.'],['D. kms_key_rotation_days',0,'Sai.']]},
+    {q:'boto3 nào dùng để gửi custom metrics lên CloudWatch?', opts:[['A. put_metric_data',1,'Đúng API chuẩn để emit metric.'],['B. start_query_execution',0,'Sai là Athena API.'],['C. assume_role',0,'Sai là STS API.'],['D. create_bucket',0,'Sai là S3 API.']]},
+    {q:'Alarm actionable cần gì?', opts:[['A. Threshold + owner + runbook',1,'Đúng để hành động được.'],['B. Chỉ có tên alarm',0,'Sai chưa đủ.'],['C. Không cần ngưỡng',0,'Sai.'],['D. Không cần ai chịu trách nhiệm',0,'Sai.']]},
+    {q:'Alert fatigue thường do?', opts:[['A. Ngưỡng alarm không dựa baseline',1,'Đúng gây nhiều false positive.'],['B. Có runbook rõ',0,'Sai vì giúp giảm fatigue.'],['C. Tách severity hợp lý',0,'Sai vì tốt.'],['D. Tập trung metric quan trọng',0,'Sai vì tốt.']]},
+    {q:'CloudWatch alarm nên được quản lý thế nào?', opts:[['A. Bằng Terraform/IaC',1,'Đúng để version-control và review.'],['B. Tạo thủ công không ghi lại',0,'Sai khó audit.'],['C. Chỉ lưu trong ghi chú cá nhân',0,'Sai.'],['D. Không cần thay đổi theo hệ thống',0,'Sai.']]},
+    {q:'Runbook dùng để?', opts:[['A. Hướng dẫn xử lý sự cố theo bước',1,'Đúng giúp giảm MTTR.'],['B. Trang trí tài liệu',0,'Sai.'],['C. Thay thế metric',0,'Sai vai trò khác.'],['D. Dùng một lần rồi bỏ',0,'Sai cần bảo trì liên tục.']]},
+    {q:'Kết quả đúng sau module CloudWatch?', opts:[['A. Thiết kế được custom metrics và alarm có thể hành động',1,'Đúng mục tiêu module.'],['B. Chỉ biết xem log thô',0,'Sai chưa đủ.'],['C. Bỏ qua owner',0,'Sai.'],['D. Không liên kết với SLA',0,'Sai.']]}
+  ],
+  m6: [
+    {q:'Glue Data Catalog lưu gì?', opts:[['A. Metadata table/partition/schema',1,'Đúng vai trò chính.'],['B. File dữ liệu thay S3',0,'Sai.'],['C. IAM password',0,'Sai.'],['D. Dashboard image',0,'Sai.']]},
+    {q:'Crawler phù hợp khi?', opts:[['A. Cần onboarding nguồn mới nhanh',1,'Đúng cho giai đoạn khám phá.'],['B. Muốn schema bất biến tuyệt đối',0,'Sai thường nên kiểm soát thủ công hơn.'],['C. Không biết path dữ liệu',0,'Sai crawler vẫn cần scope rõ.'],['D. Không có governance',0,'Sai.']]},
+    {q:'Manual DDL phù hợp khi?', opts:[['A. Dataset quan trọng cần kiểm soát schema chặt',1,'Đúng với production critical tables.'],['B. Không có team sở hữu',0,'Sai cần owner rõ.'],['C. Thay đổi schema liên tục vô kiểm soát',0,'Sai.'],['D. Không cần CI/CD',0,'Sai.']]},
+    {q:'Naming catalog tốt thường gồm?', opts:[['A. domain + layer + entity',1,'Đúng tạo chuẩn đồng nhất.'],['B. Tên ngẫu nhiên',0,'Sai khó quản trị.'],['C. Mỗi team tự đặt khác nhau',0,'Sai gây phân mảnh metadata.'],['D. Không cần prefix môi trường',0,'Sai dễ lẫn dev/prod.']]},
+    {q:'Rủi ro nếu crawler chạy quá rộng?', opts:[['A. Schema drift bất ngờ, ảnh hưởng downstream',1,'Đúng rủi ro phổ biến.'],['B. Tăng bảo mật',0,'Sai.'],['C. Giảm nhu cầu governance',0,'Sai.'],['D. Không ảnh hưởng gì',0,'Sai.']]},
+    {q:'Catalog governance cần gì?', opts:[['A. Owner table + change process',1,'Đúng để giảm breaking change.'],['B. Chỉ tạo bảng rồi bỏ',0,'Sai.'],['C. Không theo dõi phiên bản',0,'Sai.'],['D. Không cần docs',0,'Sai.']]},
+    {q:'Glue Catalog kết nối chặt nhất với dịch vụ nào trong tuần 13?', opts:[['A. Athena query layer',1,'Đúng Athena dùng metadata từ catalog.'],['B. IAM user management',0,'Sai.'],['C. S3 lifecycle',0,'Sai trực tiếp.'],['D. Route53 DNS',0,'Sai.']]},
+    {q:'Khi nào nên tách database raw và curated?', opts:[['A. Để rõ quyền truy cập và mục đích dữ liệu',1,'Đúng giúp governance tốt.'],['B. Vì không có lý do',0,'Sai.'],['C. Để tăng độ phức tạp',0,'Sai.'],['D. Để bỏ naming chuẩn',0,'Sai.']]},
+    {q:'IaC cho Glue mang lại lợi ích gì?', opts:[['A. Metadata khai báo rõ, reviewable, repeatable',1,'Đúng lợi ích chính.'],['B. Tăng scan cost Athena',0,'Sai.'],['C. Giảm nhu cầu test schema',0,'Sai.'],['D. Bỏ cần tài liệu',0,'Sai.']]},
+    {q:'Kết quả sau module Glue nên là?', opts:[['A. Thiết kế catalog có naming + governance rõ',1,'Đúng mục tiêu module.'],['B. Chỉ học crawler click tay',0,'Sai chưa đủ.'],['C. Bỏ qua ownership',0,'Sai.'],['D. Không mapping với S3 path',0,'Sai.']]}
+  ],
+  m7: [
+    {q:'Terraform mang lại giá trị gì cho DE cloud setup?', opts:[['A. Hạ tầng có thể review và tái tạo',1,'Đúng cốt lõi IaC.'],['B. Không cần kiểm thử',0,'Sai.'],['C. Không cần docs',0,'Sai.'],['D. Chỉ giúp viết code ngắn',0,'Sai không phải mục tiêu chính.']]},
+    {q:'Workflow an toàn trước apply là?', opts:[['A. fmt → validate → plan → review → apply',1,'Đúng quy trình tốt.'],['B. apply trực tiếp',0,'Sai rủi ro cao.'],['C. sửa tay trên console trước',0,'Sai gây drift.'],['D. copy state file thủ công',0,'Sai.']]},
+    {q:'backend "s3" trong Terraform dùng để?', opts:[['A. Lưu remote state tập trung trên S3',1,'Đúng giúp team cùng nhìn một state chuẩn.'],['B. Tạo policy IAM tự động',0,'Sai.'],['C. Chạy query Athena',0,'Sai.'],['D. Thay file variables.tf',0,'Sai.']]},
+    {q:'DynamoDB state locking giải quyết vấn đề gì?', opts:[['A. Tránh nhiều người apply cùng lúc làm hỏng state',1,'Đúng ngăn race condition trên state.'],['B. Tăng tốc network S3',0,'Sai.'],['C. Mã hóa dữ liệu S3',0,'Sai đây là chuyện encryption config.'],['D. Thay thế CI/CD',0,'Sai.']]},
+    {q:'Vì sao local terraform.tfstate nguy hiểm trong team?', opts:[['A. Dễ state drift, conflict và lộ dữ liệu nhạy cảm',1,'Đúng là bộ rủi ro lớn nhất.'],['B. Vì Terraform không cần state',0,'Sai.'],['C. Vì local luôn rẻ hơn',0,'Sai.'],['D. Vì chỉ dùng cho frontend',0,'Sai.']]},
+    {q:'Tagging trong Terraform giúp gì?', opts:[['A. Cost allocation và ownership rõ',1,'Đúng rất quan trọng.'],['B. Tăng tốc query SQL',0,'Sai.'],['C. Tăng quyền IAM',0,'Sai.'],['D. Thay lifecycle S3',0,'Sai.']]},
+    {q:'Security default nên mã hóa ở đâu?', opts:[['A. Trong resource definitions (SSE, block public, versioning)',1,'Đúng để bảo đảm nhất quán.'],['B. Chỉ ghi trong README',0,'Sai không enforce được.'],['C. Chờ sau khi deploy',0,'Sai dễ bị quên.'],['D. Không cần vì dev env',0,'Sai.']]},
+    {q:'Tách env dev/prod nên làm sao?', opts:[['A. tfvars riêng + biến môi trường',1,'Đúng cách phổ biến.'],['B. Copy nguyên thư mục nhiều lần',0,'Sai dễ drift và khó maintain.'],['C. Một file cho tất cả không biến',0,'Sai thiếu linh hoạt.'],['D. Chỉ đổi bằng tay trên console',0,'Sai.']]},
+    {q:'Anti-pattern IaC thường gặp?', opts:[['A. Hardcode secret',1,'Đúng nguy hiểm.'],['B. Sử dụng variables',0,'Sai vì đây là tốt.'],['C. Có module rõ ràng',0,'Sai tốt.'],['D. Chạy validate',0,'Sai vì tốt.']]},
+    {q:'Kết quả module Terraform nên đạt?', opts:[['A. Có backend remote state + locking + code hạ tầng reviewable',1,'Đúng mục tiêu production module.'],['B. Chỉ tạo 1 file main.tf',0,'Sai quá nông.'],['C. Không cần outputs',0,'Sai thiếu kết nối.'],['D. Bỏ security defaults',0,'Sai.']]}
+  ],
+  m8: [
+    {q:'Driver chi phí chính của S3 là gì?', opts:[['A. Dung lượng và storage class',1,'Đúng cho storage cost.'],['B. Số IAM role',0,'Sai.'],['C. Số tab dashboard',0,'Sai.'],['D. Số dòng SQL',0,'Sai.']]},
+    {q:'Hidden NAT bill thường đến từ đâu?', opts:[['A. Private workloads đọc/ghi dữ liệu lớn qua NAT liên tục',1,'Đúng vì NAT tính phí xử lý data theo GB.'],['B. Chỉ từ số user IAM',0,'Sai.'],['C. Chỉ từ số lượng tag',0,'Sai.'],['D. Chỉ từ tên bucket dài',0,'Sai.']]},
+    {q:'Khi nào nên ưu tiên S3 VPC Endpoint?', opts:[['A. Khi private subnet cần truy cập S3 thường xuyên',1,'Đúng để giảm NAT cost và giữ traffic nội bộ.'],['B. Khi muốn tắt encryption',0,'Sai.'],['C. Khi không dùng S3',0,'Sai.'],['D. Chỉ cho dev environment',0,'Sai.']]},
+    {q:'Same AZ / same region consideration giúp gì?', opts:[['A. Giảm data transfer không cần thiết và cải thiện ổn định',1,'Đúng nhất là với workload dữ liệu lớn.'],['B. Tăng wildcard IAM',0,'Sai.'],['C. Thay thế monitoring',0,'Sai.'],['D. Bỏ cần backup',0,'Sai.']]},
+    {q:'Tag nào nên có để ownership rõ?', opts:[['A. owner',1,'Đúng để xác định nhóm chịu trách nhiệm.'],['B. random_note',0,'Sai không chuẩn hóa.'],['C. ui_theme',0,'Sai.'],['D. unused',0,'Sai.']]},
+    {q:'Tag nào hỗ trợ phân bổ ngân sách?', opts:[['A. cost_center',1,'Đúng để cost allocation theo team/domain.'],['B. browser',0,'Sai.'],['C. sql_flavor',0,'Sai.'],['D. commit_hash',0,'Sai không phải tag cost chính.']]},
+    {q:'Security baseline nào bắt buộc?', opts:[['A. Encryption + least privilege + audit',1,'Đúng nền tảng.'],['B. Chỉ đặt mật khẩu mạnh',0,'Sai chưa đủ.'],['C. Chỉ dùng private subnet',0,'Sai vẫn cần IAM/audit.'],['D. Không cần security nếu internal',0,'Sai.']]},
+    {q:'Khi nào nên dùng Secrets Manager hoặc Parameter Store?', opts:[['A. Khi cần lưu secret ngoài code, quản vòng đời truy cập an toàn',1,'Đúng tránh hardcode credential.'],['B. Khi muốn tăng số lượng file CSV',0,'Sai.'],['C. Khi muốn thay Glue Catalog',0,'Sai.'],['D. Khi không có secret nào',0,'Sai.']]},
+    {q:'Decision record nên chứa?', opts:[['A. Bối cảnh, phương án, trade-off, rủi ro',1,'Đúng giúp quyết định minh bạch.'],['B. Chỉ kết luận cuối',0,'Sai thiếu lý do.'],['C. Chỉ ưu điểm',0,'Sai thiếu cân bằng.'],['D. Chỉ tên dịch vụ',0,'Sai quá ít thông tin.']]},
+    {q:'Kết quả module 9 nên là?', opts:[['A. Có framework cost/security gắn workload, transfer path và ownership',1,'Đúng mục tiêu module đã nâng cấp.'],['B. Chỉ biết tên dịch vụ đắt/rẻ',0,'Sai quá hẹp.'],['C. Bỏ qua tài liệu quyết định',0,'Sai.'],['D. Không liên kết với workload',0,'Sai.']]}
+  ],
+  m9: [
+    {q:'Artifact cloud_setup hoàn chỉnh cần gì?', opts:[['A. Terraform + SQL + monitoring + architecture/cost/security docs',1,'Đúng đủ code và tài liệu production-grade.'],['B. Chỉ ảnh kiến trúc',0,'Sai thiếu khả năng chạy.'],['C. Chỉ README chung chung',0,'Sai thiếu chi tiết kỹ thuật.'],['D. Chỉ script bash',0,'Sai thiếu cấu trúc tổng thể.']]},
+    {q:'README tốt nên có phần nào?', opts:[['A. Kiến trúc, cách chạy, cost, security, validation',1,'Đúng và hành động được.'],['B. Chỉ giới thiệu ngắn',0,'Sai chưa đủ.'],['C. Chỉ link tài liệu AWS',0,'Sai thiếu ngữ cảnh dự án.'],['D. Chỉ screenshot console',0,'Sai không reproducible.']]},
+    {q:'File nào giúp reviewer hiểu giả định chi phí?', opts:[['A. cost_model.md',1,'Đúng để trình bày driver cost và giả định.'],['B. providers.tf',0,'Sai đây là cấu hình provider.'],['C. .gitignore',0,'Sai.'],['D. random_notes.txt',0,'Sai.']]},
+    {q:'File nào tập trung baseline bảo mật artifact?', opts:[['A. security.md',1,'Đúng để mô tả encryption, IAM boundary, secret handling.'],['B. variables.tf',0,'Sai không phải tài liệu bảo mật tổng quan.'],['C. validation_queries.sql',0,'Sai mục tiêu khác.'],['D. logo.png',0,'Sai.']]},
+    {q:'Validation SQL trong artifact dùng để?', opts:[['A. Kiểm chứng dữ liệu sau deploy',1,'Đúng xác minh hệ thống hoạt động.'],['B. Tăng quyền IAM',0,'Sai.'],['C. Tạo S3 bucket',0,'Sai.'],['D. Chạy alert CloudWatch',0,'Sai.']]},
+    {q:'Khi narrative và terraform không khớp, hậu quả?', opts:[['A. Reviewer và team vận hành hiểu sai hệ thống',1,'Đúng và nguy hiểm.'],['B. Không ảnh hưởng gì',0,'Sai.'],['C. Chỉ ảnh hưởng UI',0,'Sai.'],['D. Chỉ ảnh hưởng local dev',0,'Sai.']]},
+    {q:'Checklist trước khi commit artifact?', opts:[['A. validate terraform + chạy query kiểm chứng + rà docs',1,'Đúng pipeline kiểm soát chất lượng.'],['B. Chỉ chạy terraform fmt',0,'Sai chưa đủ.'],['C. Chỉ mở HTML xem đẹp',0,'Sai không liên quan artifact infra.'],['D. Không cần test',0,'Sai.']]},
+    {q:'Vì sao artifact cần realistic file tree?', opts:[['A. Giúp người khác clone và tái tạo môi trường',1,'Đúng tính thực chiến.'],['B. Chỉ để trông chuyên nghiệp',0,'Sai mục tiêu chính là vận hành được.'],['C. Vì hệ thống bắt buộc nhiều file',0,'Sai không phải lúc nào cũng vậy.'],['D. Không có ý nghĩa',0,'Sai.']]},
+    {q:'Phần monitoring/ trong artifact nên chứa gì?', opts:[['A. Metric definitions và alarm runbook',1,'Đúng để vận hành sau deploy.'],['B. Access key plain text',0,'Sai nghiêm trọng.'],['C. Chỉ hình minh họa',0,'Sai chưa đủ hành động.'],['D. Không cần nội dung',0,'Sai.']]},
+    {q:'Kết quả đúng của module 10?', opts:[['A. Có artifact cloud_setup hoàn chỉnh, nhất quán và dùng được',1,'Đúng mục tiêu module.'],['B. Chỉ có lý thuyết AWS',0,'Sai thiếu thực hành.'],['C. Bỏ tài liệu vì code đủ rồi',0,'Sai.'],['D. Không có validation step',0,'Sai.']]}
+  ],
+  m10: [
+    {q:'Ngưỡng khuyến nghị để sang tuần 14?', opts:[['A. Từ 75% trở lên',1,'Đúng theo tiêu chí tuần 13.'],['B. 40% là đủ',0,'Sai quá thấp.'],['C. 50% bắt buộc',0,'Sai chưa đủ nền tảng.'],['D. 100% mới được học tiếp',0,'Sai quá cứng nhắc.']]},
+    {q:'Nếu điểm dưới 60% nên làm gì?', opts:[['A. Ôn module yếu và test lại',1,'Đúng cách cải thiện bền vững.'],['B. Bỏ qua học tiếp',0,'Sai tạo lỗ hổng kiến thức.'],['C. Chỉ học thuộc đáp án',0,'Sai ít hiệu quả thực chiến.'],['D. Xóa ghi chú cũ',0,'Sai.']]},
+    {q:'Mini test tuần 13 dùng để?', opts:[['A. Đánh giá readiness và xác định phần cần ôn',1,'Đúng mục tiêu.'],['B. Giải trí đơn thuần',0,'Sai.'],['C. Thay thế thực hành',0,'Sai.'],['D. Chấm điểm cho có',0,'Sai.']]},
+    {q:'Cách làm mini test hiệu quả?', opts:[['A. Trả lời theo bối cảnh production và trade-off',1,'Đúng phản ánh năng lực DE.'],['B. Chọn ngẫu nhiên',0,'Sai.'],['C. Né câu cost/security',0,'Sai bỏ qua trọng tâm tuần 13.'],['D. Chỉ nhìn keyword',0,'Sai dễ hiểu sai câu hỏi.']]},
+    {q:'Sau mini test nên làm gì?', opts:[['A. Lập kế hoạch cải thiện theo nhóm kỹ năng',1,'Đúng để tiến bộ có mục tiêu.'],['B. Không cần xem lại câu sai',0,'Sai lãng phí phản hồi.'],['C. Làm lại y hệt không đổi cách học',0,'Sai hiệu quả thấp.'],['D. Bỏ thực hành',0,'Sai.']]},
+    {q:'Dấu hiệu đã nắm chắc tuần 13?', opts:[['A. Giải thích được khi nào dùng mỗi dịch vụ và vì sao',1,'Đúng là năng lực cốt lõi.'],['B. Thuộc tên dịch vụ nhưng không biết chọn',0,'Sai chưa đủ.'],['C. Chỉ nhớ syntax SQL',0,'Sai quá hẹp.'],['D. Chỉ làm ví dụ toy',0,'Sai thiếu production mindset.']]},
+    {q:'Vai trò của reset mini test?', opts:[['A. Đo mức cải thiện sau khi ôn',1,'Đúng mục tiêu học tập.'],['B. Đổi đáp án đúng của đề',0,'Sai.'],['C. Xóa kiến thức cũ',0,'Sai.'],['D. Không có tác dụng',0,'Sai.']]},
+    {q:'Coverage của mini test tuần 13 nên gồm?', opts:[['A. S3, IAM, Athena/Redshift, CloudWatch, Glue, Terraform',1,'Đúng đủ phạm vi chính.'],['B. Chỉ SQL cơ bản',0,'Sai quá hẹp.'],['C. Chỉ UI HTML',0,'Sai không đúng trọng tâm kỹ thuật.'],['D. Chỉ bảo mật lý thuyết',0,'Sai thiếu cân bằng.']]},
+    {q:'Nếu đạt trên 90%, bước tiếp theo tốt nhất?', opts:[['A. Sang tuần 14 và giữ thói quen decision log',1,'Đúng vừa tiến vừa giữ chất lượng.'],['B. Bỏ hẳn thực hành',0,'Sai.'],['C. Không cần review lại ghi chú',0,'Sai vẫn nên tổng kết.'],['D. Chỉ làm test, không build artifact',0,'Sai.']]},
+    {q:'Kết quả mong đợi cuối module 11?', opts:[['A. Biết điểm mạnh/yếu và có kế hoạch nâng cấp rõ',1,'Đúng mục tiêu học tập tuần 13.'],['B. Kết thúc tuần mà không action',0,'Sai.'],['C. Né phần khó',0,'Sai.'],['D. Chỉ tập trung điểm số',0,'Sai vì cần chuyển hóa thành thực hành.']]}
+  ]
+};
+
+function renderQuiz(containerId, quizItems) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  quizItems.forEach(item => {
+    const quiz = document.createElement('div');
+    quiz.className = 'quiz-item';
+
+    const q = document.createElement('div');
+    q.className = 'quiz-q';
+    q.textContent = item.q;
+    quiz.appendChild(q);
+
+    const optsWrap = document.createElement('div');
+    optsWrap.className = 'quiz-options';
+
+    item.opts.forEach(opt => {
+      const option = document.createElement('div');
+      option.className = 'quiz-opt';
+      option.textContent = opt[0];
+      option.dataset.correct = opt[1] ? 'true' : 'false';
+      option.onclick = function() { answerQuiz(this, !!opt[1], opt[2]); };
+      optsWrap.appendChild(option);
+    });
+
+    const explain = document.createElement('div');
+    explain.className = 'quiz-explain';
+
+    quiz.appendChild(optsWrap);
+    quiz.appendChild(explain);
+    container.appendChild(quiz);
+  });
+}
+
+Object.keys(quizBank).forEach(key => {
+  renderQuiz(`quiz-${key}`, quizBank[key]);
+});
+</script>
+</body>
+</html>
