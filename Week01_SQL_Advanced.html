@@ -167,6 +167,17 @@
   .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
   .mistake-list { margin-top: 8px; padding-left: 18px; }
 
+  .tab-group { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 18px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .db-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .db-pg     { background: #4169e122; color: #4d9de0; border: 1px solid #4169e155; }
+  .db-oracle { background: #cc000022; color: #f97316; border: 1px solid #cc000055; }
+
   @media (max-width: 768px) {
     .sidebar { display: none; }
     .main { padding: 16px; }
@@ -370,6 +381,50 @@
         </div>
         <div class="quiz-explain"></div>
       </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Pattern nào DE sử dụng hàng ngày nhất trong window functions?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Dedup bằng ROW_NUMBER + rn = 1 là pattern phổ biến nhất trong staging pipeline.')">A. Dedup bằng ROW_NUMBER() rồi lọc rn = 1</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'NTILE ít phổ biến hơn trong pipeline hàng ngày.')">B. NTILE chia bucket</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'CUME_DIST dùng chủ yếu trong analytics, không phải pipeline.')">C. CUME_DIST phân phối tích lũy</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'PERCENT_RANK hữu ích nhưng không phải pattern DE dùng hàng ngày.')">D. PERCENT_RANK phân vị</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Đầu ra artifact tuần 1 cần bao gồm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Chỉ SQL chưa đủ, cần cả documentation.')">A. 1 file SQL duy nhất</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Cần file SQL có comment đầy đủ + README.md mô tả mục tiêu, dataset, kết quả.')">B. File SQL có comment + README.md</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'PowerPoint không phải deliverable kỹ thuật DE.')">C. Slide PowerPoint</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Dashboard là kỹ năng khác, không yêu cầu tuần 1.')">D. Dashboard hoàn chỉnh</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Analyst SQL và DE SQL khác nhau chính ở điểm nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Cả Analyst và DE đều dùng SELECT/JOIN.')">A. DE không cần SELECT hay JOIN</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Cả hai đều dùng WHERE để lọc dữ liệu.')">B. DE không cần WHERE</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. DE tập trung pipeline bền vững: SCD, incremental, idempotency, optimization.')">C. DE tập trung pipeline bền vững, lịch sử dữ liệu, và hiệu năng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'DE vẫn cần hiểu business logic, chỉ thêm production mindset.')">D. DE chỉ cần biết cú pháp cơ bản</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao SCD Type 2 được coi là kỹ năng bắt buộc cho DE?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'SCD2 không tự tối ưu query.')">A. Giúp query chạy nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Mọi DWH cần lưu lịch sử thay đổi dimension, SCD2 là pattern chuẩn nhất.')">B. Giữ lịch sử thay đổi dimension — yêu cầu lõi của mọi DWH</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'SCD2 không liên quan trực tiếp đến bảo mật.')">C. Để bảo mật dữ liệu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'SCD2 phức tạp hơn full load, không đơn giản hóa.')">D. Để đơn giản hóa pipeline</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
     </div>
   </div>
 
@@ -502,8 +557,25 @@
         <li><strong>Frame:</strong> phạm vi hàng tham gia tính toán tại mỗi dòng.</li>
       </ul>
 
+      <h3>ROWS vs RANGE — Bẫy mặc định</h3>
+      <table>
+        <tr><th>Tiêu chí</th><th>ROWS</th><th>RANGE</th></tr>
+        <tr><td>Cơ sở</td><td>Vị trí vật lý của dòng</td><td>Giá trị logic của ORDER BY</td></tr>
+        <tr><td>Tie (giá trị bằng nhau)</td><td>Mỗi dòng được tính riêng</td><td>Tất cả dòng cùng giá trị được gộp chung</td></tr>
+        <tr><td>Kết quả với duplicate dates</td><td>Khác nhau — tính tuần tự</td><td>Giống nhau — tất cả tie cùng giá trị</td></tr>
+        <tr><td>Khuyến nghị</td><td>✅ Dùng cho rolling metrics</td><td>Í dùng khi cần logic giá trị</td></tr>
+      </table>
+      <div class="info-box warn">⚠️ <span><strong>Default frame trap:</strong> Khi có ORDER BY mà không ghi rõ frame, mặc định là <code>RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> — không phải ROWS. Điều này có thể gây sai kết quả running total nếu có nhiều dòng cùng ngày. Luôn ghi rõ <code>ROWS BETWEEN</code> cho mọi aggregate window.</span></div>
+
+      <div class="tab-group" id="runningtotal-tabs">
+        <div class="tab active" onclick="switchTab('runningtotal-tabs','runningtotal-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('runningtotal-tabs','runningtotal-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="runningtotal-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
       <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · running_total.sql</span></div>
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · running_total.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Running total + moving average 7 ngày</span>
 <span class="kw">SELECT</span>
   order_date,
@@ -519,9 +591,38 @@
 <span class="kw">FROM</span> fct_daily_revenue
 <span class="kw">ORDER BY</span> order_date;</pre></div>
       </div>
-
+      </div>
+      <div id="runningtotal-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
       <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · rank_in_category.sql</span></div>
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · running_total.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Running total + moving average 7 ngày</span>
+<span class="kw">SELECT</span>
+  order_date,
+  revenue,
+  <span class="fn">SUM</span>(revenue) <span class="kw">OVER</span> (
+    <span class="kw">ORDER BY</span> order_date
+    <span class="kw">ROWS BETWEEN</span> <span class="kw">UNBOUNDED PRECEDING AND CURRENT ROW</span>
+  ) <span class="kw">AS</span> running_total,
+  <span class="fn">AVG</span>(revenue) <span class="kw">OVER</span> (
+    <span class="kw">ORDER BY</span> order_date
+    <span class="kw">ROWS BETWEEN</span> 6 <span class="kw">PRECEDING AND CURRENT ROW</span>
+  ) <span class="kw">AS</span> moving_avg_7d
+<span class="kw">FROM</span> fct_daily_revenue
+<span class="kw">ORDER BY</span> order_date;</pre></div>
+      </div>
+      </div>
+
+      <div class="tab-group" id="rankincategory-tabs">
+        <div class="tab active" onclick="switchTab('rankincategory-tabs','rankincategory-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('rankincategory-tabs','rankincategory-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="rankincategory-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · rank_in_category.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- So sánh ROW_NUMBER vs RANK vs DENSE_RANK</span>
 <span class="kw">SELECT</span>
   category,
@@ -532,9 +633,33 @@
   <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> category <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>) <span class="kw">AS</span> dense_rnk
 <span class="kw">FROM</span> fct_product_sales;</pre></div>
       </div>
-
+      </div>
+      <div id="rankincategory-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
       <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · lag_lead_compare.sql</span></div>
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · rank_in_category.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- So sánh ROW_NUMBER vs RANK vs DENSE_RANK</span>
+<span class="kw">SELECT</span>
+  category,
+  product_id,
+  sales,
+  <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> category <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>) <span class="kw">AS</span> rn,
+  <span class="fn">RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> category <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>) <span class="kw">AS</span> rnk,
+  <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> category <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>) <span class="kw">AS</span> dense_rnk
+<span class="kw">FROM</span> fct_product_sales;</pre></div>
+      </div>
+      </div>
+
+      <div class="tab-group" id="lagleadcompare-tabs">
+        <div class="tab active" onclick="switchTab('lagleadcompare-tabs','lagleadcompare-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('lagleadcompare-tabs','lagleadcompare-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="lagleadcompare-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · lag_lead_compare.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- So sánh doanh thu với kỳ trước và kỳ sau</span>
 <span class="kw">SELECT</span>
   month,
@@ -544,9 +669,32 @@
   revenue - <span class="fn">LAG</span>(revenue, 1, 0) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">AS</span> delta_prev
 <span class="kw">FROM</span> fct_monthly_revenue;</pre></div>
       </div>
-
+      </div>
+      <div id="lagleadcompare-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
       <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · retention_percentile.sql</span></div>
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · lag_lead_compare.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- So sánh doanh thu với kỳ trước và kỳ sau</span>
+<span class="kw">SELECT</span>
+  month,
+  revenue,
+  <span class="fn">LAG</span>(revenue, 1, 0) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">AS</span> prev_month_revenue,
+  <span class="fn">LEAD</span>(revenue, 1, 0) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">AS</span> next_month_revenue,
+  revenue - <span class="fn">LAG</span>(revenue, 1, 0) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> month) <span class="kw">AS</span> delta_prev
+<span class="kw">FROM</span> fct_monthly_revenue;</pre></div>
+      </div>
+      </div>
+
+      <div class="tab-group" id="retentionpercentile-tabs">
+        <div class="tab active" onclick="switchTab('retentionpercentile-tabs','retentionpercentile-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('retentionpercentile-tabs','retentionpercentile-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="retentionpercentile-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · retention_percentile.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Phân vị retention của user cohort</span>
 <span class="kw">SELECT</span>
   cohort_month,
@@ -558,9 +706,34 @@
   ) <span class="kw">AS</span> retention_percentile
 <span class="kw">FROM</span> fct_user_retention;</pre></div>
       </div>
-
+      </div>
+      <div id="retentionpercentile-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
       <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · top3_each_month.sql</span></div>
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · retention_percentile.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Phân vị retention của user cohort</span>
+<span class="kw">SELECT</span>
+  cohort_month,
+  user_id,
+  retention_30d,
+  <span class="fn">PERCENT_RANK</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> cohort_month
+    <span class="kw">ORDER BY</span> retention_30d
+  ) <span class="kw">AS</span> retention_percentile
+<span class="kw">FROM</span> fct_user_retention;</pre></div>
+      </div>
+      </div>
+
+      <div class="tab-group" id="top3eachmonth-tabs">
+        <div class="tab active" onclick="switchTab('top3eachmonth-tabs','top3eachmonth-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('top3eachmonth-tabs','top3eachmonth-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="top3eachmonth-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · top3_each_month.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Top 3 sản phẩm bán chạy nhất mỗi tháng</span>
 <span class="kw">WITH</span> ranked <span class="kw">AS</span> (
   <span class="kw">SELECT</span>
@@ -578,8 +751,156 @@
 <span class="kw">WHERE</span> rn &lt;= 3
 <span class="kw">ORDER BY</span> month, rn;</pre></div>
       </div>
+      </div>
+      <div id="top3eachmonth-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · top3_each_month.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Top 3 sản phẩm bán chạy nhất mỗi tháng</span>
+<span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    month,
+    product_id,
+    sales,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> month
+      <span class="kw">ORDER BY</span> sales <span class="kw">DESC</span>
+    ) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> fct_product_monthly_sales
+)
+<span class="kw">SELECT</span> month, product_id, sales
+<span class="kw">FROM</span> ranked
+<span class="kw">WHERE</span> rn &lt;= 3
+<span class="kw">ORDER BY</span> month, rn;</pre></div>
+      </div>
+      </div>
 
       <div class="info-box warn">⚠️ <span>Không chỉ nhớ cú pháp. Hãy kiểm tra xem frame đang dùng có đúng business logic hay không, nhất là rolling metrics.</span></div>
+
+      <h3>Dedup Latest Record — Pattern quan trọng nhất cho DE</h3>
+      <p>Bảng staging thường chứa <strong>nhiều bản ghi cho cùng một entity</strong> (do retry, CDC multi-version, hoặc source gửi trùng). Để lấy bản ghi mới nhất, dùng <code>ROW_NUMBER() PARTITION BY key ORDER BY updated_at DESC</code> rồi lọc <code>rn = 1</code>.</p>
+      <div class="tab-group" id="deduplatestrecord-tabs">
+        <div class="tab active" onclick="switchTab('deduplatestrecord-tabs','deduplatestrecord-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('deduplatestrecord-tabs','deduplatestrecord-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="deduplatestrecord-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · dedup_latest_record.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Dedup: giữ bản ghi mới nhất theo order_id</span>
+<span class="kw">WITH</span> deduped <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    *,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> order_id
+      <span class="kw">ORDER BY</span> updated_at <span class="kw">DESC</span>
+    ) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> stg_orders
+)
+<span class="kw">SELECT</span> order_id, customer_id, amount, updated_at
+<span class="kw">FROM</span> deduped
+<span class="kw">WHERE</span> rn = 1;</pre></div>
+      </div>
+      </div>
+      <div id="deduplatestrecord-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · dedup_latest_record.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Dedup: giữ bản ghi mới nhất theo order_id</span>
+<span class="kw">WITH</span> deduped <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    *,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> order_id
+      <span class="kw">ORDER BY</span> updated_at <span class="kw">DESC</span>
+    ) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> stg_orders
+)
+<span class="kw">SELECT</span> order_id, customer_id, amount, updated_at
+<span class="kw">FROM</span> deduped
+<span class="kw">WHERE</span> rn = 1;</pre></div>
+      </div>
+      </div>
+      <div class="info-box note">📌 <span><strong>Vấn đề determinism:</strong> Nếu nhiều record có cùng <code>updated_at</code>, ROW_NUMBER sẽ chọn ngẫu nhiên. Thêm cột tiebreaker vào ORDER BY (ví dụ: <code>ORDER BY updated_at DESC, id DESC</code>) để đảm bảo kết quả lặp lại được.</span></div>
+
+      <h3>Streak Analysis — Gap and Island (Chuỗi liên tiếp)</h3>
+      <p>Bài toán: tìm user hoạt động liên tiếp 7+ ngày. Kỹ thuật: gán mỗi dòng một <strong>island group</strong> bằng cách trừ ngày cho ROW_NUMBER. Các ngày liên tiếp sẽ có cùng giá trị group.</p>
+      <div class="tab-group" id="streak-tabs">
+        <div class="tab active" onclick="switchTab('streak-tabs','streak-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('streak-tabs','streak-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="streak-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">PostgreSQL yêu cầu ép kiểu <code>::int</code> rõ ràng khi thực hiện phép trừ giữa ngày (date) và kết quả của hàm ROW_NUMBER().</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · streak_analysis.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Bước 1: Gán island group</span>
+<span class="kw">WITH</span> numbered <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    user_id,
+    activity_date,
+    activity_date - (<span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> user_id
+      <span class="kw">ORDER BY</span> activity_date
+    ))::int <span class="kw">AS</span> island_group
+  <span class="kw">FROM</span> user_activity
+),
+<span class="comment">-- Bước 2: Đếm số ngày liên tiếp mỗi streak</span>
+streaks <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    user_id,
+    island_group,
+    <span class="fn">MIN</span>(activity_date) <span class="kw">AS</span> streak_start,
+    <span class="fn">MAX</span>(activity_date) <span class="kw">AS</span> streak_end,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> streak_days
+  <span class="kw">FROM</span> numbered
+  <span class="kw">GROUP BY</span> user_id, island_group
+)
+<span class="comment">-- Bước 3: Lọc user có streak &gt;= 7 ngày</span>
+<span class="kw">SELECT</span> user_id, streak_start, streak_end, streak_days
+<span class="kw">FROM</span> streaks
+<span class="kw">WHERE</span> streak_days &gt;= 7
+<span class="kw">ORDER BY</span> streak_days <span class="kw">DESC</span>;</pre></div>
+      </div>
+      </div>
+      <div id="streak-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle cho phép trừ trực tiếp một số (kết quả của ROW_NUMBER) từ một ngày (DATE) mà không cần ép kiểu.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · streak_analysis.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Bước 1: Gán island group</span>
+<span class="kw">WITH</span> numbered <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    user_id,
+    activity_date,
+    activity_date - <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> user_id
+      <span class="kw">ORDER BY</span> activity_date
+    ) <span class="kw">AS</span> island_group
+  <span class="kw">FROM</span> user_activity
+),
+<span class="comment">-- Bước 2: Đếm số ngày liên tiếp mỗi streak</span>
+streaks <span class="kw">AS</span> (
+  <span class="kw">SELECT</span>
+    user_id,
+    island_group,
+    <span class="fn">MIN</span>(activity_date) <span class="kw">AS</span> streak_start,
+    <span class="fn">MAX</span>(activity_date) <span class="kw">AS</span> streak_end,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> streak_days
+  <span class="kw">FROM</span> numbered
+  <span class="kw">GROUP BY</span> user_id, island_group
+)
+<span class="comment">-- Bước 3: Lọc user có streak &gt;= 7 ngày</span>
+<span class="kw">SELECT</span> user_id, streak_start, streak_end, streak_days
+<span class="kw">FROM</span> streaks
+<span class="kw">WHERE</span> streak_days &gt;= 7
+<span class="kw">ORDER BY</span> streak_days <span class="kw">DESC</span>;</pre></div>
+      </div>
+      </div>
+      <div class="info-box tip">✅ <span>Gap and Island là pattern phỏng vấn kinh điển. Nắm chắc logic "ngày - ROW_NUMBER = island" là chìa khóa giải bài toán chuỗi liên tiếp.</span></div>
     </div>
   </div>
 
@@ -652,6 +973,50 @@
           <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Dùng ROW_NUMBER trong CTE theo từng month rồi lọc rn <= 3.')">B. ROW_NUMBER PARTITION BY month rồi filter</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'DISTINCT ON có thể dùng nhưng phụ thuộc DB và kém rõ ràng hơn cho top N tổng quát.')">C. DISTINCT ON month ORDER BY sales</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Random không liên quan đến top theo sales.')">D. ORDER BY random()</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Pattern dedup lấy bản ghi mới nhất dùng hàm nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. ROW_NUMBER() PARTITION BY key ORDER BY updated_at DESC rồi lọc rn = 1.')">A. ROW_NUMBER() với ORDER BY updated_at DESC, lọc rn = 1</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'RANK có thể giữ nhiều dòng khi tie, không đảm bảo chỉ 1 record.')">B. RANK() với lọc rnk = 1</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'GROUP BY MAX chỉ trả giá trị max, không trả cả record.')">C. GROUP BY key, MAX(updated_at)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'DISTINCT loại bỏ trùng toàn bộ cột, không chọn bản ghi mới nhất.')">D. SELECT DISTINCT *</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong streak analysis (Gap and Island), island group được tạo bằng cách nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'LAG tìm khoảng cách giữa 2 dòng, không tạo group trực tiếp.')">A. Dùng LAG để tính khoảng cách</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Ngày - ROW_NUMBER() cho các ngày liên tiếp ra cùng giá trị, tạo island.')">B. Trừ ngày cho ROW_NUMBER() → các ngày liên tiếp cùng giá trị</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'SUM không tạo nhóm ngày liên tiếp.')">C. Dùng SUM() OVER để tạo cộng dồn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'NTILE chia bucket đều, không nhận diện liên tiếp hay không.')">D. NTILE() chia thành nhóm đều nhau</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Để kết quả dedup luôn lặp lại được (deterministic), cần làm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'DISTINCT không giải quyết bài toán determinism của ROW_NUMBER.')">A. Thêm DISTINCT vào SELECT</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Thêm cột tiebreaker như id vào ORDER BY để không còn ngẫu nhiên khi tie.')">B. Thêm cột tiebreaker vào ORDER BY (ví dụ: id DESC)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Xóa PARTITION BY sẽ khiến dedup sai hoàn toàn.')">C. Xóa PARTITION BY</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đổi sang RANK có thể giữ nhiều dòng, không giúp determinism.')">D. Dùng RANK thay ROW_NUMBER</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Default frame khi có ORDER BY mà không ghi rõ ROWS/RANGE là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'ROWS không phải mặc định, phải ghi rõ.')">A. ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Mặc định là RANGE, gộp các dòng cùng giá trị ORDER BY vào chung frame.')">B. RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không có frame mặc định này.')">C. ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải full range 2 chiều.')">D. ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</div>
         </div>
         <div class="quiz-explain"></div>
       </div>
@@ -739,6 +1104,55 @@
           </div>
         </div>
       </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 4 · Dedup staging orders</div>
+        <div class="practice-task-body">
+          <p>Bảng <code>stg_orders</code> có nhiều record trùng đã được gửi lại (retry). Viết query lấy bản ghi mới nhất cho mỗi <code>order_id</code>, dùng <code>updated_at</code> và <code>id</code> làm tiebreaker.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution.sql</span></div><div class="cmd-body"><pre><span class="kw">WITH</span> deduped <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> *, <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> order_id
+    <span class="kw">ORDER BY</span> updated_at <span class="kw">DESC</span>, id <span class="kw">DESC</span>
+  ) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> stg_orders
+)
+<span class="kw">SELECT</span> order_id, customer_id, amount, updated_at
+<span class="kw">FROM</span> deduped
+<span class="kw">WHERE</span> rn = 1;</pre></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 5 · Tìm user hoạt động 5+ ngày liên tiếp</div>
+        <div class="practice-task-body">
+          <p>Từ bảng <code>user_activity(user_id, activity_date)</code>, tìm tất cả user có streak hoạt động liên tiếp &gt;= 5 ngày. Trả về user_id, streak_start, streak_end, streak_days.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>solution.sql</span></div><div class="cmd-body"><pre><span class="kw">WITH</span> numbered <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> user_id, activity_date,
+    activity_date - (<span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+      <span class="kw">PARTITION BY</span> user_id <span class="kw">ORDER BY</span> activity_date
+    ))::int <span class="kw">AS</span> grp
+  <span class="kw">FROM</span> user_activity
+),
+streaks <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> user_id, grp,
+    <span class="fn">MIN</span>(activity_date) <span class="kw">AS</span> streak_start,
+    <span class="fn">MAX</span>(activity_date) <span class="kw">AS</span> streak_end,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> streak_days
+  <span class="kw">FROM</span> numbered
+  <span class="kw">GROUP BY</span> user_id, grp
+)
+<span class="kw">SELECT</span> user_id, streak_start, streak_end, streak_days
+<span class="kw">FROM</span> streaks
+<span class="kw">WHERE</span> streak_days &gt;= 5
+<span class="kw">ORDER BY</span> streak_days <span class="kw">DESC</span>;</pre></div></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -801,8 +1215,15 @@
       <h3>Vấn đề của cách làm truyền thống</h3>
       <p>Nếu cần tổng hợp theo nhiều chiều như (store, category), (store), (category), (all), nhiều người viết 4 query UNION ALL. Cách đó dài, khó bảo trì và dễ sai khi thêm metric mới.</p>
 
+      <div class="tab-group" id="groupingsets-tabs">
+        <div class="tab active" onclick="switchTab('groupingsets-tabs','groupingsets-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('groupingsets-tabs','groupingsets-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="groupingsets-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
       <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · grouping_sets.sql</span></div>
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · grouping_sets.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Sales report đa chiều gọn bằng GROUPING SETS</span>
 <span class="kw">SELECT</span>
   store_id,
@@ -819,9 +1240,39 @@
 )
 <span class="kw">ORDER BY</span> store_id <span class="kw">NULLS LAST</span>, category <span class="kw">NULLS LAST</span>;</pre></div>
       </div>
-
+      </div>
+      <div id="groupingsets-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
       <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · rollup_sales.sql</span></div>
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · grouping_sets.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Sales report đa chiều gọn bằng GROUPING SETS</span>
+<span class="kw">SELECT</span>
+  store_id,
+  category,
+  <span class="fn">SUM</span>(sales_amount) <span class="kw">AS</span> total_sales,
+  <span class="fn">GROUPING</span>(store_id) <span class="kw">AS</span> g_store,
+  <span class="fn">GROUPING</span>(category) <span class="kw">AS</span> g_category
+<span class="kw">FROM</span> fct_sales
+<span class="kw">GROUP BY GROUPING SETS</span> (
+  (store_id, category),
+  (store_id),
+  (category),
+  ()
+)
+<span class="kw">ORDER BY</span> store_id <span class="kw">NULLS LAST</span>, category <span class="kw">NULLS LAST</span>;</pre></div>
+      </div>
+      </div>
+
+      <div class="tab-group" id="rollupsales-tabs">
+        <div class="tab active" onclick="switchTab('rollupsales-tabs','rollupsales-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('rollupsales-tabs','rollupsales-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="rollupsales-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · rollup_sales.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Subtotal theo hierarchy thời gian</span>
 <span class="kw">SELECT</span>
   year,
@@ -832,9 +1283,33 @@
 <span class="kw">GROUP BY ROLLUP</span> (year, quarter, month)
 <span class="kw">ORDER BY</span> year, quarter, month;</pre></div>
       </div>
-
+      </div>
+      <div id="rollupsales-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
       <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · cube_activity.sql</span></div>
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · rollup_sales.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Subtotal theo hierarchy thời gian</span>
+<span class="kw">SELECT</span>
+  year,
+  quarter,
+  month,
+  <span class="fn">SUM</span>(sales_amount) <span class="kw">AS</span> total_sales
+<span class="kw">FROM</span> fct_sales_calendar
+<span class="kw">GROUP BY ROLLUP</span> (year, quarter, month)
+<span class="kw">ORDER BY</span> year, quarter, month;</pre></div>
+      </div>
+      </div>
+
+      <div class="tab-group" id="cubeactivity-tabs">
+        <div class="tab active" onclick="switchTab('cubeactivity-tabs','cubeactivity-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('cubeactivity-tabs','cubeactivity-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="cubeactivity-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · cube_activity.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Mọi tổ hợp nền tảng và action</span>
 <span class="kw">SELECT</span>
   platform,
@@ -843,6 +1318,22 @@
 <span class="kw">FROM</span> fct_user_events
 <span class="kw">GROUP BY CUBE</span> (platform, action_type)
 <span class="kw">ORDER BY</span> platform <span class="kw">NULLS LAST</span>, action_type <span class="kw">NULLS LAST</span>;</pre></div>
+      </div>
+      </div>
+      <div id="cubeactivity-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · cube_activity.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Mọi tổ hợp nền tảng và action</span>
+<span class="kw">SELECT</span>
+  platform,
+  action_type,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> events
+<span class="kw">FROM</span> fct_user_events
+<span class="kw">GROUP BY CUBE</span> (platform, action_type)
+<span class="kw">ORDER BY</span> platform <span class="kw">NULLS LAST</span>, action_type <span class="kw">NULLS LAST</span>;</pre></div>
+      </div>
       </div>
 
       <h3>Khi nào dùng gì?</h3>
@@ -854,6 +1345,68 @@
       </table>
 
       <div class="info-box warn">⚠️ <span>CUBE rất mạnh nhưng có thể tạo quá nhiều dòng trên bảng lớn. Chỉ dùng khi bạn thật sự cần tất cả tổ hợp.</span></div>
+
+      <h3>COALESCE + GROUPING() — Label NULL an toàn cho BI</h3>
+      <p>Trong output của GROUPING SETS, các dòng subtotal và grand total có <code>NULL</code> ở cột được group away. Nếu gửi trực tiếp cho BI tool hoặc dashboard, những giá trị <code>NULL</code> này sẽ gây nhầm lẫn. Dùng <code>COALESCE</code> kết hợp <code>GROUPING()</code> để tự động thay thế bằng nhãn đọc được.</p>
+      <div class="tab-group" id="coalesce-tabs">
+        <div class="tab active" onclick="switchTab('coalesce-tabs','coalesce-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('coalesce-tabs','coalesce-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="coalesce-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">PostgreSQL dùng <code>CAST(col AS TEXT)</code> hoặc <code>col::text</code> để chuyển đổi sang chuỗi.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · coalesce_grouping.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Tự động label các dòng subtotal/grand total</span>
+<span class="kw">SELECT</span>
+  <span class="kw">CASE WHEN</span> <span class="fn">GROUPING</span>(store_id) = 1
+    <span class="kw">THEN</span> <span class="str">'Tất Cả Cửa Hàng'</span>
+    <span class="kw">ELSE</span> <span class="fn">CAST</span>(store_id <span class="kw">AS</span> <span class="kw">TEXT</span>)
+  <span class="kw">END AS</span> store_label,
+  <span class="fn">COALESCE</span>(
+    <span class="kw">CASE WHEN</span> <span class="fn">GROUPING</span>(category) = 0
+      <span class="kw">THEN</span> category <span class="kw">END</span>,
+    <span class="str">'Tất Cả Danh Mục'</span>
+  ) <span class="kw">AS</span> category_label,
+  <span class="fn">SUM</span>(sales_amount) <span class="kw">AS</span> total_sales
+<span class="kw">FROM</span> fct_sales
+<span class="kw">GROUP BY GROUPING SETS</span> (
+  (store_id, category),
+  (store_id),
+  (category),
+  ()
+)
+<span class="kw">ORDER BY</span> store_label, category_label;</pre></div>
+      </div>
+      </div>
+      <div id="coalesce-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle dùng <code>TO_CHAR(col)</code> để chuyển đổi dữ liệu số sang chuỗi.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · coalesce_grouping.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Tự động label các dòng subtotal/grand total</span>
+<span class="kw">SELECT</span>
+  <span class="kw">CASE WHEN</span> <span class="fn">GROUPING</span>(store_id) = 1
+    <span class="kw">THEN</span> <span class="str">'Tất Cả Cửa Hàng'</span>
+    <span class="kw">ELSE</span> <span class="fn">TO_CHAR</span>(store_id)
+  <span class="kw">END AS</span> store_label,
+  <span class="fn">COALESCE</span>(
+    <span class="kw">CASE WHEN</span> <span class="fn">GROUPING</span>(category) = 0
+      <span class="kw">THEN</span> category <span class="kw">END</span>,
+    <span class="str">'Tất Cả Danh Mục'</span>
+  ) <span class="kw">AS</span> category_label,
+  <span class="fn">SUM</span>(sales_amount) <span class="kw">AS</span> total_sales
+<span class="kw">FROM</span> fct_sales
+<span class="kw">GROUP BY GROUPING SETS</span> (
+  (store_id, category),
+  (store_id),
+  (category),
+  ()
+)
+<span class="kw">ORDER BY</span> store_label, category_label;</pre></div>
+      </div>
+      </div>
+      <div class="info-box tip">✅ <span>Nhãn rõ ràng giúp stakeholder đọc báo cáo mà không cần hiểu kỹ thuật. Đây là chi tiết nhỏ nhưng tạo ấn tượng chuyên nghiệp cao.</span></div>
     </div>
   </div>
 
@@ -926,6 +1479,39 @@
           <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Cần kiểm tra GROUPING(category) để biết NULL do subtotal hay do dữ liệu thật.')">B. Không, cần dùng GROUPING để phân biệt</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Ép COALESCE không giải quyết bản chất phân biệt nguồn NULL.')">C. Luôn dùng COALESCE là đủ</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Thay bằng DISTINCT không giải quyết vấn đề phân cấp tổng hợp.')">D. Đổi sang DISTINCT</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">COALESCE + GROUPING() được dùng để làm gì trong báo cáo GROUPING SETS?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Tự động thay NULL subtotal bằng nhãn đọc được như Tất Cả, Tổng Cộng.')">A. Tự động thay NULL subtotal bằng nhãn đọc được cho BI</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không tăng tốc query, chỉ thay đổi hiển thị output.')">B. Tăng tốc query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Xóa NULL không phải mục đích, chỉ thay thế hiển thị.')">C. Loại bỏ dòng NULL</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'COALESCE không thay đổi cơ chế GROUPING SETS.')">D. Thay thế CUBE</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">So với UNION ALL, GROUPING SETS có lợi thế gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Kết quả logic giống nhau nếu viết đúng, chỉ khác mức bảo trì.')">A. Kết quả khác nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Một query duy nhất gọn hơn nhiều lần so với viết 4 query UNION ALL lặp lại.')">B. Gọn hơn, dễ bảo trì, scan dữ liệu ít hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'GROUPING SETS không tạo index.')">C. Tự tạo index</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Cả hai đều dùng cùng SUM/COUNT.')">D. Dùng hàm aggregate khác</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Bạn cần report theo (store, category), (store), (category), tổng toàn bộ. Nên chọn gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. GROUPING SETS mô tả đúng và đủ các tổ hợp cần thiết.')">A. GROUPING SETS</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'ROLLUP hợp khi có hierarchy tuyến tính, ở đây là 2 chiều ngang.')">B. ROLLUP(store, category)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'CUBE được nhưng tạo thêm tổ hợp không cần, dễ dư.')">C. CUBE(store, category)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Window function không thay cho nhóm tổng hợp đa mức.')">D. Window SUM OVER</div>
         </div>
         <div class="quiz-explain"></div>
       </div>
@@ -1047,8 +1633,13 @@
     </div>
     <div class="section-content">
       <h3>SCD Type 1: overwrite nhanh, không giữ lịch sử</h3>
-      <div class="info-box note">📌 <span>Phần dưới hiển thị song song 2 dialect: PostgreSQL và Oracle SQL để bạn dùng theo hệ quản trị đang học.</span></div>
-      <h3>PostgreSQL · SCD Type 1</h3>
+      <div class="tab-group" id="scd1-tabs">
+        <div class="tab active" onclick="switchTab('scd1-tabs','scd1-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('scd1-tabs','scd1-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="scd1-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">PostgreSQL dùng <code>UPDATE...FROM</code> và <code>IS DISTINCT FROM</code> để so sánh NULL-safe.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · scd_type1.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Cập nhật trực tiếp bản ghi hiện tại</span>
@@ -1061,8 +1652,10 @@
 <span class="kw">WHERE</span> d.customer_id = s.customer_id
   <span class="kw">AND</span> (d.city, d.email) <span class="kw">IS DISTINCT FROM</span> (s.city, s.email);</pre></div>
       </div>
-
-      <h3>Oracle SQL · SCD Type 1</h3>
+      </div>
+      <div id="scd1-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle dùng <code>MERGE INTO...USING</code> thay <code>UPDATE...FROM</code>. Dùng <code>NVL</code> + <code>&lt;&gt;</code> thay <code>IS DISTINCT FROM</code>.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · scd_type1.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Cập nhật trực tiếp bản ghi hiện tại</span>
@@ -1074,12 +1667,19 @@
      d.city = s.city,
      d.email = s.email,
      d.updated_at = <span class="kw">SYSTIMESTAMP</span>
-   <span class="kw">WHERE</span> <span class="fn">NVL</span>(d.city, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.city, <span class="str">'<<NULL>>'</span>)
-      <span class="kw">OR</span> <span class="fn">NVL</span>(d.email, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.email, <span class="str">'<<NULL>>'</span>);</pre></div>
+   <span class="kw">WHERE</span> <span class="fn">NVL</span>(d.city, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>) &lt;&gt; <span class="fn">NVL</span>(s.city, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>)
+      <span class="kw">OR</span> <span class="fn">NVL</span>(d.email, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>) &lt;&gt; <span class="fn">NVL</span>(s.email, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>);</pre></div>
+      </div>
       </div>
 
       <h3>SCD Type 2: giữ lịch sử đầy đủ</h3>
-      <h3>PostgreSQL · SCD Type 2 DDL</h3>
+      <div class="tab-group" id="scd2ddl-tabs">
+        <div class="tab active" onclick="switchTab('scd2ddl-tabs','scd2ddl-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('scd2ddl-tabs','scd2ddl-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="scd2ddl-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">PostgreSQL dùng <code>BIGSERIAL</code>, <code>BOOLEAN</code>, và partial index có <code>WHERE</code>.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · dim_customer_scd2_ddl.sql</span></div>
         <div class="cmd-body"><pre><span class="kw">CREATE TABLE IF NOT EXISTS</span> dim_customer_scd2 (
@@ -1097,8 +1697,10 @@
   <span class="kw">ON</span> dim_customer_scd2(customer_id)
   <span class="kw">WHERE</span> is_current = <span class="kw">TRUE</span>;</pre></div>
       </div>
-
-      <h3>Oracle SQL · SCD Type 2 DDL</h3>
+      </div>
+      <div id="scd2ddl-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle dùng <code>IDENTITY</code> thay <code>BIGSERIAL</code>, <code>NUMBER(1)</code> thay <code>BOOLEAN</code>. Không hỗ trợ partial index, nên dùng composite index.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · dim_customer_scd2_ddl.sql</span></div>
         <div class="cmd-body"><pre><span class="kw">CREATE TABLE</span> dim_customer_scd2 (
@@ -1115,8 +1717,16 @@
 <span class="kw">CREATE INDEX</span> idx_dim_customer_current
   <span class="kw">ON</span> dim_customer_scd2(customer_id, is_current);</pre></div>
       </div>
+      </div>
 
-      <h3>PostgreSQL · SCD Type 2 Incremental</h3>
+      <h3>SCD Type 2: Incremental Load</h3>
+      <div class="tab-group" id="scd2incr-tabs">
+        <div class="tab active" onclick="switchTab('scd2incr-tabs','scd2incr-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('scd2incr-tabs','scd2incr-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="scd2incr-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">PostgreSQL dùng <code>IS DISTINCT FROM</code> để so sánh NULL-safe, <code>CURRENT_DATE</code>, và <code>BOOLEAN</code>.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · scd_type2_incremental.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- B1: đóng bản ghi hiện tại nếu có thay đổi</span>
@@ -1148,8 +1758,10 @@
 <span class="kw">WHERE</span> d.customer_id <span class="kw">IS NULL</span>
    <span class="kw">OR</span> (d.city, d.tier) <span class="kw">IS DISTINCT FROM</span> (s.city, s.tier);</pre></div>
       </div>
-
-      <h3>Oracle SQL · SCD Type 2 Incremental</h3>
+      </div>
+      <div id="scd2incr-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle dùng <code>NVL</code> + <code>&lt;&gt;</code> thay <code>IS DISTINCT FROM</code>, <code>TRUNC(SYSDATE)</code> thay <code>CURRENT_DATE</code>, <code>0/1</code> thay <code>BOOLEAN</code>.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · scd_type2_incremental.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- B1: đóng bản ghi hiện tại nếu có thay đổi</span>
@@ -1163,8 +1775,8 @@
     <span class="kw">FROM</span> stg_customer s
     <span class="kw">WHERE</span> s.customer_id = d.customer_id
       <span class="kw">AND</span> (
-        <span class="fn">NVL</span>(d.city, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.city, <span class="str">'<<NULL>>'</span>)
-        <span class="kw">OR</span> <span class="fn">NVL</span>(d.tier, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.tier, <span class="str">'<<NULL>>'</span>)
+        <span class="fn">NVL</span>(d.city, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>) &lt;&gt; <span class="fn">NVL</span>(s.city, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>)
+        <span class="kw">OR</span> <span class="fn">NVL</span>(d.tier, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>) &lt;&gt; <span class="fn">NVL</span>(s.tier, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>)
       )
   );
 
@@ -1186,13 +1798,20 @@
  <span class="kw">AND</span> d.is_current = 1
 <span class="kw">WHERE</span> d.customer_id <span class="kw">IS NULL</span>
    <span class="kw">OR</span> (
-     <span class="fn">NVL</span>(d.city, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.city, <span class="str">'<<NULL>>'</span>)
-     <span class="kw">OR</span> <span class="fn">NVL</span>(d.tier, <span class="str">'<<NULL>>'</span>) &lt;&gt; <span class="fn">NVL</span>(s.tier, <span class="str">'<<NULL>>'</span>)
+     <span class="fn">NVL</span>(d.city, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>) &lt;&gt; <span class="fn">NVL</span>(s.city, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>)
+     <span class="kw">OR</span> <span class="fn">NVL</span>(d.tier, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>) &lt;&gt; <span class="fn">NVL</span>(s.tier, <span class="str">'&lt;&lt;NULL&gt;&gt;'</span>)
    );</pre></div>
+      </div>
       </div>
 
       <h3>Validation bắt buộc sau SCD2</h3>
-      <h3>PostgreSQL · SCD2 Validation</h3>
+      <div class="tab-group" id="scd2val-tabs">
+        <div class="tab active" onclick="switchTab('scd2val-tabs','scd2val-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('scd2val-tabs','scd2val-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="scd2val-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">PostgreSQL dùng <code>daterange</code> + toán tử <code>&&</code> để kiểm tra chồng lấn khoảng ngày.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · scd2_validation.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Mỗi customer chỉ có 1 record current</span>
@@ -1211,8 +1830,10 @@
  <span class="kw">AND</span> daterange(a.effective_from, a.effective_to, <span class="str">'[]'</span>)
      &amp;&amp; daterange(b.effective_from, b.effective_to, <span class="str">'[]'</span>);</pre></div>
       </div>
-
-      <h3>Oracle SQL · SCD2 Validation</h3>
+      </div>
+      <div id="scd2val-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle không có <code>daterange</code>, dùng so sánh trực tiếp <code>a.effective_from <= b.effective_to AND b.effective_from <= a.effective_to</code>. Boolean dùng <code>1</code> thay <code>TRUE</code>.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · scd2_validation.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Mỗi customer chỉ có 1 record current</span>
@@ -1231,8 +1852,54 @@
  <span class="kw">AND</span> a.effective_from &lt;= b.effective_to
  <span class="kw">AND</span> b.effective_from &lt;= a.effective_to;</pre></div>
       </div>
+      </div>
 
       <div class="info-box tip">✅ <span>Chạy validation ngay sau load giúp phát hiện lỗi logic trước khi dữ liệu lên dashboard.</span></div>
+
+      <h3>Xử lý Soft Delete từ nguồn (Source Delete Handling)</h3>
+      <p>Trong production, dữ liệu nguồn có thể bị xóa (soft delete hoặc hard delete). Nếu pipeline SCD2 không xử lý trường hợp này, bản ghi dimension sẽ vẫn hiển thị <code>is_current = true</code> cho một entity đã không còn tồn tại ở nguồn.</p>
+      <p><strong>Chiến lược:</strong> So sánh danh sách key hiện tại giữa <code>stg</code> và <code>dim</code>. Key nào có trong dim (is_current=1) nhưng không có trong stg thì đóng lại bằng cách set <code>effective_to = current_date</code> và <code>is_current = false</code>.</p>
+      <div class="tab-group" id="scd2softdelete-tabs">
+        <div class="tab active" onclick="switchTab('scd2softdelete-tabs','scd2softdelete-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('scd2softdelete-tabs','scd2softdelete-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="scd2softdelete-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · scd2_soft_delete.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Đóng record cho customer đã bị xóa ở nguồn</span>
+<span class="kw">UPDATE</span> dim_customer_scd2 d
+<span class="kw">SET</span>
+  effective_to = <span class="kw">CURRENT_DATE</span>,
+  is_current = <span class="kw">FALSE</span>  <span class="comment">-- Oracle: is_current = 0</span>
+<span class="kw">WHERE</span> d.is_current = <span class="kw">TRUE</span>  <span class="comment">-- Oracle: is_current = 1</span>
+  <span class="kw">AND NOT EXISTS</span> (
+    <span class="kw">SELECT</span> 1
+    <span class="kw">FROM</span> stg_customer s
+    <span class="kw">WHERE</span> s.customer_id = d.customer_id
+  );</pre></div>
+      </div>
+      </div>
+      <div id="scd2softdelete-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · scd2_soft_delete.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Đóng record cho customer đã bị xóa ở nguồn</span>
+<span class="kw">UPDATE</span> dim_customer_scd2 d
+<span class="kw">SET</span>
+  effective_to = <span class="kw">CURRENT_DATE</span>,
+  is_current = <span class="kw">FALSE</span>  <span class="comment">-- Oracle: is_current = 0</span>
+<span class="kw">WHERE</span> d.is_current = <span class="kw">TRUE</span>  <span class="comment">-- Oracle: is_current = 1</span>
+  <span class="kw">AND NOT EXISTS</span> (
+    <span class="kw">SELECT</span> 1
+    <span class="kw">FROM</span> stg_customer s
+    <span class="kw">WHERE</span> s.customer_id = d.customer_id
+  );</pre></div>
+      </div>
+      </div>
+      <div class="info-box warn">⚠️ <span>Chỉ dùng pattern này khi <code>stg_customer</code> là <strong>full snapshot</strong> của nguồn (chứa toàn bộ record hiện còn hoạt động). Nếu stg chỉ chứa delta (record thay đổi), không thể kết luận record vắng mặt là đã bị xóa.</span></div>
     </div>
   </div>
 
@@ -1305,6 +1972,39 @@
           <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. 9999-12-31 là sentinel date phổ biến cho record còn hiệu lực.')">B. 9999-12-31</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'NULL có thể dùng nhưng cần nhất quán; pattern yêu cầu ở đây dùng sentinel date.')">C. NULL</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, '1970-01-01 không có ý nghĩa end date current.')">D. 1970-01-01</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi dữ liệu nguồn xóa một customer (soft delete), SCD2 nên xử lý thế nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Xóa record trong dimension sẽ mất lịch sử.')">A. DELETE record trong dim</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Đóng record bằng effective_to = current_date và is_current = false để giữ lịch sử.')">B. Đóng record: set effective_to = current_date, is_current = false</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không làm gì sẽ để record current cho entity không còn tồn tại.')">C. Không làm gì</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Set NULL không rõ ràng bằng đóng record đúng chuẩn.')">D. Set tất cả cột về NULL</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Điều kiện tiên quyết để xác định record nguồn đã bị xóa là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Chỉ khi staging là full snapshot mới kết luận được record vắng mặt là đã bị xóa.')">A. Staging phải là full snapshot (không phải delta)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'PRIMARY KEY không giúp xác định record đã xóa hay chưa.')">B. Bảng phải có PRIMARY KEY</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Số dòng không cho biết cụ thể record nào bị xóa.')">C. Đếm số dòng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Audit log có thể giúp nhưng không phải điều kiện bắt buộc.')">D. Nguồn phải có audit log</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">SCD Type 3 lưu lịch sử bằng cách nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là Type 2.')">A. Thêm nhiều bản ghi theo thời gian</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Type 3 thêm cột previous_value trong cùng một dòng.')">B. Thêm cột previous_value bên cạnh current value</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây gần giống Type 1.')">C. Ghi đè hoàn toàn giá trị cũ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan tới cách biểu diễn history.')">D. Dùng bảng fact thay dimension</div>
         </div>
         <div class="quiz-explain"></div>
       </div>
@@ -1416,7 +2116,12 @@
     </div>
     <div class="section-content">
       <h3>Timestamp-based incremental</h3>
-      <h3>PostgreSQL · Incremental watermark</h3>
+      <div class="tab-group" id="incr-tabs">
+        <div class="tab active" onclick="switchTab('incr-tabs','incr-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('incr-tabs','incr-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="incr-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · incremental_timestamp.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Lấy watermark cuối lần load trước</span>
@@ -1430,8 +2135,10 @@
 <span class="kw">CROSS JOIN</span> wm
 <span class="kw">WHERE</span> s.updated_at &gt; wm.last_wm;</pre></div>
       </div>
-
-      <h3>Oracle SQL · Incremental watermark</h3>
+      </div>
+      <div id="incr-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle dùng <code>TO_TIMESTAMP</code> và format mask thay vì cú pháp <code>::timestamp</code> của PostgreSQL.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · incremental_timestamp.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Lấy watermark cuối lần load trước</span>
@@ -1445,9 +2152,16 @@
 <span class="kw">CROSS JOIN</span> wm
 <span class="kw">WHERE</span> s.updated_at &gt; wm.last_wm;</pre></div>
       </div>
+      </div>
 
       <h3>Idempotent UPSERT</h3>
-      <h3>PostgreSQL · ON CONFLICT</h3>
+      <div class="tab-group" id="upsert-tabs">
+        <div class="tab active" onclick="switchTab('upsert-tabs','upsert-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('upsert-tabs','upsert-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="upsert-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">PostgreSQL dùng <code>ON CONFLICT (key) DO UPDATE</code> để upsert. <code>EXCLUDED</code> tham chiếu giá trị mới từ INSERT.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · incremental_upsert.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Tránh duplicate khi chạy lại</span>
@@ -1461,8 +2175,10 @@
   updated_at = <span class="kw">EXCLUDED</span>.updated_at
 <span class="kw">WHERE</span> dw_orders.updated_at &lt; <span class="kw">EXCLUDED</span>.updated_at;</pre></div>
       </div>
-
-      <h3>Oracle SQL · MERGE</h3>
+      </div>
+      <div id="upsert-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle dùng <code>MERGE INTO ... USING ... ON</code> thay cho <code>ON CONFLICT</code>. MERGE hỗ trợ cả MATCHED và NOT MATCHED trong một câu.</p>
       <div class="cmd-block">
         <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · incremental_upsert.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- Tránh duplicate khi chạy lại bằng MERGE</span>
@@ -1479,10 +2195,18 @@
    <span class="kw">INSERT</span> (order_id, customer_id, amount, updated_at)
    <span class="kw">VALUES</span> (s.order_id, s.customer_id, s.amount, s.updated_at);</pre></div>
       </div>
+      </div>
 
       <h3>Date partition pattern</h3>
+      <div class="tab-group" id="partitiondailyload-tabs">
+        <div class="tab active" onclick="switchTab('partitiondailyload-tabs','partitiondailyload-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('partitiondailyload-tabs','partitiondailyload-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="partitiondailyload-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
       <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql + oracle sql · partition_daily_load.sql</span></div>
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · partition_daily_load.sql</span></div>
         <div class="cmd-body"><pre><span class="comment">-- target_date truyền từ scheduler</span>
 <span class="kw">DELETE FROM</span> fct_orders_daily
 <span class="kw">WHERE</span> order_date = <span class="str">:target_date</span>;
@@ -1491,6 +2215,22 @@
 <span class="kw">SELECT</span> *
 <span class="kw">FROM</span> stg_orders
 <span class="kw">WHERE</span> order_date = <span class="str">:target_date</span>;</pre></div>
+      </div>
+      </div>
+      <div id="partitiondailyload-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · partition_daily_load.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- target_date truyền từ scheduler</span>
+<span class="kw">DELETE FROM</span> fct_orders_daily
+<span class="kw">WHERE</span> order_date = <span class="str">:target_date</span>;
+
+<span class="kw">INSERT INTO</span> fct_orders_daily
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> stg_orders
+<span class="kw">WHERE</span> order_date = <span class="str">:target_date</span>;</pre></div>
+      </div>
       </div>
 
       <h3>Backfill vs Incremental</h3>
@@ -1501,6 +2241,65 @@
       </table>
 
       <div class="info-box note">📌 <span>Pattern tốt nhất là tách rõ luồng backfill và luồng daily incremental để giảm rủi ro.</span></div>
+
+      <h3>Late Arriving Data — Dữ liệu về muộn</h3>
+      <p>Trong thực tế, không phải tất cả record đều có <code>updated_at</code> đúng thời điểm. Mạng bị lag, retry queue giữ record lại, hay microservice ghi chậm đều khiến dữ liệu có <code>updated_at</code> <strong>nằm trước watermark</strong> mà chưa được load. Đây gọi là <strong>Late Arriving Data</strong>.</p>
+      <p>Nếu pipeline chỉ lấy <code>WHERE updated_at &gt; last_wm</code> mà không có biên độ an toàn, các record muộn sẽ bị bỏ sót vĩnh viễn.</p>
+
+      <div class="tab-group" id="safewm-tabs">
+        <div class="tab active" onclick="switchTab('safewm-tabs','safewm-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('safewm-tabs','safewm-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="safewm-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">PostgreSQL dùng <code>ON CONFLICT</code> kết hợp CTE watermark. Cú pháp <code>::timestamp</code> để cast kiểu.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · safe_watermark.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Lùi watermark 1 giờ để bắt Late Arriving Data</span>
+<span class="kw">WITH</span> wm <span class="kw">AS</span> (
+  <span class="kw">SELECT COALESCE</span>(<span class="fn">MAX</span>(updated_at), <span class="str">'1970-01-01'</span>::timestamp)
+    - <span class="kw">INTERVAL</span> <span class="str">'1 hour'</span> <span class="kw">AS</span> safe_wm
+  <span class="kw">FROM</span> dw_orders
+)
+<span class="kw">INSERT INTO</span> dw_orders (order_id, customer_id, amount, updated_at)
+<span class="kw">SELECT</span> s.order_id, s.customer_id, s.amount, s.updated_at
+<span class="kw">FROM</span> src_orders s
+<span class="kw">CROSS JOIN</span> wm
+<span class="kw">WHERE</span> s.updated_at &gt; wm.safe_wm
+<span class="kw">ON CONFLICT</span> (order_id)
+<span class="kw">DO UPDATE SET</span>
+  customer_id = <span class="kw">EXCLUDED</span>.customer_id,
+  amount = <span class="kw">EXCLUDED</span>.amount,
+  updated_at = <span class="kw">EXCLUDED</span>.updated_at
+<span class="kw">WHERE</span> dw_orders.updated_at &lt; <span class="kw">EXCLUDED</span>.updated_at;</pre></div>
+      </div>
+      </div>
+      <div id="safewm-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle dùng <code>MERGE</code> thay <code>ON CONFLICT</code> và <code>TO_TIMESTAMP</code> thay cast <code>::timestamp</code>.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · safe_watermark.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Lùi watermark 1 giờ để bắt Late Arriving Data</span>
+<span class="kw">MERGE INTO</span> dw_orders d
+<span class="kw">USING</span> (
+  <span class="kw">SELECT</span> s.*
+  <span class="kw">FROM</span> src_orders s,
+    (<span class="kw">SELECT COALESCE</span>(<span class="fn">MAX</span>(updated_at),
+       <span class="fn">TO_TIMESTAMP</span>(<span class="str">'1970-01-01'</span>, <span class="str">'YYYY-MM-DD'</span>))
+       - <span class="kw">INTERVAL</span> <span class="str">'1'</span> <span class="kw">HOUR</span> <span class="kw">AS</span> safe_wm
+     <span class="kw">FROM</span> dw_orders) wm
+  <span class="kw">WHERE</span> s.updated_at &gt; wm.safe_wm
+) s <span class="kw">ON</span> (d.order_id = s.order_id)
+<span class="kw">WHEN MATCHED THEN</span>
+  <span class="kw">UPDATE SET</span> d.amount = s.amount, d.updated_at = s.updated_at
+  <span class="kw">WHERE</span> d.updated_at &lt; s.updated_at
+<span class="kw">WHEN NOT MATCHED THEN</span>
+  <span class="kw">INSERT</span> (order_id, customer_id, amount, updated_at)
+  <span class="kw">VALUES</span> (s.order_id, s.customer_id, s.amount, s.updated_at);</pre></div>
+      </div>
+      </div>
+
+      <div class="info-box warn">⚠️ <span><strong>Concurrency Warning:</strong> Nhiều tiến trình UPSERT chạy song song trên cùng bảng có thể gây Race Condition hoặc Deadlock. Trong production, luôn dùng advisory lock hoặc đảm bảo chỉ 1 instance chạy tại một thời điểm (ví dụ: Airflow max_active_runs=1).</span></div>
     </div>
   </div>
 
@@ -1573,6 +2372,39 @@
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không có một cú pháp SQL duy nhất chạy nguyên xi cho cả hai hệ quản trị này.')">B. Dùng một câu lệnh UPSERT chung cho mọi DB</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Xóa rồi insert toàn bộ không phải chiến lược an toàn cho idempotent production.')">C. Luôn DELETE + INSERT toàn bảng</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Bỏ qua khác biệt dialect sẽ làm script không chạy ở một trong hai DB.')">D. Chỉ cần viết theo Oracle, PostgreSQL sẽ tự tương thích</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Late Arriving Data là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Dữ liệu lớn không phải late arriving.')">A. Dữ liệu quá lớn để load</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Record có updated_at nằm trước watermark do lag mạng, retry queue, hoặc ghi chậm.')">B. Record có updated_at nằm trước watermark do đến muộn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Dữ liệu lỗi format là vấn đề data quality, không phải late arriving.')">C. Dữ liệu sai format</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Dữ liệu trùng lặp là vấn đề khác, xử lý bằng dedup.')">D. Dữ liệu bị trùng lặp</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Cách khắc phục Late Arriving Data phổ biến nhất là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Xóa toàn bộ và nạp lại quá tốn sức và không cần thiết.')">A. Truncate và full reload mỗi ngày</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Lùi watermark một khoảng (ví dụ: - INTERVAL 1 hour) kết hợp UPSERT để bắt record muộn an toàn.')">B. Lùi watermark một khoảng + dùng UPSERT</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Bỏ qua là chấp nhận mất dữ liệu, không phải giải pháp.')">C. Bỏ qua và chấp nhận mất dữ liệu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Alert giúp phát hiện nhưng không tự khắc phục.')">D. Chỉ cần cài alert</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Rủi ro chính khi nhiều tiến trình UPSERT chạy song song là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Query chạy nhanh hơn không phải rủi ro.')">A. Query chạy nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Index không tự xóa khi chạy song song.')">B. Index bị xóa</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Race condition và deadlock là rủi ro chính khi nhiều process cùng UPSERT vào 1 bảng.')">C. Race condition và deadlock</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Bảng không bị drop khi chạy UPSERT song song.')">D. Bảng tự động bị drop</div>
         </div>
         <div class="quiz-explain"></div>
       </div>
@@ -1695,10 +2527,15 @@
         <li>Join key không cùng kiểu dữ liệu.</li>
       </ul>
 
-      <h3>PostgreSQL · Before/After plan</h3>
-      <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · explain_before.sql</span></div>
-        <div class="cmd-body"><pre><span class="comment">-- BEFORE: thiếu index trên customer_id</span>
+      <div class="tab-group" id="explain-tabs">
+        <div class="tab active" onclick="switchTab('explain-tabs','explain-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('explain-tabs','explain-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="explain-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · explain_before.sql</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- BEFORE: thiếu index trên customer_id</span>
 <span class="kw">EXPLAIN ANALYZE</span>
 <span class="kw">SELECT</span> <span class="fn">SUM</span>(amount)
 <span class="kw">FROM</span> fct_orders
@@ -1706,17 +2543,17 @@
 
 <span class="output">Seq Scan on fct_orders  (cost=0.00..45210.00 rows=120 width=8)</span>
 <span class="output">Execution Time: 2410.532 ms</span></pre></div>
-      </div>
+        </div>
 
-      <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · add_index.sql</span></div>
-        <div class="cmd-body"><pre><span class="kw">CREATE INDEX</span> idx_fct_orders_customer_id
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · add_index.sql</span></div>
+          <div class="cmd-body"><pre><span class="kw">CREATE INDEX</span> idx_fct_orders_customer_id
   <span class="kw">ON</span> fct_orders(customer_id);</pre></div>
-      </div>
+        </div>
 
-      <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · explain_after.sql</span></div>
-        <div class="cmd-body"><pre><span class="comment">-- AFTER: query plan dùng index</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · explain_after.sql</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- AFTER: query plan dùng index</span>
 <span class="kw">EXPLAIN ANALYZE</span>
 <span class="kw">SELECT</span> <span class="fn">SUM</span>(amount)
 <span class="kw">FROM</span> fct_orders
@@ -1724,12 +2561,14 @@
 
 <span class="output">Index Scan using idx_fct_orders_customer_id on fct_orders</span>
 <span class="output">Execution Time: 19.884 ms</span></pre></div>
+        </div>
       </div>
-
-      <h3>Oracle SQL · Before/After plan</h3>
-      <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · explain_before.sql</span></div>
-        <div class="cmd-body"><pre><span class="comment">-- BEFORE: thiếu index trên customer_id</span>
+      <div id="explain-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Oracle dùng <code>EXPLAIN PLAN FOR</code> + <code>DBMS_XPLAN.DISPLAY</code> thay vì <code>EXPLAIN ANALYZE</code> của PostgreSQL.</p>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · explain_before.sql</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- BEFORE: thiếu index trên customer_id</span>
 <span class="kw">EXPLAIN PLAN FOR</span>
 <span class="kw">SELECT</span> <span class="fn">SUM</span>(amount)
 <span class="kw">FROM</span> fct_orders
@@ -1739,17 +2578,17 @@
 <span class="kw">FROM</span> <span class="fn">TABLE</span>(<span class="fn">DBMS_XPLAN.DISPLAY</span>);
 
 <span class="output">TABLE ACCESS FULL FCT_ORDERS</span></pre></div>
-      </div>
+        </div>
 
-      <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · add_index.sql</span></div>
-        <div class="cmd-body"><pre><span class="kw">CREATE INDEX</span> idx_fct_orders_customer_id
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · add_index.sql</span></div>
+          <div class="cmd-body"><pre><span class="kw">CREATE INDEX</span> idx_fct_orders_customer_id
   <span class="kw">ON</span> fct_orders(customer_id);</pre></div>
-      </div>
+        </div>
 
-      <div class="cmd-block">
-        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · explain_after.sql</span></div>
-        <div class="cmd-body"><pre><span class="comment">-- AFTER: query plan dùng index</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · explain_after.sql</span></div>
+          <div class="cmd-body"><pre><span class="comment">-- AFTER: query plan dùng index</span>
 <span class="kw">EXPLAIN PLAN FOR</span>
 <span class="kw">SELECT</span> <span class="fn">SUM</span>(amount)
 <span class="kw">FROM</span> fct_orders
@@ -1759,6 +2598,7 @@
 <span class="kw">FROM</span> <span class="fn">TABLE</span>(<span class="fn">DBMS_XPLAN.DISPLAY</span>);
 
 <span class="output">INDEX RANGE SCAN IDX_FCT_ORDERS_CUSTOMER_ID</span></pre></div>
+        </div>
       </div>
 
       <h3>Index strategies cho DE</h3>
@@ -1771,6 +2611,88 @@
       </table>
 
       <div class="info-box warn">⚠️ <span>Đừng thêm index mù quáng. Mỗi index tăng chi phí ghi và dung lượng lưu trữ.</span></div>
+
+      <h3>Partition Pruning — Bằng chứng từ EXPLAIN</h3>
+      <p>Khi bảng được partition theo <code>order_date</code> và query có điều kiện lọc trên cột partition, optimizer chỉ scan partition cần thiết thay vì toàn bộ bảng. Đây gọi là <strong>Partition Pruning</strong>.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · partition_pruning_demo.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Bảng fct_orders_partitioned được partition theo RANGE(order_date)</span>
+<span class="comment">-- Query không có partition filter → scan ALL partitions</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(amount) <span class="kw">FROM</span> fct_orders_partitioned;
+
+<span class="output">Append  (cost=0.00..185020.00 ...)</span>
+<span class="output">  -&gt; Seq Scan on fct_orders_2023q1  ...</span>
+<span class="output">  -&gt; Seq Scan on fct_orders_2023q2  ...</span>
+<span class="output">  -&gt; Seq Scan on fct_orders_2024q1  ...</span>
+<span class="output">  -&gt; Seq Scan on fct_orders_2024q2  ...</span>
+<span class="output">Execution Time: 4820.123 ms</span>
+
+<span class="comment">-- Thêm WHERE trên cột partition → chỉ scan 1 partition</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(amount)
+<span class="kw">FROM</span> fct_orders_partitioned
+<span class="kw">WHERE</span> order_date <span class="kw">BETWEEN</span> <span class="str">'2024-01-01'</span> <span class="kw">AND</span> <span class="str">'2024-03-31'</span>;
+
+<span class="output">Append  (cost=0.00..46250.00 ...)</span>
+<span class="output">  -&gt; Seq Scan on fct_orders_2024q1  ...</span>
+<span class="output">Execution Time: 1180.456 ms  (↓ 4x nhanh hơn)</span></pre></div>
+      </div>
+
+      <h3>Anti-Pattern: Dùng hàm trên cột lọc (Function-on-Column)</h3>
+      <p>Khi bạn bọc cột trong hàm ở mệnh đề <code>WHERE</code>, database không thể dùng index trên cột đó vì giá trị đã bị biến đổi. Kết quả: Full Table Scan dù có index.</p>
+      <div class="tab-group" id="functionantipattern-tabs">
+        <div class="tab active" onclick="switchTab('functionantipattern-tabs','functionantipattern-pg')">🐘 PostgreSQL</div>
+        <div class="tab" onclick="switchTab('functionantipattern-tabs','functionantipattern-oracle')">🔴 Oracle SQL</div>
+      </div>
+      <div id="functionantipattern-pg" class="tab-content active">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · function_anti_pattern.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- ❌ SAI: hàm bọc cột → index vô hiệu hóa</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> fct_orders
+<span class="kw">WHERE</span> <span class="fn">EXTRACT</span>(<span class="kw">YEAR FROM</span> order_date) = 2024;
+<span class="comment">-- Kết quả: Seq Scan / Full Table Scan dù có index trên order_date</span>
+
+<span class="comment">-- ✅ ĐÚNG: đổi thành range filter → index hoạt động bình thường</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> fct_orders
+<span class="kw">WHERE</span> order_date &gt;= <span class="str">'2024-01-01'</span>
+  <span class="kw">AND</span> order_date &lt; <span class="str">'2025-01-01'</span>;
+<span class="comment">-- Kết quả: Index Range Scan — nhanh hơn nhiều lần</span>
+
+<span class="comment">-- Hoặc tạo expression index nếu buộc phải dùng EXTRACT:</span>
+<span class="comment">-- PostgreSQL:</span>
+<span class="kw">CREATE INDEX</span> idx_orders_year <span class="kw">ON</span> fct_orders((<span class="fn">EXTRACT</span>(<span class="kw">YEAR FROM</span> order_date)));
+<span class="comment">-- Oracle:</span>
+<span class="comment">-- CREATE INDEX idx_orders_year ON fct_orders(EXTRACT(YEAR FROM order_date));</span></pre></div>
+      </div>
+      </div>
+      <div id="functionantipattern-oracle" class="tab-content">
+        <span class="db-tag db-oracle">Oracle SQL</span>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin:8px 0">Cú pháp chuẩn ANSI SQL, chạy hoàn toàn giống nhau trên PostgreSQL và Oracle.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle sql · function_anti_pattern.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- ❌ SAI: hàm bọc cột → index vô hiệu hóa</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> fct_orders
+<span class="kw">WHERE</span> <span class="fn">EXTRACT</span>(<span class="kw">YEAR FROM</span> order_date) = 2024;
+<span class="comment">-- Kết quả: Seq Scan / Full Table Scan dù có index trên order_date</span>
+
+<span class="comment">-- ✅ ĐÚNG: đổi thành range filter → index hoạt động bình thường</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> fct_orders
+<span class="kw">WHERE</span> order_date &gt;= <span class="str">'2024-01-01'</span>
+  <span class="kw">AND</span> order_date &lt; <span class="str">'2025-01-01'</span>;
+<span class="comment">-- Kết quả: Index Range Scan — nhanh hơn nhiều lần</span>
+
+<span class="comment">-- Hoặc tạo expression index nếu buộc phải dùng EXTRACT:</span>
+<span class="comment">-- PostgreSQL:</span>
+<span class="kw">CREATE INDEX</span> idx_orders_year <span class="kw">ON</span> fct_orders((<span class="fn">EXTRACT</span>(<span class="kw">YEAR FROM</span> order_date)));
+<span class="comment">-- Oracle:</span>
+<span class="comment">-- CREATE INDEX idx_orders_year ON fct_orders(EXTRACT(YEAR FROM order_date));</span></pre></div>
+      </div>
+      </div>
+
+      <div class="info-box warn">⚠️ <span>Quy tắc vàng: không bao giờ bọc cột bằng hàm trong WHERE nếu không có expression index tương ứng. Đổi thành range filter là cách an toàn và portable nhất.</span></div>
     </div>
   </div>
 
@@ -1843,6 +2765,39 @@
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không tự động tạo backup.')">B. Tự động backup dữ liệu</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không tự nén toàn bộ bảng.')">C. Nén bảng vật lý</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không thay thế cơ chế replication.')">D. Thay thế replication</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Khi dùng WHERE EXTRACT(YEAR FROM order_date) = 2024, vấn đề gì xảy ra?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Hàm bọc cột khiến optimizer không thể dùng B-tree index trên order_date.')">A. Index trên order_date bị vô hiệu hóa</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Query vẫn chạy đúng về kết quả, chỉ chậm.')">B. Kết quả bị sai</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan bảo mật.')">C. Dữ liệu bị lộ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Query vẫn chạy được, chỉ hiệu năng kém.')">D. Query không chạy được</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Cách sửa tốt nhất cho function-on-column anti-pattern là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Xóa index không giải quyết vấn đề, còn làm chậm hơn.')">A. Xóa index đi</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Đổi thành range filter (order_date được so sánh trực tiếp) là cách an toàn và portable nhất.')">B. Đổi thành range filter: order_date &gt;= '2024-01-01' AND order_date &lt; '2025-01-01'</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Thêm RAM không sửa logic query, chỉ giảm triệu chứng.')">C. Thêm RAM cho server</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'LIMIT giới hạn output, không giảm scan input.')">D. Thêm LIMIT 1000</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Điều gì quan trọng nhất khi đánh giá hiệu quả của partition trên bảng lớn?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Số partition nhiều hay ít không phải tiêu chí chính.')">A. Số partition tối đa</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tên partition không ảnh hưởng hiệu năng.')">B. Đặt tên partition đẹp</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. EXPLAIN phải cho thấy chỉ các partition liên quan được scan (pruning hiệu quả).')">C. EXPLAIN khả năng thể cho thấy chỉ scan partition cần thiết</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tên cột partition không phải yếu tố quyết định.')">D. Cột partition phải là primary key</div>
         </div>
         <div class="quiz-explain"></div>
       </div>
@@ -1990,6 +2945,44 @@
       </div>
 
       <div class="info-box note">📌 <span>Nên thêm phần "limitations" cho các query giả định dữ liệu sạch hoặc không có timezone shift.</span></div>
+
+      <h3>Mapping query → Module học</h3>
+      <table>
+        <tr><th>Query</th><th>Module nguồn</th><th>Kỹ thuật chính</th></tr>
+        <tr><td>01–04</td><td>W1.02 Window Functions</td><td>SUM OVER, ROW_NUMBER, LAG, PERCENT_RANK</td></tr>
+        <tr><td>05</td><td>W1.02 Window Functions</td><td>Gap and Island (cần học phần Streak Analysis)</td></tr>
+        <tr><td>06–07</td><td>W1.03 GROUPING SETS</td><td>GROUPING SETS, ROLLUP, COALESCE+GROUPING</td></tr>
+        <tr><td>08–09</td><td>W1.04 SCD</td><td>Type 1 overwrite, Type 2 + validation</td></tr>
+        <tr><td>10</td><td>W1.05 Incremental</td><td>Watermark + UPSERT idempotent</td></tr>
+        <tr><td>11</td><td>W1.06 Optimization</td><td>EXPLAIN before/after + dán kết quả plan</td></tr>
+      </table>
+
+      <h3>Hướng dẫn dán kết quả EXPLAIN vào artifact</h3>
+      <p>Với query 11 (<code>11_explain_optimize.sql</code>), hãy copy output của <code>EXPLAIN ANALYZE</code> (PostgreSQL) hoặc <code>DBMS_XPLAN.DISPLAY</code> (Oracle) và dán thẳng vào file SQL dưới dạng comment. Đây là minh chứng rằng bạn đã thực sự chạy và đo hiệu năng.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>11_explain_optimize.sql · mẫu dán output</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- Mục tiêu: chứng minh index cải thiện query filter theo customer_id</span>
+<span class="comment">-- Dataset: fct_orders (~2M rows)</span>
+
+<span class="comment">/* === BEFORE OPTIMIZATION ===</span>
+<span class="comment">Seq Scan on fct_orders  (cost=0.00..45210.00 rows=120 width=8)</span>
+<span class="comment">  Filter: (customer_id = 12345)</span>
+<span class="comment">  Rows Removed by Filter: 1999880</span>
+<span class="comment">Execution Time: 2410.532 ms</span>
+<span class="comment">=== END BEFORE === */</span>
+
+<span class="kw">CREATE INDEX</span> idx_fct_orders_customer_id
+  <span class="kw">ON</span> fct_orders(customer_id);
+
+<span class="comment">/* === AFTER OPTIMIZATION ===</span>
+<span class="comment">Index Scan using idx_fct_orders_customer_id on fct_orders</span>
+<span class="comment">  Index Cond: (customer_id = 12345)</span>
+<span class="comment">Execution Time: 19.884 ms</span>
+<span class="comment">Improvement: 121x faster</span>
+<span class="comment">=== END AFTER === */</span></pre></div>
+      </div>
+
+      <div class="info-box tip">✅ <span>Dán kết quả EXPLAIN thực tế vào artifact là bằng chứng mạnh nhất cho portfolio và phỏng vấn. Nhà tuyển dụng sẽ ấn tượng hơn nhiều so với bài chỉ có SQL không có output.</span></div>
     </div>
   </div>
 
@@ -2051,6 +3044,50 @@
           <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Thiếu SCD2 nghĩa là chưa đạt đủ mục tiêu tuần 1.')">B. Không, cần hoàn tất đủ 11 query bắt buộc</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'SCD2 không thay bằng README được.')">C. Chỉ cần mô tả bằng README</div>
           <div class="quiz-opt" onclick="answerQuiz(this, false, 'Mini test không thay thế phần thực hành thiếu.')">D. Chỉ cần điểm mini test cao</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao nên dán kết quả EXPLAIN ANALYZE vào artifact dưới dạng comment?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Kết quả EXPLAIN là bằng chứng thực tế cho portfolio và phỏng vấn.')">A. Làm bằng chứng thật cho portfolio và interview</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'EXPLAIN output không ảnh hưởng tốc độ query khi chạy.')">B. Để query chạy nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Comment không mã hóa dữ liệu.')">C. Để bảo mật dữ liệu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Việc chạm điểm do nhà tuyển dụng, không phải mục đích chính.')">D. Để chuẩn hóa điểm số</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Query 05_consecutive_active.sql yêu cầu kỹ thuật nào từ W1.02?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Running total không giải quyết bài toán chuỗi liên tiếp.')">A. Running total</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'LAG so sánh kỳ, không tạo group streak.')">B. LAG/LEAD</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Streak analysis dùng Gap and Island với ROW_NUMBER() trừ ngày.')">C. Gap and Island (Streak Analysis)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'NTILE chia bucket, không phân tích chuỗi liên tiếp.')">D. NTILE</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Cách viết comment chuẩn cho mỗi query trong artifact là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Comment 1 dòng thường không đủ thông tin cho review.')">A. Chỉ cần tên query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Comment rõ mục tiêu, logic chính và expected output giúp review hiệu quả.')">B. Mục tiêu + logic chính + expected output</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Viết dài không có cấu trúc khó đọc hơn.')">C. Viết càng dài càng tốt</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Comment tiếng Anh hay Việt không quan trọng bằng nội dung rõ ràng.')">D. Bắt buộc tiếng Anh</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Số lượng file tối thiểu trong thư mục artifact tuần 1 là?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, '1 file SQL chưa đủ, cần cả README.')">A. 1 (chỉ file SQL)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng. Cần ít nhất week1_sql_advanced.sql và README.md.')">B. 2 (SQL + README.md)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tuần 1 không yêu cầu tách thành 5 file riêng.')">C. 5</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, '11 file riêng không bắt buộc, có thể gộp vào 1 file SQL.')">D. 11 (mỗi query 1 file)</div>
         </div>
         <div class="quiz-explain"></div>
       </div>
@@ -2122,7 +3159,7 @@
   <div class="module-header">
     <div class="module-tag">Tuần 1 · Module 08</div>
     <div class="module-title">📝 Mini Test Tổng Kết Tuần 1</div>
-    <div class="module-subtitle">20 câu trắc nghiệm bao phủ window, grouping, SCD, incremental, optimization</div>
+    <div class="module-subtitle">25 câu trắc nghiệm bao phủ window, dedup, streak, grouping, SCD, incremental, optimization</div>
     <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
   </div>
 
@@ -2135,11 +3172,11 @@
     <div class="section-content">
       <table>
         <tr><th>Nhóm câu hỏi</th><th>Số câu</th><th>Mục tiêu đánh giá</th></tr>
-        <tr><td>Window Functions</td><td>6</td><td>Hiểu over, frame, ranking, lag/lead</td></tr>
-        <tr><td>GROUPING SETS/ROLLUP/CUBE</td><td>3</td><td>Chọn đúng pattern đa chiều</td></tr>
-        <tr><td>SCD</td><td>4</td><td>Hiểu type, update flow, validation</td></tr>
-        <tr><td>Incremental</td><td>4</td><td>Watermark, idempotency, backfill</td></tr>
-        <tr><td>Optimization</td><td>3</td><td>Execution plan (PostgreSQL/Oracle) và index basics</td></tr>
+        <tr><td>Window Functions (ranking, offset, dedup, streak)</td><td>8</td><td>Hiểu over, frame, ranking, lag/lead, dedup, gap-island</td></tr>
+        <tr><td>GROUPING SETS/ROLLUP/CUBE</td><td>4</td><td>Chọn đúng pattern đa chiều, label NULL</td></tr>
+        <tr><td>SCD</td><td>4</td><td>Hiểu type, update flow, validation, soft delete</td></tr>
+        <tr><td>Incremental</td><td>5</td><td>Watermark, idempotency, backfill, late arriving data</td></tr>
+        <tr><td>Optimization</td><td>4</td><td>Execution plan, index, partition pruning, anti-pattern</td></tr>
       </table>
     </div>
   </div>
@@ -2156,7 +3193,7 @@
         <li>Xác định nhóm kiến thức còn yếu để ôn lại có trọng tâm.</li>
         <li>Rèn phản xạ chọn pattern đúng theo tình huống thực tế.</li>
       </ul>
-      <div class="info-box note">📌 <span>Thang điểm gợi ý: &lt;12 ôn lại, 12-15 đạt nền tảng, 16-18 sẵn sàng, 19-20 xuất sắc.</span></div>
+      <div class="info-box note">📌 <span>Thang điểm gợi ý: &lt;15 ôn lại, 15-18 đạt nền tảng, 19-22 sẵn sàng, 23-25 xuất sắc.</span></div>
     </div>
   </div>
 
@@ -2387,6 +3424,56 @@
           </div>
         </div>
 
+        <div class="test-question" data-q="21" data-correct="A">
+          <div class="test-question-title">Q21. Pattern dedup lấy record mới nhất theo key dùng gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q21" value="A"> A. ROW_NUMBER() PARTITION BY key ORDER BY updated_at DESC, lọc rn = 1</label>
+            <label class="test-option"><input type="radio" name="q21" value="B"> B. DISTINCT ON key</label>
+            <label class="test-option"><input type="radio" name="q21" value="C"> C. GROUP BY key rồi MAX(updated_at)</label>
+            <label class="test-option"><input type="radio" name="q21" value="D"> D. DELETE WHERE duplicated = true</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="22" data-correct="C">
+          <div class="test-question-title">Q22. Trong kỹ thuật Gap and Island, ROW_NUMBER() dùng để làm gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q22" value="A"> A. Đánh số thứ tự record</label>
+            <label class="test-option"><input type="radio" name="q22" value="B"> B. Xóa duplicate</label>
+            <label class="test-option"><input type="radio" name="q22" value="C"> C. Trừ khỏi ngày để tạo island_group nhận diện chuỗi liên tiếp</label>
+            <label class="test-option"><input type="radio" name="q22" value="D"> D. Tính running total</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="23" data-correct="D">
+          <div class="test-question-title">Q23. Late Arriving Data trong incremental load là gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q23" value="A"> A. Dữ liệu bị lỗi format</label>
+            <label class="test-option"><input type="radio" name="q23" value="B"> B. Dữ liệu trùng lặp</label>
+            <label class="test-option"><input type="radio" name="q23" value="C"> C. Dữ liệu quá lớn</label>
+            <label class="test-option"><input type="radio" name="q23" value="D"> D. Dữ liệu có updated_at nằm trước watermark do lag mạng/retry</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="24" data-correct="B">
+          <div class="test-question-title">Q24. WHERE EXTRACT(year FROM order_date) = 2024 có vấn đề gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q24" value="A"> A. Sai cú pháp SQL</label>
+            <label class="test-option"><input type="radio" name="q24" value="B"> B. Hàm bọc cột phá vỡ khả năng dùng index (function-on-column anti-pattern)</label>
+            <label class="test-option"><input type="radio" name="q24" value="C"> C. Trả về quá nhiều dòng</label>
+            <label class="test-option"><input type="radio" name="q24" value="D"> D. Không tương thích Oracle SQL</label>
+          </div>
+        </div>
+
+        <div class="test-question" data-q="25" data-correct="A">
+          <div class="test-question-title">Q25. COALESCE kết hợp GROUPING() trong GROUPING SETS dùng để làm gì?</div>
+          <div class="test-options">
+            <label class="test-option"><input type="radio" name="q25" value="A"> A. Tự động thay NULL subtotal bằng nhãn đọc được như 'Tổng Cộng'</label>
+            <label class="test-option"><input type="radio" name="q25" value="B"> B. Tăng tốc query</label>
+            <label class="test-option"><input type="radio" name="q25" value="C"> C. Thay thế ROLLUP</label>
+            <label class="test-option"><input type="radio" name="q25" value="D"> D. Tạo index tự động</label>
+          </div>
+        </div>
+
         <div class="test-actions">
           <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
           <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
@@ -2404,9 +3491,9 @@
     </div>
     <div class="section-content">
       <div class="summary-grid">
-        <div class="summary-item"><strong>Đánh giá toàn diện</strong>20 câu bao phủ trọn các kỹ năng cốt lõi tuần 1.</div>
+        <div class="summary-item"><strong>Đánh giá toàn diện</strong>25 câu bao phủ trọn các kỹ năng cốt lõi tuần 1 bao gồm dedup, streak, late data.</div>
         <div class="summary-item"><strong>Phản hồi tức thì</strong>Kết quả hiển thị đúng, sai, chưa trả lời sau khi chấm.</div>
-        <div class="summary-item"><strong>Mốc điểm</strong>16+ là sẵn sàng tốt cho tuần 2, 19+ là rất vững.</div>
+        <div class="summary-item"><strong>Mốc điểm</strong>19+ là sẵn sàng tốt cho tuần 2, 23+ là rất vững.</div>
         <div class="summary-item"><strong>Học theo lỗ hổng</strong>Xem nhóm câu sai để ôn đúng module còn yếu.</div>
         <div class="summary-item"><strong>Kết nối roadmap</strong>Xong tuần 1 là nền để học Python ETL tuần 2.</div>
         <div class="summary-item"><strong>Kỷ luật thực chiến</strong>Test chỉ có ý nghĩa khi artifact đã làm thật và chạy thật.</div>
@@ -2533,9 +3620,9 @@ function gradeFinalTest() {
   const percent = Math.round((correctCount / total) * 100);
   let levelText = '', chipClass = 'warn', guidance = '';
 
-  if (correctCount >= 19) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn đã nắm rất chắc SQL tuần 1. Hoàn tất commit artifact và bắt đầu Tuần 2 Python cho DE.'; }
-  else if (correctCount >= 16) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Bạn đã sẵn sàng sang Tuần 2. Nên ôn lại vài câu sai để chắc hơn.'; }
-  else if (correctCount >= 12) { levelText = 'Đạt'; chipClass = 'warn'; guidance = 'Nền tảng ổn nhưng nên ôn lại SCD và incremental trước khi chuyển tuần.'; }
+  if (correctCount >= 23) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn đã nắm rất chắc SQL tuần 1. Hoàn tất commit artifact và bắt đầu Tuần 2 Python cho DE.'; }
+  else if (correctCount >= 19) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Bạn đã sẵn sàng sang Tuần 2. Nên ôn lại vài câu sai để chắc hơn.'; }
+  else if (correctCount >= 15) { levelText = 'Đạt'; chipClass = 'warn'; guidance = 'Nền tảng ổn nhưng nên ôn lại SCD và incremental trước khi chuyển tuần.'; }
   else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Ôn lại W1.02 đến W1.06, làm lại artifact và test lại sau khi thực hành thêm.'; }
 
   const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
@@ -2564,6 +3651,24 @@ function resetFinalTest() {
   });
   result.style.display = 'none';
   result.innerHTML = '';
+}
+
+function switchTab(groupId, tabId) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const clicked = group.querySelector(`[onclick*="${tabId}"]`);
+  if (clicked) clicked.classList.add('active');
+  
+  // Only hide tab-contents belonging to this group
+  let nextElem = group.nextElementSibling;
+  while (nextElem && nextElem.classList.contains('tab-content')) {
+    nextElem.classList.remove('active');
+    nextElem = nextElem.nextElementSibling;
+  }
+  
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
 }
 </script>
 </body>

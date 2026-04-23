@@ -380,7 +380,65 @@ Improve the file across:
 - artifact realism
 
 PATCH PRIORITIES:
-[PASTE ANTIGRAVITY REVIEW HERE]
+Viewed Week14_Data_Warehouse.html:1-800
+Viewed Week14_Data_Warehouse.html:800-1398
+
+Dưới đây là bản **Review Report** chuyên sâu cho tài liệu `Week14_Data_Warehouse.html` dưới góc độ của một Senior Data Engineering Architect, bám sát các quy tắc trong `.claude/`.
+
+# Week14 Review Report
+
+## 1. Executive Summary
+- **Score:** 9.2/10
+- **Strongest parts:** Tư duy kiến trúc (Architecture Mindset) đạt mức xuất sắc. Việc đưa các chủ đề rất "senior" như Schema-on-Read vs Write (W14.04), chiến lược dbt dual-run migration (W14.07) và Lakehouse boundaries (W14.05) vào giảng dạy là vô cùng thực chiến. Đặc biệt, cấu trúc 100 câu hỏi Quiz đã **tuân thủ hoàn hảo chuẩn 4 đáp án (A, B, C, D)** của dự án.
+- **Biggest weaknesses:** Bỏ sót khái niệm "Result Cache" (một cơ chế sống còn để tiết kiệm cost trên Cloud DW). Thiếu các đoạn code thực tế (SQL) để debug chi phí trên Cloud DW (như query vào `QUERY_HISTORY`). Vẫn vi phạm nhẹ quy tắc giải thích SQL syntax (chưa giải thích sự khác nhau giữa PostgreSQL và Oracle).
+- **Priority level:** Medium (Chỉ cần **patch lightly** để bổ sung các khái niệm mấu chốt còn thiếu).
+
+## 2. What Already Strong
+- **Độ sâu kỹ thuật & Production Realism:** Phân tích cực kỳ sắc bén về Cost model (W14.03), Partition Pruning (W14.02), và Iceberg Metadata Layers (W14.06). Tư duy không coi Snowflake/BigQuery là viên đạn bạc, mà nhấn mạnh vào Data Layout và Governance.
+- **Portfolio Value:** Khối lượng kiến thức trong Artifact W14.09 (warehouse_migration) là một dự án "chứng minh năng lực" (proof-of-competence) hoàn hảo. Việc yêu cầu viết `migration_notes.md` với rollback triggers và `cost_comparison.md` thể hiện đúng tố chất của một kỹ sư xịn.
+- **Tuân thủ chuẩn HTML Learning Product:** Giao diện tab SQL mượt mà, cấu trúc 6 sections nhất quán, hệ thống Quiz và Mini-test cuối tuần hoạt động xuất sắc.
+
+## 3. Critical Gaps
+- **Thiếu "Result Cache" Concept:** Ở W14.08 (Cost Control), tài liệu quên đề cập đến Result Cache (Metadata cache). Trên Snowflake/BigQuery, nếu dashboard gửi cùng một query lặp lại, nó sẽ trả về từ Cache (0 cost). Đây là best practice cực lớn mà một Senior DE phải nắm để tối ưu BI.
+- **Thiếu System Query cho Cloud DW:** W14.01 dạy dùng `pg_stat_statements` để tìm query chậm trên Postgres. Nhưng sang W14.08, lại thiếu mất code SQL để tìm query "đốt tiền" trên Cloud (ví dụ: query vào `SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY` hoặc `INFORMATION_SCHEMA.JOBS` của BigQuery).
+- **Thiếu Warehouse Sizing & Workload Isolation:** W14.03 nói về Snowflake/BigQuery nhưng chưa làm rõ khái niệm Sizing (T-shirt sizes: X-Small, Large) và chiến thuật chia tách compute vật lý (ví dụ: `WH_LOADING` tách biệt hoàn toàn với `WH_BI` để ETL không làm sập Dashboard).
+- **Vi phạm nhỏ SQL Policy (`OUTPUT_STANDARD.md`):** Ở W14.07, tab PostgreSQL dùng `date_trunc('day', order_date)` và tab Oracle dùng `TRUNC(order_date)` nhưng không có hộp text giải thích lý do khác biệt cú pháp cho beginner.
+
+## 4. Module-by-Module Improvements
+- **W14.01:** Bổ sung hộp thoại `info-box` giải thích hàm `now()` vs `SYSDATE`.
+- **W14.03:** Thêm một đoạn ngắn về "Warehouse Sizing & Isolation" – giải thích vì sao DE luôn tạo tối thiểu 2 warehouse riêng biệt cho luồng Ghi (ETL) và luồng Đọc (BI).
+- **W14.06:** Thêm SQL snippet thực tế gọi hàm bảo trì Iceberg (ví dụ: `CALL catalog.system.expire_snapshots()`) thay vì chỉ nói lý thuyết "cần expire snapshots". Đề cập thêm lợi ích chống Vendor Lock-in của Iceberg.
+- **W14.07:** Bổ sung text giải thích sự khác biệt giữa hàm `date_trunc` (Postgres) và `TRUNC` (Oracle) dưới khối SQL. Thêm một sơ đồ ASCII nhỏ minh họa luồng "Dual-run".
+- **W14.08:** Thêm hẳn một tiểu mục về "Result Cache & Metadata Cache". Đưa code SQL query lịch sử cost/scan bytes thực tế vào làm ví dụ.
+
+## 5. Production Upgrades Recommended
+- **Debugging Cost Spikes:** Cung cấp script SQL "cứu hỏa" (Firefighting Script) để DE copy-paste khi sếp hỏi: "Tại sao hôm qua cost BigQuery/Snowflake tăng gấp đôi?". Điều này cực kỳ ăn điểm về production realism.
+- **Dbt Optimization:** Ở W14.07, nhắc nhẹ về việc dùng `is_incremental()` kết hợp với `cluster_by` hoặc `partition_by` config trong dbt model để Cloud DW thực sự prune được bytes khi chạy DAG hàng ngày.
+
+## 6. Teaching Upgrades Recommended
+- **Giải thích lời giải Bài tập (Beginner friendliness):** Lời giải trong Solution Box hiện tại (nhất là W14.07 và W14.08) đang ở dạng list (1, 2, 3, 4). Hãy thêm một câu dẫn giải thích logic vì sao lại sắp xếp thứ tự ưu tiên như vậy (Explain why before how).
+- **External Links:** Thêm một số link trỏ ra ngoài tham khảo whitepaper gốc (như Databricks Lakehouse Paper hoặc Snowflake Architecture) ở mục 2 (Mục đích module) của W14.05 và W14.03 để tăng độ uy tín.
+
+## 7. Portfolio Value Assessment
+- Mức độ giá trị: **Vượt trội (Elite level)**.
+- Artifact `warehouse_migration/` ở W14.09 chạm đúng "nỗi đau" (pain points) của mọi doanh nghiệp đang scale. Khả năng thiết kế Dual-run, lập baseline KPI và rollback plan biến tài liệu này thành một thứ vũ khí sắc bén để học viên thảo luận trong vòng phỏng vấn System Design.
+- **Nâng cấp để hoàn hảo:** Nên yêu cầu học viên chụp màn hình (screenshot) Dbt Lineage Graph hoặc biểu đồ Cost Before/After từ tài khoản Cloud (hoặc giả lập) rồi đưa vào file `README.md` của artifact để nó trông giống một PR (Pull Request) thật sự trên GitHub.
+
+## 8. Top 10 Immediate Patches
+1. **[Kỹ thuật]** Bổ sung khái niệm "Result Cache & Metadata Cache" vào W14.08, nhấn mạnh đây là vũ khí giảm cost số 1.
+2. **[Kỹ thuật]** Thêm SQL script mẫu truy vấn `QUERY_HISTORY` (Snowflake) hoặc `INFORMATION_SCHEMA.JOBS` (BigQuery) để tìm top query tốn tiền nhất vào W14.08.
+3. **[Quy chuẩn]** Viết 1-2 câu giải thích sự khác biệt cú pháp giữa `date_trunc` (PostgreSQL) và `TRUNC` (Oracle) dưới các Tab SQL ở W14.01 và W14.07.
+4. **[Kỹ thuật]** Cập nhật W14.03 với khái niệm "Compute Isolation" (chia tách `WH_ETL` và `WH_BI`) và cách sizing (T-shirt sizes).
+5. **[Kỹ thuật]** Bổ sung đoạn mã gọi procedure bảo trì `expire_snapshots()` và `rewrite_data_files()` cho Iceberg ở W14.06.
+6. **[UI/UX]** Vẽ một sơ đồ kiến trúc ASCII đơn giản minh họa luồng "Dual-run migration" (Data từ nguồn -> chạy song song Postgres & DW -> Dashboard) vào W14.07.
+7. **[Kỹ thuật]** Làm nổi bật giá trị "Chống Vendor Lock-in" (Portability) của Apache Iceberg so với storage độc quyền của hãng ở W14.06.
+8. **[Portfolio]** Thêm yêu cầu "đính kèm screenshot Lineage và Cost Benchmark vào README" tại W14.09.
+9. **[Giảng dạy]** Bổ sung các lời giải thích dạng note (logic tư duy) vào dưới các list gạch đầu dòng trong phần "Xem lời giải" của mọi bài tập thực hành.
+10. **[Giảng dạy]** Cập nhật dbt `config()` block ở W14.07 để thể hiện rõ việc cấu hình `partition_by` khi làm incremental model trên Cloud DW.
+
+## 9. Final Verdict
+- **patch lightly**
+- **Lý do:** Khung kiến trúc và nội dung chuyên môn (Data Engineering) của Week 14 đã quá tốt, thậm chí chạm tới mức Senior/Lead. Giao diện và cấu trúc (đặc biệt là 100 câu Quiz 4 đáp án) tuân thủ hoàn hảo chuẩn `.claude`. Chỉ cần thêm vài đoạn text giải thích SQL, 1-2 script tìm kiếm cost trên Cloud DW, và nhắc đến cơ chế Result Cache là file này sẽ hoàn thiện 10/10.
 
 MANDATORY EDITING RULES:
 1. First identify which current sections should be preserved

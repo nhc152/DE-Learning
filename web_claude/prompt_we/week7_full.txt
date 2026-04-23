@@ -1,0 +1,652 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week07_Fact_Modeling.html`.
+
+Week07 là tuần rất quan trọng vì nó đi sâu vào **fact modeling thực chiến**: transaction fact, periodic snapshot, accumulating snapshot, deduplication, reduced fact tables, incremental loading. Đây là phần nối giữa dimensional modeling và pipeline loading, nên nếu làm tốt thì các tuần dbt, warehouse, analytics sẽ chắc hơn nhiều.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text id="w7build"
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+- SQL policy:
+  - Khi phù hợp phải hỗ trợ cả PostgreSQL và Oracle SQL
+  - Nếu khác cú pháp, hiển thị cả 2 version
+  - Dùng tab buttons:
+    [PostgreSQL] [Oracle SQL]
+  - Không dùng plain heading text để so sánh syntax
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week07_Fact_Modeling.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 7 – Fact Data Modeling cho Data Engineer
+
+Allowed sources only:
+- ./Week07_Fact_Modeling.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 07 CORE MISSION:
+This file must teach fact modeling as a practical analytics design discipline, not as dry warehouse theory.
+
+The learner should understand:
+- fact table là trung tâm của phân tích business events
+- sự khác nhau giữa transaction fact, periodic snapshot, accumulating snapshot
+- khi nào cần deduplication trước khi nạp fact
+- reduced fact table dùng để tối ưu storage/query như thế nào
+- incremental load cho fact table phải idempotent ra sao
+- cách thiết kế artifact recruiter-grade cho fact modeling
+
+This tutorial must feel stronger than common theory-only data warehouse content.
+
+MANDATORY MODULES:
+- W7.01 – Tổng Quan: Fact Modeling là gì và vì sao quan trọng?
+- W7.02 – Transaction Fact vs Periodic Snapshot vs Accumulating Snapshot
+- W7.03 – Deduplication: ROW_NUMBER + Microbatch Pattern
+- W7.04 – Reduced Fact Tables & Storage Optimization
+- W7.05 – Incremental Load cho Fact Tables
+- W7.06 – Homework / Artifact: user_devices + hosts + host_activity_reduced
+- W7.07 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W7.01
+- why fact modeling matters for analytics performance and business clarity
+- fact tables as records of measurable business events
+- why raw event tables are often not enough
+- connection between Week05 dimensional modeling and Week07 fact specialization
+- common analytics use cases:
+  orders, payments, sessions, device activity, host activity
+- week outcomes checklist
+
+W7.02
+- transaction fact:
+  - one row per event
+  - examples: order placed, payment received, click event
+  - pros / cons
+- periodic snapshot:
+  - one row per period per entity
+  - examples: daily inventory, daily balance, daily active device status
+  - pros / cons
+- accumulating snapshot:
+  - one row per process entity updated over lifecycle
+  - examples: order fulfillment pipeline, ticket resolution lifecycle
+  - pros / cons
+- comparison table:
+  row meaning, update pattern, storage cost, query simplicity
+- anti-pattern:
+  choosing wrong fact type and making downstream reporting painful
+
+W7.03
+- why deduplication is often required before loading facts
+- exact duplicate vs logical duplicate
+- ROW_NUMBER() pattern
+- latest row wins
+- deterministic tie-break rules
+- microbatch deduplication concept
+- dedup by event_time + ingestion_time
+- practical examples:
+  user_devices_cumulated
+  hosts_cumulated
+- anti-patterns:
+  - blind DISTINCT
+  - dedup without defining business key
+  - non-deterministic dedup
+
+Must include PostgreSQL + Oracle SQL tabs when syntax differs.
+
+W7.04
+- what is a reduced fact table
+- why reduce storage footprint
+- event compression mindset
+- daily/periodic activity represented more efficiently
+- array / bitmap / compressed representation intro
+- trade-off:
+  storage savings vs query complexity
+- when reduced facts are valuable
+- when they are over-engineering
+- examples tied to host/user activity
+
+W7.05
+- incremental load patterns for fact tables
+- append-only vs merge/update
+- idempotent load
+- handling late arriving rows
+- surrogate keys vs natural business keys in load logic
+- partition-aware loads
+- batch date processing
+- watermark/checkpoint concept
+- validation after incremental load:
+  row count
+  duplicates
+  unexpected drops
+- anti-pattern:
+  rerun creates duplicate facts
+
+Show PostgreSQL + Oracle SQL variants where useful.
+
+W7.06
+- build realistic portfolio artifact:
+  week7_fact_modeling/
+  ├── dedup_queries.sql
+  ├── user_devices_cumulated.sql
+  ├── hosts_cumulated.sql
+  ├── host_activity_reduced.sql
+  ├── incremental_load.sql
+  ├── model_notes.md
+  └── README.md
+- artifact should reflect realistic homework-style implementation
+- README must explain:
+  - business questions
+  - why each fact type was chosen
+  - dedup logic
+  - storage trade-offs
+  - incremental logic
+  - lessons learned
+- must feel portfolio-ready
+
+W7.07
+- final mini test: 20 questions
+- cover:
+  - fact types
+  - deduplication
+  - reduced facts
+  - incremental loading
+  - modeling decisions
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- fact type selection tasks
+- dedup design tasks
+- incremental load design tasks
+- reduced fact critique tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every SQL example should be believable
+- focus on business grain, event semantics, and load behavior
+- do not turn this into generic warehousing theory
+- must connect design decisions to downstream analytics usability
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- vague definitions
+- filler text
+- shallow examples
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week07 scope you are using from roadmap
+2. Which format rules you inherit from Week00
+3. Which assumptions you are making for business examples and datasets
+
+Then output the full final content for:
+./Week07_Fact_Modeling.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text id="w7review"
+Use project rules from .claude.
+
+Review ./Week07_Fact_Modeling.html as a senior Data Warehouse and Data Engineering reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- teaching quality
+- fact modeling correctness
+- production realism
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week07 teaches fact modeling for real analytics systems, not generic theory.
+Check relevance of:
+- transaction/event modeling
+- snapshot design
+- dedup before loading
+- reduced facts for scale
+- incremental fact loading
+- downstream query usability
+- pipeline implications
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- duplicate event handling
+- wrong fact type consequences
+- late arriving facts
+- rerun/idempotency mindset
+- storage/query trade-offs
+- reduced fact complexity costs
+- validation after load
+- realistic homework / artifact quality
+
+D. MODELING QUALITY
+Review whether explanations are strong enough for:
+- transaction fact vs periodic snapshot vs accumulating snapshot
+- ROW_NUMBER dedup logic
+- microbatch patterns
+- reduced fact tables
+- incremental fact load logic
+- choice of grain and business key
+- practical SQL examples
+- PostgreSQL vs Oracle SQL syntax separation where relevant
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W7.06 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- event_time vs ingestion_time
+- deterministic tie-breakers
+- snapshot freshness
+- accumulating snapshot lifecycle examples
+- audit columns
+- late-arriving correction strategies
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week07 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text id="w7patch"
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week07_Fact_Modeling.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week07 becomes a high-value, portfolio-grade Fact Modeling tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week07_Fact_Modeling.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- fact modeling depth
+- teaching clarity
+- production realism
+- business decision quality
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+# Yêu Cầu Nâng Cấp: Week 07 - Fact Data Modeling (Senior Level)
+
+Dưới đây là nội dung Review chi tiết và các hướng dẫn/mã SQL mẫu để bạn gửi cho **Claude Code** (hoặc dùng để tự nâng cấp file `Week07_Fact_Modeling.html`). Nội dung này được thiết kế để biến tài liệu từ mức cơ bản thành "Elite Engineering Standard".
+
+---
+
+## 🎯 Mục Tiêu Nâng Cấp (Dành cho Claude Code)
+**Nhiệm vụ:** Chỉnh sửa trực tiếp file `Week07_Fact_Modeling.html`. Tài liệu hiện tại đang thiếu một số khái niệm cốt lõi của Data Warehouse ở cấp độ Senior. Vui lòng thêm/chỉnh sửa các phần sau vào đúng các Module tương ứng mà không làm phá vỡ cấu trúc HTML UI (tab, info-box, v.v.).
+
+---
+
+## 1. Các Khái Niệm Cần Bổ Sung (Module 1 - 3 Loại Fact Table)
+
+Vui lòng tìm đến phần **Accumulating Snapshot** và bổ sung 2 khái niệm cực kỳ quan trọng trong thực tế:
+
+### A. Role-playing Dimensions
+**Nội dung cần thêm:** Trong Accumulating Snapshot (ví dụ `fact_order_fulfillment`), chúng ta có nhiều mốc thời gian (`ordered_date`, `shipped_date`, `delivered_date`). Thay vì tạo 3 bảng Dimension thời gian khác nhau, ta chỉ dùng 1 bảng `dim_date` duy nhất nhưng đóng các "vai trò" (role) khác nhau khi `JOIN`. Đây gọi là **Role-playing Dimensions**.
+
+### B. Unknown Member (-1) & Late-arriving Dimension
+**Nội dung cần thêm:** Khi một event xảy ra nhưng chưa có đủ thông tin Dimension (ví dụ: có `customer_id` nhưng khách hàng này chưa được nạp vào `dim_customer` do pipeline chạy chậm), ta KHÔNG được để cột Surrogate Key là `NULL` (vì sẽ làm rớt data khi `INNER JOIN` trên BI tool).
+- **Giải pháp:** Trong tất cả các bảng Dimension, luôn tạo một dòng mặc định có `SK = -1` (mang ý nghĩa "Unknown" hoặc "N/A"). Fact table sẽ trỏ về `-1`. Khi dimension thực sự đến (Late-arriving dimension), ta sẽ update lại Fact table trỏ về đúng ID.
+
+### C. Audit Columns (Bắt buộc cho Production)
+**Nội dung cần thêm:** Một bảng Fact đạt chuẩn Senior luôn phải có các Audit Columns để phục vụ Data Quality và Deduplication. Bổ sung giải thích về 3 cột sau vào DDL mẫu của Fact:
+- `ingested_at` (TIMESTAMP): Thời điểm raw data được đưa vào Data Lake/Staging.
+- `updated_at` (TIMESTAMP): Thời điểm record này được update lần cuối trong Data Warehouse.
+- `batch_id` (VARCHAR): ID của task/pipeline Airflow đã load dòng này (rất quan trọng để backfill hoặc xóa data lỗi).
+
+---
+
+## 2. Cảnh Báo Hiệu Suất & Late-Arriving Facts (Module 4 - Incremental Load)
+
+### A. Trade-off của `FULL OUTER JOIN`
+Trong phần incremental load của bảng `users_cumulated` (dùng `FULL OUTER JOIN` giữa `yesterday` và `today`), cần thêm một `<div class="info-box warn">` để cảnh báo:
+- **Vấn đề:** Pattern `FULL OUTER JOIN` hoạt động rất tốt để duy trì lịch sử (giữ lại cả user cũ không có tương tác). Tuy nhiên, với hệ thống lớn (hàng trăm triệu user), câu query này sẽ tốn chi phí đọc/ghi khổng lồ mỗi ngày.
+- **Giải pháp tối ưu (Senior):** Trong thực tế, để tối ưu, ta có thể dùng `MERGE`/`UPSERT` thay cho `FULL OUTER JOIN` (chỉ cập nhật những user có hoạt động hôm nay), HOẶC thực hiện Pruning (loại bỏ khỏi mảng những user không hoạt động trong 90 ngày qua) để giảm kích thước bảng.
+
+---
+
+## 3. Bổ Sung SQL Mẫu Cho Bài Tập (Module 5 - Homework)
+
+Mặc dù bài tập đã có SQL DDL và Insert, nhưng thiếu các câu lệnh **Validation** và **Audit Columns**. Claude Code cần update lại các đoạn mã SQL trong Module 5 như sau:
+
+### Cập nhật DDL cho Fact Table (Ví dụ: `fact_web_events`)
+```sql
+-- PostgreSQL: Bổ sung Audit Columns vào bảng
+CREATE TABLE fact_web_events (
+    event_id VARCHAR(50) PRIMARY KEY,
+    user_id BIGINT,
+    page_url TEXT,
+    event_type VARCHAR(50),
+    occurred_at TIMESTAMP,
+    -- Audit Columns (Production Standard)
+    ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    batch_id VARCHAR(50)
+);
+```
+
+### Bổ Sung Query Validation (Bắt buộc cho mọi Artifacts)
+Thêm một block SQL ở cuối Module 5 (phần Homework) yêu cầu học viên phải chạy Validation Queries để chứng minh Idempotency (chạy nhiều lần không trùng lặp):
+
+```sql
+-- 1. Kiểm tra Duplicate Validation (Kỳ vọng trả về 0 rows)
+SELECT 
+    user_id, 
+    date, 
+    COUNT(*) as duplicate_count
+FROM user_devices_cumulated
+GROUP BY user_id, date
+HAVING COUNT(*) > 1;
+
+-- 2. Kiểm tra Data Loss / Sanity Check (Đảm bảo Array không rỗng một cách vô lý)
+SELECT 
+    COUNT(*) AS total_users,
+    SUM(CASE WHEN CARDINALITY(device_activity_datelist) = 0 THEN 1 ELSE 0 END) AS empty_history_users
+FROM user_devices_cumulated
+WHERE date = CURRENT_DATE;
+
+-- 3. Row Count Check (Kiểm tra xem chạy pipeline lần 2 có làm tăng row count không)
+SELECT 
+    date, 
+    COUNT(*) as total_rows 
+FROM user_devices_cumulated 
+WHERE date = '2023-01-31' 
+GROUP BY date;
+```
+
+---
+**Ghi chú cho Claude Code:** 
+Hãy đảm bảo bạn giữ nguyên định dạng của hệ thống UI hiện tại (sử dụng `<div class="cmd-block sql-postgres">` và tabset cho PostgreSQL vs Oracle) khi thêm các nội dung này. Các class như `info-box tip` hay `info-box warn` phải được tận dụng tối đa để giải thích các "Senior insights" này!
+
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Preserve or improve PostgreSQL / Oracle tab handling
+8. Upgrade SQL examples and modeling scenarios where needed
+9. Avoid duplication
+10. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen fact-type decision framework
+- improve transaction vs snapshot examples
+- improve dedup with deterministic tie-break logic
+- improve microbatch explanation
+- improve reduced fact trade-off analysis
+- improve incremental load and late-arriving data realism
+- improve validation steps after load
+- strengthen W7.06 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week07_Fact_Modeling.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text id="w7finalreview"
+Review the patched ./Week07_Fact_Modeling.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text id="w7qa"
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week07_Fact_Modeling.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- PostgreSQL / Oracle SQL tabs still work correctly
+- examples still feel coherent and realistic
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week07_Fact_Modeling.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week07
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo riêng cho Week07
+
+Week07 rất dễ bị biến thành “phân loại fact table theo sách giáo khoa”.
+Bạn nên thêm 1 dòng này vào prompt build hoặc patch:
+
+```text id="w7tip"
+Do not turn Week07 into a theory-only warehouse page.
+Teach fact modeling as practical event design, deduplication, storage trade-offs, and incremental loading for real analytics systems.
+```
+
+Nếu bạn muốn, mình có thể viết tiếp ngay **full bộ prompt cho Week08_dbt.html**.

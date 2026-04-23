@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 6 · PostgreSQL Advanced</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+  .badge-purple { color: var(--accent4); border-color: var(--accent4); background: #6e40c926; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+  .sidebar { width: 300px; min-width: 300px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--accent4); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 50px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 980px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent4); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent4); margin-bottom: 8px; }
+  .module-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent4); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+  .comment { color: var(--text-muted); }
+  .kw { color: var(--accent); }
+  .str { color: var(--accent5); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent4); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent4); color: var(--accent4); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent4); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent4); background: #6e40c915; color: var(--accent4); }
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent4), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent4); color: var(--accent4); }
+  .nav-btn.primary { background: var(--accent4); color: #000; border-color: var(--accent4); }
+  .nav-btn.primary:hover { background: #e0c0ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent4); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '□'; color: var(--accent5); font-size: 1.1rem; flex-shrink: 0; margin-top: -1px; }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🐘 Data Engineering Handbook · PostgreSQL Advanced</h1>
+  <p>Giai đoạn 2 · Tuần 6 · Tư duy vận hành database thực chiến cho Data Engineer</p>
+  <div class="badge-row">
+    <span class="badge badge-purple">Giai đoạn 2 · Core Skills</span>
+    <span class="badge badge-orange">Module 203 · PostgreSQL Advanced</span>
+    <span class="badge badge-blue">Artifact: week6_postgres_lab</span>
+    <span class="badge badge-green">Prerequisite: Week01 + Week05</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương Trình Học</div>
+    <div class="level-label">▶ TUẦN 6 · POSTGRESQL ADVANCED</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W6.01</span>Tổng Quan: PostgreSQL cho DE</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W6.02</span>Indexing Strategy & Performance</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W6.03</span>EXPLAIN ANALYZE & Execution Plans</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W6.04</span>Partitioning Large Tables</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W6.05</span>Transactions, MVCC & Locking</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W6.06</span>VACUUM & Maintenance</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W6.07</span>Backup, Restore & Connections</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W6.08</span>Artifact: week6_postgres_lab</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W6.09</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+<!-- MODULE 0 -->
+<div class="module active" id="m0">
+  <div class="module-header">
+    <div class="module-tag">Tuần 6 · Module W6.01</div>
+    <div class="module-title">📌 Tổng Quan: PostgreSQL cho Data Engineer</div>
+    <div class="module-subtitle">Vai trò trong DE stack · workload phù hợp · giới hạn cần biết</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:11%"></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">📋</div>
+      1. Menu Tổng Thể
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <tr><th>Module</th><th>Nội dung</th><th>Mục tiêu đầu ra</th></tr>
+        <tr><td>W6.01</td><td>Vai trò PostgreSQL trong hệ DE</td><td>Biết khi nào dùng PostgreSQL, khi nào cần platform lớn hơn</td></tr>
+        <tr><td>W6.02</td><td>Indexing strategy</td><td>Thiết kế index theo filter/join thay vì đoán</td></tr>
+        <tr><td>W6.03</td><td>EXPLAIN ANALYZE</td><td>Đọc execution plan để tối ưu query</td></tr>
+        <tr><td>W6.04</td><td>Partitioning</td><td>Tách bảng lớn theo thời gian + retention an toàn</td></tr>
+        <tr><td>W6.05</td><td>Transactions, MVCC, locking</td><td>Tránh lock contention và deadlock trong ETL</td></tr>
+        <tr><td>W6.06</td><td>VACUUM / autovacuum</td><td>Hiểu bloat, dead tuples, maintenance tối thiểu</td></tr>
+        <tr><td>W6.07</td><td>Backup, restore, connections</td><td>Có checklist vận hành cơ bản</td></tr>
+        <tr><td>W6.08</td><td>Portfolio artifact</td><td>Tạo package tuần 6 sẵn để show năng lực</td></tr>
+        <tr><td>W6.09</td><td>Mini test 20 câu</td><td>Tự đánh giá mức sẵn sàng production mindset</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purpose">🎯</div>
+      2. Mục Đích Module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>Nhìn PostgreSQL như một <strong>database engine</strong>, không chỉ là nơi chạy SQL.</li>
+        <li>Hiểu các workload DE thường gặp: staging, metadata, app source, analytics-lite.</li>
+        <li>Xác định rõ giới hạn: khi query volume vượt ngưỡng thì cần warehouse/lakehouse.</li>
+      </ul>
+      <div class="info-box tip">✅ <span>Nếu tuần này làm tốt, bạn sẽ giảm rất mạnh kiểu tối ưu query bằng cảm tính.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-detail">📖</div>
+      3. Giải Thích Chi Tiết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3>PostgreSQL trong hệ Data Engineering</h3>
+      <ul>
+        <li><strong>OLTP source:</strong> nơi dữ liệu gốc phát sinh từ ứng dụng.</li>
+        <li><strong>Staging DB:</strong> nhận raw batch/CDC trước khi đẩy vào DWH.</li>
+        <li><strong>CDC source:</strong> phát change event từ WAL qua Logical Replication (thường đi vào Debezium/Kafka trước khi vào lake/warehouse).</li>
+        <li><strong>Metadata DB:</strong> lưu run history, config, quality check log.</li>
+        <li><strong>Analytics-lite:</strong> dashboard nhỏ, ad-hoc query cho team nội bộ.</li>
+      </ul>
+
+      <h3>Khi nào PostgreSQL chưa đủ</h3>
+      <ul>
+        <li>Concurrency analytics cao + query quét bảng lớn liên tục.</li>
+        <li>Storage vài chục TB và retention dài nhiều năm.</li>
+        <li>Cần tách compute/storage độc lập, auto-scale mạnh cho BI workload.</li>
+      </ul>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Mindset nhanh khi chọn nền tảng</span></div>
+        <div class="cmd-body"><pre><span class="comment">Nếu workload chính là app transaction + ETL vừa phải:</span>
+<span class="str">PostgreSQL đủ tốt, chi phí thấp, đơn giản vận hành.</span>
+
+<span class="comment">Nếu workload chính là BI quét dữ liệu lớn liên tục:</span>
+<span class="str">Cân nhắc warehouse (BigQuery/Snowflake/Redshift) sớm.</span></pre></div>
+      </div>
+
+      <div class="info-box warn">⚠️ <span>Anti-pattern: dùng PostgreSQL làm warehouse lớn nhưng vẫn giữ index/partition theo kiểu tạm bợ, dẫn đến chậm dần theo thời gian.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-quiz">❓</div>
+      4. Câu Hỏi Ôn Tập
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Trong DE stack, PostgreSQL thường phù hợp nhất cho vai trò nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. PostgreSQL rất mạnh cho OLTP/source, staging và metadata ở quy mô vừa.')">A. OLTP source + staging + metadata DB</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng. Đây là thế mạnh của warehouse/lakehouse hơn là PostgreSQL đơn lẻ.')">B. Warehouse petabyte-scale cho BI nặng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không chính xác. PostgreSQL không phải object storage cho raw data lake.')">C. Data lake object storage</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL không thay thế hoàn toàn message queue.')">D. Queue streaming thay Kafka</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Dấu hiệu nào cho thấy nên cân nhắc warehouse thay vì giữ tất cả trên PostgreSQL?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải dấu hiệu bắt buộc phải chuyển nền tảng.')">A. Team có thêm 1 data analyst</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhiều query scan nặng + dữ liệu tăng nhanh là tín hiệu rõ nhất.')">B. BI scan nặng liên tục, dữ liệu tăng mạnh theo tháng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CPU cao nhất thời điểm ngắn chưa đủ để kết luận.')">C. CPU tăng 5 phút trong giờ cao điểm</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan trực tiếp đến khả năng xử lý analytics.')">D. Đổi tên bảng staging</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Trong bối cảnh CDC hiện đại, thành phần nào của PostgreSQL thường được dùng để phát change events?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'VACUUM dọn dẹp storage, không phải kênh phát CDC.')">A. VACUUM daemon</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. CDC thường đọc từ WAL qua cơ chế logical replication/decoding.')">B. WAL + Logical Replication</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CHECKPOINT không phải cơ chế CDC cho downstream.')">C. CHECKPOINT log</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'pg_dump dùng cho backup logic, không phải luồng CDC realtime.')">D. pg_dump incremental</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Mục tiêu chính của tuần 6 là gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Syntax SQL quan trọng, nhưng không phải trọng tâm chính của tuần này.')">A. Thuộc lòng syntax SQL phức tạp</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Trọng tâm là hiểu hành vi engine và vận hành thực tế.')">B. Xây tư duy vận hành PostgreSQL cho workload DE</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Tuần này không tập trung frontend.')">C. Thiết kế dashboard UI</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải mục tiêu của tuần 6.')">D. Viết Spark job thay PostgreSQL</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-summary">📌</div>
+      5. Tổng Kết
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Vai trò cốt lõi</strong>Source DB, staging, metadata, analytics-lite.</div>
+        <div class="summary-item"><strong>Giá trị DE</strong>Tối ưu tốt giúp ETL ổn định, giảm bottleneck pipeline.</div>
+        <div class="summary-item"><strong>Giới hạn</strong>Không nên ép làm warehouse lớn lâu dài.</div>
+        <div class="summary-item"><strong>Mindset</strong>Đọc plan + đo đạc trước khi tối ưu.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-practice">🔬</div>
+      6. Bài Tập Thực Hành
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Bài 1: Mapping workload hiện tại</div>
+        <div class="practice-task-body">
+          <p>Liệt kê 3 workload bạn đang chạy trên PostgreSQL và phân loại: OLTP / staging / metadata / analytics-lite.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Dùng bảng 3 cột: workload, pattern query, expected scale 6 tháng. Từ đó gắn nhãn workload nào cần chuyển dần sang warehouse.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn primary" onclick="goNext(0)">Sang W6.02 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 1 -->
+<div class="module" id="m1">
+  <div class="module-header">
+    <div class="module-tag">Tuần 6 · Module W6.02</div>
+    <div class="module-title">⚡ Indexing Strategy & Query Performance</div>
+    <div class="module-subtitle">B-tree · GIN · BRIN · composite/partial/expression index</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:22%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Chủ đề</th><th>Ý chính</th><th>Lưu ý production</th></tr>
+      <tr><td>B-tree</td><td>Index mặc định cho equality/range</td><td>Hợp với cột selectivity cao</td></tr>
+      <tr><td>GIN</td><td>Tốt cho JSONB, array, full-text</td><td>Write cost cao hơn B-tree</td></tr>
+      <tr><td>BRIN</td><td>Nhẹ cho bảng rất lớn, dữ liệu có thứ tự</td><td>Hiệu quả với cột thời gian append-only</td></tr>
+      <tr><td>Composite</td><td>Tối ưu nhiều cột theo thứ tự</td><td>Column order rất quan trọng</td></tr>
+      <tr><td>Partial</td><td>Index subset dữ liệu</td><td>Giảm size index, tăng hiệu quả</td></tr>
+      <tr><td>Expression</td><td>Index theo biểu thức</td><td>Tránh function khiến mất index usage</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Biết chọn index theo truy vấn thực tế, không tạo index theo cảm giác.</li>
+      <li>Hiểu trade-off: read nhanh hơn nhưng write chậm hơn.</li>
+      <li>Tránh over-indexing làm ETL insert/update chậm dần.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>1) Selectivity quyết định sức mạnh index</h3>
+    <p>Nếu cột có ít giá trị lặp (ví dụ <code>country_code</code> chỉ vài chục giá trị), index thường ít hiệu quả hơn cột có nhiều giá trị khác nhau.</p>
+
+    <h3>2) Composite index phải bám pattern WHERE + ORDER BY</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Ví dụ index theo truy vấn thật</span></div><div class="cmd-body"><pre><span class="comment">-- Query thường dùng:</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> events
+<span class="kw">WHERE</span> tenant_id = <span class="str">'acme'</span>
+  <span class="kw">AND</span> event_time &gt;= NOW() - INTERVAL <span class="str">'7 days'</span>
+<span class="kw">ORDER BY</span> event_time DESC
+<span class="kw">LIMIT</span> 100;
+
+<span class="comment">-- Index phù hợp:</span>
+<span class="kw">CREATE INDEX</span> idx_events_tenant_time
+  <span class="kw">ON</span> events (tenant_id, event_time DESC);</pre></div></div>
+
+    <h3>3) Partial index giảm chi phí</h3>
+    <p>Với bảng jobs, nếu chỉ query job chưa xong thì index partial sẽ nhỏ và nhanh hơn index full table.</p>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Partial index</span></div><div class="cmd-body"><pre><span class="kw">CREATE INDEX</span> idx_jobs_pending
+  <span class="kw">ON</span> jobs (scheduled_at)
+  <span class="kw">WHERE</span> status <span class="kw">IN</span> (<span class="str">'queued'</span>, <span class="str">'retry'</span>);</pre></div></div>
+
+    <h3>4) BRIN cho bảng time-series append-only</h3>
+    <p>BRIN (Block Range Index) không index từng row như B-tree mà lưu metadata theo block range. Vì vậy index rất nhỏ, tạo nhanh, phù hợp bảng log/event lớn có dữ liệu tăng theo thời gian.</p>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>BRIN cho event_time</span></div><div class="cmd-body"><pre><span class="kw">CREATE INDEX</span> idx_events_event_time_brin
+  <span class="kw">ON</span> events <span class="kw">USING</span> BRIN (event_time);
+
+<span class="comment">-- Hợp khi dữ liệu insert gần theo thứ tự thời gian.</span>
+<span class="comment">-- Nếu dữ liệu random mạnh, BRIN có thể kém hiệu quả hơn B-tree.</span></pre></div></div>
+
+    <div class="info-box warn">⚠️ <span>Anti-pattern: tạo index cho mọi cột "để chắc". Kết quả thường là write latency tăng và autovacuum nặng hơn.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Index nào phù hợp nhất cho cột JSONB cần query key/value?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'B-tree không tối ưu cho truy vấn chứa JSONB containment pattern.')">A. B-tree</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. GIN thường phù hợp cho JSONB và array search.')">B. GIN</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'BRIN không phải lựa chọn chính cho JSONB search.')">C. BRIN</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Hash index có use-case hẹp, không phải mặc định cho JSONB.')">D. Hash</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Vì sao over-indexing gây hại cho pipeline ingest?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Mỗi INSERT/UPDATE phải cập nhật thêm nhiều index, làm write chậm.')">A. Vì mỗi write phải cập nhật thêm nhiều cấu trúc index</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Index không tự làm giảm row count.')">B. Vì index làm mất dữ liệu trùng</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng. Index không tự khóa toàn bảng mặc định.')">C. Vì index luôn tạo table lock</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Index không ảnh hưởng encoding text theo nghĩa này.')">D. Vì index làm sai encoding UTF-8</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Khi query chủ yếu là tenant_id + event_time thì thứ tự composite index nên là?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cột lọc equality trước, cột range/order sau.')">A. (tenant_id, event_time)</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Thường kém hiệu quả hơn với pattern đã nêu.')">B. (event_time, tenant_id)</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Thiếu cột thời gian nên khó tối ưu đầy đủ query.')">C. (tenant_id) duy nhất</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Sai pattern lọc chính.')">D. (status, tenant_id)</div>
+    </div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Index theo workload</strong>Nhìn truy vấn thật trước, tạo index sau.</div>
+      <div class="summary-item"><strong>Trade-off</strong>Read nhanh hơn, write nặng hơn.</div>
+      <div class="summary-item"><strong>Ưu tiên</strong>Composite + partial thường ROI cao.</div>
+      <div class="summary-item"><strong>Cảnh báo</strong>Over-indexing làm chi phí vận hành tăng dần.</div>
+    </div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="practice-task"><div class="practice-task-header">Bài 1: Thiết kế index cho bảng events</div><div class="practice-task-body">
+      <p>Tạo 3 index phục vụ query: recent events theo tenant, failed jobs theo status, tìm metadata JSONB theo key.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Gợi ý: B-tree composite cho tenant/time, partial cho status pending/failed, GIN cho JSONB metadata.</p></div>
+    </div></div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goPrev(1)">← Quay lại W6.01</button>
+      <button class="nav-btn primary" onclick="goNext(1)">Sang W6.03 →</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- MODULE 2 -->
+<div class="module" id="m2">
+  <div class="module-header">
+    <div class="module-tag">Tuần 6 · Module W6.03</div>
+    <div class="module-title">🔎 EXPLAIN ANALYZE & Execution Plans</div>
+    <div class="module-subtitle">Planner vs Executor · đọc node quan trọng · estimated vs actual</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Khái niệm</th><th>Mô tả</th><th>Ứng dụng</th></tr>
+      <tr><td>Planner</td><td>Chọn chiến lược chạy query</td><td>Hiểu vì sao query chọn Seq Scan hay Index Scan</td></tr>
+      <tr><td>Executor</td><td>Thực thi plan đã chọn</td><td>Quan sát thời gian thực và rows thực tế</td></tr>
+      <tr><td>EXPLAIN</td><td>Xem kế hoạch ước lượng</td><td>Kiểm tra nhanh trước khi chạy nặng</td></tr>
+      <tr><td>EXPLAIN ANALYZE</td><td>Chạy thật + đo timing</td><td>Đánh giá bottleneck chính xác</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Đọc được các node phổ biến: Seq Scan, Index Scan, Bitmap Heap Scan, Hash Join.</li>
+      <li>Nhìn chênh lệch estimated rows vs actual rows để phát hiện stats cũ.</li>
+      <li>Dùng <code>pg_stat_statements</code> để ưu tiên đúng query chậm trước khi EXPLAIN.</li>
+      <li>Tối ưu theo bằng chứng plan thay vì thử-may-rủi.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Ví dụ plan trước khi tối ưu</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>EXPLAIN ANALYZE trước index</span></div><div class="cmd-body"><pre><span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> customer_id = 9123
+  <span class="kw">AND</span> created_at &gt;= NOW() - INTERVAL <span class="str">'30 days'</span>;
+
+Seq Scan on orders  (cost=0.00..183421.10 rows=141 width=128)
+  Filter: ((customer_id = 9123) AND (created_at &gt;= ...))
+  Rows Removed by Filter: 4231192
+Execution Time: 842.331 ms</pre></div></div>
+
+    <h3>Sau khi thêm composite index</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>EXPLAIN ANALYZE sau index</span></div><div class="cmd-body"><pre><span class="kw">CREATE INDEX</span> idx_orders_customer_created
+  <span class="kw">ON</span> orders (customer_id, created_at DESC);
+
+Index Scan using idx_orders_customer_created on orders
+  (cost=0.43..102.54 rows=148 width=128)
+Execution Time: 8.943 ms</pre></div></div>
+
+    <h3>Estimated rows lệch lớn nghĩa là gì?</h3>
+    <p>Nếu estimated 100 rows nhưng actual 500,000 rows, planner dễ chọn kế hoạch sai. Lúc này cần <code>ANALYZE</code> hoặc xem lại skew dữ liệu.</p>
+
+    <h3>Tìm query chậm trước khi EXPLAIN bằng <code>pg_stat_statements</code></h3>
+    <p>Trong production có hàng ngàn query, bạn nên khoanh vùng top query tốn thời gian nhất trước, rồi mới chạy EXPLAIN ANALYZE để tối ưu đúng điểm đau.</p>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Top slow queries (mean time)</span></div><div class="cmd-body"><pre><span class="kw">SELECT</span>
+  calls,
+  ROUND(total_exec_time::numeric, 2) <span class="kw">AS</span> total_ms,
+  ROUND(mean_exec_time::numeric, 2) <span class="kw">AS</span> mean_ms,
+  rows,
+  <span class="kw">LEFT</span>(query, 120) <span class="kw">AS</span> query_sample
+<span class="kw">FROM</span> pg_stat_statements
+<span class="kw">ORDER BY</span> mean_exec_time DESC
+<span class="kw">LIMIT</span> 10;</pre></div></div>
+
+    <div class="info-box note">🧠 <span>Quy tắc đơn giản: tìm top query chậm bằng <code>pg_stat_statements</code>, đọc node tốn thời gian nhất trong plan, rồi mới tối ưu theo bằng chứng.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">EXPLAIN ANALYZE khác EXPLAIN ở điểm nào?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng. EXPLAIN thường không chạy query thực thi đầy đủ.')">A. EXPLAIN luôn đo thời gian thực thi thật</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. EXPLAIN ANALYZE chạy query thật và trả về actual metrics.')">B. EXPLAIN ANALYZE chạy thật và đo actual rows/time</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'EXPLAIN ANALYZE không dùng cho DDL theo cách này.')">C. EXPLAIN ANALYZE chỉ dùng cho CREATE INDEX</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đây không phải khác biệt chính.')">D. EXPLAIN ANALYZE chỉ dùng được với bảng nhỏ</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Dấu hiệu stats có thể stale là gì?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chênh lệch lớn estimated vs actual thường báo stats chưa phản ánh dữ liệu mới.')">A. estimated rows lệch rất xa actual rows</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan trực tiếp đến stale stats.')">B. Query có ORDER BY</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải dấu hiệu cốt lõi của stats cũ.')">C. Bảng có primary key</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải nhận diện chuẩn.')">D. Query có LIMIT 100</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Khi plan cho thấy Seq Scan chậm trên bảng lớn, bước đầu hợp lý nhất là?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần kiểm tra pattern WHERE/JOIN rồi thiết kế index đúng.')">A. Kiểm tra điều kiện lọc và thiết kế index phù hợp</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải lựa chọn tối ưu đầu tiên.')">B. Tăng RAM server ngay lập tức</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Rủi ro cao và ít kiểm soát.')">C. Rewrite toàn bộ schema trước</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không giải quyết root cause.')">D. Chạy VACUUM FULL mọi bảng</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Trước khi EXPLAIN tối ưu trong hệ thống lớn, bước nào thường đúng hơn?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'EXPLAIN mọi query sẽ tốn công và thiếu trọng tâm.')">A. EXPLAIN toàn bộ query trong app</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nên dùng pg_stat_statements để ưu tiên top query chậm trước.')">B. Dùng pg_stat_statements để lấy top query chậm rồi mới EXPLAIN</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không khả thi với production workload lớn.')">C. Chỉ dựa vào cảm giác query nào chậm</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Restart không giúp xác định bottleneck query.')">D. Restart DB để đo lại từ đầu</div>
+    </div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Planner/Executor</strong>Một bên chọn kế hoạch, một bên chạy thật.</div>
+      <div class="summary-item"><strong>Node quan trọng</strong>Scan + Join + Sort thường quyết định tốc độ.</div>
+      <div class="summary-item"><strong>Ưu tiên</strong>Xử lý chỗ tốn thời gian cao nhất trước.</div>
+      <div class="summary-item"><strong>Kỷ luật</strong>Tối ưu phải dựa EXPLAIN ANALYZE.</div>
+    </div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="practice-task"><div class="practice-task-header">Bài 1: Đọc execution plan thật</div><div class="practice-task-body">
+      <p>Chọn 2 query chậm trong hệ thống của bạn, chạy <code>EXPLAIN ANALYZE</code>, xác định node chiếm thời gian cao nhất.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Tối thiểu ghi lại: query, node nóng nhất, nguyên nhân, hành động tối ưu đã chọn, kết quả trước/sau.</p></div>
+    </div></div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goPrev(2)">← Quay lại W6.02</button>
+      <button class="nav-btn primary" onclick="goNext(2)">Sang W6.04 →</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- MODULE 3 -->
+<div class="module" id="m3">
+  <div class="module-header">
+    <div class="module-tag">Tuần 6 · Module W6.04</div>
+    <div class="module-title">🧩 Partitioning Large Tables</div>
+    <div class="module-subtitle">Range/List/Hash · pruning · retention management</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:44%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Loại partition</th><th>Dùng khi nào</th><th>Rủi ro</th></tr>
+      <tr><td>Range</td><td>Theo ngày/tháng</td><td>Quá nhiều partition nhỏ</td></tr>
+      <tr><td>List</td><td>Theo tenant/region</td><td>Lệch tải giữa các giá trị</td></tr>
+      <tr><td>Hash</td><td>Chia đều dữ liệu</td><td>Khó quản trị retention theo thời gian</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Hiểu partitioning giúp query và maintenance dễ hơn trên bảng lớn.</li>
+      <li>Nắm partition pruning để query chỉ đọc phần cần thiết.</li>
+      <li>Biết retention strategy: detach/drop partition theo thời gian.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Range partition cho bảng events theo tháng</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Partition theo thời gian</span></div><div class="cmd-body"><pre><span class="kw">CREATE TABLE</span> events_p (
+  id BIGSERIAL,
+  event_time TIMESTAMP NOT NULL,
+  tenant_id TEXT NOT NULL,
+  payload JSONB
+) <span class="kw">PARTITION BY RANGE</span> (event_time);
+
+<span class="kw">CREATE TABLE</span> events_2026_04 <span class="kw">PARTITION OF</span> events_p
+  <span class="kw">FOR VALUES FROM</span> (<span class="str">'2026-04-01'</span>) <span class="kw">TO</span> (<span class="str">'2026-05-01'</span>);
+
+<span class="kw">CREATE TABLE</span> events_2026_05 <span class="kw">PARTITION OF</span> events_p
+  <span class="kw">FOR VALUES FROM</span> (<span class="str">'2026-05-01'</span>) <span class="kw">TO</span> (<span class="str">'2026-06-01'</span>);</pre></div></div>
+
+    <h3>Partition pruning</h3>
+    <p>Khi query có điều kiện <code>event_time</code>, planner bỏ qua các partition không liên quan. Đây là lợi ích chính, không phải "tự động nhanh mọi query".</p>
+
+    <h3>Retention</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Retention theo partition</span></div><div class="cmd-body"><pre><span class="comment">-- Ví dụ giữ 6 tháng:</span>
+<span class="kw">ALTER TABLE</span> events_p DETACH PARTITION events_2025_10;
+<span class="kw">DROP TABLE</span> events_2025_10;</pre></div></div>
+
+    <div class="info-box warn">⚠️ <span>Partitioning không thay thế indexing. Nếu query lọc tenant_id nhưng không có index phù hợp, vẫn có thể chậm.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Lợi ích chính của partition pruning là gì?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Query chỉ đọc các partition liên quan điều kiện lọc.')">A. Giảm lượng dữ liệu phải scan cho query có điều kiện partition key</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng. Partition không tự nén dữ liệu.')">B. Tự động compress toàn bộ bảng</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan trực tiếp.')">C. Tăng kết nối tối đa</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải chức năng của partition.')">D. Loại bỏ dead tuple tự động</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Với bảng append theo thời gian, partition nào thường phù hợp nhất?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Range theo ngày/tháng là pattern phổ biến nhất cho event table.')">A. Range partition theo ngày/tháng</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'List phù hợp cho phân loại rời rạc, không phải lựa chọn đầu tiên cho time-series lớn.')">B. List partition theo status</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Hash có use-case riêng, không trực quan cho retention theo thời gian.')">C. Hash partition theo id</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải chiến lược partition hợp lệ.')">D. Không partition nhưng tạo 20 index</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Anti-pattern phổ biến khi partitioning là?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Quá nhiều partition nhỏ làm planner overhead tăng.')">A. Tạo quá nhiều partition nhỏ không kiểm soát</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Có thể hợp lý tùy context.')">B. Dùng partition theo tháng cho event table</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Có thể cần trong nhiều hệ thống.')">C. Có retention policy rõ ràng</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải anti-pattern.')">D. Dùng EXPLAIN để kiểm tra pruning</div>
+    </div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Giá trị chính</strong>Query và retention dễ quản trị hơn trên bảng lớn.</div>
+      <div class="summary-item"><strong>Điểm mấu chốt</strong>Pruning chỉ tốt khi query có condition trên partition key.</div>
+      <div class="summary-item"><strong>Không thần thánh hóa</strong>Partitioning không thay index strategy.</div>
+      <div class="summary-item"><strong>Vận hành</strong>Phải có job tạo partition mới và dọn partition cũ.</div>
+    </div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="practice-task"><div class="practice-task-header">Bài 1: Thiết kế partition plan 12 tháng</div><div class="practice-task-body">
+      <p>Viết SQL tạo parent table + 12 partition tháng và nêu chính sách retention 6 tháng.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Khuyến nghị: tạo script sinh partition tự động theo tháng để tránh quên tạo partition kỳ mới.</p></div>
+    </div></div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goPrev(3)">← Quay lại W6.03</button>
+      <button class="nav-btn primary" onclick="goNext(3)">Sang W6.05 →</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- MODULE 4 -->
+<div class="module" id="m4">
+  <div class="module-header">
+    <div class="module-tag">Tuần 6 · Module W6.05</div>
+    <div class="module-title">🔒 Transactions, MVCC & Locking</div>
+    <div class="module-subtitle">ACID căn bản · reader/writer behavior · deadlock awareness</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Chủ đề</th><th>Mục tiêu</th><th>Ứng dụng ETL</th></tr>
+      <tr><td>BEGIN/COMMIT/ROLLBACK</td><td>Giữ tính nhất quán</td><td>Batch job an toàn khi lỗi</td></tr>
+      <tr><td>MVCC</td><td>Reader không chặn writer đa số trường hợp</td><td>Giảm blocking cho read/report</td></tr>
+      <tr><td>Row lock</td><td>Kiểm soát concurrent update</td><td>Job retry không ghi đè sai</td></tr>
+      <tr><td>Deadlock</td><td>Nhận biết và phòng tránh</td><td>Giảm fail ngẫu nhiên production</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Hiểu transaction boundaries để tránh update nửa chừng.</li>
+      <li>Biết vì sao transaction kéo dài làm bloat và chặn vacuum.</li>
+      <li>Thiết kế ETL theo nguyên tắc: ngắn, rõ ràng, idempotent.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>MVCC ngắn gọn</h3>
+    <p>PostgreSQL lưu nhiều phiên bản row. Reader thường đọc snapshot phù hợp mà không bị writer chặn trực tiếp.</p>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>MVCC timeline trực quan</span></div><div class="cmd-body"><pre>T1 (09:00): BEGIN; SELECT balance FROM wallet WHERE user_id = 42;  -- thấy 100
+T2 (09:01): BEGIN; UPDATE wallet SET balance = 70 WHERE user_id = 42; COMMIT;
+T1 (09:02): SELECT lại trong cùng transaction vẫn thấy 100 (snapshot cũ)
+T1 (09:03): COMMIT; -- transaction mới sau đó sẽ thấy 70</pre></div></div>
+
+    <h3>Lock contention thường gặp trong ETL</h3>
+    <ul>
+      <li>Job A giữ transaction quá lâu trong khi Job B cần update cùng rows.</li>
+      <li>Batch update không có điều kiện tốt dẫn đến lock lan rộng.</li>
+      <li>Thứ tự update bảng không nhất quán giữa các job gây deadlock.</li>
+    </ul>
+
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Ví dụ transaction rõ ràng</span></div><div class="cmd-body"><pre><span class="kw">BEGIN</span>;
+
+<span class="kw">UPDATE</span> inventory
+<span class="kw">SET</span> reserved_qty = reserved_qty + 1
+<span class="kw">WHERE</span> sku = <span class="str">'SKU-42'</span>;
+
+<span class="kw">INSERT INTO</span> reservation_log (sku, reserved_at)
+<span class="kw">VALUES</span> (<span class="str">'SKU-42'</span>, NOW());
+
+<span class="kw">COMMIT</span>;</pre></div></div>
+
+    <h3>Runtime troubleshooting với <code>pg_stat_activity</code></h3>
+    <p>Khi hệ thống bị treo lock, đừng đoán. Hãy xác định session nào đang block hoặc idle in transaction để xử lý đúng tiến trình.</p>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Find blocker / idle transaction</span></div><div class="cmd-body"><pre><span class="comment">-- Session đang idle in transaction (thường gây giữ lock lâu):</span>
+<span class="kw">SELECT</span>
+  pid,
+  usename,
+  state,
+  now() - xact_start <span class="kw">AS</span> xact_age,
+  wait_event_type,
+  wait_event,
+  <span class="kw">LEFT</span>(query, 120) <span class="kw">AS</span> query_sample
+<span class="kw">FROM</span> pg_stat_activity
+<span class="kw">WHERE</span> state = <span class="str">'idle in transaction'</span>
+<span class="kw">ORDER BY</span> xact_start;
+
+<span class="comment">-- Ai đang block ai:</span>
+<span class="kw">SELECT</span>
+  a.pid <span class="kw">AS</span> blocked_pid,
+  pg_blocking_pids(a.pid) <span class="kw">AS</span> blocking_pids,
+  <span class="kw">LEFT</span>(a.query, 120) <span class="kw">AS</span> blocked_query
+<span class="kw">FROM</span> pg_stat_activity a
+<span class="kw">WHERE</span> array_length(pg_blocking_pids(a.pid), 1) &gt; 0;
+
+<span class="comment">-- Chỉ terminate khi đã xác nhận đúng session thủ phạm:</span>
+<span class="comment">-- SELECT pg_terminate_backend(&lt;pid&gt;);</span></pre></div></div>
+
+    <div class="info-box warn">⚠️ <span>Anti-pattern: mở transaction rồi gọi API ngoài hoặc xử lý file lớn bên trong transaction. Hãy tách phần I/O ra ngoài.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">MVCC giúp điều gì quan trọng nhất?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Reader/writer ít chặn nhau hơn trong nhiều trường hợp.')">A. Cho phép đọc theo snapshot, giảm blocking reader/writer</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'MVCC không làm transaction biến mất.')">B. Loại bỏ hoàn toàn transaction</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'MVCC không thay thế backup.')">C. Tự động backup dữ liệu</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng.')">D. Tăng max_connections tự động</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Tác hại phổ biến của long-running transaction là gì?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nó giữ snapshot cũ lâu, gây áp lực bloat/vacuum.')">A. Giữ snapshot lâu, tăng bloat và gây contention</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải hệ quả chính.')">B. Làm giảm số cột trong bảng</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan trực tiếp.')">C. Tự động xóa index</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng.')">D. Bắt buộc restart database</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Cách giảm deadlock thực tế trong nhiều job song song?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng thứ tự lock/update nhất quán là biện pháp nền tảng.')">A. Giữ thứ tự update bảng/row nhất quán giữa các job</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Tăng timeout không giải quyết gốc.')">B. Tăng statement_timeout thật cao</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải giải pháp chuẩn.')">C. Disable autovacuum</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan giảm deadlock.')">D. Chuyển tất cả sang SERIALIZABLE ngay</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Khi nghi có lock contention, view nào nên kiểm tra đầu tiên để tìm session thủ phạm?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. pg_stat_activity cho thấy state, query đang chạy và tuổi transaction.')">A. pg_stat_activity</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'View này thiên về thống kê table, không phải session runtime.')">B. pg_stat_user_tables</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không dùng cho lock debugging runtime.')">C. pg_settings</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải điểm bắt đầu phù hợp khi truy lock session.')">D. information_schema.columns</div>
+    </div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Transaction tốt</strong>Ngắn, rõ boundary, rollback được.</div>
+      <div class="summary-item"><strong>MVCC</strong>Cho phép đồng thời tốt hơn nhưng không miễn phí.</div>
+      <div class="summary-item"><strong>Locking</strong>Cần thiết để giữ dữ liệu đúng, nhưng phải kiểm soát.</div>
+      <div class="summary-item"><strong>Deadlock</strong>Giảm bằng thứ tự thao tác nhất quán.</div>
+    </div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="practice-task"><div class="practice-task-header">Bài 1: Thiết kế transaction cho ETL upsert</div><div class="practice-task-body">
+      <p>Viết pseudocode transaction gồm: stage load, validate, merge target, commit. Nêu rõ bước nào phải rollback.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Khuyến nghị: validate trước khi BEGIN; trong transaction chỉ giữ các lệnh DB cốt lõi để giảm lock time.</p></div>
+    </div></div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goPrev(4)">← Quay lại W6.04</button>
+      <button class="nav-btn primary" onclick="goNext(4)">Sang W6.06 →</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- MODULE 5 -->
+<div class="module" id="m5">
+  <div class="module-header">
+    <div class="module-tag">Tuần 6 · Module W6.06</div>
+    <div class="module-title">🧹 VACUUM, Autovacuum & Maintenance</div>
+    <div class="module-subtitle">dead tuples · bloat · freeze basics · monitoring mindset</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Topic</th><th>Mục đích</th><th>Thực tế</th></tr>
+      <tr><td>Dead tuples</td><td>Hiểu vì sao bảng phình</td><td>Do UPDATE/DELETE tạo phiên bản cũ</td></tr>
+      <tr><td>VACUUM</td><td>Thu hồi không gian có thể tái sử dụng</td><td>Không thu nhỏ file ngay như VACUUM FULL</td></tr>
+      <tr><td>ANALYZE</td><td>Cập nhật statistics planner</td><td>Giảm plan sai</td></tr>
+      <tr><td>Autovacuum</td><td>Tự động bảo trì nền</td><td>Không nên tắt bừa</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Biết vì sao database chậm dần nếu bỏ maintenance.</li>
+      <li>Nắm khác biệt <code>VACUUM</code>, <code>VACUUM ANALYZE</code>, <code>VACUUM FULL</code>.</li>
+      <li>Đọc chỉ số cơ bản để biết autovacuum có đang tụt hậu hay không.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Dead tuples hình thành thế nào?</h3>
+    <p>Trong MVCC, UPDATE không ghi đè row cũ mà tạo row mới. Row cũ thành dead tuple và cần vacuum dọn dẹp.</p>
+
+    <h3>HOT update và <code>fillfactor</code> cho bảng update-heavy</h3>
+    <p>Với bảng staging/fact bị UPDATE nhiều, HOT (Heap-Only Tuple) giúp giảm ghi thêm vào index nếu update không đụng cột index. Để tăng cơ hội HOT update, thường giảm <code>fillfactor</code> để chừa chỗ trống trên page.</p>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Set fillfactor cho bảng update-heavy</span></div><div class="cmd-body"><pre><span class="kw">ALTER TABLE</span> fact_order_status
+  <span class="kw">SET</span> (fillfactor = 90);
+
+<span class="comment">-- Sau đó cần rewrite table (ví dụ VACUUM FULL / CLUSTER / pg_repack)
+-- để fillfactor mới áp dụng toàn bộ dữ liệu cũ.</span></pre></div></div>
+
+    <h3>Lệnh bảo trì cơ bản</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Maintenance command</span></div><div class="cmd-body"><pre><span class="kw">VACUUM</span> events;
+<span class="kw">VACUUM ANALYZE</span> events;
+<span class="comment">-- Dùng cẩn thận vì lock mạnh:</span>
+<span class="kw">VACUUM FULL</span> events;</pre></div></div>
+
+    <h3>Kiểm tra bảng có nguy cơ bloat</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Monitoring đơn giản</span></div><div class="cmd-body"><pre><span class="kw">SELECT</span>
+  relname,
+  n_live_tup,
+  n_dead_tup,
+  last_vacuum,
+  last_autovacuum,
+  last_analyze,
+  last_autoanalyze
+<span class="kw">FROM</span> pg_stat_user_tables
+<span class="kw">ORDER BY</span> n_dead_tup DESC
+<span class="kw">LIMIT</span> 20;</pre></div></div>
+
+    <div class="info-box warn">⚠️ <span>Anti-pattern nguy hiểm: tắt autovacuum vì "đỡ tốn CPU" nhưng không có lịch maintenance thay thế.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Mục tiêu chính của VACUUM thường là gì?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. VACUUM giải phóng dead tuples để tái sử dụng không gian.')">A. Thu hồi dead tuples để tái sử dụng không gian</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải vai trò chính của VACUUM thường.')">B. Tạo index tự động</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng.')">C. Tăng max_connections</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng.')">D. Mã hóa dữ liệu</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Lệnh nào giúp planner có statistics mới?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'VACUUM đơn thuần không cập nhật stats như ANALYZE.')">A. VACUUM</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ANALYZE (hoặc VACUUM ANALYZE) cập nhật statistics.')">B. ANALYZE / VACUUM ANALYZE</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan.')">C. REINDEX</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan.')">D. CHECKPOINT</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Phát biểu đúng về autovacuum?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Tắt autovacuum cần kế hoạch thay thế rất rõ.')">A. Nên tắt mặc định để tăng tốc ingest</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là lớp bảo trì nền quan trọng của PostgreSQL.')">B. Là cơ chế nền quan trọng, cần tune thay vì tắt bừa</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng.')">C. Chỉ chạy khi DB restart</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng.')">D. Chỉ ảnh hưởng bảng có index</div>
+    </div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Dead tuples</strong>Là hệ quả tự nhiên của MVCC.</div>
+      <div class="summary-item"><strong>VACUUM</strong>Dọn dẹp để hệ thống không phình theo thời gian.</div>
+      <div class="summary-item"><strong>ANALYZE</strong>Giúp planner quyết định tốt hơn.</div>
+      <div class="summary-item"><strong>Autovacuum</strong>Là lớp phòng thủ mặc định, không tắt tùy tiện.</div>
+    </div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="practice-task"><div class="practice-task-header">Bài 1: Lập checklist maintenance tuần</div><div class="practice-task-body">
+      <p>Tạo checklist 5 mục: bảng nào theo dõi, ngưỡng dead tuples, lịch analyze, query dashboard, hành động khi autovacuum tụt hậu.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Checklist tối thiểu nên có chủ sở hữu, ngưỡng cảnh báo và thao tác phản ứng cụ thể cho từng tình huống.</p></div>
+    </div></div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goPrev(5)">← Quay lại W6.05</button>
+      <button class="nav-btn primary" onclick="goNext(5)">Sang W6.07 →</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- MODULE 6 -->
+<div class="module" id="m6">
+  <div class="module-header">
+    <div class="module-tag">Tuần 6 · Module W6.07</div>
+    <div class="module-title">💾 Backup, Restore & Connections</div>
+    <div class="module-subtitle">pg_dump/pg_restore · restore drill · pooling mindset</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:77%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Nhóm</th><th>Nội dung</th><th>Điểm cần nhớ</th></tr>
+      <tr><td>Backup logical</td><td>pg_dump</td><td>Phù hợp backup schema/table linh hoạt</td></tr>
+      <tr><td>Restore</td><td>pg_restore / psql</td><td>Phải test restore định kỳ</td></tr>
+      <tr><td>Connections</td><td>max_connections, pooling</td><td>Nhiều kết nối idle vẫn tốn tài nguyên</td></tr>
+      <tr><td>Security cơ bản</td><td>Credential rotation</td><td>Không hardcode mật khẩu trong script</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Biết backup là vô nghĩa nếu không kiểm tra restore.</li>
+      <li>Nắm vấn đề connection storm và vai trò connection pooler.</li>
+      <li>Có operational checklist tối thiểu cho team nhỏ.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Backup logical cơ bản</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>pg_dump / pg_restore</span></div><div class="cmd-body"><pre><span class="comment">-- Backup dạng custom:</span>
+pg_dump -h localhost -U de_user -d de_lab -Fc -f de_lab_2026_04_22.dump
+
+<span class="comment">-- Restore vào DB mới:</span>
+createdb -h localhost -U de_user de_lab_restore
+pg_restore -h localhost -U de_user -d de_lab_restore de_lab_2026_04_22.dump</pre></div></div>
+
+    <h3>Connection management</h3>
+    <ul>
+      <li>Không tăng <code>max_connections</code> vô tội vạ.</li>
+      <li>Dùng pooler (ví dụ PgBouncer) để gom kết nối ngắn hạn.</li>
+      <li>Đóng idle connection từ app đúng cách.</li>
+    </ul>
+
+    <h3>Bẫy PgBouncer: session pooling vs transaction pooling</h3>
+    <p><strong>Transaction pooling</strong> thường phù hợp cho workload ETL/app ngắn-lệnh vì trả connection nhanh về pool sau mỗi transaction. Nếu vô tình giữ workflow theo kiểu session state dài, bạn dễ gặp lỗi khó đoán hoặc pool cạn.</p>
+    <div class="info-box warn">⚠️ <span>Với Airflow hoặc worker chạy nhiều task song song, dùng session-level pooling sai cách có thể giữ connection quá lâu và làm nghẽn pool toàn hệ thống.</span></div>
+
+    <h3>Checklist vận hành tối thiểu</h3>
+    <ul class="checklist">
+      <li>Có lịch backup rõ tần suất (daily/weekly).</li>
+      <li>Có restore drill ít nhất hàng tháng.</li>
+      <li>Có theo dõi số kết nối active vs idle.</li>
+      <li>Có rotation credential theo chu kỳ.</li>
+    </ul>
+
+    <div class="info-box note">🛡️ <span>Backup strategy nên đi kèm mục tiêu RPO/RTO rõ ràng để chọn tần suất và quy trình khôi phục phù hợp.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Vì sao phải test restore định kỳ?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Backup chỉ có giá trị khi khôi phục được trong tình huống thật.')">A. Vì backup không có ý nghĩa nếu không chứng minh restore được</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng.')">B. Vì pg_dump tự kiểm tra restore</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan.')">C. Vì giúp giảm dead tuples</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải lý do chính.')">D. Vì làm tăng tốc query</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Pooler như PgBouncer giúp gì?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Pooler giúp giảm overhead tạo quá nhiều connection trực tiếp tới DB.')">A. Giảm overhead kết nối bằng cách tái sử dụng connection</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Pooler không thay backup.')">B. Tự động backup mỗi giờ</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng.')">C. Tự động tạo index mới</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng.')">D. Tắt hoàn toàn lock contention</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Anti-pattern về credentials là gì?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Hardcode secret trong code/repo là rủi ro cao.')">A. Hardcode password trong script và commit lên Git</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là thói quen tốt hơn hardcode.')">B. Dùng biến môi trường + secret manager</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải anti-pattern.')">C. Rotate password theo chu kỳ</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải anti-pattern.')">D. Giới hạn quyền user theo principle of least privilege</div>
+    </div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Backup tốt</strong>Không chỉ tạo file, mà phải phục hồi được.</div>
+      <div class="summary-item"><strong>Connections</strong>Nhiều kết nối nhàn rỗi vẫn gây áp lực hệ thống.</div>
+      <div class="summary-item"><strong>Pooling</strong>Giảm cost mở/đóng connection liên tục.</div>
+      <div class="summary-item"><strong>Bảo mật</strong>Quản lý secret đúng quy trình là bắt buộc.</div>
+    </div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="practice-task"><div class="practice-task-header">Bài 1: Viết runbook backup/restore</div><div class="practice-task-body">
+      <p>Tạo runbook 1 trang: command backup, command restore, checklist verify dữ liệu sau restore, owner chịu trách nhiệm.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Runbook tốt phải có cả "khi restore thất bại thì làm gì" chứ không chỉ happy-path command.</p></div>
+    </div></div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goPrev(6)">← Quay lại W6.06</button>
+      <button class="nav-btn primary" onclick="goNext(6)">Sang W6.08 →</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- MODULE 7 -->
+<div class="module" id="m7">
+  <div class="module-header">
+    <div class="module-tag">Tuần 6 · Module W6.08</div>
+    <div class="module-title">🗂️ Artifact: week6_postgres_lab</div>
+    <div class="module-subtitle">Xây portfolio-ready package: schema, index, explain, partition, maintenance</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>File</th><th>Mục đích</th><th>Expected quality</th></tr>
+      <tr><td>schema.sql</td><td>DDL cho bảng demo workload</td><td>Rõ grain + key + datatype hợp lý</td></tr>
+      <tr><td>indexes.sql</td><td>Index strategy kèm lý do</td><td>Bám query thực, không dư thừa</td></tr>
+      <tr><td>explain_examples.sql</td><td>Trước/sau tối ưu</td><td>Có số liệu timing</td></tr>
+      <tr><td>partition_demo.sql</td><td>Partition + retention</td><td>Có create/drop lifecycle</td></tr>
+      <tr><td>maintenance.md</td><td>Vacuum/autovacuum checklist</td><td>Actionable, có ngưỡng</td></tr>
+      <tr><td>backup_restore.md</td><td>Runbook backup/restore</td><td>Có verify steps</td></tr>
+      <tr><td>README.md</td><td>Narrative toàn bộ lab</td><td>Portfolio-ready, có lessons learned</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Biến kiến thức tuần 6 thành artifact có thể show khi apply việc.</li>
+      <li>Thể hiện tư duy kỹ thuật + vận hành, không chỉ SQL syntax.</li>
+      <li>Tạo cấu trúc có thể tái dùng cho tuần sau (dbt/Airflow).</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Cấu trúc artifact chuẩn</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>week6_postgres_lab/</span></div><div class="cmd-body"><pre>week6_postgres_lab/
+├── schema.sql
+├── indexes.sql
+├── explain_examples.sql
+├── partition_demo.sql
+├── maintenance.md
+├── backup_restore.md
+└── README.md</pre></div></div>
+
+    <h3>README nên có gì?</h3>
+    <ul>
+      <li>Workload scenario: quy mô dữ liệu, kiểu truy vấn, vấn đề gặp phải.</li>
+      <li>Performance baseline: query nào chậm, plan ban đầu ra sao.</li>
+      <li>Giải pháp: index nào, partition theo gì, maintenance thế nào.</li>
+      <li>Kết quả: trước/sau tối ưu.</li>
+      <li>Bài học: trade-off và giới hạn còn lại.</li>
+      <li>Monitoring evidence: chèn output/screenshot từ <code>pg_stat_user_tables</code> hoặc <code>pg_stat_statements</code> để chứng minh bạn biết quan sát hệ thống runtime.</li>
+    </ul>
+
+    <div class="info-box tip">✅ <span>Artifact tốt là artifact người khác có thể clone và hiểu được logic tối ưu trong 10 phút đầu.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">README của artifact nên nhấn mạnh điều gì nhất?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhà tuyển dụng quan tâm cách bạn xác định vấn đề và cải thiện có số liệu.')">A. Vấn đề thực tế, quyết định kỹ thuật, và kết quả trước/sau</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đủ chiều sâu kỹ thuật.')">B. Chỉ liệt kê danh sách file</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phù hợp mục tiêu portfolio kỹ thuật.')">C. Chỉ viết lý thuyết PostgreSQL tổng quát</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải trọng tâm.')">D. Chỉ thêm ảnh screenshot đẹp</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">File nào nên chứa trước/sau EXPLAIN ANALYZE?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'schema.sql nên chứa DDL chính, không phải benchmark.')">A. schema.sql</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách riêng giúp reviewer dễ đọc reasoning tối ưu.')">B. explain_examples.sql</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'maintenance.md dành cho vận hành, không phải benchmark SQL.')">C. maintenance.md</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'backup_restore.md không phải nơi để plan benchmark.')">D. backup_restore.md</div>
+    </div><div class="quiz-explain"></div></div>
+
+    <div class="quiz-item"><div class="quiz-q">Portfolio artifact tốt cần tránh điều gì?</div><div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Placeholder làm artifact thiếu độ tin cậy thực chiến.')">A. Placeholder mơ hồ như TODO/coming soon không có kết quả thật</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là điểm cộng nếu có số liệu rõ.')">B. Có baseline và kết quả tối ưu</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là điểm tốt.')">C. Nêu trade-off của quyết định kỹ thuật</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là nên làm.')">D. Có cấu trúc file rõ ràng</div>
+    </div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Mục tiêu</strong>Biến tuần học thành sản phẩm thể hiện năng lực thật.</div>
+      <div class="summary-item"><strong>Trọng tâm</strong>Reasoning + số liệu + runbook rõ ràng.</div>
+      <div class="summary-item"><strong>Chất lượng</strong>Ít file nhưng file nào cũng có giá trị.</div>
+      <div class="summary-item"><strong>Đầu ra</strong>Sẵn sàng đính kèm trong CV/GitHub portfolio.</div>
+    </div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="practice-task"><div class="practice-task-header">Bài 1: Viết README portfolio tuần 6</div><div class="practice-task-body">
+      <p>Viết README tối đa 1 trang theo format: bối cảnh, vấn đề, giải pháp, kết quả, lessons learned.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Nhớ chèn 2-3 query đại diện và số liệu runtime trước/sau để tăng độ tin cậy.</p></div>
+    </div></div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goPrev(7)">← Quay lại W6.07</button>
+      <button class="nav-btn primary" onclick="goNext(7)">Sang W6.09 →</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- MODULE 8 -->
+<div class="module" id="m8">
+  <div class="module-header">
+    <div class="module-tag">Tuần 6 · Module W6.09</div>
+    <div class="module-title">🧪 Mini Test Tổng Kết (20 câu)</div>
+    <div class="module-subtitle">Kiểm tra kiến thức indexing, plans, partitioning, transaction, vacuum, backup</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">📋</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Phần</th><th>Số câu</th><th>Nội dung</th></tr>
+      <tr><td>Indexing</td><td>4</td><td>Chọn index đúng, hiểu trade-off</td></tr>
+      <tr><td>Execution Plan</td><td>4</td><td>Đọc plan và nhận diện bottleneck</td></tr>
+      <tr><td>Partitioning</td><td>3</td><td>Pruning, retention, anti-pattern</td></tr>
+      <tr><td>Transactions/MVCC</td><td>4</td><td>Locking, transaction design, runtime debugging</td></tr>
+      <tr><td>VACUUM/Maintenance</td><td>3</td><td>Dead tuples, HOT update, autovacuum</td></tr>
+      <tr><td>Backup/Connection</td><td>2</td><td>Restore drill, pooling, vận hành cơ bản</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">🎯</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Tự đánh giá xem bạn đã có production mindset với PostgreSQL chưa.</li>
+      <li>Xác định phần kiến thức còn yếu để ôn lại đúng trọng tâm.</li>
+      <li>Dùng kết quả làm baseline trước khi bước sang dbt/Airflow.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. Hướng Dẫn Làm Mini Test<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Chọn 1 đáp án A/B/C/D cho mỗi câu.</li>
+      <li>Không cần hoàn hảo, mục tiêu là phát hiện lỗ hổng kiến thức.</li>
+      <li>Sau khi chấm điểm, đọc kỹ phần câu sai để ôn lại module liên quan.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">❓</div>4. Mini Test 20 Câu<span class="section-toggle">▼</span></div><div class="section-content">
+    <div id="final-test">
+      <div class="test-question" data-q="1" data-correct="B">
+        <div class="test-question-title">Q1. Loại index phổ biến nhất cho equality và range query là?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q1" value="A"> A. GIN</label>
+          <label class="test-option"><input type="radio" name="q1" value="B"> B. B-tree</label>
+          <label class="test-option"><input type="radio" name="q1" value="C"> C. BRIN</label>
+          <label class="test-option"><input type="radio" name="q1" value="D"> D. GiST</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="2" data-correct="C">
+        <div class="test-question-title">Q2. Index nào thường phù hợp cho JSONB containment query?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q2" value="A"> A. Hash</label>
+          <label class="test-option"><input type="radio" name="q2" value="B"> B. B-tree đơn cột</label>
+          <label class="test-option"><input type="radio" name="q2" value="C"> C. GIN</label>
+          <label class="test-option"><input type="radio" name="q2" value="D"> D. Không cần index</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="3" data-correct="A">
+        <div class="test-question-title">Q3. Over-indexing gây hậu quả gì rõ nhất?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q3" value="A"> A. Write chậm do cập nhật nhiều index</label>
+          <label class="test-option"><input type="radio" name="q3" value="B"> B. Tự động xóa duplicate</label>
+          <label class="test-option"><input type="radio" name="q3" value="C"> C. Giảm lock hoàn toàn</label>
+          <label class="test-option"><input type="radio" name="q3" value="D"> D. Không ảnh hưởng gì</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="4" data-correct="D">
+        <div class="test-question-title">Q4. Composite index (tenant_id, event_time) hợp khi query thường là?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q4" value="A"> A. WHERE status='ok'</label>
+          <label class="test-option"><input type="radio" name="q4" value="B"> B. GROUP BY region</label>
+          <label class="test-option"><input type="radio" name="q4" value="C"> C. ORDER BY user_id</label>
+          <label class="test-option"><input type="radio" name="q4" value="D"> D. WHERE tenant_id=? AND event_time&gt;=?</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="5" data-correct="B">
+        <div class="test-question-title">Q5. EXPLAIN ANALYZE cho bạn điều gì?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q5" value="A"> A. Chỉ syntax query</label>
+          <label class="test-option"><input type="radio" name="q5" value="B"> B. Kế hoạch + số liệu chạy thật</label>
+          <label class="test-option"><input type="radio" name="q5" value="C"> C. Tự động rewrite query</label>
+          <label class="test-option"><input type="radio" name="q5" value="D"> D. Tự động tạo index</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="6" data-correct="C">
+        <div class="test-question-title">Q6. Estimated rows lệch xa actual rows thường gợi ý gì?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q6" value="A"> A. Query chắc chắn đúng tối ưu</label>
+          <label class="test-option"><input type="radio" name="q6" value="B"> B. Index đã đủ</label>
+          <label class="test-option"><input type="radio" name="q6" value="C"> C. Statistics có thể stale hoặc skew</label>
+          <label class="test-option"><input type="radio" name="q6" value="D"> D. Cần restart server ngay</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="7" data-correct="A">
+        <div class="test-question-title">Q7. Node nào thường là full scan bảng?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q7" value="A"> A. Seq Scan</label>
+          <label class="test-option"><input type="radio" name="q7" value="B"> B. Index Scan</label>
+          <label class="test-option"><input type="radio" name="q7" value="C"> C. Nested Loop</label>
+          <label class="test-option"><input type="radio" name="q7" value="D"> D. Aggregate</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="8" data-correct="D">
+        <div class="test-question-title">Q8. Cách tối ưu đúng khi thấy node Sort rất tốn thời gian là?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q8" value="A"> A. Xóa ORDER BY khỏi query business-critical</label>
+          <label class="test-option"><input type="radio" name="q8" value="B"> B. Chuyển toàn bộ sang NoSQL</label>
+          <label class="test-option"><input type="radio" name="q8" value="C"> C. Chỉ tăng max_connections</label>
+          <label class="test-option"><input type="radio" name="q8" value="D"> D. Xem index hỗ trợ ORDER BY/filter phù hợp</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="9" data-correct="A">
+        <div class="test-question-title">Q9. Partition pruning xảy ra khi nào?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q9" value="A"> A. Query có điều kiện trên partition key</label>
+          <label class="test-option"><input type="radio" name="q9" value="B"> B. Bảng có hơn 10 index</label>
+          <label class="test-option"><input type="radio" name="q9" value="C"> C. Luôn xảy ra mọi query</label>
+          <label class="test-option"><input type="radio" name="q9" value="D"> D. Chỉ khi VACUUM FULL</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="10" data-correct="B">
+        <div class="test-question-title">Q10. Anti-pattern partitioning là?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q10" value="A"> A. Có retention policy rõ ràng</label>
+          <label class="test-option"><input type="radio" name="q10" value="B"> B. Tạo quá nhiều partition nhỏ không kiểm soát</label>
+          <label class="test-option"><input type="radio" name="q10" value="C"> C. Dùng range theo tháng</label>
+          <label class="test-option"><input type="radio" name="q10" value="D"> D. Dùng EXPLAIN kiểm tra pruning</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="11" data-correct="C">
+        <div class="test-question-title">Q11. Partitioning có thay thế indexing hoàn toàn không?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q11" value="A"> A. Có, luôn thay thế được</label>
+          <label class="test-option"><input type="radio" name="q11" value="B"> B. Có, nếu bảng &gt; 1TB</label>
+          <label class="test-option"><input type="radio" name="q11" value="C"> C. Không, vẫn cần index phù hợp truy vấn</label>
+          <label class="test-option"><input type="radio" name="q11" value="D"> D. Chỉ cần BRIN là đủ</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="12" data-correct="A">
+        <div class="test-question-title">Q12. MVCC mang lại lợi ích nào?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q12" value="A"> A. Reader/writer ít chặn nhau hơn</label>
+          <label class="test-option"><input type="radio" name="q12" value="B"> B. Không cần transaction nữa</label>
+          <label class="test-option"><input type="radio" name="q12" value="C"> C. Tăng tốc network</label>
+          <label class="test-option"><input type="radio" name="q12" value="D"> D. Xóa dead tuples tự động ngay lập tức</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="13" data-correct="D">
+        <div class="test-question-title">Q13. Để giảm deadlock, nên làm gì?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q13" value="A"> A. Tăng autovacuum cost delay</label>
+          <label class="test-option"><input type="radio" name="q13" value="B"> B. Tắt index</label>
+          <label class="test-option"><input type="radio" name="q13" value="C"> C. Để transaction mở lâu hơn</label>
+          <label class="test-option"><input type="radio" name="q13" value="D"> D. Giữ thứ tự lock/update nhất quán</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="14" data-correct="B">
+        <div class="test-question-title">Q14. Long-running transaction thường gây gì?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q14" value="A"> A. Tự động giảm dung lượng DB</label>
+          <label class="test-option"><input type="radio" name="q14" value="B"> B. Tăng bloat và lock contention</label>
+          <label class="test-option"><input type="radio" name="q14" value="C"> C. Tăng tốc autovacuum</label>
+          <label class="test-option"><input type="radio" name="q14" value="D"> D. Tự xóa dead tuples</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="15" data-correct="B">
+        <div class="test-question-title">Q15. View nào dùng để tìm session đang idle in transaction?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q15" value="A"> A. pg_stat_user_tables</label>
+          <label class="test-option"><input type="radio" name="q15" value="B"> B. pg_stat_activity</label>
+          <label class="test-option"><input type="radio" name="q15" value="C"> C. information_schema.tables</label>
+          <label class="test-option"><input type="radio" name="q15" value="D"> D. pg_settings</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="16" data-correct="D">
+        <div class="test-question-title">Q16. Với bảng UPDATE-heavy, cách nào giúp tăng cơ hội HOT update?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q16" value="A"> A. Tăng fillfactor lên 100</label>
+          <label class="test-option"><input type="radio" name="q16" value="B"> B. Tắt autovacuum</label>
+          <label class="test-option"><input type="radio" name="q16" value="C"> C. Chỉ tăng max_connections</label>
+          <label class="test-option"><input type="radio" name="q16" value="D"> D. Giảm fillfactor (ví dụ 90) để chừa chỗ trên page</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="17" data-correct="C">
+        <div class="test-question-title">Q17. Mục tiêu chính của VACUUM là?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q17" value="A"> A. Tạo backup full</label>
+          <label class="test-option"><input type="radio" name="q17" value="B"> B. Tăng max_connections</label>
+          <label class="test-option"><input type="radio" name="q17" value="C"> C. Dọn dead tuples để tái sử dụng space</label>
+          <label class="test-option"><input type="radio" name="q17" value="D"> D. Tạo index hash</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="18" data-correct="D">
+        <div class="test-question-title">Q18. Anti-pattern bảo trì nguy hiểm là?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q18" value="A"> A. Theo dõi pg_stat_user_tables</label>
+          <label class="test-option"><input type="radio" name="q18" value="B"> B. Định kỳ review bloat</label>
+          <label class="test-option"><input type="radio" name="q18" value="C"> C. Tune autovacuum theo workload</label>
+          <label class="test-option"><input type="radio" name="q18" value="D"> D. Tắt autovacuum mà không có kế hoạch thay thế</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="19" data-correct="B">
+        <div class="test-question-title">Q19. Backup có giá trị khi nào?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q19" value="A"> A. Khi file dump lớn hơn 1GB</label>
+          <label class="test-option"><input type="radio" name="q19" value="B"> B. Khi đã kiểm chứng restore thành công</label>
+          <label class="test-option"><input type="radio" name="q19" value="C"> C. Khi đặt cron backup mỗi giờ</label>
+          <label class="test-option"><input type="radio" name="q19" value="D"> D. Khi chạy trên cloud</label>
+        </div>
+      </div>
+
+      <div class="test-question" data-q="20" data-correct="C">
+        <div class="test-question-title">Q20. Trong PgBouncer, lựa chọn nào thường an toàn hơn cho workload ETL ngắn transaction?</div>
+        <div class="test-options">
+          <label class="test-option"><input type="radio" name="q20" value="A"> A. Session pooling cho mọi workload</label>
+          <label class="test-option"><input type="radio" name="q20" value="B"> B. Tắt pooling để tránh lỗi</label>
+          <label class="test-option"><input type="radio" name="q20" value="C"> C. Transaction pooling để trả connection nhanh về pool</label>
+          <label class="test-option"><input type="radio" name="q20" value="D"> D. Dùng max_connections cực cao thay pooler</label>
+        </div>
+      </div>
+
+      <div class="test-actions">
+        <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+        <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+      </div>
+      <div class="test-result" id="final-test-result" style="display:none"></div>
+    </div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">📌</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+    <p>Hoàn thành tuần 6 nghĩa là bạn đã có nền tảng vận hành PostgreSQL theo hướng Data Engineering thực tế: biết tối ưu query bằng bằng chứng, quản trị bảng lớn, và duy trì độ ổn định hệ thống.</p>
+    <div class="summary-grid">
+      <div class="summary-item"><strong>Ngưỡng tốt</strong>16/20 trở lên: sẵn sàng sang dbt/Airflow với nền SQL engine vững.</div>
+      <div class="summary-item"><strong>Nếu dưới 12</strong>Ôn lại W6.02, W6.03, W6.05 trước khi tiếp tục tuần sau.</div>
+    </div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">🔬</div>6. Bài Tập Thực Hành Tiếp Theo<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="practice-task"><div class="practice-task-header">Nhiệm vụ chốt tuần 6</div><div class="practice-task-body">
+      <ul>
+        <li>Hoàn thiện artifact <code>week6_postgres_lab</code> với đầy đủ file bắt buộc.</li>
+        <li>Chạy ít nhất 2 benchmark trước/sau tối ưu và ghi số liệu thật.</li>
+        <li>Viết ngắn 1 đoạn "lessons learned" cho mỗi nhóm chủ đề lớn.</li>
+      </ul>
+    </div></div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goPrev(8)">← Quay lại W6.08</button>
+      <div style="text-align:center;color:var(--accent2);font-weight:700">🎉 Hoàn thành Tuần 6 · Sẵn sàng sang Tuần 7</div>
+    </div>
+  </div></div>
+</div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  const next = idx + 1;
+  if (next < modules.length) showModule(next, navItems[next]);
+}
+
+function goPrev(idx) {
+  const prev = idx - 1;
+  if (prev >= 0) showModule(prev, navItems[prev]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+  explain.textContent = (correct ? '✓ Chính xác! ' : '✗ Sai. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? '🔼 Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (correctCount >= 18) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn đã có production mindset tốt cho PostgreSQL trong DE workload.'; }
+  else if (correctCount >= 15) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Nền tảng vững. Ôn lại vài câu sai trước khi sang tuần tiếp theo.'; }
+  else if (correctCount >= 11) { levelText = 'Đạt'; chipClass = 'warn'; guidance = 'Nên ôn lại W6.02, W6.03, W6.05 để chắc phần hiệu năng và transaction.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Hãy review lại toàn bộ tuần 6 và làm lại mini test sau khi luyện lab.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đúng là <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng. Rất tốt!</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+</body>
+</html>

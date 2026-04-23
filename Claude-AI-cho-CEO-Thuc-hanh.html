@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAUDE AI CHO CEO THỰC HÀNH</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 330px; min-width: 330px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--text-muted); }
+  .level-label.l0 { color: var(--accent2); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 50px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 980px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.55rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '□'; color: var(--accent5); font-size: 1.1rem; flex-shrink: 0; margin-top: -1px; }
+  .checklist li.done::before { content: '✓'; color: var(--accent2); }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  .tab-group { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 18px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>CLAUDE AI CHO CEO THỰC HÀNH</h1>
+  <p>6 bước để Claude trở thành cố vấn chiến lược cho doanh nghiệp của bạn</p>
+  <p><em>Tập 2 - Dành cho CEO, founder, chủ doanh nghiệp</em></p>
+  <p><strong>Bùi Tấn Việt</strong></p>
+  <p>Founder SePay - Hạ tầng Open Banking cho doanh nghiệp Việt</p>
+  <p>Tháng 3, 2026</p>
+  <div class="badge-row"><span class="badge badge-blue">Claude AI Guide</span></div>
+</div>
+<div class="container">
+  <div class="sidebar">
+    <div class="sidebar-title">NỘI DUNG CHÍNH</div>
+    <a class="nav-item active" onclick="showModule(0, this)">M1: MỤC LỤC</a>
+    <a class="nav-item " onclick="showModule(1, this)">M2: TẠI SAO CEO CẦN ĐỌC TÀI LIỆU NÀY</a>
+    <a class="nav-item " onclick="showModule(2, this)">M3: 6 bước từ dễ đến khó</a>
+    <a class="nav-item " onclick="showModule(3, this)">M4: CHUẨN BỊ TRƯỚC KHI BẮT ĐẦU</a>
+    <a class="nav-item " onclick="showModule(4, this)">M5: BƯỚC 1: GIỚI THIỆU DOANH NGHIỆP CHO CLAUDE</a>
+    <a class="nav-item " onclick="showModule(5, this)">M6: BƯỚC 2: PHÂN TÍCH NGÀNH</a>
+    <a class="nav-item " onclick="showModule(6, this)">M7: BƯỚC 3: PHÂN TÍCH ĐỐI THỦ</a>
+    <a class="nav-item " onclick="showModule(7, this)">M8: BƯỚC 4: RÀ SOÁT SẢN PHẨM HIỆN TẠI & NGHIÊN CỨU SẢN PHẨM MỚI</a>
+    <a class="nav-item " onclick="showModule(8, this)">M9: BƯỚC 5: LẬP CHIẾN LƯỢC</a>
+    <a class="nav-item " onclick="showModule(9, this)">M10: BƯỚC 6: LẬP KẾ HOẠCH TÀI CHÍNH</a>
+    <a class="nav-item " onclick="showModule(10, this)">M11: TỔNG KẾT</a>
+    <a class="nav-item " onclick="showModule(11, this)">M12: PHỤ LỤC: CÀI ĐẶT SKILL HOẠCH ĐỊNH CHIẾN LƯỢC</a>
+    <a class="nav-item " onclick="showModule(12, this)">M13: VỀ TÁC GIẢ</a>
+  </div>
+  <div class="main">
+    <div class="module active" id="module-0">
+      <div class="module-header">
+        <div class="module-tag">MODULE 1</div>
+        <div class="module-title">MỤC LỤC</div>
+      </div>
+<ul>
+<li>Mở đầu: Tại sao CEO cần đọc tài liệu này</li>
+<li>Chuẩn bị: Thiết lập trước khi bắt đầu</li>
+<li>Bước 1: Giới thiệu doanh nghiệp cho Claude</li>
+<li>Bước 2: Phân tích ngành</li>
+<li>Bước 3: Phân tích đối thủ</li>
+<li>Bước 4: Rà soát sản phẩm & Nghiên cứu sản phẩm mới</li>
+<li>Bước 5: Lập chiến lược</li>
+<li>Bước 6: Lập kế hoạch tài chính</li>
+<li>Phụ lục: Cài đặt Skill Hoạch định chiến lược</li>
+</ul>
+<hr style="border-color: var(--border); margin: 20px 0;">
+      <div class="nav-buttons">
+        <div></div>
+        <button class="nav-btn primary" onclick="goNext(0)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-1">
+      <div class="module-header">
+        <div class="module-tag">MODULE 2</div>
+        <div class="module-title">TẠI SAO CEO CẦN ĐỌC TÀI LIỆU NÀY</div>
+      </div>
+<p>Tập 1 hướng dẫn bạn cách dùng Claude AI - từ thiết lập đến các kỹ thuật hỏi đáp cơ bản. Ai cũng đọc được.</p>
+<p>Tập 2 này khác hoàn toàn. Đây là tài liệu dành cho CEO, founder, chủ doanh nghiệp - những người ra quyết định chiến lược. Tôi sẽ hướng dẫn bạn biến Claude thành cố vấn chiến lược cho chính doanh nghiệp của mình.</p>
+<p>Tôi là founder của SePay - nền tảng kết nối API ngân hàng cho doanh nghiệp, và 123HOST - dịch vụ hosting. Tài liệu này sinh ra từ thực chiến điều hành 2 công ty.</p>
+<p><strong>Vấn đề của hầu hết CEO khi dùng AI:</strong></p>
+<p>Bạn gõ "viết cho tôi kế hoạch kinh doanh" và nhận lại một bản kế hoạch chung chung, áp dụng cho bất kỳ công ty nào, không riêng gì của bạn. Bạn gõ "phân tích đối thủ giúp tôi" nhưng Claude không biết đối thủ là ai, ngành gì, quy mô nào. Bạn gõ "làm chiến lược cho công ty tôi" nhưng Claude chưa biết công ty bạn là gì.</p>
+<p>Tất cả đều có chung một nguyên nhân: Claude chưa hiểu doanh nghiệp của bạn.</p>
+<p>Hãy tưởng tượng bạn thuê một cố vấn chiến lược. Người này đọc rộng, biết nhiều, phản hồi nhanh. Nhưng nếu bạn gặp và hỏi ngay "làm chiến lược giúp tôi" mà không nói công ty làm gì, doanh thu bao nhiêu, đối thủ là ai - thì cố vấn giỏi mấy cũng chỉ trả lời chung chung.</p>
+<p>Tài liệu này hướng dẫn bạn "onboard" Claude vào doanh nghiệp của mình - giống như onboard một nhân viên mới. Cho nó biết công ty làm gì, ngành như thế nào, đối thủ là ai, tài chính ra sao. Sau đó, mọi câu hỏi bạn hỏi đều cho kết quả sát thực tế.</p>
+<p><strong>Trước khi đọc tiếp, bạn cần biết:</strong></p>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> Claude là công cụ, không phải phép màu. Kết quả phụ thuộc vào 2 thứ: thông tin bạn cung cấp và khả năng phân tích của bạn. Thông tin ít hoặc chưa chính xác sẽ dẫn đến kết quả chưa đúng. Nếu bạn chưa có nền tảng kinh doanh vững, kết quả có thể không như kỳ vọng - nhưng đừng lo, bản thân quá trình trao đổi với Claude cũng là một cách học rất tốt.</span></div>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> Bộ hướng dẫn 6 bước này là bài tập thực hành, giúp bạn hiểu quy trình hoạch định chiến lược với AI. Nó không đủ để ra một bản chiến lược hoàn chỉnh cho doanh nghiệp. Thực tế, lập chiến lược cần nhiều framework hơn, nhiều dữ liệu hơn, và nhiều vòng phản biện hơn những gì trình bày ở đây. Hãy xem đây là điểm khởi đầu, không phải đích đến.</span></div>
+<p>Tác giả sử dụng Claude gói Max và model Opus 4.6. Dùng gói khác hoặc model khác, kết quả có thể cần điều chỉnh.</p>
+<p>Mỗi ngành có mô hình kinh doanh khác nhau. Ví dụ trong tài liệu chỉ là mẫu - hãy sáng tạo theo ngành của mình, cách làm của riêng mình. Tài liệu có thể còn sai sót, mọi góp ý xin liên hệ qua Facebook (facebook.com/buitanviet), email tanviet@sepay.vn hoặc SĐT 0903 252 427.</p>
+<p>Tác giả sử dụng các khung phân tích chiến lược sau trong tài liệu:</p>
+<ul>
+<li>**SWOT / TOWS** - Điểm mạnh, yếu, cơ hội, thách thức và chiến lược tương ứng</li>
+<li>**STP** - Phân khúc, chọn mục tiêu, định vị</li>
+<li>**4P / 7P** - Chiến lược sản phẩm, giá, kênh phân phối, truyền thông</li>
+<li>**Porter's Five Forces** - Phân tích cấu trúc cạnh tranh trong ngành</li>
+<li>**PESTEL** - Phân tích môi trường kinh doanh vĩ mô</li>
+<li>**Value Chain** - Phân tích chuỗi giá trị, tìm mấu chốt thành công</li>
+<li>**BCG Matrix** - Phân loại danh mục sản phẩm</li>
+</ul>
+<p>Đây chỉ là những khung phân tích chính được nhắc đến trong tài liệu. Thực tế khi lập chiến lược, chúng ta cần nhiều công cụ và góc nhìn hơn thế. Tài liệu này là hướng dẫn cơ bản nên không thể đưa hết vào - nhưng đủ để bạn bắt đầu. Bạn không cần nhớ tên các framework - chỉ cần nói vấn đề, Claude tự chọn công cụ phù hợp.</p>
+<p>Tài liệu này được chia sẻ miễn phí, vì mục đích hỗ trợ cộng đồng doanh nhân Việt Nam. Vì một Việt Nam hùng cường.</p>
+<hr style="border-color: var(--border); margin: 20px 0;">
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(1)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(1)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-2">
+      <div class="module-header">
+        <div class="module-tag">MODULE 3</div>
+        <div class="module-title">6 bước từ dễ đến khó</div>
+      </div>
+<table>
+<tr><th>Bước</th><th>Nội dung</th></tr>
+<tr><td>**1**</td><td>**Giới thiệu doanh nghiệp cho Claude** — Upload file hoặc kể cho Claude nghe. 15-30 phút.</td></tr>
+<tr><td>**2**</td><td>**Phân tích ngành** — Hiểu ngành đang đi đâu, cơ hội và rủi ro. Claude research từ web.</td></tr>
+<tr><td>**3**</td><td>**Phân tích đối thủ** — Biết đối thủ đang chơi kiểu gì, mình thắng/thua ở đâu.</td></tr>
+<tr><td>**4**</td><td>**Rà soát sản phẩm & Nghiên cứu sản phẩm mới** — Cái nào đẩy, cái nào cắt, có nên làm cái mới không.</td></tr>
+<tr><td>**5**</td><td>**Lập chiến lược** — Xây dựng chiến lược dài hạn, trung hạn, ngắn hạn cho doanh nghiệp.</td></tr>
+<tr><td>**6**</td><td>**Lập kế hoạch tài chính** — Lượng hoá chiến lược thành con số, ra file Excel.</td></tr>
+</table>
+<div class="info-box tip">✅ <span><strong>>> MẸO:</strong> Bạn không cần làm hết 6 bước mới có giá trị. Làm bước 1-3 đã hơn 90% CEO vì hầu hết chưa bao giờ phân tích ngành và đối thủ có hệ thống. Làm bước 1-4 đã có thể tối ưu doanh thu ngay. Làm hết 6 bước thì có chiến lược và kế hoạch tài chính hoàn chỉnh.</span></div>
+<hr style="border-color: var(--border); margin: 20px 0;">
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(2)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(2)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-3">
+      <div class="module-header">
+        <div class="module-tag">MODULE 4</div>
+        <div class="module-title">CHUẨN BỊ TRƯỚC KHI BẮT ĐẦU</div>
+      </div>
+<p>Nếu bạn đã đọc Tập 1 và thiết lập xong thì bỏ qua phần này. Nếu chưa, dành 10 phút làm 4 bước dưới đây.</p>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          1. Đăng ký tài khoản
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Vào claude.ai trên trình duyệt, nhấn Sign Up - đăng ký bằng email hoặc Google.</p>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          2. Chọn gói phù hợp
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Toàn bộ tài liệu này được thực hiện với gói Max ($100/tháng). Tuy nhiên, bạn có thể bắt đầu với gói Pro ($20/tháng) trước - đủ để làm theo tài liệu này. Khi nào đạt giới hạn tin nhắn, hãy nâng lên Max.</p>
+<table>
+<tr><th>Gói</th><th>Giá</th><th>Ghi chú</th></tr>
+<tr><td>Free</td><td>$0</td><td>Giới hạn tin nhắn, chỉ dùng Sonnet. Dùng thử.</td></tr>
+<tr><td>Pro (bắt đầu ở đây)</td><td>$20/tháng</td><td>Đủ để làm theo tài liệu này. Được dùng Opus nhưng giới hạn số lượng. Khi hết lượt, nâng lên Max.</td></tr>
+<tr><td>Max</td><td>$100/tháng</td><td>Không lo hết lượt. Dùng Opus thoải mái. Nếu bạn dùng Claude cho chiến lược kinh doanh hàng ngày, $100/tháng là khoản đầu tư xứng đáng.</td></tr>
+</table>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          3. Chọn model Opus 4.6
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Khi mở cuộc trò chuyện mới, bạn sẽ thấy thanh chọn model ở góc phải ô nhập tin nhắn. Chọn Opus 4.6 - đây là model thông minh nhất của Claude, cho kết quả phân tích và chiến lược tốt nhất. Nếu tương lai có Opus phiên bản cao hơn, hãy chọn phiên bản cao nhất.</p>
+<table>
+<tr><th>Model</th><th>Đặc điểm</th><th>Dùng khi</th></tr>
+<tr><td>**Opus 4.6**</td><td>Thông minh nhất. Phân tích sâu, hiểu ngữ cảnh phức tạp</td><td>Chiến lược, phân tích, ra quyết định. Dùng cái này.</td></tr>
+<tr><td>Sonnet 4.5</td><td>Nhanh, khá thông minh</td><td>Việc đơn giản: email, tóm tắt, dịch thuật</td></tr>
+<tr><td>Haiku 4.5</td><td>Nhanh nhất, đơn giản nhất</td><td>Sửa lỗi chính tả, format văn bản</td></tr>
+</table>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          4. Cấu hình thông tin cá nhân & bật Memory
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Mục đích: Khi bạn điền thông tin cá nhân vào đây, Claude sẽ biết bạn là ai, làm gì, trình độ thế nào - trong mọi cuộc trò chuyện. Không cần giới thiệu lại mỗi lần. Claude sẽ tự điều chỉnh cách trả lời cho phù hợp với bạn.</p>
+<p>Chọn vào biểu tượng Tên bạn ở menu phía dưới bên trái > Settings > General > kéo xuống mục "What personal preferences should Claude consider in responses?"</p>
+<p>Đây là mẫu tham khảo. Hãy copy và sửa lại theo thông tin của bạn, sau đó dán vào ô "What personal preferences..." ở trên.</p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+## Thông tin về tôi
+- Tên: [Họ tên]
+- Giới tính: [Nam/Nữ]
+- Sinh năm: [Ví dụ: 1985]
+- Chức vụ: [Ví dụ: CEO, Giám đốc, Trưởng phòng...]
+
+## Công ty của tôi
+- Tên: [Tên công ty]. Website: [URL]
+- Lĩnh vực: [Ví dụ: Chuỗi trà sữa, Logistics, Phần mềm...]
+- Quy mô: [Ví dụ: 20 nhân viên, 2 chi nhánh]
+- Tình hình: [Ví dụ: Đang tăng trưởng tốt. Hoặc: Đang gặp khó khăn cạnh tranh]
+
+## Trình độ của tôi
+- Về kinh doanh: [Ví dụ: 10 năm kinh nghiệm quản lý. Hiểu chiến lược, marketing, tài chính]
+- Về kỹ thuật: [Ví dụ: Không biết lập trình. Biết Excel cơ bản]
+
+## Công việc hằng ngày
+- [Ví dụ: Điều hành công ty, họp phòng ban, lập kế hoạch]
+- [Ví dụ: Viết content Facebook, soạn email đối tác]
+
+## Ngôn ngữ
+- Luôn trả lời bằng tiếng Việt
+- Thuật ngữ chuyên ngành giữ tiếng Anh nhưng hạn chế
+
+## Phong cách
+- Trình bày đủ sâu, đừng nói chung chung
+- Thẳng thắn chỉ ra vấn đề
+- Không chắc thì nói không chắc, đừng đoán mò
+</code></pre></div></div>
+<p>Sau khi dán xong, nhớ bấm <strong>Save changes</strong> để lưu.</p>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Bật Memory
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Mục đích: Memory giúp Claude nhớ những gì bạn đã trao đổi ở các cuộc trò chuyện trước. Không có Memory, mỗi lần mở chat mới Claude sẽ quên sạch - như nói chuyện với người lạ.</p>
+<p>Vào Settings > Capabilities, kéo xuống phần Memory và bật cả 2:</p>
+<ul>
+<li>**Search and reference chats**: Claude tìm lại được nội dung từ cuộc trò chuyện cũ</li>
+<li>**Generate memory from chat history**: Claude tự động ghi nhớ thông tin quan trọng về bạn qua từng cuộc trò chuyện</li>
+</ul>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Kiểm tra Tool access
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Mục đích: Claude cần các công cụ như web search, tạo file... để tự tìm kiếm thông tin ngành, đối thủ, xu hướng thị trường ở các bước sau. Không bật thì Claude chỉ dùng được kiến thức có sẵn - có thể đã lỗi thời.</p>
+<p>Vẫn ở Settings > Capabilities, kéo xuống mục Tool access và đảm bảo đang chọn <strong>Auto</strong> (Claude tự chọn công cụ phù hợp).</p>
+<div class="info-box tip">✅ <span><strong>>> MẸO:</strong> Các bước trên chỉ cần làm 1 lần. Từ giờ mỗi cuộc trò chuyện, Claude đã biết bạn là ai, làm gì, cần gì. Không cần nhắc lại.</span></div>
+<hr style="border-color: var(--border); margin: 20px 0;">
+        </div>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(3)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(3)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-4">
+      <div class="module-header">
+        <div class="module-tag">MODULE 5</div>
+        <div class="module-title">BƯỚC 1: GIỚI THIỆU DOANH NGHIỆP CHO CLAUDE</div>
+      </div>
+<p>Đây là bước quan trọng nhất. Không có bước này, 5 bước còn lại đều cho kết quả chung chung. Giống như bạn không thể yêu cầu cố vấn tư vấn khi cố vấn chưa biết gì về công ty bạn.</p>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Cách 1: Upload file có sẵn (15 phút)
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Dành cho CEO đã có tài liệu công ty. Mở một cuộc trò chuyện mới trên Claude và upload các file có sẵn.</p>
+<div class="info-box tip">✅ <span><strong>>> MẸO:</strong> Claude đọc file rất tốt - Word, PDF, Excel, PowerPoint, thậm chí hàng trăm trang. Đặc biệt với Excel, Claude đọc từng hàng, từng cột, từng số liệu trong hàng nghìn dòng dữ liệu - không bỏ sót như người đọc lướt. Nên đừng ngại, cứ mạnh dạn upload tất cả những gì đang có về công ty lên.</span></div>
+<p>Ngoài ra, bạn nên đưa link website công ty, Claude sẽ tự vào đọc toàn bộ nội dung và tóm tắt lại. Đây là cách nhanh nhất nếu bạn chưa có file gì sẵn.</p>
+<p><strong>Bắt buộc</strong> (nếu đã upload đầy đủ file có chứa thông tin rồi thì bỏ qua):</p>
+<ul>
+<li>Công ty là gì, đang làm gì: File brochure, profile công ty, hoặc ghi link website</li>
+<li>Sản phẩm/dịch vụ: Tên, giá, kênh bán, đối tượng khách hàng. Điền được bao nhiêu thì điền, Claude sẽ hỏi thêm nếu thiếu.</li>
+<li>Khách hàng: Ai đang mua? Tại sao họ mua của bạn mà không mua của đối thủ? Họ hay khen gì, chê gì?</li>
+<li>Báo cáo tài chính: Tối thiểu năm gần nhất. Công ty nào cũng có - xin kế toán.</li>
+<li>Đối thủ: Tên + vài dòng mô tả, hoặc link website của họ. Chỉ cần tên cũng được, Claude sẽ tự tìm hiểu.</li>
+</ul>
+<p><strong>Có thì tốt:</strong></p>
+<ul>
+<li>Nhân sự, phòng ban, cấu trúc công ty</li>
+<li>Chi tiết sản phẩm: phân khúc, doanh thu, lợi nhuận từng sản phẩm</li>
+<li>Chiến lược hiện tại (nếu có file)</li>
+<li>Vấn đề đang gặp phải, đang lo lắng nhất</li>
+</ul>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Cách 2: Ngồi kể cho Claude nghe (30 phút)
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Dành cho ai không có tài liệu gì sẵn. Chủ quán, tiểu thương, freelancer, startup mới bắt đầu. Mở cuộc trò chuyện mới và kể cho Claude nghe. Không cần cấu trúc, không cần format. Kể như kể cho bạn bè nghe:</p>
+<ul>
+<li>Bạn làm gì, bán gì, khách là ai</li>
+<li>Một ngày kinh doanh của bạn như thế nào</li>
+<li>Đang gặp khó gì, đang lo gì nhất</li>
+<li>Đối thủ là ai, họ làm gì khác bạn</li>
+<li>Bạn muốn doanh nghiệp mình đi đến đâu</li>
+</ul>
+<p>Claude sẽ tự hỏi lại những gì còn thiếu. Bạn trả lời bình thường, không cần biết bất kỳ thuật ngữ nào.</p>
+<p><strong>Ví dụ hội thoại:</strong></p>
+<div class="info-box tip">✅ <span><strong>BẠN:</strong> Tôi điều hành công ty fintech cung cấp API ngân hàng cho doanh nghiệp. Website: sepay.vn. Định vị là hạ tầng Open Banking - giúp doanh nghiệp tự động xác nhận thanh toán, đối soát giao dịch. Đã kết nối hơn 10 ngân hàng lớn. Công ty hoạt động được hơn 2 năm, đang tăng trưởng nhanh. Thị trường có vài đối thủ cạnh tranh trực tiếp. Tôi cần bạn hỏi thêm để tìm hiểu về công ty tôi. Mục tiêu là bạn sẽ làm trợ lý chiến lược cho tôi và hỗ trợ công việc kinh doanh tôi hằng ngày.</span></div>
+<div class="info-box note">📌 <span> **CLAUDE:** Cảm ơn anh đã chia sẻ. Để tôi hiểu rõ hơn, cho tôi hỏi thêm: 1. Khách hàng chủ yếu là doanh nghiệp loại nào - e-commerce, SaaS, bán lẻ, hay đa ngành? 2. Mô hình thu phí: theo giao dịch, thuê bao tháng, hay kết hợp? 3. Đối thủ cạnh tranh bằng gì - giá, số lượng ngân hàng, hay tính năng? 4. Rào cản pháp lý trong ngành này hiện tại ra sao? 5. Anh có bao nhiêu người trong team? Đội kỹ thuật chiếm bao nhiêu %?  **BẠN:** Khách hàng đa dạng: e-commerce, SaaS, giáo dục, F&B - ai cần nhận thanh toán đều dùng được. Mô hình kết hợp: có gói miễn phí và gói trả phí. Đối thủ chủ yếu cạnh tranh bằng số lượng ngân hàng kết nối và giá. Rào cản pháp lý khá phức tạp vì liên quan đến dữ liệu ngân hàng. Team chuyên môn cao, kỹ thuật chiếm đa số.  **CLAUDE:** Tôi đã hiểu khá rõ. Để tôi tóm tắt lại: Anh đang vận hành công ty fintech B2B, cung cấp hạ tầng API ngân hàng. Mô hình freemium, khách đa ngành. Lợi thế là đã kết nối 10+ ngân hàng - đây là rào cản gia nhập rất lớn vì mỗi kết nối mất thời gian và quan hệ. Điểm cần lưu ý: thị trường còn mới, quy định pháp lý có thể thay đổi. Và khách đa ngành nghĩa là chưa có phân khúc rõ ràng - có thể là cơ hội hoặc rủi ro tuỳ cách anh chọn. Tôi có hiểu đúng không? Có gì cần bổ sung không?</span></div>
+<p>Bạn thấy không? Chỉ cần kể chuyện bình thường, Claude tự sắp xếp thành bức tranh có cấu trúc. Và nó hỏi lại để xác nhận - nếu sai chỗ nào, bạn chỉ nói thẳng, Claude sẽ sửa.</p>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Sau khi upload file hoặc kể xong
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Dù bạn dùng cách 1 hay cách 2, làm 2 bước tiếp theo:</p>
+<p><strong>Bước A - Kiểm tra Claude hiểu đúng chưa:</strong></p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Đọc hết thông tin tôi đã cung cấp và tóm tắt lại cho tôi: công ty tôi là gì, đang làm
+gì, điểm mạnh yếu, vị trí trong ngành.
+</code></pre></div></div>
+<p>Đọc bản tóm tắt của Claude. Sai chỗ nào? Thiếu chỗ nào? Nói thẳng. Đừng để Claude hiểu sai từ bước này vì 5 bước sau đều dựa trên nền tảng này.</p>
+<p><strong>Bước B - Để Claude hỏi thêm những gì còn thiếu:</strong></p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Còn thiếu thông tin gì để bạn tư vấn cho tôi như một cố vấn kinh doanh? Hỏi tôi đi.
+</code></pre></div></div>
+<p>Claude sẽ hỏi 5-10 câu bình thường: khách hàng chính là ai, doanh thu đến từ đâu, đang khó gì nhất... Bạn trả lời như trò chuyện đời thường. Không cần biết thuật ngữ kinh doanh.</p>
+<div class="info-box tip">✅ <span><strong>KINH NGHIỆM CỦA TÔI:</strong> </span></div>
+<div class="info-box note">📌 <span>Lần đầu tôi làm điều này cho công ty mình, tôi upload báo cáo tài chính, file chiến lược, và kể thêm về đối thủ, khách hàng. Claude tóm tắt lại, chỉ ra điểm mạnh yếu, và giúp tôi sắp xếp thứ tự ưu tiên - việc nào cần làm trước, việc nào để sau. CEO thường biết hết nhưng không biết nên tập trung vào đâu. Claude giúp phân loại và ưu tiên.  Nhiều CEO sẽ lần đầu thấy doanh nghiệp mình được mô tả rõ ràng: mình ở đâu trong chuỗi giá trị, điểm mạnh yếu là gì, đang bỏ lỡ cơ hội nào. Đây là giá trị bất ngờ của bước 1.</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Phân tích nội bộ
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Sau khi Claude đã hiểu công ty, hãy đào sâu hơn bằng prompt này:</p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Tôi muốn phân tích nội bộ công ty trước khi lập chiến lược. Hãy hỏi tôi lần lượt về:
+- Điểm mạnh cốt lõi của công ty
+- Điểm yếu lớn nhất cần khắc phục
+- Nguồn lực đang thiếu (vốn, người, công nghệ)
+- Các đối tượng liên quan (khách hàng, nhân viên, nhà cung cấp, đối tác) - tôi đang
+phục vụ họ tốt chưa
+</code></pre></div></div>
+<p>Claude sẽ hỏi từng mục, bạn trả lời. Cuối cùng Claude tổng hợp thành bức tranh nội bộ hoàn chỉnh - nền tảng để lập chiến lược ở bước 5.</p>
+<div class="info-box tip">✅ <span><strong>>> MẸO:</strong> Nhờ đã bật Memory ở phần Chuẩn bị, Claude sẽ tự nhớ thông tin công ty bạn cho các cuộc trò chuyện sau. Không cần lặp lại mỗi lần hỏi.</span></div>
+<p>Và một điều quan trọng nữa: hãy tập thói quen tâm sự với Claude hằng ngày. Bất cứ vấn đề nào cũng hỏi - khách hàng phàn nàn, đối thủ ra sản phẩm mới, nhân viên xin nghỉ, doanh thu tháng này giảm. Có kết quả kinh doanh thì cập nhật cho Claude. Càng trao đổi nhiều, Claude càng hiểu doanh nghiệp bạn sâu hơn, và trở thành cố vấn tốt hơn theo thời gian.</p>
+<hr style="border-color: var(--border); margin: 20px 0;">
+        </div>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(4)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(4)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-5">
+      <div class="module-header">
+        <div class="module-tag">MODULE 6</div>
+        <div class="module-title">BƯỚC 2: PHÂN TÍCH NGÀNH</div>
+      </div>
+<p>Mục tiêu: Hiểu ngành mình đang chơi - đang lên hay xuống, cơ hội và rủi ro từ bên ngoài. Ngành tăng trưởng 30%/năm hay đang bão hoà sẽ ảnh hưởng trực tiếp đến mọi quyết định kinh doanh của bạn.</p>
+<p>Tin tốt: bạn gần như không cần làm gì thêm. Claude đã biết công ty bạn làm gì từ Bước 1, nên nó tự biết ngành nào cần phân tích và tự research thông tin.</p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Phân tích giúp tôi ngành mà công ty tôi đang hoạt động, sử dụng PESTEL và
+Porter's Five Forces. Tôi cần hiểu:
+- Ngành này đang ở giai đoạn nào, tăng trưởng hay bão hoà?
+- Xu hướng lớn nào đang ảnh hưởng đến ngành (chính trị, kinh tế, công nghệ, pháp luật)?
+- Công ty tôi đang ở vị trí nào trong chuỗi giá trị?
+- Đối thủ mới có dễ nhảy vào không? Khách hàng và nhà cung cấp có quyền lực
+đàm phán mạnh không?
+- Có quy định pháp luật nào đang hoặc sắp ảnh hưởng?
+Output trực tiếp trong chat, chưa cần tạo file.
+</code></pre></div></div>
+<p>Claude sẽ phân tích các khía cạnh sau:</p>
+<p><strong>Tổng quan ngành:</strong> Quy mô thị trường bao nhiêu, tốc độ tăng trưởng, đang ở giai đoạn nào (mới nổi, tăng trưởng, bão hoà, hay suy thoái). Ví dụ: Open Banking tại Việt Nam đang ở giai đoạn đầu, nhu cầu rất lớn nhưng khung pháp lý chưa hoàn chỉnh.</p>
+<p><strong>Xu hướng lớn đang ảnh hưởng:</strong> Công nghệ mới, luật mới, hành vi khách hàng thay đổi, yếu tố kinh tế vĩ mô. Ví dụ: ngành bán lẻ bị ảnh hưởng bởi e-commerce, ngành tài chính bị ảnh hưởng bởi fintech và quy định mới.</p>
+<p><strong>Chuỗi giá trị:</strong> Ai ở đâu trong ngành, công ty bạn đang ở vị trí nào. Bạn là nhà sản xuất, nhà phân phối, hay bán lẻ? Ai cung cấp cho bạn? Ai là khách hàng cuối? Hiểu được vị trí của mình giúp bạn biết nên mở rộng lên hay xuống trong chuỗi.</p>
+<p><strong>Cấu trúc cạnh tranh:</strong> Đối thủ mới có dễ nhảy vào không? (rào cản gia nhập) Khách hàng có dễ chuyển sang đối thủ không? (chi phí chuyển đổi) Có sản phẩm thay thế nào không? Mức độ cạnh tranh hiện tại như thế nào?</p>
+<p><strong>Quy định pháp luật:</strong> Có luật mới nào ảnh hưởng đến ngành không? Xu hướng quản lý của nhà nước như thế nào? Đây là yếu tố nhiều CEO bỏ qua nhưng có thể thay đổi cả cục diện.</p>
+<p><strong>Ví dụ hội thoại:</strong></p>
+<div class="info-box tip">✅ <span><strong>CLAUDE:</strong> [Claude research và trả lại bản phân tích đầy đủ]</span></div>
+<div class="info-box note">📌 <span> Tổng quan: Open Banking tại Việt Nam đang ở giai đoạn đầu. Nhà nước đã có định hướng nhưng chưa có khung pháp lý chính thức. Nhu cầu thực tế rất lớn - hàng triệu doanh nghiệp vẫn đối soát thủ công.  Xu hướng: Thanh toán không tiền mặt tăng mạnh, QR code phổ biến, doanh nghiệp yêu cầu tự động hoá ngày càng cao. Ngân hàng bắt đầu mở API nhưng còn chậm và chọn lọc đối tác.  Chuỗi giá trị: Anh đang ở vị trí trung gian kết nối - phụ thuộc vào ngân hàng (upstream) và phục vụ doanh nghiệp (downstream). Lợi thế là ai kết nối được nhiều ngân hàng trước thì có moat.  Rào cản gia nhập: Cao - cần quan hệ với ngân hàng, hiểu kỹ thuật banking, và thời gian tích luỹ kết nối. Không phải startup nào cũng làm được.  **BẠN:** Phần rào cản gia nhập đúng. Nhưng tôi bổ sung: thực tế quy định pháp lý là rủi ro lớn nhất. Nhà nước có thể ra quy định mới bất cứ lúc nào - siết hoặc mở đều ảnh hưởng trực tiếp đến mô hình kinh doanh.  **CLAUDE:** Cảm ơn anh bổ sung - đây là thông tin chỉ người trong ngành mới biết. Tôi cập nhật lại:  Rủi ro pháp lý là yếu tố số 1. Điều này có nghĩa công ty cần xây dựng mô hình linh hoạt, sẵn sàng thích ứng khi quy định thay đổi. Đồng thời, phân khúc SME là sân chơi bền vững hơn - vì đây là tệp khách mà ngân hàng khó phục vụ trực tiếp do số lượng quá lớn và nhu cầu đa dạng...</span></div>
+<p>Đây là bước quan trọng nhất của phân tích ngành: bạn đọc lại và bổ sung. Bạn sống trong ngành mỗi ngày, bạn biết rõ hơn Claude. Claude có thể nói ngành đang tăng trưởng 20% nhưng thực tế bạn thấy chậm lại rồi. Hay Claude không biết một quy định địa phương. Chính những thông tin bạn bổ sung mới tạo ra bản phân tích có giá trị.</p>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> Ngành phổ biến (F&B, bán lẻ, tech) thì Claude có nhiều data, kết quả tốt. Ngành niche (sản xuất khuôn mẫu, hoá chất đặc thù) thì Claude có thể nông hoặc sai - bạn cần bổ sung nhiều hơn. Điều đó không sao - Claude vẫn giúp bạn hệ thống hoá thông tin.</span></div>
+<div class="info-box tip">✅ <span><strong>KINH NGHIỆM CỦA TÔI:</strong> </span></div>
+<div class="info-box note">📌 <span>Khi tôi phân tích ngành fintech/Open Banking tại Việt Nam, Claude research được các thông tư, quy định, xu hướng quốc tế. Nhưng thực tế vận hành khác xa lý thuyết - và những góc nhìn đó chỉ người trong ngành mới biết. Kết hợp lại mới ra bức tranh đầy đủ.</span></div>
+<hr style="border-color: var(--border); margin: 20px 0;">
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(5)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(5)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-6">
+      <div class="module-header">
+        <div class="module-tag">MODULE 7</div>
+        <div class="module-title">BƯỚC 3: PHÂN TÍCH ĐỐI THỦ</div>
+      </div>
+<p>Mục tiêu: Biết đối thủ đang chơi kiểu gì, mình đang thắng/thua ở đâu, và nên đánh vào đâu.</p>
+<p>Input: Tên đối thủ + link website + tài liệu (nếu có). Bạn đã cung cấp sơ bộ ở Bước 1.</p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Phân tích đối thủ của công ty tôi. Đối thủ chính là:
+- [Tên đối thủ A] - website: [link]
+- [Tên đối thủ B] - website: [link]
+Tôi cần biết: họ đang bán gì, cho ai, giá bao nhiêu, điểm mạnh yếu ở từng khâu
+(sản phẩm, marketing, bán hàng, hỗ trợ), và công ty tôi có thể đánh vào khoảng
+trống nào.
+</code></pre></div></div>
+<p>Claude sẽ research thông tin công khai (website, tin tức, review) và phân tích:</p>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> Claude chỉ phân tích được những gì công khai bên ngoài - website, review, tin tức. Đây chỉ là bề nổi. Trong quá trình kinh doanh, bạn hiểu đối thủ hơn ai hết: họ mạnh phân khúc nào, lợi thế cạnh tranh là gì, quy mô ra sao, đang phát triển sản phẩm gì. Hãy bổ sung những thông tin này cho Claude - càng nhiều càng tốt.</span></div>
+<ul>
+<li>Đối thủ đang bán gì, cho ai, giá bao nhiêu</li>
+<li>Điểm mạnh, điểm yếu của từng đối thủ</li>
+<li>So sánh trực tiếp với công ty bạn: thắng ở đâu, thua ở đâu</li>
+<li>Đối thủ đang đi hướng nào (từ tuyển dụng, sản phẩm mới, content họ đang đẩy)</li>
+<li>Khoảng trống chưa đối thủ nào đánh</li>
+</ul>
+<p><strong>Ví dụ hội thoại:</strong></p>
+<div class="info-box tip">✅ <span><strong>CLAUDE:</strong> [Claude research website, review, tin tức của đối thủ]</span></div>
+<div class="info-box note">📌 <span> Đối thủ A: Mạnh về mảng thanh toán, chuyên B2B, bán hàng chủ yếu qua kênh đối tác. Có thương hiệu lâu năm và mạng lưới đối tác rộng.  Đối thủ B: Tập trung làm ứng dụng cho doanh nghiệp, hướng đến trải nghiệm người dùng cuối. Không tập trung vào hạ tầng API.  So sánh với anh: Anh tập trung vào hạ tầng API - khác hẳn hướng đi của cả A và B. Nhưng chưa rõ trong nhận thức thị trường, nhiều người vẫn nhầm anh với đối thủ thanh toán trung gian...  **BẠN:** Đúng. Tôi bổ sung: điểm khác biệt lớn nhất của mình là mô hình - khách dùng trực tiếp tài khoản ngân hàng của họ, tiền không qua trung gian. Đối thủ thì tiền đi qua ví hoặc tài khoản trung gian trước khi về merchant.  **CLAUDE:** Thông tin này rất quan trọng. Cập nhật lại:  Đây là điểm khác biệt cốt lõi: tiền về trực tiếp tài khoản merchant, không qua trung gian, không phí %. Trong khi đối thủ giữ tiền rồi mới chuyển - tạo rủi ro cho merchant và tốn phí.  Khoảng trống anh có thể đánh: Phân khúc doanh nghiệp nhạy cảm với dòng tiền - cần tiền về nhanh, không muốn bị giữ. E-commerce, giáo dục, dịch vụ thuê bao - những ngành mà dòng tiền là sống còn.</span></div>
+<p>Giá trị lớn nhất của bước này: kết hợp thông tin công khai (Claude research) với kiến thức nội bộ (bạn biết). Claude không biết "đối thủ của bạn vừa thắng một hợp đồng lớn" hay "họ vừa gọi được vốn vòng 2". Nhưng bạn biết. Kết hợp cả hai mới ra bản phân tích có giá trị thực tế, không phải lý thuyết.</p>
+<div class="info-box tip">✅ <span><strong>KINH NGHIỆM CỦA TÔI:</strong> </span></div>
+<div class="info-box note">📌 <span>Khi tôi phân tích đối thủ của SePay, Claude research từ website và tin tức, cho ra bản phân tích khá đầy đủ. Nhưng khi tôi bổ sung góc nhìn người trong ngành, Claude chỉ ra một điểm yếu của đối thủ mà tôi không nhận ra. Điều đó ảnh hưởng đến chiến lược kinh doanh cả năm 2026 của tôi.</span></div>
+<hr style="border-color: var(--border); margin: 20px 0;">
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(6)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(6)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-7">
+      <div class="module-header">
+        <div class="module-tag">MODULE 8</div>
+        <div class="module-title">BƯỚC 4: RÀ SOÁT SẢN PHẨM HIỆN TẠI & NGHIÊN CỨU SẢN PHẨM MỚI</div>
+      </div>
+<p>Mục tiêu: Biết sản phẩm nào đẩy mạnh, cái nào cắt, có nên làm cái mới không.</p>
+<p>Nguyên tắc quan trọng: Rà soát cái đang có trước, tối ưu trước. Rồi mới tính cái mới. Nhiều CEO hay chạy theo cái mới trong khi sản phẩm đang có vẫn chưa khai thác hết. Hoặc có sản phẩm đang lỗ mà không biết nên cắt.</p>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Phần 1: Rà soát sản phẩm đang có (BCG Matrix)
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>BCG Matrix phân loại sản phẩm/dịch vụ của bạn thành 4 nhóm. Bạn không cần nhớ tên - chỉ cần hiểu logic:</p>
+<table>
+<tr><th></th><th>Thị phần cao</th><th>Thị phần thấp</th></tr>
+<tr><td>**Tăng trưởng cao**</td><td>**NGÔI SAO** — Đẩy mạnh đầu tư</td><td>**DẤU HỎI** — Quyết định: đầu tư hoặc cắt</td></tr>
+<tr><td>**Tăng trưởng thấp**</td><td>**BÒ SỮA** — Vắt tiền, không cần đầu tư thêm</td><td>**CHÓ** — Cân nhắc cắt bỏ</td></tr>
+</table>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Giờ phân tích nội tại công ty. Dựa trên thông tin về sản phẩm/dịch vụ của công ty
+tôi, hãy phân loại từng sản phẩm theo BCG Matrix. Cái nào là ngôi sao, bò sữa,
+dấu hỏi, chó? Cái nào nên đẩy mạnh, cái nào nên cắt?
+</code></pre></div></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Phần 2: Nghiên cứu sản phẩm/dịch vụ mới (Ansoff Matrix)
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Ansoff Matrix chỉ ra 4 hướng phát triển, từ ít rủi ro đến nhiều rủi ro:</p>
+<table>
+<tr><th></th><th>Sản phẩm hiện tại</th><th>Sản phẩm mới</th></tr>
+<tr><td>**Thị trường hiện tại**</td><td>**TĂNG THỊ PHẦN** (Ít rủi ro nhất)</td><td>**PHÁT TRIỂN SP** (Rủi ro trung bình)</td></tr>
+<tr><td>**Thị trường mới**</td><td>**MỞ RỘNG TT** (Rủi ro trung bình)</td><td>**ĐA DẠNG HOÁ** (Rủi ro cao nhất)</td></tr>
+</table>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Dựa trên phân tích ngành, đối thủ, và thực trạng công ty tôi - hãy đề xuất 3-5
+hướng phát triển. Mỗi hướng cần phân tích: thị trường tiềm năng có đủ lớn không,
+có phù hợp năng lực công ty không, cần đầu tư gì, rủi ro gì, nên làm hay không.
+</code></pre></div></div>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> CEO phải phản biện. Claude có thể đề xuất hướng nghe hay nhưng không khả thi vì bạn biết rõ nội lực. Cái nào làm được, cái nào không - chỉ bạn mới biết.</span></div>
+<div class="info-box note">📌 <span> BCG Matrix chỉ là một trong nhiều công cụ đánh giá sản phẩm. Thực tế bạn cần kết hợp thêm các framework khác để có góc nhìn đầy đủ hơn. Đây chỉ là ví dụ để bạn thực hành.</span></div>
+<div class="info-box tip">✅ <span><strong>KINH NGHIỆM CỦA TÔI:</strong> </span></div>
+<div class="info-box note">📌 <span>Tôi đã dùng Claude phân tích có nên mở rộng sang một dịch vụ hosting cao cấp cho thị trường Việt Nam. Claude phân tích từ quy mô thị trường, đối thủ, chi phí, đến pricing strategy. Kết luận: có cơ hội nhưng chưa phải thời điểm. Tiết kiệm cho tôi thời gian và có thể cả một khoản đầu tư lớn.</span></div>
+<div class="info-box tip">✅ <span><strong>>> MẸO:</strong> Đến đây, Claude đã có đủ dữ liệu về doanh nghiệp, ngành, đối thủ và sản phẩm của bạn. Bạn có thể dừng lại ở bước 4 và bắt đầu hỏi Claude bất kỳ vấn đề kinh doanh nào cần phân tích - Claude sẽ trả lời dựa trên toàn bộ dữ liệu đã thu thập.</span></div>
+<div class="info-box note">📌 <span> Bước 5 và 6 dành cho ai muốn đi tiếp: lập chiến lược và kế hoạch tài chính hoàn chỉnh.  Trước khi bắt đầu, hãy tự hỏi: "Vấn đề lớn nhất của công ty mình hiện tại là gì?" Giữ câu trả lời trong đầu - nó sẽ giúp bạn tập trung suốt 6 bước thay vì lan man.</span></div>
+<hr style="border-color: var(--border); margin: 20px 0;">
+        </div>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(7)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(7)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-8">
+      <div class="module-header">
+        <div class="module-tag">MODULE 9</div>
+        <div class="module-title">BƯỚC 5: LẬP CHIẾN LƯỢC</div>
+      </div>
+<p>Mục tiêu: Trả lời câu hỏi lớn nhất - "Công ty nên đi hướng nào?"</p>
+<p>Đến bước này Claude đã có đủ: thực trạng công ty (bước 1), ngành (bước 2), đối thủ (bước 3), sản phẩm (bước 4). Chiến lược hình thành tự nhiên từ 4 bước trước, không phải ngồi nghĩ từ trang giấy trắng.</p>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Xây dựng chiến lược dài hạn
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Sai lầm phổ biến: CEO lập kế hoạch kiểu "năm nay doanh thu 5 tỷ, năm sau cố lên 6 tỷ" - chỉ nhìn ngắn hạn, không có hướng đi dài hạn. Cách làm đúng: nhìn xa trước, rồi mới lùi về gần.</p>
+<table>
+<tr><th>Nội dung</th><th>Câu hỏi cần trả lời</th></tr>
+<tr><td>**DÀI HẠN** (Hướng đi)</td><td>Ngành sẽ đi đâu? Công ty muốn ở vị trí nào? Trong tương lai ngành này thay đổi thế nào? Mình muốn trở thành cái gì?</td></tr>
+<tr><td>**TRUNG HẠN** (Mục tiêu)</td><td>Cột mốc cần đạt để đi đúng hướng. Doanh thu, thị phần, sản phẩm cần có là gì?</td></tr>
+<tr><td>**NGẮN HẠN** (Kế hoạch)</td><td>Hành động cụ thể, con số cụ thể, KPI rõ ràng. Năm nay làm gì, ai làm, bao nhiêu tiền, đo bằng gì?</td></tr>
+</table>
+<p>Logic: dựa trên phân tích ngành (bước 2) để dự đoán tương lai, kết hợp với nguồn lực hiện tại (bước 1) để chọn hướng đi phù hợp. Không phải mơ viển vông, mà là chọn hướng thực tế dựa trên dữ liệu.</p>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Chọn phân khúc: STP
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Trước khi lập chiến lược, bạn phải trả lời: bán cho ai? Không thể bán cho tất cả mọi người. STP giúp bạn chọn:</p>
+<ul>
+<li>**Segmentation (Phân khúc):** Chia thị trường thành các nhóm khách hàng khác nhau</li>
+<li>**Targeting (Chọn mục tiêu):** Chọn phân khúc nào để tập trung, bỏ phân khúc nào</li>
+<li>**Positioning (Định vị):** Trong phân khúc đã chọn, mình khác đối thủ ở đâu</li>
+</ul>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Không dùng chung chiến lược cho mọi khách hàng
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Khi đã chọn xong phân khúc mục tiêu, sai lầm phổ biến nhất là dùng chung một cách tiếp cận cho tất cả khách hàng.</p>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> Mỗi nhóm khách hàng khác nhau cần cách tiếp cận khác nhau: sản phẩm khác, giá khác, kênh bán khác, cách truyền thông khác. Tương tự, mục tiêu và kế hoạch hành động cũng phải chia theo từng nhóm - rõ ràng, đo được.</span></div>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Dựa trên tất cả phân tích chúng ta đã làm (ngành, đối thủ, sản phẩm, thực trạng
+công ty), hãy giúp tôi xây dựng chiến lược kinh doanh. Trước tiên hãy lập
+SWOT/TOWS và phân tích STP (phân khúc, chọn mục tiêu, định vị).
+
+DÀI HẠN:
+- Ngành sẽ thay đổi thế nào? Công ty muốn ở vị trí nào?
+- Chọn phân khúc nào, bỏ phân khúc nào?
+
+TRUNG HẠN:
+- Doanh thu, khách hàng, thị phần cần đạt
+- Sản phẩm/dịch vụ cần có
+- Lợi thế cạnh tranh cần xây
+
+NGẮN HẠN (1 NĂM):
+- 3-5 việc lớn cần làm ngay
+- Mục tiêu cụ thể theo quý
+- KPI đo lường
+- Rủi ro và phương án dự phòng
+</code></pre></div></div>
+<p>Claude sẽ phân tích và đề xuất:</p>
+<ul>
+<li>**SWOT/TOWS:** Điểm mạnh, yếu, cơ hội, thách thức. Chiến lược cho từng tổ hợp (mạnh + cơ hội = tấn công, yếu + thách thức = phòng thủ).</li>
+<li>**Định vị:** Công ty bạn là gì, phục vụ ai, khác đối thủ ở đâu? Tại sao khách nên chọn bạn?</li>
+<li>**Mục tiêu cụ thể:** Doanh thu, thị phần, số khách - có con số, chia theo năm.</li>
+<li>**Chọn trận đánh:** Tập trung phân khúc nào, bỏ phân khúc nào. Không thể đánh hết - phải chọn.</li>
+<li>**Lợi thế cạnh tranh:** Đánh bằng gì - giá, chất lượng, tốc độ, thương hiệu, mạng lưới, hay công nghệ?</li>
+<li>**Xây rào cản (competitive moat):** Giữ lợi thế bằng cách nào? Công nghệ độc quyền, network effect, chi phí chuyển đổi cao, dữ liệu tích luỹ... Lợi thế đối thủ copy được trong 6 tháng không phải rào cản.</li>
+<li>**Các trụ cột chiến lược:** 3-5 việc lớn phải làm, mỗi trụ cột có action cụ thể.</li>
+<li>**Rủi ro và dự phòng:** Cái gì có thể sai? Nếu sai thì làm gì?</li>
+</ul>
+<p><strong>Ví dụ hội thoại (tiếp tục case công ty API ngân hàng):</strong></p>
+<div class="info-box tip">✅ <span><strong>CLAUDE:</strong> [Sau khi phân tích]</span></div>
+<div class="info-box note">📌 <span> Dài hạn: Open Banking sẽ phổ biến tại VN như các nước phát triển. Công ty cần trở thành hạ tầng mặc định mà doanh nghiệp nghĩ đến khi cần kết nối ngân hàng.  Trung hạn: Trở thành nền tảng API ngân hàng số 1 cho SME tại Việt Nam. Mở rộng hệ sinh thái từ xác nhận thanh toán sang quản lý dòng tiền toàn diện.  3 trụ cột năm nay: 1. Củng cố hạ tầng - thêm kết nối ngân hàng, đảm bảo uptime 99.9% 2. Xây developer community - API docs tốt, SDK, sandbox để dev tích hợp dễ 3. Tập trung phân khúc - chọn 2-3 ngành trọng điểm thay vì phục vụ tất cả  **BẠN:** Tôi đồng ý hướng lớn. Nhưng trụ cột 2 (developer community) - team tôi chưa đủ lớn, không đủ người để vừa build product vừa build community. Ưu tiên gì trước?  **CLAUDE:** Với nguồn lực hiện tại, không nên làm cả 3 cùng lúc. Ưu tiên: 1. Hạ tầng trước - đây là nền tảng, không vững thì mọi thứ khác đều sụp. Mỗi kết nối ngân hàng mới là lợi thế tích luỹ khó bắt chước. 2. Phân khúc ngay - chọn 1-2 ngành mà mình đang có khách nhiều nhất, phục vụ sâu thay vì rộng. 3. Developer community để sau - khi hạ tầng đã ổn và có phân khúc rõ, docs tốt + SDK là đủ cho giai đoạn này, chưa cần community lớn.  Nguyên tắc: nguồn lực có hạn thì phải focus - làm ít nhưng làm tốt.</span></div>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> Đây là bước hard core nhất. Claude đề xuất, nhưng CEO quyết định. Không ai hiểu doanh nghiệp bạn bằng bạn. Như ví dụ trên: Claude đề xuất đẩy mạnh delivery, nhưng CEO biết margin thấp - nên phản biện. Chính quá trình đối thoại này mới ra chiến lược tốt.</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Stress-test chiến lược
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Khi đã có bản chiến lược, đừng vội hài lòng. Hãy bắt Claude phản biện chính chiến lược đó:</p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Hãy đóng vai một nhà tư vấn chiến lược khó tính và stress-test toàn bộ chiến lược
+chúng ta vừa xây dựng:
+- Chiến lược này có thể sai ở đâu?
+- Giả định nào đang quá lạc quan?
+- Nếu đối thủ phản ứng mạnh thì sao?
+- Kịch bản xấu nhất (worst-case) là gì?
+- Nếu chỉ được giữ 1 trụ cột, bỏ hết còn lại, chọn cái nào?
+</code></pre></div></div>
+<p>Đây là bước nhiều CEO bỏ qua nhưng cực kỳ quan trọng. Chiến lược chưa được stress-test là chiến lược chưa hoàn chỉnh.</p>
+<div class="info-box tip">✅ <span><strong>KINH NGHIỆM CỦA TÔI:</strong> </span></div>
+<div class="info-box note">📌 <span>Không phải ngồi một lần ra hết chiến lược. Tôi nghĩ, hỏi Claude, phản biện, sửa, rồi hỏi tiếp. Có khi nghĩ thêm vài ngày rồi quay lại điều chỉnh. Quá trình đối thoại qua lại đó mới ra được chiến lược thực sự phù hợp.</span></div>
+<div class="info-box tip">✅ <span><strong>>> MẸO:</strong> Khi chiến lược đã hoàn chỉnh, gõ một trong các prompt sau để xuất file:</span></div>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Tổng hợp toàn bộ phân tích và chiến lược chúng ta đã làm thành 1 file Word hoàn chỉnh.
+</code></pre></div></div>
+<p>Hoặc nếu cần trình bày cho đội ngũ/ban lãnh đạo:</p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Tạo file PowerPoint trình bày chiến lược. Tóm tắt từ phân tích ngành, đối thủ,
+SWOT đến chiến lược và KPI.
+</code></pre></div></div>
+<hr style="border-color: var(--border); margin: 20px 0;">
+        </div>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(8)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(8)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-9">
+      <div class="module-header">
+        <div class="module-tag">MODULE 10</div>
+        <div class="module-title">BƯỚC 6: LẬP KẾ HOẠCH TÀI CHÍNH</div>
+      </div>
+<p>Mục tiêu: Lượng hoá chiến lược thành con số. Chiến lược nói "tăng doanh thu 50%" - kế hoạch tài chính trả lời "bằng cách nào, bao nhiêu tiền, từ đâu ra, mỗi tháng cần đạt bao nhiêu."</p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Dựa trên chiến lược chúng ta vừa xây dựng, hãy giúp tôi lập kế hoạch tài chính chi tiết:
+- Kế hoạch doanh thu: chia theo sản phẩm, kênh bán, theo từng quý
+- Kế hoạch chi phí: nhân sự, marketing, vận hành, đầu tư mới
+- Lợi nhuận dự kiến theo tháng và quý
+- KPI cần theo dõi hàng tháng để biết đang đúng hướng hay lệch
+</code></pre></div></div>
+<p>Claude sẽ tạo:</p>
+<p><strong>Kế hoạch doanh thu:</strong> Chia theo sản phẩm/dịch vụ, theo kênh bán, theo quý. Mỗi con số có logic: dựa trên khách hiện tại, tỷ lệ gia hạn, khách mới dự kiến. Không phải "đặt 500 triệu vì thích" mà là "500 triệu = 300 triệu khách cũ + 200 triệu khách mới x tỷ lệ chuyển đổi Y%."</p>
+<p><strong>Kế hoạch chi phí:</strong> Nhân sự, marketing, vận hành, đầu tư mới. Tách cố định (mặt bằng, lương) và biến đổi (nguyên liệu, quảng cáo). Để bạn biết: doanh thu giảm 30% thì vẫn sống được bao lâu.</p>
+<p><strong>Lợi nhuận dự kiến:</strong> Theo tháng và quý. Margin từng sản phẩm/dịch vụ. Để biết cái nào đang nuôi cái nào.</p>
+<p><strong>KPI theo dõi:</strong> Mỗi tháng cần đạt gì để biết đang đúng hướng. Ví dụ: số khách mới, doanh thu trung bình/khách, tỷ lệ khách quay lại, chi phí marketing/khách mới.</p>
+<p><strong>Ví dụ hội thoại:</strong></p>
+<div class="info-box tip">✅ <span><strong>BẠN:</strong> Lập kế hoạch tài chính cho công ty API ngân hàng của tôi, dựa trên chiến lược vừa bàn.</span></div>
+<div class="info-box note">📌 <span> **CLAUDE:** Dựa trên chiến lược: củng cố hạ tầng, phân khúc rõ, tối ưu nguồn lực.  Cấu trúc doanh thu cần theo dõi: - Doanh thu recurring (thuê bao) vs doanh thu theo giao dịch - ARPU theo phân khúc khách hàng - Chi phí vận hành hạ tầng (server, API ngân hàng) - Chi phí phát triển sản phẩm (team dev)  KPI theo dõi hàng tháng: - Số khách mới vs khách mất - Số giao dịch xử lý (volume) - Uptime hệ thống - Chi phí có khách mới (CAC) - Lifetime value (LTV) theo phân khúc  **BẠN:** Hợp lý. Bạn tạo giúp tôi file Excel để theo dõi hàng tháng được không?  **CLAUDE:** Được, tôi sẽ tạo file Excel với các sheet: 1. Dashboard tổng quan - doanh thu, chi phí, lợi nhuận theo tháng 2. Chi tiết doanh thu - chia theo phân khúc khách hàng và loại phí 3. KPI tracking - so sánh kế hoạch vs thực tế 4. Unit economics - CAC, LTV, LTV/CAC ratio theo phân khúc  Bạn chỉ cần điền số liệu thực tế mỗi tháng, file sẽ tự động tính toán và so sánh với kế hoạch.</span></div>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> Claude tính toán dựa trên giả định. Bạn phải kiểm tra giả định có thực tế không. Ví dụ Claude giả định tỷ lệ khách quay lại là 40% nhưng thực tế chỉ 20%. Luôn hỏi: "Giả định này dựa trên cơ sở nào?"</span></div>
+<p>Và trước khi làm bước này: nếu bạn chưa có báo cáo tài chính (chưa upload ở Bước 1), hãy xin kế toán trước. Không có số liệu thật thì kế hoạch tài chính chỉ là ước đoán.</p>
+<p>Đừng quên hỏi kịch bản xấu:</p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Hãy đưa ra kịch bản xấu nhất (worst-case) cho kế hoạch tài chính này:
+- Nếu churn tăng gấp đôi thì sao?
+- Nếu chi phí marketing không ra lead thì sao?
+- Nếu Q2 doanh thu giảm thay vì tăng thì cắt gì trước?
+- Mức cash reserve tối thiểu cần có để sống sót 3 tháng xấu liên tiếp là bao nhiêu?
+</code></pre></div></div>
+<div class="info-box tip">✅ <span><strong>KINH NGHIỆM CỦA TÔI:</strong> </span></div>
+<div class="info-box note">📌 <span>Kế hoạch tài chính không phải làm một lần là xong. Tôi liên tục cập nhật và điều chỉnh dựa trên số liệu thực tế hàng tháng. Claude giúp tôi tạo cấu trúc file Excel, thiết lập công thức, và mỗi khi cần điều chỉnh kế hoạch, tôi chỉ cần đưa số liệu mới và Claude phân tích chênh lệch giữa kế hoạch và thực tế.</span></div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          Triển khai xuống phòng ban
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p>Khi chiến lược và kế hoạch tài chính đã chốt, bước tiếp theo là chia xuống từng phòng ban:</p>
+<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Prompt / Code</span></div><div class="cmd-body"><pre><code>
+GÕ VÀO CLAUDE:
+Dựa trên chiến lược và kế hoạch tài chính đã chốt, hãy:
+1. Chia mục tiêu xuống từng phòng ban (sản phẩm, kinh doanh, marketing, kế toán)
+2. Mỗi phòng ban: mục tiêu gì, cách làm gì, KPI đo lường gì
+3. Tạo bảng kế hoạch hành động theo quý: Q1 làm gì, Q2 làm gì...
+4. Mỗi hành động cần có: người phụ trách, thời gian bắt đầu - kết thúc, điểm kiểm soát
+</code></pre></div></div>
+<p>Sau đó gõ: "Tạo file Excel bảng kế hoạch hành động cho từng phòng ban." Gửi cho trưởng phòng ban, để họ bổ sung cách làm chi tiết - vì cách làm là phần nhân viên đề xuất, CEO chỉ xác nhận mục tiêu.</p>
+<hr style="border-color: var(--border); margin: 20px 0;">
+        </div>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(9)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(9)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-10">
+      <div class="module-header">
+        <div class="module-tag">MODULE 11</div>
+        <div class="module-title">TỔNG KẾT</div>
+      </div>
+<table>
+<tr><th>Bước</th><th>Nội dung</th><th>Độ khó</th><th>Thời gian</th></tr>
+<tr><td>1</td><td>Giới thiệu doanh nghiệp</td><td>Dễ</td><td>15-30 phút</td></tr>
+<tr><td>2</td><td>Phân tích ngành</td><td>Dễ</td><td>1-2 ngày</td></tr>
+<tr><td>3</td><td>Phân tích đối thủ</td><td>Dễ</td><td>1-2 ngày</td></tr>
+<tr><td>4</td><td>Rà soát SP & SP mới</td><td>Trung bình</td><td>Vài ngày</td></tr>
+<tr><td>5</td><td>Lập chiến lược</td><td>Nâng cao</td><td>1-2 tuần</td></tr>
+<tr><td>6</td><td>Kế hoạch tài chính</td><td>Nâng cao</td><td>1 tuần</td></tr>
+</table>
+<p><strong>Làm xong 6 bước, bạn có:</strong></p>
+<ul>
+<li>Claude hiểu doanh nghiệp bạn (bước 1)</li>
+<li>Hiểu ngành đang đi đâu (bước 2)</li>
+<li>Biết đối thủ đang chơi kiểu gì (bước 3)</li>
+<li>Biết sản phẩm nào đẩy, nào cắt, nào mới (bước 4)</li>
+<li>Chiến lược rõ ràng (bước 5)</li>
+<li>Kế hoạch tài chính cụ thể (bước 6)</li>
+</ul>
+<p>Mỗi bước output trở thành input cho bước tiếp theo. Bạn không nhảy thẳng vào lập chiến lược từ trang giấy trắng - mà đi từ hiểu mình, hiểu ngành, hiểu đối thủ, rồi chiến lược tự nhiên hình thành.</p>
+<div class="info-box tip">✅ <span><strong>>> MẸO:</strong> Nhớ: không cần làm hết 6 bước. Làm bước 1-3 đã hơn 90% CEO rồi. Mỗi bước đều có giá trị riêng. Leo núi không cần lên đỉnh mới có view đẹp - mỗi chặng đều có view riêng.</span></div>
+<p>Và điều quan trọng nhất tôi học được sau nhiều tháng làm việc với Claude:</p>
+<p><strong>Output tốt nhất của Claude không phải văn bản nó tạo ra. Mà là suy nghĩ nó kích hoạt trong đầu bạn. Claude không thay thế CEO ra quyết định. Nó giúp CEO ra quyết định nhanh hơn, có hệ thống hơn, và tự tin hơn.</strong></p>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> Nhắc lại: 6 bước trong tài liệu này là bài tập thực hành để bạn làm quen với quy trình. Chiến lược thực sự cần nhiều hơn thế - nhiều framework hơn, nhiều dữ liệu hơn, nhiều vòng phản biện hơn. Đừng dùng kết quả từ bài tập này làm chiến lược chính thức mà không kiểm chứng và bổ sung thêm.</span></div>
+<div class="info-box tip">✅ <span><strong>>> MẸO:</strong> Upload chính file PDF này lên Claude, rồi nói: "Hướng dẫn tôi làm theo từng bước trong tài liệu này." Claude sẽ đọc toàn bộ tài liệu, dẫn bạn đi từng bước, hỏi thông tin khi cần, và đảm bảo bạn không bỏ sót bước nào.</span></div>
+<hr style="border-color: var(--border); margin: 20px 0;">
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(10)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(10)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-11">
+      <div class="module-header">
+        <div class="module-tag">MODULE 12</div>
+        <div class="module-title">PHỤ LỤC: CÀI ĐẶT SKILL HOẠCH ĐỊNH CHIẾN LƯỢC</div>
+      </div>
+<p>Kèm theo tài liệu này là một Skill - bộ kiến thức chuyên môn giúp Claude phân tích và lập chiến lược bài bản hơn. Khi cài Skill này, Claude sẽ tự động áp dụng các framework phù hợp khi bạn hỏi về chiến lược, phân tích ngành, hay lập kế hoạch.</p>
+<p><strong>Các framework có trong Skill:</strong></p>
+<ul>
+<li>**PESTEL** - Phân tích môi trường kinh doanh (chính trị, kinh tế, xã hội, công nghệ, môi trường, pháp luật)</li>
+<li>**Porter's Five Forces** - Phân tích cấu trúc cạnh tranh trong ngành</li>
+<li>**Value Chain Analysis** - Phân tích chuỗi giá trị</li>
+<li>**BCG Matrix** - Phân loại và rà soát sản phẩm</li>
+<li>**SWOT / TOWS** - Phân tích điểm mạnh, yếu, cơ hội, thách thức và chiến lược tương ứng</li>
+<li>**STP** - Phân khúc, lựa chọn thị trường mục tiêu, định vị</li>
+</ul>
+<p>Bạn không cần biết các framework này. Khi cài Skill, Claude tự biết lúc nào nên dùng framework nào. Bạn chỉ cần nói vấn đề, Claude tự chọn công cụ phân tích phù hợp.</p>
+<p><strong>Cách cài đặt:</strong></p>
+<p>1. Tải file Skill tại: https://drive.google.com/file/d/1VYgfkzUs8TEFgaKAYr_hBvTEsHhdtekO</p>
+<p>2. Mở Claude > Project của bạn > Settings</p>
+<p>3. Ở mục "Custom Instructions" hoặc "Skills", upload file Skill</p>
+<p>4. Xong. Từ giờ Claude sẽ tự động áp dụng khi phân tích chiến lược.</p>
+<div class="info-box warn">⚠️ <span><strong>LƯU Ý:</strong> Skill này chỉ là ví dụ minh hoạ để bạn hiểu cách dùng Skill trong việc hoạch định chiến lược. Các framework trong đây là cơ bản, không đủ để lập chiến lược hoàn chỉnh cho mọi ngành. Thực tế, bạn cần tự build Skill phù hợp với ngành và mô hình kinh doanh của mình - bổ sung thêm framework, kiến thức chuyên ngành, quy trình riêng. Đừng dùng nguyên Skill này rồi tin hoàn toàn kết quả.</span></div>
+<div class="info-box tip">✅ <span><strong>>> MẸO:</strong> Skill này hoạt động tốt nhất khi kết hợp với dữ liệu doanh nghiệp ở Bước 1. Framework không có dữ liệu thì chỉ là lý thuyết. Dữ liệu không có framework thì chỉ là con số rời rạc. Kết hợp cả hai mới ra chiến lược có giá trị.</span></div>
+<hr style="border-color: var(--border); margin: 20px 0;">
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(11)">← Phần trước</button>
+        <button class="nav-btn primary" onclick="goNext(11)">Phần tiếp theo →</button>
+      </div>
+    </div>
+    <div class="module " id="module-12">
+      <div class="module-header">
+        <div class="module-tag">MODULE 13</div>
+        <div class="module-title">VỀ TÁC GIẢ</div>
+      </div>
+<p><strong>Bùi Tấn Việt</strong></p>
+<p>Founder SePay - Hạ tầng Open Banking cho doanh nghiệp Việt</p>
+<p>13+ năm khởi nghiệp và điều hành doanh nghiệp. Hiện đang ứng dụng Claude AI vào mọi khía cạnh điều hành - từ hoạch định chiến lược, phân tích thị trường, ra quyết định, đến viết content và xây dựng quy trình nội bộ.</p>
+<p>Tài liệu này được viết dựa trên kinh nghiệm thực tế sử dụng Claude AI tại SePay và 123HOST. Mọi ví dụ, mọi hội thoại mẫu đều dựa trên những cuộc trò chuyện thật giữa tác giả và Claude.</p>
+<p><strong>Liên hệ tác giả:</strong></p>
+<ul>
+<li>Facebook: facebook.com/buitanviet</li>
+<li>Email: tanviet@sepay.vn</li>
+<li>SĐT: 0903 252 427</li>
+</ul>
+<hr style="border-color: var(--border); margin: 20px 0;">
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          SePay
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p><strong>Tầm nhìn Open Banking tại Việt Nam</strong></p>
+<p>SePay cung cấp hạ tầng Open Banking - kết nối trực tiếp doanh nghiệp với hơn 10 ngân hàng lớn qua API. Xác nhận thanh toán tự động, đối soát realtime, tiền về thẳng tài khoản ngân hàng doanh nghiệp. Mục tiêu: giúp doanh nghiệp Việt Nam vận hành dòng tiền hiệu quả hơn bằng công nghệ.</p>
+<p>Hiện đang phục vụ hàng nghìn doanh nghiệp từ startup đến tập đoàn.</p>
+<p>Website: sepay.vn</p>
+<hr style="border-color: var(--border); margin: 20px 0;">
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">📖</div>
+          123HOST
+          <span class="section-toggle">▼ Mở rộng</span>
+        </div>
+        <div class="section-content">
+<p><strong>Hạ tầng số cho doanh nghiệp Việt</strong></p>
+<p>Từ năm 2012, 123HOST cung cấp nền tảng lưu trữ và hạ tầng internet cho hàng nghìn doanh nghiệp và cá nhân tại Việt Nam: Web Hosting, Cloud VPS, Tên miền, Email Doanh Nghiệp, Dedicated Server. Cam kết uptime 99.9%, hỗ trợ kỹ thuật 24/7.</p>
+<p>Website: 123host.vn</p>
+        </div>
+      </div>
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(12)">← Phần trước</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showModule(idx, el) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('module-' + idx).classList.add('active');
+  if(el) el.classList.add('active');
+  else {
+    const navs = document.querySelectorAll('.nav-item');
+    if(navs[idx]) navs[idx].classList.add('active');
+  }
+  window.scrollTo(0, 0);
+}
+function goNext(idx) {
+  showModule(idx + 1, null);
+}
+function goPrev(idx) {
+  showModule(idx - 1, null);
+}
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    toggle.textContent = '▼ Thu gọn';
+  } else {
+    content.style.display = 'none';
+    toggle.textContent = '▶ Mở rộng';
+  }
+}
+</script>
+
+</body>
+</html>

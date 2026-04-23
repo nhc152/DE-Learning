@@ -1,0 +1,627 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week04_Pipeline_Design.html`.
+
+Week04 là tuần cực kỳ quan trọng vì nó chuyển người học từ mindset “viết script chạy được” sang mindset **thiết kế hệ thống pipeline đáng tin cậy**. Trọng tâm gồm: DAG thinking, idempotency, retries, failure handling, monitoring, data contracts, SLA/SLO/SLI. Đây là nền để học Airflow, Spark, orchestration sau này.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text id="w4build"
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week04_Pipeline_Design.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 4 – Pipeline Design & Tư Duy Data Engineer
+
+Allowed sources only:
+- ./Week04_Pipeline_Design.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 04 CORE MISSION:
+This file must teach how to design reliable data pipelines, not just write scripts.
+
+The learner should understand:
+- pipeline là gì trong thế giới DE
+- DAG thinking
+- dependency management
+- idempotency
+- retry / timeout / failure handling
+- monitoring mindset
+- data contracts
+- SLA / SLO / SLI basics
+- how to design a pipeline that survives real production issues
+
+This tutorial must feel stronger than common “ETL overview” content.
+
+MANDATORY MODULES:
+- W4.01 – Tổng Quan & Pipeline là gì?
+- W4.02 – DAG: Directed Acyclic Graph Thinking
+- W4.03 – Idempotency & Reliability
+- W4.04 – Failure Handling & Retry Patterns
+- W4.05 – Monitoring & Data Contracts
+- W4.06 – SLA, SLO, SLI cho Data Pipeline
+- W4.07 – Artifact: week4_pipeline_design/
+- W4.08 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W4.01
+- what is a data pipeline
+- source → transform → destination
+- batch vs streaming mention (light intro)
+- pipeline components
+- why pipelines fail in real life
+- script vs pipeline mindset
+- why design matters more than code volume
+- examples:
+  - API to DB
+  - CSV to warehouse
+  - daily KPI refresh
+- week outcomes checklist
+
+W4.02
+- DAG meaning
+- node = task
+- edge = dependency
+- acyclic requirement
+- why cycles are dangerous
+- sequential vs parallel tasks
+- fan-in / fan-out
+- dependency planning
+- critical path concept
+- examples:
+  - extract → clean → validate → load → report
+- anti-pattern:
+  - giant monolithic task
+  - hidden dependencies
+
+W4.03
+- what is idempotency
+- same run multiple times = same correct result
+- why retries need idempotency
+- truncate+reload vs merge vs partition overwrite
+- checkpoint / watermark basics
+- rerun yesterday safely
+- duplicate prevention
+- deterministic outputs
+- anti-pattern:
+  - append blindly every rerun
+  - partial writes without rollback
+
+W4.04
+- common failure types:
+  - network
+  - timeout
+  - bad data
+  - downstream unavailable
+  - disk full
+- retryable vs non-retryable errors
+- retry with backoff
+- timeout strategy
+- dead-letter / quarantine concept
+- alerting on repeated failures
+- graceful failure design
+- anti-pattern:
+  - infinite retries
+  - swallowing exceptions
+  - no timeout
+
+W4.05
+- why monitoring matters
+- pipeline health metrics
+- runtime
+- rows processed
+- freshness
+- success/failure counts
+- anomaly signals
+- logging vs metrics vs alerts
+- data contracts meaning
+- schema expectations
+- upstream/downstream ownership
+- fail fast when contract breaks
+- examples of simple data contract checks
+
+W4.06
+- SLA vs SLO vs SLI in simple language
+- examples for daily pipeline
+- freshness SLA
+- success rate SLO
+- runtime SLI
+- choosing realistic targets
+- trade-off reliability vs cost
+- stakeholder communication
+- anti-pattern:
+  - fake 100% promises
+  - measuring nothing
+
+W4.07
+- build realistic portfolio artifact:
+  week4_pipeline_design/
+  ├── architecture.md
+  ├── dag_design.md
+  ├── runbook.md
+  ├── monitoring_spec.md
+  ├── retry_policy.md
+  └── README.md
+- include sample diagrams in markdown form if useful
+- explain each file clearly
+- README must explain:
+  - pipeline goal
+  - dependencies
+  - failure scenarios
+  - monitoring plan
+  - SLA targets
+  - lessons learned
+- must feel portfolio-ready
+
+W4.08
+- final mini test: 20 questions
+- cover:
+  - pipeline basics
+  - DAG
+  - idempotency
+  - failure handling
+  - monitoring
+  - SLA/SLO/SLI
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- pipeline design tasks
+- dependency mapping tasks
+- failure scenario tasks
+- monitoring design tasks
+- SLA definition tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every example should be believable
+- avoid shallow theory-only explanations
+- focus on reasoning and production decision-making
+- do not depend on specific orchestration tool yet unless helpful as example
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- generic ETL buzzwords
+- filler text
+- vague advice
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week04 scope you are using from roadmap
+2. Which format rules you inherit from Week00
+3. Which assumptions you are making for sample pipelines and scenarios
+
+Then output the full final content for:
+./Week04_Pipeline_Design.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text id="w4review"
+Use project rules from .claude.
+
+Review ./Week04_Pipeline_Design.html as a senior Data Engineering architecture reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- teaching quality
+- production realism
+- system design usefulness
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week04 teaches pipeline thinking for Data Engineers, not generic workflow theory.
+Check relevance of:
+- DAG reasoning
+- idempotency
+- retries
+- dependency design
+- observability
+- data contracts
+- SLA communication
+- production readiness
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- reruns after failure
+- duplicate prevention
+- partial failure scenarios
+- timeout strategy
+- retryable vs fatal errors
+- freshness monitoring
+- ownership boundaries
+- contract breaks
+- realistic SLA expectations
+- runbook thinking
+
+D. SYSTEM DESIGN QUALITY
+Review whether explanations are strong enough for:
+- task decomposition
+- fan-in / fan-out
+- bottlenecks
+- critical path
+- metrics selection
+- alert fatigue avoidance
+- balancing reliability vs cost
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W4.07 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- backfill strategy
+- manual rerun process
+- ownership matrix
+- incident response basics
+- runbook usefulness
+- dependency visualization clarity
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week04 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text id="w4patch"
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week04_Pipeline_Design.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week04 becomes a high-value, portfolio-grade Pipeline Design tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week04_Pipeline_Design.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- system design depth
+- teaching clarity
+- production realism
+- reliability mindset
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+Ran command: `python dump_html.py Week04_Pipeline_Design.html Week04_text.txt`
+Viewed Week04_text.txt:1-800
+Viewed Week04_text.txt:801-917
+
+# Week04 Review Report
+
+## 1. Executive Summary
+- **score /10:** 9.7/10
+- **strongest parts:** Sự chuyển giao logic cực kỳ xuất sắc từ kỹ năng SQL/Python thuần túy sang **System Design** (SLA, DLQ, Watermark Incremental, Idempotency). Kỹ thuật dùng SQL CTE để giải thích cấu trúc lưới DAG là một masterclass về sư phạm.
+- **biggest weaknesses:** Yêu cầu học viên nộp Artifact chứa "DAG bằng Mermaid", "Runbook" và "Ownership Matrix" nhưng lại quên không cung cấp Template/Code mẫu cho các công cụ này ở file bài học.
+- **priority level:** High ROI (Việc đắp thêm các Markdown template này cực kỳ dễ nhưng lại nâng giá trị Portfolio của Artifact lên mức Senior DE/Tech Lead).
+
+## 2. What Already Strong
+- **Conceptual Grounding:** Cách dùng từ khóa của dân chuyên: Cụ thể hóa bài toán Idempotency bằng code `DELETE + INSERT` (Transaction) và `ON CONFLICT / MERGE`. Rất ít tutorial trên mạng mô phỏng chính xác logic này trên 2 Engine DB (PostgreSQL vs Oracle) cùng lúc.
+- **Advanced Load Strategies:** Áp dụng khái niệm **Watermark với Buffer time** (trừ hao 10 phút để vớt late-arriving data) là kiến thức đặc tả của môi trường Production thực tế.
+- **Modern DE Culture:** Đưa `Data Contract` (YAML schema) và khái niệm SLI/SLO vào Week 4 là một bước đi cực kì cập nhật với xu hướng data hiện đại.
+- **Monitoring Mindset:** Check sự sụt giảm Volume dựa theo "7-day average" thay vì "Hard Threshold" giúp giải quyết được ngay bài toán False Alarm trong ngày nghỉ cuối tuần.
+
+## 3. Critical Gaps
+- **Thiếu Mermaid Code (W4.02):** Module liệt kê việc dùng Mermaid để vẽ DAG, nhưng lại thiếu Snippet code ` ```mermaid ` mẫu. Học viên sẽ bối rối khi chuyển hóa kiến thức vào Github README.
+- **Thiếu Runbook và Ownership Matrix (W4.05 & W4.07):** Ở W4.08 có yêu cầu "Làm Runbook và Matrix" cho bài tập cuối khóa, thế nhưng nội dung bài học không hề có khung mẫu (Template) quy định Runbook gồm những phần gì (Symptom, Diagnosis, Resolution) hay Ownership Matrix trông ra sao.
+- **Chưa rào bẫy Timezone (W4.04):** Watermark incremental rely 100% vào `NOW()` và `MAX(loaded_at)`, nhưng lại quên nhắc tới rủi ro chết người ở Production là sự sai lệch Timezone giữa Server và Database.
+
+## 4. Module-by-Module Improvements
+- **W4.02 DAG:** Bổ sung ngay một đoạn code block ngôn ngữ Mermaid vẽ ra biểu đồ mũi tên để học viên copy-paste và điều chỉnh cho Artifact.
+- **W4.04 Load Strategy:** Phải có một Info Box rào chắn (Cảnh báo Red/Danger): Khi dùng Watermark Incremental, bắt buộc phải ép về chuẩn UTC (`NOW() AT TIME ZONE 'UTC'`) để không bị lọt data khi Server chuyển giờ mùa hè.
+- **W4.05 Failure Handling:** Bổ sung một block Markdown "Runbook Template" cơ bản, giả lập cách viết tài liệu hướng dẫn xử lý sự cố.
+- **W4.07 SLA & Contracts:** Bổ sung "Ownership Matrix" example table (Cột: Domain, Primary DE Owner, Secondary DE Owner, Kênh Slack cảnh báo).
+
+## 5. Production Upgrades Recommended
+- **Tham số hóa Backfill:** Strategy Backfill được nhắc đến, nhưng Claude nên bổ sung giải thích ngắn về việc Backfill yêu cầu mã nguồn phải "Parameterized" (Truyền tham số biến `:start_date`, `:end_date` vào thay vì hardcode ngày `2024-01-15`) để tạo thành vòng lặp xử lý lại quá khứ tự động.
+- **Alert Fatigue (Nhiễu loạn cảnh báo):** Nhấn mạnh thêm ở W4.06 về state `WARN`, giải thích cho người học biết nếu còi báo động Alert kêu liên tục cho các lỗi vặt không cần xử lý, team DE sẽ bị hội chứng "cậu bé chăn cừu" và phớt lờ cả lỗi thật.
+
+## 6. Teaching Upgrades Recommended
+- Tách bạch thêm 1 ý nhỏ trong phần DAG để hệ thống hóa kiến thức cao cấp hơn: **Task Dependency** (Chạy task A xong mới được kích API chạy Task B) KHÁC VỚI **Data Dependency** (Task B yêu cầu chính xác Output file/table của Task A chuyển xuống).
+
+## 7. Portfolio Value Assessment
+- **Không Thế Thay Thế.** Thiết kế file `week4_pipeline_design.md` đóng vai trò như một bản **System Design Document** hoàn chỉnh mà các Staff/Senior DE cung cấp trong buổi Tech Design Review hằng tuần hoặc Interview.
+
+## 8. Top 10 Immediate Patches
+1. Thêm Mermaid syntax mẫu vào W4.02.
+2. Cung cấp Markdown Template cho Runbook tại W4.05.
+3. Vẽ Ownership Matrix Table tại W4.07.
+4. Gắn Warning về quy chuẩn Timezone (UTC) trong phần Incremental Load W4.04.
+5. Giải thích Backfill Parameterization (Truyền tham số ngày).
+6. Viết 1 dòng về Alert Fatigue ở W4.06.
+7. Giải thích Task Dependency vs Data Dependency.
+8. Giữ nguyên bộ Quiz cực kỳ sâu sắc và chất lượng này.
+9. Rà soát chuẩn hóa tên Bảng `pipeline.dead_letter_queue` (tự định nghĩa Schema `pipeline` rõ ràng để học viên không hỏi).
+10. Nhấn mạnh việc Push Markdown File này lên Git là điều kiện bắt buộc để có Portfolio.
+
+## 9. Final Verdict
+- **patch lightly** (Chỉ cần lấp các khoảng trống về Templates ở W4.05 và W4.07, thêm Mermaid và UTC warning. Khung lý thuyết hiện tại đang là một trong những tài liệu Data Architecture Engineering chuẩn chỉ nhất bằng Tiếng Việt).
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade scenarios and examples where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen script vs pipeline mindset
+- improve DAG examples and dependency clarity
+- improve idempotency realism
+- improve retry / timeout strategy nuance
+- improve monitoring metrics quality
+- improve data contract explanation
+- improve SLA/SLO/SLI examples
+- strengthen W4.07 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week04_Pipeline_Design.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text id="w4finalreview"
+Review the patched ./Week04_Pipeline_Design.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text id="w4qa"
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week04_Pipeline_Design.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- examples still feel coherent and realistic
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week04_Pipeline_Design.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week04
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo riêng cho Week04
+
+Week04 rất dễ bị viết thành lý thuyết khô khan.
+Bạn nên thêm 1 dòng này vào prompt build hoặc patch:
+
+```text id="w4tip"
+Do not turn Week04 into a generic ETL theory page.
+Teach pipeline design as practical decision-making under failure, retries, dependencies, monitoring, and real production constraints.
+```
+
+Nếu bạn muốn, mình có thể tiếp tục viết ngay **full bộ prompt cho Week05_Dimensional_Modeling.html**.

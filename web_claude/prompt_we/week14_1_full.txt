@@ -1,0 +1,567 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week14_Data_Warehouse.html`.
+
+Week14 là tuần hệ thống hóa toàn bộ tư duy **Data Warehouse architecture**. Đây là lúc người học ghép các mảnh trước đó (SQL, modeling, facts, dbt, orchestration, quality) thành một hệ thống hoàn chỉnh: ingestion → staging → transform → serving → governance. Nếu học tốt tuần này, bạn sẽ bắt đầu “nhìn hệ thống” thay vì chỉ nhìn từng tool.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text id="w14build"
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+- SQL policy:
+  - Khi phù hợp phải hỗ trợ cả PostgreSQL và Oracle SQL
+  - Nếu khác cú pháp, hiển thị cả 2 version
+  - Dùng tab buttons:
+    [PostgreSQL] [Oracle SQL]
+  - Không dùng plain heading text để so sánh syntax
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week14_Data_Warehouse.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 14 – Data Warehouse Architecture cho Data Engineer
+
+Allowed sources only:
+- ./Week14_Data_Warehouse.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 14 CORE MISSION:
+This file must teach how a real data warehouse system is designed and operated, not just define warehouse terminology.
+
+The learner should understand:
+- warehouse solves what business problems
+- end-to-end architecture layers
+- ingestion → staging → transform → serving
+- data marts and semantic consumption
+- batch vs near real-time trade-offs
+- governance, lineage, quality, security
+- cost/performance optimization
+- modern warehouse patterns
+- how to design recruiter-grade warehouse architecture artifacts
+
+This tutorial must feel stronger than common theory-only warehouse content.
+
+MANDATORY MODULES:
+- W14.01 – Tổng Quan: Warehouse là gì và vì sao tồn tại?
+- W14.02 – End-to-End Warehouse Architecture
+- W14.03 – Staging, Core, Marts & Serving Layers
+- W14.04 – Batch vs Near Real-Time Design Trade-offs
+- W14.05 – Governance, Security, Quality & Lineage
+- W14.06 – Performance, Cost & Scalability
+- W14.07 – Artifact: week14_warehouse_architecture/
+- W14.08 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W14.01
+- why BI/reporting on raw OLTP systems is painful
+- single source of truth concept
+- historical analysis need
+- cross-system integration
+- consistent metrics
+- self-service analytics goal
+- warehouse vs database vs lake (light comparison)
+- week outcomes checklist
+
+W14.02
+- common architecture flow:
+  sources -> ingestion -> raw/staging -> transform -> warehouse -> BI/tools
+- source systems:
+  apps, ERP, CRM, APIs, files
+- batch ingestion
+- CDC intro
+- orchestration role
+- metadata/control tables
+- monitoring layer
+- examples of realistic enterprise architecture
+
+W14.03
+- staging layer purpose
+- raw fidelity vs cleaned data
+- core/business layer
+- dimensional models
+- marts by domain/team
+- semantic consumption layer intro
+- why not expose raw tables directly
+- ownership boundaries between layers
+- anti-pattern:
+  one giant schema with everything mixed
+
+W14.04
+- batch pipelines strengths/limits
+- micro-batch / near real-time concept
+- latency vs complexity trade-off
+- freshness requirements by use case:
+  finance close, dashboards, fraud alerts
+- when daily batch is enough
+- when streaming may be justified
+- operational burden of real-time systems
+- anti-pattern:
+  choosing streaming for vanity
+
+W14.05
+- data governance basics
+- ownership / stewardship
+- glossary / metric definitions
+- access control / RBAC
+- PII handling basics
+- lineage value
+- data quality checks
+- auditability
+- schema change management
+- anti-pattern:
+  everyone can access everything
+
+W14.06
+- partitioning/clustering concepts
+- workload management
+- query optimization basics
+- storage tiers
+- retention policies
+- compute vs storage scaling
+- concurrency considerations
+- cost monitoring
+- optimize for business value, not vanity benchmarks
+- anti-pattern:
+  overbuilding expensive architecture too early
+
+W14.07
+- build realistic portfolio artifact:
+  week14_warehouse_architecture/
+  ├── architecture.md
+  ├── source_inventory.md
+  ├── layer_design.md
+  ├── governance_plan.md
+  ├── sla_cost_plan.md
+  ├── sample_models.sql
+  └── README.md
+- include architecture diagrams in markdown/text if useful
+- README must explain:
+  - business context
+  - sources
+  - chosen layers
+  - freshness targets
+  - governance decisions
+  - scaling/cost trade-offs
+  - lessons learned
+- must feel portfolio-ready
+
+W14.08
+- final mini test: 20 questions
+- cover:
+  - architecture layers
+  - marts
+  - batch vs real-time
+  - governance
+  - lineage
+  - performance/cost
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- architecture design tasks
+- layer mapping tasks
+- trade-off decision tasks
+- governance review tasks
+- cost optimization tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every example should be believable
+- focus on system thinking and business trade-offs
+- do not turn this into dictionary definitions
+- must connect architecture choices to analytics outcomes
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- vendor buzzword dumping
+- filler text
+- shallow definitions
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week14 scope you are using from roadmap
+2. Which format rules you inherit from Week00
+3. Which assumptions you are making for enterprise/business examples
+
+Then output the full final content for:
+./Week14_Data_Warehouse.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text id="w14review"
+Use project rules from .claude.
+
+Review ./Week14_Data_Warehouse.html as a senior Data Warehouse / Data Engineering reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- teaching quality
+- warehouse architecture correctness
+- production realism
+- business usefulness
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week14 teaches real warehouse systems, not generic buzzwords.
+Check relevance of:
+- ingestion
+- staging/core/marts
+- orchestration
+- governance
+- freshness targets
+- scalability
+- cost/performance decisions
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- raw source inconsistency
+- schema changes
+- conflicting metrics
+- security boundaries
+- stale dashboards
+- cost overruns
+- unnecessary streaming complexity
+- ownership gaps
+- realistic enterprise workflows
+
+D. ARCHITECTURE QUALITY
+Review whether explanations are strong enough for:
+- layering
+- domain marts
+- batch vs near real-time
+- lineage
+- RBAC
+- quality gates
+- scaling patterns
+- trade-off decisions
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W14.07 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- semantic layer
+- data contracts
+- medallion comparison
+- CDC deeper usage
+- disaster recovery basics
+- cost allocation/showback
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week14 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text id="w14patch"
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week14_Data_Warehouse.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week14 becomes a high-value, portfolio-grade Data Warehouse Architecture tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week14_Data_Warehouse.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- architecture depth
+- teaching clarity
+- production realism
+- business/system thinking
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+[PASTE ANTIGRAVITY REVIEW HERE]
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade architecture scenarios/examples where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen why warehouse exists framing
+- improve layer ownership explanations
+- improve batch vs near real-time decision framework
+- improve governance/security realism
+- improve cost/performance trade-offs
+- improve semantic consumption concepts
+- improve architecture diagrams
+- strengthen W14.07 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week14_Data_Warehouse.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text id="w14finalreview"
+Review the patched ./Week14_Data_Warehouse.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text id="w14qa"
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week14_Data_Warehouse.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- architecture examples still feel coherent and realistic
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week14_Data_Warehouse.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week14
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo riêng cho Week14
+
+Week14 rất dễ bị biến thành:
+
+* định nghĩa warehouse khô khan
+* hoặc list tool buzzwords
+
+Bạn nên thêm 1 dòng này vào prompt build hoặc patch:
+
+```text id="w14tip"
+Do not turn Week14 into a theory-only warehouse definitions page or vendor buzzword list.
+Teach data warehouse architecture as practical system design for trusted analytics, governance, scalability, and business decision-making.
+```

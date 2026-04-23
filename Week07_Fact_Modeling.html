@@ -314,8 +314,10 @@
     unit_price      NUMERIC(10,2) <span class="kw">NOT NULL</span>,
     discount_pct    NUMERIC(5,2),
 
-    <span class="comment">-- Audit columns</span>
-    loaded_at       TIMESTAMP     <span class="kw">DEFAULT NOW</span>()
+    <span class="comment">-- Audit columns production-ready</span>
+    ingested_at     TIMESTAMP     <span class="kw">DEFAULT NOW</span>(),
+    updated_at      TIMESTAMP     <span class="kw">DEFAULT NOW</span>(),
+    batch_id        VARCHAR(100)
 );</pre></div>
       </div>
         </div>
@@ -338,9 +340,88 @@
     cost_amount     NUMBER(12,2)  <span class="kw">NOT NULL</span>,
     unit_price      NUMBER(10,2)  <span class="kw">NOT NULL</span>,
     discount_pct    NUMBER(5,2),
-    loaded_at       TIMESTAMP     <span class="kw">DEFAULT</span> SYSTIMESTAMP
+    ingested_at     TIMESTAMP     <span class="kw">DEFAULT</span> SYSTIMESTAMP,
+    updated_at      TIMESTAMP     <span class="kw">DEFAULT</span> SYSTIMESTAMP,
+    batch_id        VARCHAR2(100)
 );</pre></div>
       </div>
+        </div>
+      </div>
+
+      <div class="info-box tip">💡 <span><strong>Unknown member strategy:</strong> Khi dimension lookup chưa ra kết quả, không để FK = NULL mà map về surrogate key <code>-1</code> (Unknown). Cách này giữ được referential integrity và giúp fact load không bị drop row.</span></div>
+
+      <div class="sql-tabset">
+        <div class="tab-group" id="sql-tabs-22">
+          <div class="tab active" onclick="switchTab('sql-tabs-22','sql-tabs-22-pg')">🐘 PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sql-tabs-22','sql-tabs-22-oracle')">🔴 Oracle SQL</div>
+        </div>
+        <div id="sql-tabs-22-pg" class="tab-content active">
+          <div class="cmd-block sql-postgres">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · unknown member + late-arriving dimension</span></div>
+            <div class="cmd-body"><pre><span class="comment">-- Load fact: dimension chưa tới thì gán -1 thay vì NULL</span>
+<span class="kw">INSERT INTO</span> fact_sales (order_id, order_line_num, date_sk, customer_sk, product_sk, store_sk, quantity_sold, gross_amount, discount_amount, net_amount, cost_amount, unit_price, discount_pct, batch_id)
+<span class="kw">SELECT</span>
+    s.order_id,
+    s.order_line_num,
+    d.date_sk,
+    <span class="fn">COALESCE</span>(c.customer_sk, -1) <span class="kw">AS</span> customer_sk,
+    <span class="fn">COALESCE</span>(p.product_sk, -1)  <span class="kw">AS</span> product_sk,
+    <span class="fn">COALESCE</span>(st.store_sk, -1)  <span class="kw">AS</span> store_sk,
+    s.quantity_sold,
+    s.gross_amount,
+    s.discount_amount,
+    s.net_amount,
+    s.cost_amount,
+    s.unit_price,
+    s.discount_pct,
+    :batch_id
+<span class="kw">FROM</span> stg_sales s
+<span class="kw">JOIN</span> dim_date d <span class="kw">ON</span> d.full_date = s.order_date
+<span class="kw">LEFT JOIN</span> dim_customer c <span class="kw">ON</span> c.customer_bk = s.customer_id
+<span class="kw">LEFT JOIN</span> dim_product p  <span class="kw">ON</span> p.product_bk = s.product_id
+<span class="kw">LEFT JOIN</span> dim_store st   <span class="kw">ON</span> st.store_bk = s.store_id;
+
+<span class="comment">-- Backfill khi dimension đã đến: thay -1 bằng surrogate key thật</span>
+<span class="kw">UPDATE</span> fact_sales f
+<span class="kw">SET</span> customer_sk = c.customer_sk,
+    updated_at  = <span class="fn">NOW</span>()
+<span class="kw">FROM</span> dim_customer c
+<span class="kw">WHERE</span> f.customer_sk = -1
+  <span class="kw">AND</span> f.order_id = c.last_order_id;</pre></div>
+          </div>
+        </div>
+        <div id="sql-tabs-22-oracle" class="tab-content">
+          <div class="cmd-block sql-oracle">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Oracle SQL · unknown member + late-arriving dimension</span></div>
+            <div class="cmd-body"><pre><span class="kw">INSERT INTO</span> fact_sales (order_id, order_line_num, date_sk, customer_sk, product_sk, store_sk, quantity_sold, gross_amount, discount_amount, net_amount, cost_amount, unit_price, discount_pct, batch_id)
+<span class="kw">SELECT</span>
+    s.order_id,
+    s.order_line_num,
+    d.date_sk,
+    <span class="fn">NVL</span>(c.customer_sk, -1) <span class="kw">AS</span> customer_sk,
+    <span class="fn">NVL</span>(p.product_sk, -1)  <span class="kw">AS</span> product_sk,
+    <span class="fn">NVL</span>(st.store_sk, -1)  <span class="kw">AS</span> store_sk,
+    s.quantity_sold,
+    s.gross_amount,
+    s.discount_amount,
+    s.net_amount,
+    s.cost_amount,
+    s.unit_price,
+    s.discount_pct,
+    :batch_id
+<span class="kw">FROM</span> stg_sales s
+<span class="kw">JOIN</span> dim_date d <span class="kw">ON</span> d.full_date = s.order_date
+<span class="kw">LEFT JOIN</span> dim_customer c <span class="kw">ON</span> c.customer_bk = s.customer_id
+<span class="kw">LEFT JOIN</span> dim_product p  <span class="kw">ON</span> p.product_bk = s.product_id
+<span class="kw">LEFT JOIN</span> dim_store st   <span class="kw">ON</span> st.store_bk = s.store_id;
+
+<span class="kw">MERGE INTO</span> fact_sales f
+<span class="kw">USING</span> dim_customer c
+<span class="kw">ON</span> (f.order_id = c.last_order_id <span class="kw">AND</span> f.customer_sk = -1)
+<span class="kw">WHEN MATCHED THEN UPDATE SET</span>
+  f.customer_sk = c.customer_sk,
+  f.updated_at  = SYSTIMESTAMP;</pre></div>
+          </div>
         </div>
       </div>
 
@@ -741,6 +822,49 @@
           </div>
         </div>
       </div>
+
+      <div class="info-box note">📌 <span><strong>Role-playing dimension trong accumulating snapshot:</strong> Cùng một <code>dim_date</code> nhưng đóng nhiều vai trò khác nhau theo milestone (<code>ordered_date_sk</code>, <code>confirmed_date_sk</code>, <code>shipped_date_sk</code>, <code>delivered_date_sk</code>). Khi phân tích funnel/SLA, luôn join alias theo từng vai trò để tránh nhầm nghĩa thời gian.</span></div>
+
+      <div class="sql-tabset">
+        <div class="tab-group" id="sql-tabs-23">
+          <div class="tab active" onclick="switchTab('sql-tabs-23','sql-tabs-23-pg')">🐘 PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sql-tabs-23','sql-tabs-23-oracle')">🔴 Oracle SQL</div>
+        </div>
+        <div id="sql-tabs-23-pg" class="tab-content active">
+          <div class="cmd-block sql-postgres">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · role-playing dim_date joins</span></div>
+            <div class="cmd-body"><pre><span class="kw">SELECT</span>
+    f.order_id,
+    od.full_date <span class="kw">AS</span> ordered_date,
+    cd.full_date <span class="kw">AS</span> confirmed_date,
+    sd.full_date <span class="kw">AS</span> shipped_date,
+    dd.full_date <span class="kw">AS</span> delivered_date,
+    f.total_lead_days
+<span class="kw">FROM</span> fact_order_fulfillment f
+<span class="kw">LEFT JOIN</span> dim_date od <span class="kw">ON</span> f.ordered_date_sk   = od.date_sk
+<span class="kw">LEFT JOIN</span> dim_date cd <span class="kw">ON</span> f.confirmed_date_sk = cd.date_sk
+<span class="kw">LEFT JOIN</span> dim_date sd <span class="kw">ON</span> f.shipped_date_sk   = sd.date_sk
+<span class="kw">LEFT JOIN</span> dim_date dd <span class="kw">ON</span> f.delivered_date_sk = dd.date_sk;</pre></div>
+          </div>
+        </div>
+        <div id="sql-tabs-23-oracle" class="tab-content">
+          <div class="cmd-block sql-oracle">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Oracle SQL · role-playing dim_date joins</span></div>
+            <div class="cmd-body"><pre><span class="kw">SELECT</span>
+    f.order_id,
+    od.full_date <span class="kw">AS</span> ordered_date,
+    cd.full_date <span class="kw">AS</span> confirmed_date,
+    sd.full_date <span class="kw">AS</span> shipped_date,
+    dd.full_date <span class="kw">AS</span> delivered_date,
+    f.total_lead_days
+<span class="kw">FROM</span> fact_order_fulfillment f
+<span class="kw">LEFT JOIN</span> dim_date od <span class="kw">ON</span> f.ordered_date_sk   = od.date_sk
+<span class="kw">LEFT JOIN</span> dim_date cd <span class="kw">ON</span> f.confirmed_date_sk = cd.date_sk
+<span class="kw">LEFT JOIN</span> dim_date sd <span class="kw">ON</span> f.shipped_date_sk   = sd.date_sk
+<span class="kw">LEFT JOIN</span> dim_date dd <span class="kw">ON</span> f.delivered_date_sk = dd.date_sk;</pre></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -785,12 +909,12 @@
       </div>
 
       <div class="quiz-item">
-        <div class="quiz-q">Loại fact table nào phù hợp để track "thời gian từ lúc lead vào CRM đến lúc deal closed"?</div>
+        <div class="quiz-q">Trong accumulating snapshot, vì sao phải join <code>dim_date</code> nhiều lần bằng alias khác nhau?</div>
         <div class="quiz-options">
-          <div class="quiz-opt" onclick="answerQuiz(this,false,'Transaction fact sẽ tạo nhiều rows cho cùng 1 deal — khó tính lead time.')">A. Transaction Fact — ghi mỗi touchpoint của lead</div>
-          <div class="quiz-opt" onclick="answerQuiz(this,false,'Periodic snapshot ghi trạng thái theo kỳ — không track milestone rõ ràng.')">B. Periodic Snapshot — snapshot trạng thái lead mỗi ngày</div>
-          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Accumulating snapshot: grain = 1 lead deal, có các milestone date fields: lead_created, qualified_date, proposal_date, closed_date. Lag facts như days_to_close được tính từ các milestone. Điển hình cho sales funnel analytics.')">C. Accumulating Snapshot — 1 row per deal, milestone dates cập nhật khi tiến triển</div>
-          <div class="quiz-opt" onclick="answerQuiz(this,false,'Dimension table không phù hợp để track metrics như lead time.')">D. Dimension table — lead là entity cần attributes</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không liên quan đến index. Mục tiêu chính là tách vai trò thời gian theo milestone.')">A. Để ép query dùng index tốt hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cùng dim_date nhưng mỗi FK là một vai trò nghiệp vụ khác nhau (ordered/confirmed/shipped/delivered). Join alias riêng giúp tính đúng SLA theo từng mốc.')">B. Để thể hiện role-playing dimension theo từng milestone date</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Dim_date không bắt buộc tách bảng; alias đã đủ để phân vai trò.')">C. Vì mỗi milestone bắt buộc cần 1 bảng dim_date riêng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Group by không thay thế việc phân vai trò join.')">D. Vì nếu không join nhiều lần thì không thể GROUP BY month</div>
         </div>
         <div class="quiz-explain"></div>
       </div>
@@ -1777,6 +1901,9 @@ today <span class="kw">AS</span> (
         </div>
       </div>
 
+      <div class="info-box warn">⚠️ <span><strong>Trade-off của FULL OUTER JOIN ở scale lớn:</strong> Với bảng cumulative hàng trăm triệu user, pattern <code>yesterday + today + FULL OUTER JOIN</code> có thể tạo scan + shuffle rất nặng. Dùng tốt cho học pattern, nhưng production thường tối ưu theo changed keys hoặc chia nhỏ workload.</span></div>
+      <div class="info-box tip">✅ <span><strong>Hướng tối ưu senior:</strong> (1) dùng <code>MERGE/UPSERT</code> theo tập key thay đổi thay vì full join toàn bộ; (2) áp dụng retention/pruning window (ví dụ user inactive &gt; 90 ngày) nếu business cho phép để giảm kích thước bảng cumulative.</span></div>
+
       <h3>2️⃣ UPSERT cho bảng reduced/array</h3>
       <div class="sql-tabset">
         <div class="tab-group" id="sql-tabs-13">
@@ -1892,6 +2019,42 @@ today <span class="kw">AS</span> (
 <span class="kw">WHEN NOT MATCHED THEN</span>
   <span class="kw">INSERT</span> (order_id, confirmed_date_sk, shipped_date_sk, delivered_date_sk, current_status)
   <span class="kw">VALUES</span> (s.order_id, s.confirmed_date_sk, s.shipped_date_sk, s.delivered_date_sk, s.current_status);</pre></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>3.5️⃣ Late-arriving dimension: monitor backlog FK = -1</h3>
+      <div class="info-box note">📌 <span><strong>Tách trách nhiệm rõ ràng:</strong> W7.01 đã trình bày cách load + backfill unknown member. Ở W7.05, trọng tâm là theo dõi backlog <code>-1</code> theo ngày để biết pipeline dimension có đang kẹt hay không.</span></div>
+      <div class="sql-tabset">
+        <div class="tab-group" id="sql-tabs-24">
+          <div class="tab active" onclick="switchTab('sql-tabs-24','sql-tabs-24-pg')">🐘 PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sql-tabs-24','sql-tabs-24-oracle')">🔴 Oracle SQL</div>
+        </div>
+        <div id="sql-tabs-24-pg" class="tab-content active">
+          <div class="cmd-block sql-postgres">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · kiểm tra tồn đọng FK = -1</span></div>
+            <div class="cmd-body"><pre><span class="comment">-- Monitor backlog unknown keys</span>
+<span class="kw">SELECT</span>
+    date_sk,
+    <span class="fn">COUNT</span>(*) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> customer_sk = -1) <span class="kw">AS</span> unknown_customer_rows,
+    <span class="fn">COUNT</span>(*) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> product_sk = -1)  <span class="kw">AS</span> unknown_product_rows
+<span class="kw">FROM</span> fact_sales
+<span class="kw">GROUP BY</span> date_sk
+<span class="kw">ORDER BY</span> date_sk <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> 14;</pre></div>
+          </div>
+        </div>
+        <div id="sql-tabs-24-oracle" class="tab-content">
+          <div class="cmd-block sql-oracle">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Oracle SQL · kiểm tra tồn đọng FK = -1</span></div>
+            <div class="cmd-body"><pre><span class="kw">SELECT</span>
+    date_sk,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> customer_sk = -1 <span class="kw">THEN</span> 1 <span class="kw">ELSE</span> 0 <span class="kw">END</span>) <span class="kw">AS</span> unknown_customer_rows,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> product_sk = -1 <span class="kw">THEN</span> 1 <span class="kw">ELSE</span> 0 <span class="kw">END</span>)  <span class="kw">AS</span> unknown_product_rows
+<span class="kw">FROM</span> fact_sales
+<span class="kw">GROUP BY</span> date_sk
+<span class="kw">ORDER BY</span> date_sk <span class="kw">DESC</span>
+<span class="kw">FETCH FIRST</span> 14 <span class="kw">ROWS ONLY</span>;</pre></div>
           </div>
         </div>
       </div>
@@ -2038,7 +2201,7 @@ today <span class="kw">AS</span> (
         <div class="summary-item"><strong>🔀 UPSERT</strong>ON CONFLICT DO UPDATE. EXCLUDED chứa giá trị mới. Idempotent. Tốt cho reduced fact, periodic snapshot.</div>
         <div class="summary-item"><strong>🔃 MERGE</strong>ANSI SQL (PostgreSQL 15+). WHEN MATCHED → UPDATE. WHEN NOT MATCHED → INSERT. Tốt cho accumulating snapshot.</div>
         <div class="summary-item"><strong>⚠️ TRUNCATE caution</strong>Table-level lock — block reads trong thời gian load. Chỉ dùng cho full refresh nhỏ không có concurrent queries.</div>
-        <div class="summary-item"><strong>🔁 Late Arrival</strong>Backfill = re-run pipeline cho ngày cụ thể. DELETE + INSERT rebuild clean. UPSERT auto refresh.</div>
+        <div class="summary-item"><strong>🔁 Late Arrival</strong>Backfill cho transaction/reduced: re-run ngày cụ thể. Với dimension đến trễ, theo dõi backlog FK <code>-1</code> và backfill theo quy tắc đã định nghĩa ở W7.01.</div>
         <div class="summary-item"><strong>💥 Transaction</strong>DELETE + INSERT trong 1 BEGIN/COMMIT. INSERT fail → DELETE rollback → table không empty. Atomic.</div>
       </div>
     </div>
@@ -2054,7 +2217,7 @@ today <span class="kw">AS</span> (
       <div class="practice-task">
         <div class="practice-task-header">🔬 Bài 1: Viết incremental idempotent cho users_cumulated</div>
         <div class="practice-task-body">
-          <p>Viết 1 script incremental cho ngày D gồm: CTE <code>yesterday</code>/<code>today</code>, <code>FULL OUTER JOIN</code>, load vào <code>users_cumulated</code> và 2 query validation (duplicate theo grain + rerun không tăng row count).</p>
+          <p>Viết 1 script incremental cho ngày D gồm: CTE <code>yesterday</code>/<code>today</code>, <code>FULL OUTER JOIN</code>, load vào <code>users_cumulated</code> và 2 query validation (duplicate theo grain + rerun không tăng row count). Bonus: thêm 1 query monitor backlog FK <code>-1</code> cho late-arriving dimension.</p>
         </div>
       </div>
     </div>
@@ -2379,6 +2542,9 @@ today <span class="kw">AS</span> (
               month_start DATE <span class="kw">NOT NULL</span>,
               hit_array BIGINT[] <span class="kw">NOT NULL</span>,
               unique_visitors REAL[] <span class="kw">NOT NULL</span>,
+              ingested_at TIMESTAMP <span class="kw">DEFAULT NOW</span>(),
+              updated_at TIMESTAMP <span class="kw">DEFAULT NOW</span>(),
+              batch_id VARCHAR(100),
               <span class="kw">PRIMARY KEY</span> (host, month_start)
           );
 
@@ -2411,10 +2577,20 @@ today <span class="kw">AS</span> (
               <span class="kw">LEFT JOIN</span> host_activity_reduced h
                 <span class="kw">ON</span> h.host = d.host <span class="kw">AND</span> h.month_start = d.month_start
           )
-          <span class="kw">SELECT</span> * <span class="kw">FROM</span> merged
+          <span class="kw">SELECT</span>
+    host,
+    month_start,
+    hit_array,
+    unique_visitors,
+    <span class="fn">NOW</span>(),
+    <span class="fn">NOW</span>(),
+    :batch_id
+<span class="kw">FROM</span> merged
           <span class="kw">ON CONFLICT</span> (host, month_start) <span class="kw">DO UPDATE SET</span>
               hit_array = EXCLUDED.hit_array,
-              unique_visitors = EXCLUDED.unique_visitors;</pre></div>
+              unique_visitors = EXCLUDED.unique_visitors,
+              updated_at = <span class="fn">NOW</span>(),
+              batch_id = EXCLUDED.batch_id;</pre></div>
                 </div>
         </div>
 
@@ -2422,6 +2598,17 @@ today <span class="kw">AS</span> (
           <div class="cmd-block sql-oracle">
                   <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Oracle SQL · reduced host activity</span></div>
                   <div class="cmd-body"><pre><span class="comment">-- host_activity_reduced monthly: dùng MERGE + JSON arrays</span>
+          <span class="kw">CREATE TABLE</span> host_activity_reduced_oracle (
+              host VARCHAR2(255) <span class="kw">NOT NULL</span>,
+              month_start DATE <span class="kw">NOT NULL</span>,
+              hit_array_json CLOB <span class="kw">CHECK</span> (hit_array_json <span class="kw">IS</span> JSON),
+              unique_visitors_json CLOB <span class="kw">CHECK</span> (unique_visitors_json <span class="kw">IS</span> JSON),
+              ingested_at TIMESTAMP <span class="kw">DEFAULT</span> SYSTIMESTAMP,
+              updated_at TIMESTAMP <span class="kw">DEFAULT</span> SYSTIMESTAMP,
+              batch_id VARCHAR2(100),
+              <span class="kw">CONSTRAINT</span> pk_host_activity_reduced_oracle <span class="kw">PRIMARY KEY</span> (host, month_start)
+          );
+
           <span class="kw">MERGE INTO</span> host_activity_reduced_oracle t
           <span class="kw">USING</span> (
               <span class="kw">SELECT</span>
@@ -2435,9 +2622,11 @@ today <span class="kw">AS</span> (
           <span class="kw">ON</span> (t.host = s.host <span class="kw">AND</span> t.month_start = s.month_start)
           <span class="kw">WHEN MATCHED THEN UPDATE SET</span>
               t.hit_array_json = s.hit_array_json,
-              t.unique_visitors_json = s.unique_visitors_json
-          <span class="kw">WHEN NOT MATCHED THEN INSERT</span> (host, month_start, hit_array_json, unique_visitors_json)
-          <span class="kw">VALUES</span> (s.host, s.month_start, s.hit_array_json, s.unique_visitors_json);</pre></div>
+              t.unique_visitors_json = s.unique_visitors_json,
+              t.updated_at = SYSTIMESTAMP,
+              t.batch_id = :batch_id
+          <span class="kw">WHEN NOT MATCHED THEN INSERT</span> (host, month_start, hit_array_json, unique_visitors_json, ingested_at, updated_at, batch_id)
+          <span class="kw">VALUES</span> (s.host, s.month_start, s.hit_array_json, s.unique_visitors_json, SYSTIMESTAMP, SYSTIMESTAMP, :batch_id);</pre></div>
                 </div>
         </div>
       </div>
@@ -2450,9 +2639,67 @@ today <span class="kw">AS</span> (
         <li>✅ Query chuyển <code>device_activity_datelist</code> sang <code>datelist_int</code></li>
         <li>✅ DDL <code>hosts_cumulated</code> có <code>host_activity_datelist</code></li>
         <li>✅ Incremental query build <code>host_activity_datelist</code></li>
-        <li>✅ DDL monthly reduced fact <code>host_activity_reduced</code> gồm <code>month</code>, <code>host</code>, <code>hit_array</code>, <code>unique_visitors</code></li>
+        <li>✅ DDL monthly reduced fact <code>host_activity_reduced</code> gồm <code>month</code>, <code>host</code>, <code>hit_array</code>, <code>unique_visitors</code>, <code>ingested_at</code>, <code>updated_at</code>, <code>batch_id</code></li>
         <li>✅ Incremental query nạp <code>host_activity_reduced</code> theo day-by-day</li>
       </ul>
+
+      <h3>🧪 Validation pack bắt buộc trước khi nộp</h3>
+      <div class="sql-tabset">
+        <div class="tab-group" id="sql-tabs-25">
+          <div class="tab active" onclick="switchTab('sql-tabs-25','sql-tabs-25-pg')">🐘 PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sql-tabs-25','sql-tabs-25-oracle')">🔴 Oracle SQL</div>
+        </div>
+        <div id="sql-tabs-25-pg" class="tab-content active">
+          <div class="cmd-block sql-postgres">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>PostgreSQL · validation_pack.sql</span></div>
+            <div class="cmd-body"><pre><span class="comment">-- 1) Duplicate check theo grain monthly reduced</span>
+<span class="kw">SELECT</span> host, month_start, <span class="fn">COUNT</span>(*)
+<span class="kw">FROM</span> host_activity_reduced
+<span class="kw">GROUP BY</span> host, month_start
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; 1;
+
+<span class="comment">-- 2) Sanity check: array rỗng bất thường</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> empty_metric_rows
+<span class="kw">FROM</span> host_activity_reduced
+<span class="kw">WHERE</span> <span class="fn">CARDINALITY</span>(hit_array) = 0
+   <span class="kw">OR</span> <span class="fn">CARDINALITY</span>(unique_visitors) = 0;
+
+<span class="comment">-- 3) Idempotency check cho ngày rerun</span>
+<span class="kw">SELECT</span>
+    month_start,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> row_cnt,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> host) <span class="kw">AS</span> distinct_host_cnt
+<span class="kw">FROM</span> host_activity_reduced
+<span class="kw">WHERE</span> month_start = DATE_TRUNC(<span class="str">'month'</span>, DATE(<span class="str">'2023-01-31'</span>))
+<span class="kw">GROUP BY</span> month_start;</pre></div>
+          </div>
+        </div>
+        <div id="sql-tabs-25-oracle" class="tab-content">
+          <div class="cmd-block sql-oracle">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Oracle SQL · validation_pack.sql</span></div>
+            <div class="cmd-body"><pre><span class="comment">-- 1) Duplicate check theo grain monthly reduced</span>
+<span class="kw">SELECT</span> host, month_start, <span class="fn">COUNT</span>(*)
+<span class="kw">FROM</span> host_activity_reduced_oracle
+<span class="kw">GROUP BY</span> host, month_start
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; 1;
+
+<span class="comment">-- 2) Sanity check: JSON array rỗng bất thường</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> empty_metric_rows
+<span class="kw">FROM</span> host_activity_reduced_oracle
+<span class="kw">WHERE</span> JSON_QUERY(hit_array_json, <span class="str">'$[0]'</span>) <span class="kw">IS NULL</span>
+   <span class="kw">OR</span> JSON_QUERY(unique_visitors_json, <span class="str">'$[0]'</span>) <span class="kw">IS NULL</span>;
+
+<span class="comment">-- 3) Idempotency check cho tháng rerun</span>
+<span class="kw">SELECT</span>
+    month_start,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> row_cnt,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> host) <span class="kw">AS</span> distinct_host_cnt
+<span class="kw">FROM</span> host_activity_reduced_oracle
+<span class="kw">WHERE</span> month_start = TRUNC(DATE <span class="str">'2023-01-31'</span>, <span class="str">'MM'</span>)
+<span class="kw">GROUP BY</span> month_start;</pre></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2475,12 +2722,12 @@ today <span class="kw">AS</span> (
       </div>
 
       <div class="quiz-item">
-        <div class="quiz-q">Cột lõi bắt buộc trong <code>user_devices_cumulated</code> theo homework là gì?</div>
+        <div class="quiz-q">Trong artifact production, vì sao nên có <code>ingested_at</code>, <code>updated_at</code>, <code>batch_id</code>?</div>
         <div class="quiz-options">
-          <div class="quiz-opt" onclick="answerQuiz(this,false,'hit_array thuộc host_activity_reduced, không phải user_devices_cumulated.')">A. <code>hit_array BIGINT[]</code></div>
-          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Homework yêu cầu datelist hoạt động thiết bị theo user và browser.')">B. <code>device_activity_datelist DATE[]</code></div>
-          <div class="quiz-opt" onclick="answerQuiz(this,false,'monthly_balance không thuộc bài tuần này.')">C. <code>monthly_balance NUMERIC</code></div>
-          <div class="quiz-opt" onclick="answerQuiz(this,false,'json payload không phải trọng tâm của homework này.')">D. <code>raw_payload JSONB</code></div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bộ audit columns giúp trace batch nào nạp dữ liệu, khi nào insert/update và hỗ trợ debug rerun/backfill.')">A. Để truy vết lineage, điều tra lỗi và audit theo batch</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Các cột này không làm dữ liệu realtime hơn; chúng phục vụ observability/audit.')">B. Để query realtime nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải chỉ dùng cho Oracle, đây là nhu cầu chung production DWH.')">C. Chỉ vì Oracle bắt buộc phải có</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không thay thế được PK/unique key.')">D. Để thay thế luôn primary key</div>
         </div>
         <div class="quiz-explain"></div>
       </div>
@@ -2508,12 +2755,12 @@ today <span class="kw">AS</span> (
       </div>
 
       <div class="quiz-item">
-        <div class="quiz-q">Vì sao incremental cho bảng cumulative thường dùng <code>yesterday + today + FULL OUTER JOIN</code>?</div>
+        <div class="quiz-q">Với bảng cumulative rất lớn, rủi ro chính của pattern <code>yesterday + today + FULL OUTER JOIN</code> là gì?</div>
         <div class="quiz-options">
-          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Pattern này giữ được cả entity cũ không có activity hôm nay và entity mới xuất hiện hôm nay.')">A. Gộp được cả entity cũ lẫn entity mới trong cùng lần nạp</div>
-          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải để sort.')">B. Để ORDER BY nhanh hơn</div>
-          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải để tránh index.')">C. Để bỏ qua primary key</div>
-          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải để xóa historical data.')">D. Để xóa dữ liệu cũ mỗi ngày</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. FULL OUTER JOIN toàn bảng có thể gây scan/shuffle nặng, tốn compute và kéo dài SLA ở scale lớn.')">A. Scan/shuffle nặng khi join toàn tập dữ liệu lớn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'FULL OUTER JOIN không tự tạo duplicate nếu key và logic đúng.')">B. Tự động tạo duplicate dù grain đúng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'FULL OUTER JOIN không khóa toàn bảng theo kiểu TRUNCATE.')">C. Luôn lock toàn bảng nên query khác không đọc được</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cú pháp vẫn chạy được trên PostgreSQL và nhiều engine khác.')">D. Chỉ chạy được trên Oracle nên không portable</div>
         </div>
         <div class="quiz-explain"></div>
       </div>
@@ -2741,13 +2988,13 @@ FETCH FIRST 10 ROWS ONLY;</pre></div>
           </div>
         </div>
 
-        <div class="test-question" data-q="4" data-correct="C">
-          <div class="test-question-title">Q4. Accumulating Snapshot sử dụng UPDATE thay vì INSERT vì lý do gì?</div>
+        <div class="test-question" data-q="4" data-correct="B">
+          <div class="test-question-title">Q4. Trong accumulating snapshot, phát biểu đúng về role-playing dimension là gì?</div>
           <div class="test-options">
-            <label class="test-option"><input type="radio" name="q4" value="A"> A. UPDATE nhanh hơn INSERT</label>
-            <label class="test-option"><input type="radio" name="q4" value="B"> B. PostgreSQL không cho INSERT nhiều lần cùng key</label>
-            <label class="test-option"><input type="radio" name="q4" value="C"> C. 1 lifecycle = 1 row — milestone chỉ cập nhật row, không tạo sự kiện mới</label>
-            <label class="test-option"><input type="radio" name="q4" value="D"> D. UPDATE không tạo WAL log, tiết kiệm disk</label>
+            <label class="test-option"><input type="radio" name="q4" value="A"> A. Mỗi milestone phải dùng một bảng dim_date khác nhau</label>
+            <label class="test-option"><input type="radio" name="q4" value="B"> B. Cùng dim_date có thể join nhiều alias cho ordered/confirmed/shipped/delivered</label>
+            <label class="test-option"><input type="radio" name="q4" value="C"> C. Chỉ cần 1 date_sk duy nhất cho toàn bộ lifecycle</label>
+            <label class="test-option"><input type="radio" name="q4" value="D"> D. Role-playing chỉ áp dụng cho degenerate dimensions</label>
           </div>
         </div>
 
@@ -2821,13 +3068,13 @@ FETCH FIRST 10 ROWS ONLY;</pre></div>
           </div>
         </div>
 
-        <div class="test-question" data-q="12" data-correct="B">
-          <div class="test-question-title">Q12. Pattern DELETE partition + INSERT đảm bảo idempotency như thế nào?</div>
+        <div class="test-question" data-q="12" data-correct="C">
+          <div class="test-question-title">Q12. Khi dimension lookup chưa có kết quả lúc load fact, cách xử lý chuẩn là gì?</div>
           <div class="test-options">
-            <label class="test-option"><input type="radio" name="q12" value="A"> A. PostgreSQL tự detect duplicate</label>
-            <label class="test-option"><input type="radio" name="q12" value="B"> B. DELETE trước tạo clean slate — chạy lại bao nhiêu lần kết quả như nhau</label>
-            <label class="test-option"><input type="radio" name="q12" value="C"> C. Transaction ACID tự rollback</label>
-            <label class="test-option"><input type="radio" name="q12" value="D"> D. Primary key ngăn duplicate</label>
+            <label class="test-option"><input type="radio" name="q12" value="A"> A. Để foreign key = NULL cho nhanh</label>
+            <label class="test-option"><input type="radio" name="q12" value="B"> B. Bỏ luôn row fact đó để tránh sai dữ liệu</label>
+            <label class="test-option"><input type="radio" name="q12" value="C"> C. Gán unknown surrogate key = -1 và backfill sau</label>
+            <label class="test-option"><input type="radio" name="q12" value="D"> D. Tạo surrogate key ngẫu nhiên mỗi lần load</label>
           </div>
         </div>
 
@@ -2841,13 +3088,13 @@ FETCH FIRST 10 ROWS ONLY;</pre></div>
           </div>
         </div>
 
-        <div class="test-question" data-q="14" data-correct="B">
-          <div class="test-question-title">Q14. Tại sao TRUNCATE + INSERT nguy hiểm hơn DELETE partition + INSERT?</div>
+        <div class="test-question" data-q="14" data-correct="A">
+          <div class="test-question-title">Q14. Trade-off lớn nhất của FULL OUTER JOIN cho cumulative ở scale rất lớn là gì?</div>
           <div class="test-options">
-            <label class="test-option"><input type="radio" name="q14" value="A"> A. TRUNCATE chậm hơn DELETE</label>
-            <label class="test-option"><input type="radio" name="q14" value="B"> B. TRUNCATE lock toàn bộ table — queries khác không đọc được</label>
-            <label class="test-option"><input type="radio" name="q14" value="C"> C. TRUNCATE không thể rollback</label>
-            <label class="test-option"><input type="radio" name="q14" value="D"> D. TRUNCATE bỏ qua foreign key</label>
+            <label class="test-option"><input type="radio" name="q14" value="A"> A. Scan/shuffle nặng, tốn compute và dễ vượt SLA</label>
+            <label class="test-option"><input type="radio" name="q14" value="B"> B. Không thể chạy trên PostgreSQL</label>
+            <label class="test-option"><input type="radio" name="q14" value="C"> C. Luôn tạo duplicate dù key đúng</label>
+            <label class="test-option"><input type="radio" name="q14" value="D"> D. Không thể dùng với dữ liệu theo ngày</label>
           </div>
         </div>
 
@@ -2901,13 +3148,13 @@ FETCH FIRST 10 ROWS ONLY;</pre></div>
           </div>
         </div>
 
-        <div class="test-question" data-q="20" data-correct="A">
-          <div class="test-question-title">Q20. Pattern nào xử lý tốt nhất khi có late arrival data cho ngày cũ?</div>
+        <div class="test-question" data-q="20" data-correct="D">
+          <div class="test-question-title">Q20. Bộ cột nào là audit columns quan trọng trong production fact/reduced fact?</div>
           <div class="test-options">
-            <label class="test-option"><input type="radio" name="q20" value="A"> A. DELETE partition ngày đó + re-INSERT (backfill) bao gồm late data</label>
-            <label class="test-option"><input type="radio" name="q20" value="B"> B. INSERT-only append late data vào cuối</label>
-            <label class="test-option"><input type="radio" name="q20" value="C"> C. Bỏ qua late data để đơn giản</label>
-            <label class="test-option"><input type="radio" name="q20" value="D"> D. Tăng partition size</label>
+            <label class="test-option"><input type="radio" name="q20" value="A"> A. created_by, approved_by, owner_team</label>
+            <label class="test-option"><input type="radio" name="q20" value="B"> B. source_file, file_size, checksum</label>
+            <label class="test-option"><input type="radio" name="q20" value="C"> C. partition_date, shard_id, bucket_id</label>
+            <label class="test-option"><input type="radio" name="q20" value="D"> D. ingested_at, updated_at, batch_id</label>
           </div>
         </div>
 

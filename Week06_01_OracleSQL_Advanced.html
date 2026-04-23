@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 06.01 · Oracle SQL Advanced</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 45%, #1c2738 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 42px 24px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.4px;
+    margin-bottom: 8px;
+  }
+  .hero p { color: var(--text-muted); font-size: 0.95rem; }
+
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px; }
+  .badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 330px;
+    min-width: 330px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+  .sidebar-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding: 0 16px 12px;
+  }
+  .level-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent2);
+    padding: 8px 16px 8px;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 8px 16px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.83rem;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: var(--highlight);
+    font-weight: 600;
+  }
+  .nav-number {
+    display: inline-block;
+    width: 70px;
+    color: var(--text-muted);
+    font-family: monospace;
+    font-size: 0.72rem;
+  }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 1020px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    background: var(--surface);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .module-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent);
+  }
+  .module-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .module-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .progress-bar { height: 4px; margin: 16px 0 0; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+  .section {
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 0.9rem;
+    user-select: none;
+  }
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+  .section-content { padding: 20px; background: var(--surface); }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); color: var(--accent); text-align: left; padding: 8px 12px; border: 1px solid var(--border); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .cmd-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+  .cmd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: 'Courier New', monospace;
+  }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--text);
+  }
+  code {
+    font-family: 'Courier New', monospace;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--accent4);
+  }
+
+  .info-box {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    font-size: 0.84rem;
+    border: 1px solid;
+    display: flex;
+    gap: 10px;
+  }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .quiz-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before {
+    content: 'Q';
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    background: var(--accent);
+    color: #000;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-align: center;
+    line-height: 22px;
+    margin-right: 8px;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.84rem;
+    transition: all 0.15s;
+    background: var(--bg);
+  }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 8px;
+    display: none;
+  }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .summary-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.82rem;
+  }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .practice-task-header {
+    padding: 12px 16px;
+    background: #d2940015;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--accent5);
+  }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--accent2);
+    margin-top: 10px;
+    transition: all 0.15s;
+  }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box {
+    margin-top: 10px;
+    display: none;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .solution-box.show { display: block; }
+
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .nav-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  .test-question {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+  }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    color: var(--text);
+    background: var(--bg);
+  }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  .file-tree {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    margin: 10px 0;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Tuần 06.01 · Oracle SQL Advanced cho Data Engineer</h1>
+  <p>Tư duy SQL doanh nghiệp: reporting, incremental load, tuning và consistency trong môi trường Oracle</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 2 · SQL thực chiến doanh nghiệp</span>
+    <span class="badge badge-orange">Oracle cho ETL · Warehouse · Reconciliation</span>
+    <span class="badge badge-blue">Portfolio-grade · Recruiter-ready</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">CHƯƠNG TRÌNH HỌC</div>
+    <div class="level-label">WEEK 06.01 · ORACLE SQL ADVANCED</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W6.01.01</span>Tổng Quan Oracle SQL cho DE</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W6.01.02</span>Analytic Functions & Reporting</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W6.01.03</span>GROUPING SETS · ROLLUP · CUBE</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W6.01.04</span>MERGE · Incremental · Idempotency</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W6.01.05</span>Execution Plan · Index · Tuning</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W6.01.06</span>Partitioning · Transaction · Locking</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W6.01.07</span>Artifact week6_01_oracle_sql_lab</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W6.01.08</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="m0">
+      <div class="module-header">
+        <div class="module-tag">W6.01.01</div>
+        <div class="module-title">Tổng Quan: Oracle SQL cho Data Engineer</div>
+        <div class="module-subtitle">Hiểu vai trò Oracle trong enterprise data stack và mindset khác biệt giữa học SQL chung với làm DE thật</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:12.5%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <tr><th>Phần</th><th>Nội dung chính</th><th>Giá trị cho DE</th></tr>
+            <tr><td>Bối cảnh doanh nghiệp</td><td>Oracle trong banking, finance, telco, hệ thống legacy quan trọng</td><td>Hiểu vì sao Oracle vẫn là nguồn dữ liệu sống còn</td></tr>
+            <tr><td>Điểm mạnh</td><td>Stability, optimizer trưởng thành, partitioning, MERGE</td><td>Làm batch ETL và reporting ổn định lâu dài</td></tr>
+            <tr><td>Trade-off</td><td>License cao, ecosystem khác Postgres, cú pháp có khác biệt</td><td>Ra quyết định công nghệ thực tế hơn</td></tr>
+            <tr><td>Outcome tuần</td><td>Analytic SQL + incremental + tuning + artifact</td><td>Tạo năng lực portfolio-grade</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <ul>
+            <li>Phân biệt rõ Oracle SQL cho Data Engineering khác gì so với SQL học để làm bài tập.</li>
+            <li>Nắm được bối cảnh enterprise: Oracle thường nằm ở lõi hệ thống tài chính, giao dịch, và báo cáo kiểm toán.</li>
+            <li>Xác định checklist kỹ năng phải đạt vào cuối tuần để có thể build artifact recruiter-grade.</li>
+          </ul>
+          <div class="info-box note">📌 <span>Mục tiêu của tuần này là vận hành SQL có tư duy dữ liệu sản xuất: đúng, ổn định, kiểm chứng được, và tối ưu có căn cứ.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <h3>Vì sao Oracle vẫn quan trọng trong data environments</h3>
+          <p>Nhiều ngân hàng, công ty bảo hiểm, tập đoàn viễn thông, và doanh nghiệp có hệ thống core lâu năm vẫn chạy Oracle làm transactional backbone. Với Data Engineer, điều này nghĩa là Oracle thường là nguồn upstream cho ETL, warehouse, reconciliation, và regulatory reporting.</p>
+
+          <table>
+            <tr><th>Góc nhìn</th><th>Generic SQL learner</th><th>Data Engineer dùng Oracle</th></tr>
+            <tr><td>Mục tiêu query</td><td>Ra kết quả đúng về mặt cú pháp</td><td>Đúng + chạy ổn định theo lịch + dễ kiểm soát hiệu năng</td></tr>
+            <tr><td>Tập trung</td><td>SELECT cơ bản, join cơ bản</td><td>Analytic, incremental MERGE, execution plan, partition pruning</td></tr>
+            <tr><td>Đầu ra</td><td>Bài tập SQL</td><td>Script ETL/reporting có thể rerun và audit</td></tr>
+            <tr><td>Thước đo</td><td>Pass test</td><td>SLA, data quality, consistency, cost</td></tr>
+          </table>
+
+          <h3>Strengths và trade-offs của Oracle trong DE</h3>
+          <ul>
+            <li><strong>Strengths:</strong> ổn định cao, optimizer trưởng thành, hỗ trợ tốt analytic workloads, partitioning mạnh, MERGE chuẩn enterprise.</li>
+            <li><strong>Limitations:</strong> license và vận hành có thể tốn chi phí, cú pháp/behavior khác với open-source DB, cần kỷ luật tuning và thống kê dữ liệu.</li>
+          </ul>
+
+          <div class="info-box tip">✅ <span>Oracle không phải chỉ để viết query. Với DE, Oracle là nơi bạn thiết kế logic incremental, reconciliation, và reporting có thể defend trước audit.</span></div>
+          <div class="info-box warn">⚠️ <span>Anti-pattern: xem Oracle như SQL generic rồi copy truy vấn từ internet mà không đọc execution plan, không kiểm thử rerun, không kiểm tra duplicate.</span></div>
+
+          <h3>Week outcomes checklist</h3>
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>week6_01_outcomes.txt</span></div>
+            <div class="cmd-body"><pre>[ ] Viết được analytic queries cho top N per partition, latest row per key, running totals
+[ ] Dùng GROUPING SETS/ROLLUP/CUBE để tạo subtotal đa cấp thay cho UNION ALL dài
+[ ] Thiết kế MERGE incremental có idempotency, watermark, late-arriving handling
+[ ] Đọc EXPLAIN PLAN và giải thích khác biệt FTS vs index range scan, hash join vs nested loops
+[ ] Chọn index và partition có trade-off rõ ràng, không thêm chỉ số theo cảm tính
+[ ] Trình bày transaction boundary và lock awareness cho ETL batch
+[ ] Hoàn thiện artifact week6_01_oracle_sql_lab với README recruiter-grade</pre></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="quiz-item"><div class="quiz-q">Oracle còn phổ biến trong bối cảnh nào nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì Oracle còn rất mạnh ở hệ thống enterprise có yêu cầu ổn định và audit cao.')">A. Banking, finance, large enterprise systems</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì startup nhỏ có thể dùng nhiều lựa chọn khác, không phải nơi Oracle chiếm ưu thế tuyệt đối.')">B. Chỉ startup giai đoạn seed</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì mobile app demo không đại diện workload enterprise data.')">C. Chỉ dự án mobile demo</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì game local không phải bối cảnh chính của Oracle trong DE.')">D. Chỉ game offline single-player</div></div><div class="quiz-explain"></div></div>
+          <div class="quiz-item"><div class="quiz-q">Data Engineer dùng Oracle SQL khác gì người học SQL cơ bản?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ học syntax không đủ cho vận hành ETL thực tế.')">A. Chỉ cần nhớ syntax</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì DE cần quan tâm hiệu năng, consistency và khả năng rerun của pipeline.')">B. Phải gắn query với ETL, hiệu năng, và tính rerun</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì dashboard đẹp không thay thế logic data đúng.')">C. Chủ yếu làm giao diện báo cáo</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì DE không thể bỏ qua data quality.')">D. Không cần kiểm tra dữ liệu đầu ra</div></div><div class="quiz-explain"></div></div>
+          <div class="quiz-item"><div class="quiz-q">Điểm mạnh nổi bật của Oracle cho workload DE là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì free license không phải strength chính của Oracle.')">A. Chi phí license thấp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì schema-less không phải định vị chính trong Oracle enterprise SQL.')">B. Schema-less by default</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì optimizer trưởng thành, partitioning và MERGE rất hữu ích cho ETL/reporting.')">C. Optimizer trưởng thành và enterprise features</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Oracle không tối ưu cho use case no-SQL document là chính.')">D. Không cần schema design</div></div><div class="quiz-explain"></div></div>
+          <div class="quiz-item"><div class="quiz-q">Trade-off thực tế khi làm việc với Oracle thường là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì license và độ phức tạp vận hành là trade-off phổ biến.')">A. License cost và complexity cao hơn một số hệ khác</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Oracle vẫn cần tuning và thống kê tốt, không phải tự tối ưu hoàn toàn.')">B. Không cần tối ưu execution plan</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Oracle không tự xử lý mọi lỗi logic ETL cho bạn.')">C. Tự động chống duplicate không cần thiết kế</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Oracle không miễn trừ nhu cầu monitoring batch.')">D. Không cần monitoring ETL</div></div><div class="quiz-explain"></div></div>
+          <div class="quiz-item"><div class="quiz-q">Một đầu ra tuần 06.01 được xem là đạt chuẩn là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì note lý thuyết không đủ chứng minh năng lực SQL vận hành.')">A. Chỉ có file ghi chú lý thuyết</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì artifact có script + README thể hiện workload và quyết định kỹ thuật.')">B. Artifact SQL có cấu trúc, có README và kiểm chứng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ screenshot query chưa đủ để đánh giá quality.')">C. Chỉ chụp màn hình query chạy thành công</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không có benchmark/tuning thì thiếu production mindset.')">D. Chỉ có câu lệnh SELECT cơ bản</div></div><div class="quiz-explain"></div></div>
+          <div class="quiz-item"><div class="quiz-q">Oracle SQL trong DE thường phục vụ nhóm bài toán nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì ETL, warehouse, reporting và reconciliation là use case cốt lõi.')">A. ETL incremental, reporting, reconciliation</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì animation front-end không liên quan trọng tâm Oracle SQL DE.')">B. Rendering animation web</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì game physics không phải workload Oracle SQL trong DE.')">C. Engine vật lý game</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Oracle SQL không dùng chủ yếu cho chỉnh ảnh.')">D. Chỉnh sửa ảnh raw</div></div><div class="quiz-explain"></div></div>
+          <div class="quiz-item"><div class="quiz-q">Mindset đúng khi học Oracle SQL tuần này là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì học thuộc syntax mà không hiểu behavior dễ vỡ trong production.')">A. Học thuộc câu lệnh càng nhiều càng tốt</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì phải hiểu hành vi query với dữ liệu thật, hiệu năng và rủi ro rerun.')">B. Hiểu behavior query trong kịch bản dữ liệu thực</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì copy snippet thiếu ngữ cảnh dễ tạo lỗi logic.')">C. Copy template từ internet là đủ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bỏ kiểm tra consistency là nguy hiểm với dữ liệu tài chính.')">D. Bỏ qua consistency để tối ưu tốc độ</div></div><div class="quiz-explain"></div></div>
+          <div class="quiz-item"><div class="quiz-q">Trong enterprise, vì sao legacy Oracle vẫn được giữ?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đổi hệ thống core không phải chuyện một đêm.')">A. Vì migrate luôn dễ và rẻ</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì hệ thống core ổn định, nhiều quy trình nghiệp vụ và kiểm toán đã bám Oracle.')">B. Vì độ ổn định và ràng buộc nghiệp vụ cao</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải do thiếu người dùng cloud.')">C. Vì cloud không hỗ trợ dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì compliance thường đòi hỏi kiểm soát chặt chứ không phải bỏ DBMS.')">D. Vì không cần DBMS</div></div><div class="quiz-explain"></div></div>
+          <div class="quiz-item"><div class="quiz-q">Chỉ số nào phản ánh bạn làm SQL theo chuẩn DE hơn là SQL bài tập?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì có kiểm chứng row count, duplicate, rerun behavior mới phản ánh mindset vận hành.')">A. Có validation sau load và xử lý rerun</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tốc độ viết query không đồng nghĩa độ tin cậy.')">B. Viết query thật nhanh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì ít dòng code không phải lúc nào cũng đúng nghiệp vụ.')">C. Câu SQL ngắn nhất có thể</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không đọc plan thì khó biết query có mở rộng được.')">D. Không bao giờ xem execution plan</div></div><div class="quiz-explain"></div></div>
+          <div class="quiz-item"><div class="quiz-q">Khi nói recruiter-grade artifact cho Oracle SQL, điều nào quan trọng nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ nhiều file không nói lên chất lượng.')">A. Càng nhiều file càng tốt</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì dùng từ ngữ bóng bẩy không thay thế kiểm chứng kỹ thuật.')">B. README thật hoa mỹ</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì phải thể hiện bối cảnh nghiệp vụ, thiết kế SQL, tuning decisions và validation rõ ràng.')">C. Có business context + SQL logic + tuning + validation</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì demo ngẫu nhiên không có scenario khó thuyết phục nhà tuyển dụng.')">D. Chỉ demo query top 10 records</div></div><div class="quiz-explain"></div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>Oracle vị trí nào</strong>Nguồn dữ liệu cốt lõi ở enterprise có yêu cầu ổn định cao</div>
+            <div class="summary-item"><strong>DE mindset</strong>SQL gắn với ETL, validation, rerun và SLA</div>
+            <div class="summary-item"><strong>Strengths</strong>Optimizer trưởng thành, MERGE, partitioning, stability</div>
+            <div class="summary-item"><strong>Trade-offs</strong>License, complexity, ecosystem khác open-source stack</div>
+            <div class="summary-item"><strong>Outcome tuần</strong>Làm được analytic, merge incremental, tuning và artifact</div>
+            <div class="summary-item"><strong>Anti-pattern</strong>Chỉ học cú pháp mà bỏ qua behavior production</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 1: Mapping Oracle use case theo domain</div>
+            <div class="practice-task-body">
+              <p>Chọn 1 domain (banking hoặc insurance). Liệt kê 3 bảng nguồn Oracle có khả năng cấp dữ liệu cho warehouse, kèm rủi ro dữ liệu nếu ETL sai.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <table>
+                  <tr><th>Bảng nguồn</th><th>Mục đích ETL</th><th>Rủi ro nếu sai</th></tr>
+                  <tr><td>core_txn</td><td>Fact giao dịch ngày</td><td>Double count doanh thu hoặc thiếu giao dịch</td></tr>
+                  <tr><td>cust_master</td><td>Dimension khách hàng</td><td>Sai phân khúc, sai KPI churn</td></tr>
+                  <tr><td>acct_balance_snap</td><td>Reconciliation cuối ngày</td><td>Lệch số giữa báo cáo và sổ cái</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 2: Viết week outcomes checklist cho team</div>
+            <div class="practice-task-body">
+              <p>Soạn checklist 7 dòng để team xác nhận đã đủ năng lực Oracle SQL cho incremental ETL trước khi vào sprint mới.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <div class="cmd-block"><div class="cmd-header"><span>oracle_de_readiness.md</span></div><div class="cmd-body"><pre>- Có analytic query mẫu cho latest row per key
+- Có merge incremental script có dedup source
+- Có query kiểm duplicate sau load
+- Có explain plan cho query nặng
+- Có ghi nhận index strategy và selectivity
+- Có transaction boundary rõ theo batch
+- Có runbook rerun khi late-arriving records xuất hiện</pre></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons"><div></div><button class="nav-btn primary" onclick="goNext(0)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m1">
+      <div class="module-header">
+        <div class="module-tag">W6.01.02</div>
+        <div class="module-title">Analytic Functions & Reporting SQL</div>
+        <div class="module-subtitle">Window functions trong Oracle: từ ranking đến running metrics phục vụ dashboard và reconciliation</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Nhóm kỹ thuật</th><th>Functions</th><th>Use case DE</th></tr>
+          <tr><td>Ranking</td><td>ROW_NUMBER, RANK, DENSE_RANK</td><td>Top N per partition, dedup bản ghi</td></tr>
+          <tr><td>Time-shift</td><td>LAG, LEAD</td><td>So sánh ngày trước/sau, phát hiện biến động</td></tr>
+          <tr><td>Window aggregates</td><td>SUM OVER, AVG OVER</td><td>Running total, moving average</td></tr>
+          <tr><td>Pattern</td><td>Latest row per key</td><td>Lấy trạng thái hiện tại từ log thay đổi</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Hiểu rõ cú pháp <code>OVER(PARTITION BY ... ORDER BY ...)</code> và lý do nó khác <code>GROUP BY</code>.</li>
+          <li>Dùng analytic functions để giải bài toán reporting kiểu doanh nghiệp thay vì query thủ công nhiều bước.</li>
+          <li>Biết áp dụng cho dedup, latest row per key, và theo dõi xu hướng chỉ số theo thời gian.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Analytic function khác GROUP BY như thế nào</h3>
+        <p><strong>GROUP BY</strong> gom nhiều dòng thành một dòng kết quả. <strong>Analytic function</strong> giữ nguyên số dòng, nhưng tính thêm metric theo cửa sổ dữ liệu. Với reporting SQL, đây là khác biệt rất quan trọng vì bạn vừa giữ chi tiết transaction vừa có tổng hợp ngay trên từng dòng.</p>
+
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>analytic_queries.sql</span></div>
+          <div class="cmd-body"><pre>SELECT
+    branch_id,
+    txn_date,
+    txn_id,
+    amount,
+    ROW_NUMBER() OVER (
+        PARTITION BY branch_id
+        ORDER BY txn_date DESC, txn_id DESC
+    ) AS rn_latest,
+    RANK() OVER (
+        PARTITION BY branch_id
+        ORDER BY amount DESC
+    ) AS amount_rank,
+    DENSE_RANK() OVER (
+        PARTITION BY branch_id
+        ORDER BY amount DESC
+    ) AS amount_dense_rank,
+    LAG(amount) OVER (
+        PARTITION BY branch_id
+        ORDER BY txn_date
+    ) AS prev_amount,
+    LEAD(amount) OVER (
+        PARTITION BY branch_id
+        ORDER BY txn_date
+    ) AS next_amount,
+    SUM(amount) OVER (
+        PARTITION BY branch_id
+        ORDER BY txn_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total,
+    AVG(amount) OVER (
+        PARTITION BY branch_id
+        ORDER BY txn_date
+        ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+    ) AS moving_avg_7d
+FROM stg_branch_txn;
+</pre></div>
+        </div>
+
+        <h3>Latest row per key và dedup bằng ROW_NUMBER</h3>
+        <div class="cmd-block">
+          <div class="cmd-header"><span>latest_record_pattern.sql</span></div>
+          <div class="cmd-body"><pre>WITH ranked AS (
+    SELECT
+        customer_id,
+        status,
+        updated_at,
+        ROW_NUMBER() OVER (
+            PARTITION BY customer_id
+            ORDER BY updated_at DESC, event_id DESC
+        ) AS rn
+    FROM cust_status_log
+)
+SELECT customer_id, status, updated_at
+FROM ranked
+WHERE rn = 1;
+</pre></div>
+        </div>
+
+        <h3>Top N per partition cho reporting</h3>
+        <p>Ví dụ: top 3 sản phẩm doanh thu cao nhất theo từng region trong ngày. Đây là pattern phổ biến cho dashboard quản trị.</p>
+        <div class="cmd-block"><div class="cmd-header"><span>top_n_per_partition.sql</span></div><div class="cmd-body"><pre>WITH ranked_sales AS (
+    SELECT
+        sales_date,
+        region,
+        product_id,
+        revenue,
+        ROW_NUMBER() OVER (
+            PARTITION BY sales_date, region
+            ORDER BY revenue DESC
+        ) AS rn
+    FROM fct_product_sales
+)
+SELECT *
+FROM ranked_sales
+WHERE rn &lt;= 3;
+</pre></div></div>
+
+        <p>Nếu chỉ cần top N toàn cục (không partition theo nhóm), từ Oracle 12c có thể dùng cú pháp ngắn hơn và rất dễ đọc:</p>
+        <div class="cmd-block"><div class="cmd-header"><span>top_n_global_12c.sql</span></div><div class="cmd-body"><pre>SELECT product_id, revenue
+FROM fct_product_sales
+ORDER BY revenue DESC
+FETCH FIRST 10 ROWS ONLY;
+</pre></div></div>
+
+        <div class="info-box note">📌 <span>Oracle hỗ trợ analytic functions mạnh và ổn định. Tuy nhiên luôn chỉ định ORDER BY rõ ràng để kết quả deterministic, nhất là khi dùng ROW_NUMBER cho dedup.</span></div>
+        <div class="info-box warn">⚠️ <span>Anti-pattern: dùng ROW_NUMBER nhưng ORDER BY thiếu tie-breaker khiến mỗi lần rerun chọn dòng khác nhau.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Analytic function giữ đặc tính nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì analytic function giữ số dòng gốc và thêm cột tính toán.')">A. Giữ số dòng gốc và thêm metric</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đó là hành vi của GROUP BY chứ không phải analytic function.')">B. Luôn gộp dòng thành một bản ghi tổng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì analytic function không bắt buộc phải lọc dữ liệu.')">C. Luôn giảm dữ liệu xuống 1 dòng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì analytic function không liên quan việc tự tạo index.')">D. Tự động tạo index cho bảng</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Function nào phù hợp để lấy dòng mới nhất mỗi customer?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì COUNT không chọn được bản ghi cụ thể.')">A. COUNT(*)</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì ROW_NUMBER với PARTITION BY key và ORDER BY thời gian giúp chọn bản ghi mới nhất.')">B. ROW_NUMBER()</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì MIN chỉ cho giá trị nhỏ nhất, không giải quyết tie và toàn bộ cột.')">C. MIN(updated_at)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING dùng cho subtotal grouping sets.')">D. GROUPING()</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khác biệt chính giữa RANK và DENSE_RANK là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì cả hai đều cần ORDER BY để xếp hạng đúng.')">A. DENSE_RANK không cần ORDER BY</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì RANK bỏ số thứ hạng khi có tie, DENSE_RANK thì không.')">B. RANK tạo khoảng trống thứ hạng, DENSE_RANK thì liền mạch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì cả hai đều hỗ trợ PARTITION BY.')">C. Chỉ RANK hỗ trợ PARTITION BY</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì hai function không bắt buộc đi cùng aggregate.')">D. Cả hai chỉ dùng với SUM</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">LAG thường dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì LAG lấy giá trị dòng trước theo thứ tự đã định.')">A. So sánh giá trị hiện tại với dòng trước</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì lọc duplicate không phải chức năng trực tiếp của LAG.')">B. Tự động xoá duplicate</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì LAG không tạo partition vật lý.')">C. Chia partition table</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì LAG không thay thế MERGE.')">D. Upsert dữ liệu incremental</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Câu nào phù hợp để tính running total?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUP BY sẽ mất chi tiết từng dòng.')">A. SUM(amount) với GROUP BY thuần</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì SUM OVER với frame từ đầu đến dòng hiện tại tạo running total.')">B. SUM(amount) OVER (PARTITION BY ... ORDER BY ... ROWS UNBOUNDED PRECEDING)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì AVG không cho tổng lũy kế.')">C. AVG(amount)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì COUNT không thể hiện tổng tiền.')">D. COUNT(*)</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Top N theo từng region nên dùng pattern nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì ROW_NUMBER partition theo region giúp lọc N bản ghi cao nhất mỗi nhóm.')">A. ROW_NUMBER partition theo region rồi lọc rn &lt;= N</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì ORDER BY toàn cục sẽ lấy top N toàn hệ thống.')">B. ORDER BY revenue DESC FETCH FIRST N ROWS ONLY</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì DISTINCT không giải được top theo nhóm.')">C. DISTINCT region, product</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì UNION ALL không cần thiết cho top N per partition.')">D. UNION ALL nhiều query thủ công</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi dedup với ROW_NUMBER, vì sao cần tie-breaker?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì tie-breaker giúp kết quả ổn định qua nhiều lần chạy.')">A. Để kết quả deterministic giữa các lần rerun</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tie-breaker không làm query ngắn hơn đáng kể.')">B. Để giảm số dòng SQL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tie-breaker không phải để bỏ PARTITION BY.')">C. Để không cần PARTITION BY</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tie-breaker không thay vai trò index strategy.')">D. Để thay thế index</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Analytic function nào phù hợp để nhìn trung bình trượt 7 ngày?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì MAX không cho trung bình trượt.')">A. MAX OVER</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì AVG OVER với frame 6 PRECEDING đến CURRENT ROW là moving average 7 ngày.')">B. AVG OVER với frame 6 PRECEDING</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì SUM OVER cho tổng lũy kế, không phải trung bình trượt.')">C. SUM OVER UNBOUNDED PRECEDING</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì LEAD dùng cho giá trị tương lai gần.')">D. LEAD</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi nào analytic function đặc biệt hữu ích cho reporting?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì delete dữ liệu không phải mục tiêu reporting.')">A. Khi muốn xoá dữ liệu nhanh</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì bạn cần vừa giữ chi tiết giao dịch vừa thêm metric tổng hợp trên từng dòng.')">B. Khi cần metric tổng hợp mà vẫn giữ chi tiết dòng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì analytic function không thay thế vai trò ETL scheduling.')">C. Khi muốn lên lịch cron</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì analytic function không tự xử lý phân quyền.')">D. Khi cần quản lý user privilege</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Oracle-specific lưu ý nào khi dùng window function?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì ORDER BY rõ và frame rõ giúp tránh kết quả mơ hồ trong reporting.')">A. Luôn chỉ định ORDER BY và window frame rõ ràng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì analytic function không yêu cầu COMMIT để tính toán đúng.')">B. Luôn COMMIT trước mọi SELECT</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì index bitmap không phải giải pháp mặc định cho mọi analytic query.')">C. Luôn tạo bitmap index trước khi chạy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải query analytic nào cũng cần MATERIALIZED VIEW.')">D. Bắt buộc dùng materialized view</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Core syntax</strong>OVER + PARTITION BY + ORDER BY là nền tảng analytic</div>
+        <div class="summary-item"><strong>Ranking</strong>ROW_NUMBER/RANK/DENSE_RANK cho top N và dedup</div>
+        <div class="summary-item"><strong>Time shift</strong>LAG/LEAD để phân tích biến động theo chuỗi thời gian</div>
+        <div class="summary-item"><strong>Window aggregate</strong>SUM/AVG OVER cho running và moving metrics</div>
+        <div class="summary-item"><strong>Reporting mindset</strong>Giữ dòng chi tiết nhưng thêm ngữ cảnh tổng hợp</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Thiếu tie-breaker khiến dedup không deterministic</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Analytic SQL cho retention reporting</div><div class="practice-task-body"><p>Viết query tính running active users theo từng ngày và moving average 7 ngày cho mỗi channel trong bảng <code>fct_user_activity</code>.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>analytic_retention.sql</span></div><div class="cmd-body"><pre>SELECT
+    activity_date,
+    channel,
+    active_users,
+    SUM(active_users) OVER (
+      PARTITION BY channel
+      ORDER BY activity_date
+      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_active_users,
+    AVG(active_users) OVER (
+      PARTITION BY channel
+      ORDER BY activity_date
+      ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+    ) AS ma7_active_users
+FROM fct_user_activity;
+</pre></div></div></div></div></div>
+
+        <div class="practice-task"><div class="practice-task-header">Bài 2: Dedup batch event bằng ROW_NUMBER</div><div class="practice-task-body"><p>Dữ liệu event có duplicate theo <code>(event_id)</code>. Viết query lấy bản ghi cuối cùng theo <code>ingest_ts</code> và <code>src_seq</code>.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>dedup_events.sql</span></div><div class="cmd-body"><pre>WITH ranked AS (
+  SELECT e.*,
+         ROW_NUMBER() OVER (
+            PARTITION BY event_id
+            ORDER BY ingest_ts DESC, src_seq DESC
+         ) AS rn
+  FROM stg_event_raw e
+)
+SELECT *
+FROM ranked
+WHERE rn = 1;
+</pre></div></div></div></div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(1)">← Module trước</button><button class="nav-btn primary" onclick="goNext(1)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m2">
+      <div class="module-header">
+        <div class="module-tag">W6.01.03</div>
+        <div class="module-title">Advanced Aggregation: GROUPING SETS, ROLLUP, CUBE</div>
+        <div class="module-subtitle">Tạo subtotal đa cấp cho finance/reporting mà không phải viết UNION ALL dài</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:37.5%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Chủ đề</th><th>Kỹ thuật</th><th>Ý nghĩa báo cáo</th></tr>
+          <tr><td>Multi-level subtotal</td><td>ROLLUP</td><td>Subtotal theo hierarchy và grand total</td></tr>
+          <tr><td>All combinations</td><td>CUBE</td><td>Phân tích đa chiều đầy đủ</td></tr>
+          <tr><td>Custom subtotal sets</td><td>GROUPING SETS</td><td>Chỉ tính các mức business cần</td></tr>
+          <tr><td>Nhận diện subtotal</td><td>GROUPING(), GROUPING_ID()</td><td>Phân biệt dòng dữ liệu thật và dòng tổng hợp</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Hiểu cách thay thế chuỗi <code>UNION ALL</code> dài bằng biểu thức tổng hợp rõ ràng hơn.</li>
+        <li>Biết diễn giải đúng các dòng subtotal/grand total để tránh đọc nhầm số liệu.</li>
+        <li>Áp dụng cho báo cáo tài chính, doanh thu đa chiều và reconciliation theo cấp tổ chức.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>GROUPING SETS: chỉ lấy mức tổng hợp bạn cần</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>grouping_reports.sql</span></div><div class="cmd-body"><pre>SELECT
+    fiscal_month,
+    region,
+    product_line,
+    SUM(net_revenue) AS net_revenue,
+    GROUPING(fiscal_month) AS g_month,
+    GROUPING(region) AS g_region,
+    GROUPING(product_line) AS g_product,
+    GROUPING_ID(fiscal_month, region, product_line) AS grp_id
+FROM fct_revenue
+GROUP BY GROUPING SETS (
+    (fiscal_month, region, product_line),
+    (fiscal_month, region),
+    (fiscal_month),
+    ()
+)
+ORDER BY fiscal_month, region, product_line;
+</pre></div></div>
+
+        <h3>ROLLUP và CUBE</h3>
+        <ul>
+          <li><strong>ROLLUP(a,b,c):</strong> tạo cấp (a,b,c) → (a,b) → (a) → grand total.</li>
+          <li><strong>CUBE(a,b):</strong> tạo toàn bộ tổ hợp (a,b), (a), (b), ().</li>
+        </ul>
+
+        <div class="cmd-block"><div class="cmd-header"><span>rollup_hierarchy_ascii.txt</span></div><div class="cmd-body"><pre>Hierarchy subtotal mindset (ROLLUP):
+Country -> Channel -> Detail
+VN      -> Mobile  -> từng giao dịch
+VN      -> Mobile  -> Subtotal Mobile
+VN      -> ALL     -> Subtotal quốc gia VN
+ALL     -> ALL     -> Grand Total
+</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><span>rollup_vs_cube.sql</span></div><div class="cmd-body"><pre>-- ROLLUP: hierarchy subtotal
+SELECT country, channel, SUM(amount) AS amount
+FROM fct_payment
+GROUP BY ROLLUP(country, channel);
+
+-- CUBE: full combination subtotal
+SELECT country, channel, SUM(amount) AS amount
+FROM fct_payment
+GROUP BY CUBE(country, channel);
+</pre></div></div>
+
+        <h3>Diễn giải subtotal rows đúng cách</h3>
+        <p>Khi cột dimension bị NULL trong kết quả tổng hợp, không phải lúc nào cũng nghĩa là dữ liệu gốc NULL. Nó có thể là dòng subtotal do ROLLUP/CUBE tạo ra. Vì vậy cần nhìn thêm <code>GROUPING()</code> hoặc <code>GROUPING_ID()</code>.</p>
+
+        <table>
+          <tr><th>GROUPING(col)</th><th>Ý nghĩa</th></tr>
+          <tr><td>0</td><td>Dòng dữ liệu chi tiết hoặc col có giá trị thực</td></tr>
+          <tr><td>1</td><td>Col đã được tổng hợp ở cấp subtotal/grand total</td></tr>
+        </table>
+
+        <div class="info-box tip">✅ <span>Với báo cáo finance, GROUPING SETS giúp query ngắn hơn, dễ audit hơn, và tránh lỗi logic khi copy nhiều nhánh UNION ALL.</span></div>
+        <div class="info-box warn">⚠️ <span>Anti-pattern: đọc nhầm dòng subtotal có NULL là lỗi dữ liệu thiếu, dẫn tới xử lý sai ở downstream report.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Mục tiêu chính của GROUPING SETS là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì GROUPING SETS cho phép định nghĩa rõ các mức tổng hợp cần lấy.')">A. Chọn chính xác các mức subtotal cần thiết</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING SETS không tự tạo index.')">B. Tự động tạo index tối ưu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING SETS không thay partitioning vật lý.')">C. Chia bảng thành partition</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING SETS không thực hiện upsert.')">D. Upsert dữ liệu incremental</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">ROLLUP tạo đặc điểm nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì ROLLUP tạo subtotal theo hierarchy và có grand total.')">A. Subtotal theo hierarchy đến grand total</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì full combinations là đặc trưng của CUBE.')">B. Tạo mọi tổ hợp dimension</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì ROLLUP không giới hạn ở đúng 2 cột.')">C. Chỉ chạy với đúng hai cột</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì ROLLUP vẫn dùng group aggregate, không phải analytic window.')">D. Chỉ dùng với analytic function</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">CUBE khác ROLLUP ở điểm nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì CUBE vẫn tạo cả grand total.')">A. CUBE không có grand total</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì CUBE tạo toàn bộ tổ hợp subtotal cho các dimension.')">B. CUBE tạo toàn bộ combinations</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì CUBE không bắt buộc có GROUPING_ID mới chạy.')">C. CUBE chỉ chạy khi có GROUPING_ID</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì CUBE không phải kỹ thuật partition vật lý.')">D. CUBE dùng để partition table</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">GROUPING(col)=1 nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì 1 không đại diện cho detail row.')">A. Cột là detail row</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì giá trị 1 nghĩa cột đã được tổng hợp ở dòng subtotal.')">B. Cột đang ở trạng thái aggregated subtotal</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không liên quan lỗi null data gốc.')">C. Dữ liệu nguồn bị lỗi null</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING chỉ nói trạng thái aggregate, không nói index.')">D. Cột đang dùng bitmap index</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Tại sao GROUPING_ID hữu ích cho reporting?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì GROUPING_ID giúp phân loại dòng tổng hợp theo cấp để format báo cáo chính xác.')">A. Phân loại cấp subtotal dễ dàng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING_ID không thay được SUM.')">B. Thay thế hoàn toàn aggregate function</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING_ID không liên quan commit transaction.')">C. Tự commit sau query</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING_ID không tối ưu network transfer trực tiếp.')">D. Giảm network latency tự động</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi nào nên ưu tiên GROUPING SETS thay UNION ALL?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì nhiều cấp subtotal trong cùng business report sẽ rõ ràng và giảm lặp code.')">A. Khi cần nhiều mức subtotal trong cùng query</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì UNION ALL vẫn có thể cần trong một số trường hợp khác bản chất phép tính.')">B. Khi muốn bỏ mọi UNION ALL mọi nơi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING SETS không dành cho việc đổi data type.')">C. Khi cần cast dữ liệu nhanh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì GROUPING SETS không phải công cụ backup.')">D. Khi cần sao lưu bảng</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Rủi ro thường gặp khi đọc output ROLLUP/CUBE?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì dễ nhầm dòng subtotal thành dữ liệu chi tiết nếu không xem cờ GROUPING.')">A. Nhầm subtotal rows thành detail rows</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì ROLLUP/CUBE không tự gây deadlock.')">B. Tự gây deadlock</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì output không bắt buộc mất dữ liệu gốc.')">C. Luôn mất dữ liệu gốc</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không liên quan trực tiếp tới index invalid.')">D. Tự làm invalid index</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Use case finance nào phù hợp cho GROUPING SETS?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì báo cáo doanh thu theo nhiều cấp tổ chức là use case điển hình.')">A. Báo cáo doanh thu theo chi nhánh, vùng, toàn công ty</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì reset mật khẩu không liên quan aggregation.')">B. Luồng reset mật khẩu user</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì upload ảnh không phải nghiệp vụ SQL aggregation.')">C. Upload media vào CDN</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì render biểu đồ là bước front-end, không phải SQL grouping.')">D. Render chart animation</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Nếu chỉ cần 3 mức subtotal cụ thể, nên dùng gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì GROUPING SETS cho phép chọn đúng 3 mức cần thiết.')">A. GROUPING SETS</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì CUBE tạo nhiều tổ hợp hơn cần thiết.')">B. CUBE</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì ROLLUP theo hierarchy có thể tạo cấp dư.')">C. ROLLUP cố định</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì DISTINCT không tạo subtotal.')">D. DISTINCT</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Trade-off đúng của advanced aggregation là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì query biểu đạt tốt hơn nhưng output phức tạp hơn khi đọc và xử lý.')">A. Query expressive hơn nhưng output khó đọc hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì advanced aggregation không luôn nhanh hơn mọi trường hợp.')">B. Luôn nhanh hơn mọi query khác</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không làm mất nhu cầu validation subtotal.')">C. Không cần validation kết quả</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không thay thế hoàn toàn reporting layer.')">D. Có thể bỏ mọi logic ở BI layer</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>GROUPING SETS</strong>Tùy chỉnh các mức subtotal đúng nhu cầu business</div>
+        <div class="summary-item"><strong>ROLLUP</strong>Subtotal theo thứ bậc dimension</div>
+        <div class="summary-item"><strong>CUBE</strong>Phân tích toàn bộ tổ hợp dimension</div>
+        <div class="summary-item"><strong>GROUPING flags</strong>Phân biệt detail rows với subtotal rows</div>
+        <div class="summary-item"><strong>Use case</strong>Finance reporting, reconciliation đa cấp</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Đọc sai NULL subtotal thành lỗi dữ liệu</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Reporting đa cấp thay UNION ALL</div><div class="practice-task-body"><p>Viết query báo cáo <code>net_amount</code> theo <code>(month, region, product)</code>, <code>(month, region)</code>, <code>(month)</code> và grand total bằng GROUPING SETS.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>report_grouping_sets.sql</span></div><div class="cmd-body"><pre>SELECT month_key,
+       region,
+       product,
+       SUM(net_amount) AS net_amount,
+       GROUPING_ID(month_key, region, product) AS gid
+FROM fct_finance
+GROUP BY GROUPING SETS (
+  (month_key, region, product),
+  (month_key, region),
+  (month_key),
+  ()
+);
+</pre></div></div></div></div></div>
+
+        <div class="practice-task"><div class="practice-task-header">Bài 2: Reconciliation interpretation</div><div class="practice-task-body"><p>Thiết kế rule đọc output: dòng nào là detail, dòng nào là subtotal để không cộng đè số liệu khi xuất Excel.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><ul><li>Nếu <code>GROUPING_ID=0</code> thì là detail row.</li><li>Nếu <code>GROUPING_ID&gt;0</code> thì là subtotal/grand total row.</li><li>Không cộng lại subtotal vào detail ở bước hậu xử lý.</li><li>Xuất cột <code>row_level</code> để BI layer phân biệt hiển thị.</li></ul></div></div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(2)">← Module trước</button><button class="nav-btn primary" onclick="goNext(2)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m3">
+      <div class="module-header">
+        <div class="module-tag">W6.01.04</div>
+        <div class="module-title">MERGE, Incremental Load & Idempotency</div>
+        <div class="module-subtitle">Thiết kế upsert Oracle chuẩn batch production: dedup, watermark, late-arriving và kiểm định sau load</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Chủ đề</th><th>Điểm cần nắm</th><th>Rủi ro nếu sai</th></tr>
+        <tr><td>MERGE syntax</td><td>WHEN MATCHED / WHEN NOT MATCHED</td><td>Overwrite sai hoặc missing insert</td></tr>
+        <tr><td>Incremental watermark</td><td>Load theo mốc thời gian/tăng dần</td><td>Bỏ sót dữ liệu mới</td></tr>
+        <tr><td>Idempotency</td><td>Rerun cho cùng kết quả</td><td>Duplicate hoặc drift số liệu</td></tr>
+        <tr><td>Late-arriving</td><td>Mở cửa sổ load bù và dedup</td><td>Lệch reporting theo ngày</td></tr>
+        <tr><td>Set-based processing</td><td>Ưu tiên MERGE/INSERT SELECT thay loop cursor</td><td>Row-by-row chậm và khó scale</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Viết MERGE Oracle theo tư duy incremental load thay vì full refresh.</li>
+        <li>Xây idempotent pipeline có thể rerun an toàn khi job fail giữa chừng.</li>
+        <li>Thêm bước validation sau merge: insert/update count, duplicate checks, đối soát tổng.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>MERGE cho daily incremental load</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>merge_incremental.sql</span></div><div class="cmd-body"><pre>MERGE INTO fct_account_txn t
+USING (
+    SELECT *
+    FROM (
+        SELECT s.*,
+               ROW_NUMBER() OVER (
+                 PARTITION BY txn_id
+                 ORDER BY src_updated_at DESC, src_seq DESC
+               ) AS rn
+        FROM stg_account_txn_delta s
+        WHERE src_updated_at &gt;= :watermark_start
+          AND src_updated_at &lt;  :watermark_end
+    )
+    WHERE rn = 1
+) s
+ON (t.txn_id = s.txn_id)
+WHEN MATCHED THEN
+  UPDATE SET
+      t.amount = s.amount,
+      t.status = s.status,
+      t.src_updated_at = s.src_updated_at,
+      t.etl_updated_at = SYSTIMESTAMP
+WHEN NOT MATCHED THEN
+  INSERT (txn_id, account_id, amount, status, src_updated_at, etl_created_at, etl_updated_at)
+  VALUES (s.txn_id, s.account_id, s.amount, s.status, s.src_updated_at, SYSTIMESTAMP, SYSTIMESTAMP);
+</pre></div></div>
+
+        <h3>Watermark và late-arriving records</h3>
+        <p>Thực tế, sự kiện đến trễ là bình thường. Nên dùng sliding window, ví dụ load lại 2 ngày gần nhất để bắt bổ sung, sau đó dedup theo business key.</p>
+        <div class="cmd-block"><div class="cmd-header"><span>watermark_strategy.sql</span></div><div class="cmd-body"><pre>-- Giả sử scheduler lưu watermark_end lần chạy trước
+-- Lần này mở rộng lùi 2 ngày để bắt late-arriving
+watermark_start = previous_watermark_end - INTERVAL '2' DAY;
+watermark_end   = current_batch_cutoff;
+</pre></div></div>
+
+        <h3>Set-based vs Row-by-row (Cursor Loop)</h3>
+        <p>Với ETL khối lượng lớn, Oracle mạnh nhất khi xử lý theo tập dữ liệu (set-based). Tránh anti-pattern <code>FOR rec IN cursor LOOP ...</code> để update từng dòng vì sẽ chậm, khó tune và dễ kéo dài lock.</p>
+        <div class="cmd-block"><div class="cmd-header"><span>set_based_append_insert.sql</span></div><div class="cmd-body"><pre>-- Direct-path insert cho batch lớn vào staging/target append-only
+INSERT /*+ APPEND */ INTO stg_account_txn_dedup (
+    txn_id, account_id, amount, status, src_updated_at
+)
+SELECT
+    txn_id, account_id, amount, status, src_updated_at
+FROM stg_account_txn_delta
+WHERE src_updated_at &gt;= :watermark_start
+  AND src_updated_at &lt;  :watermark_end;
+</pre></div></div>
+        <div class="info-box note">📌 <span><code>/*+ APPEND */</code> dùng direct path insert, hữu ích cho bulk load lớn kiểu warehouse/batch. Luôn benchmark và phối hợp với chiến lược commit/segment phù hợp môi trường.</span></div>
+
+        <h3>Validation sau MERGE</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>reconciliation_checks.sql</span></div><div class="cmd-body"><pre>-- 1) Duplicate check
+SELECT txn_id, COUNT(*) AS cnt
+FROM fct_account_txn
+GROUP BY txn_id
+HAVING COUNT(*) &gt; 1;
+
+-- 2) Delta coverage check
+SELECT COUNT(*) AS src_rows
+FROM stg_account_txn_delta
+WHERE src_updated_at &gt;= :watermark_start
+  AND src_updated_at &lt;  :watermark_end;
+
+SELECT COUNT(*) AS tgt_rows
+FROM fct_account_txn
+WHERE etl_updated_at &gt;= :batch_start_ts
+  AND etl_updated_at &lt;  :batch_end_ts;
+
+-- 3) Amount reconciliation
+SELECT
+  SUM(amount) AS src_amount
+FROM (
+  SELECT s.*,
+         ROW_NUMBER() OVER(PARTITION BY txn_id ORDER BY src_updated_at DESC, src_seq DESC) rn
+  FROM stg_account_txn_delta s
+  WHERE src_updated_at &gt;= :watermark_start
+    AND src_updated_at &lt;  :watermark_end
+)
+WHERE rn = 1;
+
+-- 4) Record-level reconciliation bằng MINUS
+-- Các txn_id có ở source dedup nhưng chưa có ở target sau batch
+SELECT txn_id
+FROM (
+  SELECT txn_id
+  FROM (
+    SELECT s.txn_id,
+           ROW_NUMBER() OVER(PARTITION BY s.txn_id ORDER BY s.src_updated_at DESC, s.src_seq DESC) rn
+    FROM stg_account_txn_delta s
+    WHERE s.src_updated_at &gt;= :watermark_start
+      AND s.src_updated_at &lt;  :watermark_end
+  )
+  WHERE rn = 1
+)
+MINUS
+SELECT txn_id
+FROM fct_account_txn
+WHERE etl_updated_at &gt;= :batch_start_ts
+  AND etl_updated_at &lt;  :batch_end_ts;
+</pre></div></div>
+
+        <div class="info-box tip">✅ <span>MERGE mạnh vì gói cả update và insert vào một flow rõ ràng, rất hợp incremental pipelines.</span></div>
+        <div class="info-box warn">⚠️ <span>Anti-pattern: rerun batch nhưng source chưa dedup, hoặc ON condition thiếu business key làm overwrite nhầm record.</span></div>
+        <div class="info-box warn">⚠️ <span>Tránh row-by-row cursor loop cho ETL lớn. Hãy ưu tiên set-based SQL (MERGE/INSERT SELECT) để scale tốt và dễ vận hành.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Lý do chính MERGE quan trọng trong incremental ETL là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì MERGE xử lý đồng thời update và insert theo key matching.')">A. Kết hợp update và insert trong một luồng logic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì MERGE không phải công cụ nén dữ liệu.')">B. Tự động nén dữ liệu bảng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì MERGE không thay commit control.')">C. Loại bỏ hoàn toàn nhu cầu transaction</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì MERGE không tự giải quyết mọi duplicate upstream.')">D. Tự xử lý tất cả duplicate không cần dedup</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Trong MERGE, WHEN MATCHED thường dùng cho hành động nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì insert thường thuộc WHEN NOT MATCHED.')">A. Insert record mới</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì khi key đã tồn tại thì thực hiện UPDATE cột cần đồng bộ.')">B. Update record hiện có</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì truncate không nằm trong flow MERGE.')">C. Truncate bảng target</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì create index không phải clause của MERGE.')">D. Create index tạm</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Idempotent load nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì rerun cùng input phải cho cùng output, không phát sinh duplicate.')">A. Chạy lại cùng batch vẫn cho kết quả ổn định</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì idempotent không đồng nghĩa chạy nhanh hơn.')">B. Chạy lại sẽ luôn nhanh hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì idempotent không yêu cầu full refresh mỗi lần.')">C. Mỗi lần đều xoá và nạp lại toàn bộ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì idempotent không phải phân quyền user.')">D. Chỉ user admin mới chạy được</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Watermark trong incremental load dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì watermark xác định cửa sổ dữ liệu cần load ở batch hiện tại.')">A. Xác định phạm vi bản ghi cần xử lý theo thời gian</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì watermark không thay khóa chính.')">B. Tạo primary key cho bảng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì watermark không dùng để đổi data type.')">C. Chuyển NUMBER sang VARCHAR2</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì watermark không thay execution plan.')">D. Ép query dùng hash join</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Late-arriving records nên xử lý theo hướng nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì mở lại window gần đây + dedup giúp bắt dữ liệu đến trễ an toàn.')">A. Sliding window + dedup theo business key</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bỏ qua dữ liệu trễ làm lệch report.')">B. Bỏ qua hoàn toàn dữ liệu trễ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì full reload mỗi ngày thường tốn tài nguyên và không cần thiết.')">C. Full reload toàn bảng mỗi batch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì lock bảng thủ công không giải quyết bản chất late-arriving.')">D. Lock bảng để chờ đủ dữ liệu</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Bước validation nào quan trọng sau MERGE?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì duplicate check là phòng tuyến cơ bản bảo vệ tính đúng của target.')">A. Kiểm tra duplicate theo business key</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đổi tên cột không giúp xác minh chất lượng batch.')">B. Đổi alias cột cho đẹp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì comment SQL không thay thế validation.')">C. Thêm comment dài trong script</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ check runtime không đủ xác thực dữ liệu.')">D. Chỉ xem query chạy nhanh hay chậm</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern nguy hiểm với MERGE là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì ON condition sai key có thể update nhầm hàng loạt bản ghi.')">A. ON condition không đủ khóa nghiệp vụ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bind variables thường là best practice.')">B. Dùng bind variables trong batch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì logging batch là tốt.')">C. Ghi log số lượng bản ghi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì lọc theo watermark là cần thiết.')">D. Lọc theo watermark chuẩn</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Nếu rerun gây duplicate, nguyên nhân hợp lý nhất là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì source chưa dedup hoặc merge key không unique thường gây duplicate khi rerun.')">A. Source chưa dedup hoặc key merge không chuẩn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì timezone có thể ảnh hưởng, nhưng không phải nguyên nhân duy nhất và trực tiếp mọi trường hợp.')">B. Do timezone của laptop</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì thiếu comment không tạo duplicate dữ liệu.')">C. Do không có comment trong SQL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì font editor không liên quan logic dữ liệu.')">D. Do font chữ terminal</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Thiết kế incremental nào dễ audit hơn?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì lưu watermark, batch_id, insert/update counts giúp truy vết rõ ràng.')">A. Có metadata batch: watermark, counts, thời gian chạy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không lưu metadata làm khó điều tra sự cố.')">B. Chạy xong là bỏ qua log</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì hardcode ngày làm pipeline khó vận hành lâu dài.')">C. Hardcode ngày trong script</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chạy tay không lịch không giúp audit tốt.')">D. Chỉ chạy thủ công ad-hoc</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Kiểm tra đối soát số tiền sau MERGE nhằm mục đích gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì giúp phát hiện lệch logic update/insert hoặc mất dữ liệu trong cửa sổ batch.')">A. Xác minh tổng tiền nguồn và đích không lệch bất thường</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không nhằm mục tiêu giảm kích thước bảng.')">B. Giảm dung lượng tablespace</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đối soát không thay role của index maintenance.')">C. Tự động rebuild index</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải để thay đổi partition key.')">D. Đổi partition strategy</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>MERGE core</strong>WHEN MATCHED update, WHEN NOT MATCHED insert</div>
+        <div class="summary-item"><strong>Idempotency</strong>Rerun cùng input phải ra output ổn định</div>
+        <div class="summary-item"><strong>Watermark</strong>Giới hạn batch window cho incremental load</div>
+        <div class="summary-item"><strong>Late-arriving</strong>Sliding window + dedup để bắt dữ liệu đến trễ</div>
+        <div class="summary-item"><strong>Validation</strong>Duplicate check, count check, amount reconciliation</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Merge key sai và source không dedup</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: MERGE design task</div><div class="practice-task-body"><p>Thiết kế MERGE cho bảng <code>fct_invoice_payment</code> với khóa nghiệp vụ <code>invoice_id</code>. Nguồn có thể gửi lại cùng invoice nhiều lần trong ngày.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><ul><li>Dedup nguồn bằng ROW_NUMBER theo <code>invoice_id</code>, ORDER BY <code>src_updated_at DESC, src_seq DESC</code>.</li><li>Merge ON theo <code>invoice_id</code>.</li><li>Matched: cập nhật amount, status, updated timestamp.</li><li>Not matched: insert record mới.</li><li>Sau merge: chạy duplicate check <code>HAVING COUNT(*)&gt;1</code>.</li></ul></div></div></div>
+
+        <div class="practice-task"><div class="practice-task-header">Bài 2: Validation checklist sau incremental run</div><div class="practice-task-body"><p>Viết checklist 5 bước để xác nhận batch merge ngày D chạy đúng, có thể audit được.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><ol><li>Kiểm tra row source trong cửa sổ watermark.</li><li>Kiểm tra số dòng target được cập nhật trong batch.</li><li>Duplicate check theo business key.</li><li>Đối soát tổng amount source vs target delta.</li><li>Lưu batch metadata: watermark_start/end, start/end_ts, status.</li></ol></div></div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">← Module trước</button><button class="nav-btn primary" onclick="goNext(3)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m4">
+      <div class="module-header">
+        <div class="module-tag">W6.01.05</div>
+        <div class="module-title">Execution Plans, Indexes & Query Tuning</div>
+        <div class="module-subtitle">Đọc plan theo cost-based optimizer mindset và tối ưu có bằng chứng</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:62.5%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Khối kiến thức</th><th>Nội dung</th><th>Mục tiêu thực tế</th></tr>
+        <tr><td>EXPLAIN PLAN</td><td>Hiểu operator và cost</td><td>Biết query bottleneck nằm ở đâu</td></tr>
+        <tr><td>Join strategy</td><td>Nested loops, hash join</td><td>Chọn join phù hợp volume và index</td></tr>
+        <tr><td>Access path</td><td>Full table scan, index range scan</td><td>Nhận diện đọc dữ liệu hiệu quả</td></tr>
+        <tr><td>Index strategy</td><td>B-tree, bitmap, composite, function-based</td><td>Tối ưu đọc mà kiểm soát chi phí ghi</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Hiểu cost-based optimizer mindset: optimizer chọn plan theo thống kê, không theo cảm giác người viết query.</li>
+        <li>Đọc được execution plan cơ bản và phát hiện anti-pattern tuning phổ biến.</li>
+        <li>Thiết kế index có chủ đích, biết trade-off giữa cải thiện đọc và chi phí ghi/update.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>EXPLAIN PLAN basics</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>explain_plan.sql</span></div><div class="cmd-body"><pre>EXPLAIN PLAN FOR
+SELECT /* monthly ledger report */
+       l.ledger_date,
+       l.branch_id,
+       SUM(l.amount) AS amount
+FROM fct_ledger l
+WHERE l.ledger_date BETWEEN DATE '2026-03-01' AND DATE '2026-03-31'
+  AND l.branch_id = :p_branch
+GROUP BY l.ledger_date, l.branch_id;
+
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());
+</pre></div></div>
+        <p>Bạn có thể dùng AUTOTRACE trong SQL*Plus/SQLcl để xem thêm thống kê thực thi thực tế sau khi chạy query.</p>
+        <p>Dùng bind variables như <code>:p_branch</code>, <code>:p_email</code> giúp Oracle tái sử dụng execution plan tốt hơn, giảm hard parse và giảm áp lực shared pool khi query được gọi lặp lại với nhiều giá trị khác nhau.</p>
+
+        <h3>Đọc operator quan trọng</h3>
+        <table>
+          <tr><th>Operator</th><th>Ý nghĩa</th><th>Khi thường gặp</th></tr>
+          <tr><td>FULL TABLE SCAN</td><td>Đọc toàn bộ bảng</td><td>Không có index phù hợp hoặc filter selectivity thấp</td></tr>
+          <tr><td>INDEX RANGE SCAN</td><td>Đọc một phần index theo điều kiện range/equality</td><td>Filter selectivity đủ tốt</td></tr>
+          <tr><td>NESTED LOOPS</td><td>Join theo vòng lặp bảng ngoài vào bảng trong</td><td>Lookup nhỏ, có index lookup tốt</td></tr>
+          <tr><td>HASH JOIN</td><td>Build hash table để join volume lớn</td><td>Join dataset lớn, ít selective index</td></tr>
+          <tr><td>SORT</td><td>Sắp xếp hoặc group kết quả</td><td>ORDER BY/GROUP BY trên dữ liệu lớn</td></tr>
+        </table>
+
+        <h3>Index strategy thực tế</h3>
+        <ul>
+          <li><strong>B-tree:</strong> mặc định, phù hợp OLTP và lookup/range phổ biến.</li>
+          <li><strong>Bitmap:</strong> hiệu quả cho cột cardinality thấp trong workload đọc nhiều, cẩn trọng với write-heavy tables.</li>
+          <li><strong>Composite index:</strong> cần theo thứ tự cột sát điều kiện lọc/join thực tế.</li>
+          <li><strong>Function-based index:</strong> hỗ trợ predicate có hàm, ví dụ <code>UPPER(email)</code>.</li>
+        </ul>
+
+        <div class="info-box warn">⚠️ <span>Bitmap index trên bảng OLTP write-heavy (insert/update liên tục) có thể gây lock contention rất nặng. Với nghiệp vụ giao dịch, ưu tiên B-tree và chỉ dùng bitmap khi workload chủ yếu là đọc dạng warehouse/reporting.</span></div>
+
+        <div class="cmd-block"><div class="cmd-header"><span>tuning_examples.sql</span></div><div class="cmd-body"><pre>-- Before: filter trên hàm làm optimizer khó dùng index thường
+SELECT *
+FROM dim_customer
+WHERE UPPER(email) = UPPER(:p_email);
+
+-- Tạo function-based index
+CREATE INDEX idx_dim_customer_email_upper
+    ON dim_customer (UPPER(email));
+
+-- After: query giữ nguyên nhưng có cơ hội index range scan
+SELECT *
+FROM dim_customer
+WHERE UPPER(email) = UPPER(:p_email);
+</pre></div></div>
+
+        <p><strong>Stale statistics</strong> là nguyên nhân phổ biến khiến optimizer chọn plan kém. Sau thay đổi lớn dữ liệu, cần refresh thống kê để optimizer có thông tin mới.</p>
+        <div class="cmd-block"><div class="cmd-header"><span>refresh_stats.sql</span></div><div class="cmd-body"><pre>BEGIN
+  DBMS_STATS.GATHER_TABLE_STATS(
+    ownname          =&gt; 'DW_FINANCE',
+    tabname          =&gt; 'FCT_LEDGER',
+    cascade          =&gt; TRUE,
+    estimate_percent =&gt; DBMS_STATS.AUTO_SAMPLE_SIZE,
+    method_opt       =&gt; 'FOR ALL COLUMNS SIZE AUTO'
+  );
+END;
+/
+</pre></div></div>
+        <div class="info-box note">📌 <span>Index giúp read nhanh hơn nhưng làm insert/update/delete tốn chi phí hơn vì phải duy trì index entries.</span></div>
+        <div class="info-box warn">⚠️ <span>Anti-pattern: thêm index tràn lan khi thấy query chậm mà không nhìn execution plan và pattern truy cập thực tế.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">EXPLAIN PLAN dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì EXPLAIN PLAN cho biết cách optimizer dự kiến thực thi query.')">A. Xem chiến lược thực thi query của optimizer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì EXPLAIN PLAN không sửa dữ liệu.')">B. Tự sửa dữ liệu sai</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì EXPLAIN PLAN không tạo schema mới.')">C. Tạo bảng tự động</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì EXPLAIN PLAN không cấp quyền user.')">D. Quản lý role và permission</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi nào full table scan có thể hợp lý?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì khi lọc rất ít chọn lọc hoặc cần đọc phần lớn bảng thì FTS có thể hợp lý.')">A. Khi cần đọc phần lớn bảng hoặc selectivity thấp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải lúc nào full scan cũng xấu tuyệt đối.')">B. Không bao giờ hợp lý</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì full scan không liên quan trực tiếp commit policy.')">C. Chỉ khi chưa COMMIT</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ số lượng cột không quyết định duy nhất access path.')">D. Chỉ khi SELECT có hơn 10 cột</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Index range scan thường tốt khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì điều kiện lọc có chọn lọc tốt giúp index scan hiệu quả.')">A. Khi predicate có selectivity tốt</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì select * không tự động tạo lợi thế index range scan.')">B. Khi luôn SELECT *</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì range scan không phụ thuộc việc bảng có trigger.')">C. Khi bảng có nhiều trigger</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì index range scan không yêu cầu rollback trước.')">D. Khi rollback transaction</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Hash join phù hợp hơn nested loops trong kịch bản nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì join dataset lớn thường hợp hash join hơn khi lookup index không selective.')">A. Join hai tập dữ liệu lớn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì lookup từng dòng nhỏ có index thường hợp nested loops hơn.')">B. Lookup bảng nhỏ theo key có index mạnh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì hash join không dành cho merge incremental logic.')">C. Upsert với MERGE</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tạo user không liên quan join strategy.')">D. Tạo tài khoản DB mới</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Bitmap index nên cân nhắc khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì bitmap thường hợp cột cardinality thấp trong workload đọc nhiều.')">A. Cột cardinality thấp, workload đọc nhiều</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì write-heavy table không phải nơi bitmap index an toàn mặc định.')">B. Bảng update liên tục theo từng dòng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì primary key unique thường hợp B-tree.')">C. Cột ID unique cao</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bitmap không phải giải pháp cho mọi filter date range.')">D. Mọi cột ngày tháng</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Composite index hiệu quả phụ thuộc điều gì nhiều nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì thứ tự cột phải bám pattern lọc/join thực tế của query.')">A. Thứ tự cột theo predicate phổ biến</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tên index đẹp không cải thiện plan.')">B. Tên index ngắn gọn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì màu highlight IDE không tác động optimizer.')">C. Màu syntax editor</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì index count nhiều không đồng nghĩa hiệu quả.')">D. Số lượng index càng nhiều càng tốt</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Function-based index giúp gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì nó hỗ trợ predicate sử dụng hàm như UPPER, TRUNC một cách tối ưu hơn.')">A. Tối ưu query filter có hàm trên cột</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không dùng để thay partition key.')">B. Tự đổi partition table</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không thay được cơ chế transaction.')">C. Bỏ qua lock row</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải backup mechanism.')">D. Sao lưu tự động bảng</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Stale statistics ảnh hưởng gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì thống kê cũ có thể khiến optimizer chọn plan không còn phù hợp dữ liệu hiện tại.')">A. Optimizer có thể chọn plan kém</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì stale stats không xoá dữ liệu trực tiếp.')">B. Tự làm mất dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì stale stats không tự khóa toàn DB.')">C. Tự khóa toàn bộ database</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì stale stats không làm thay đổi cú pháp SQL.')">D. SQL bị sai cú pháp</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Sau bulk load lớn, thao tác nào thường giúp optimizer chọn plan ổn định hơn?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì refresh statistics bằng DBMS_STATS giúp optimizer có thông tin mới về phân bố dữ liệu.')">A. Chạy DBMS_STATS.GATHER_TABLE_STATS cho bảng liên quan</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ COMMIT không cập nhật thống kê optimizer.')">B. Chỉ COMMIT rồi bỏ qua statistics</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đổi tên index không giúp optimizer có stats mới.')">C. Đổi tên index để plan mới hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì format SQL đẹp không thay stats thực tế.')">D. Chỉnh format câu SQL</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Vì sao nói index có trade-off?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì index tăng tốc đọc nhưng tăng chi phí ghi và bảo trì.')">A. Tăng tốc đọc nhưng làm ghi tốn hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì index không chỉ có lợi mà không tốn chi phí.')">B. Chỉ có lợi, không có chi phí</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì index không thay role của data quality checks.')">C. Thay thế validation dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì index không liên quan trực tiếp commit frequency policy.')">D. Quyết định thời điểm COMMIT</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern tuning phổ biến nhất là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì thêm index mù mà không đọc plan và workload thực dễ gây lãng phí và regressions.')">A. Thêm index mù theo cảm tính</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì so sánh before/after plan là best practice.')">B. So sánh plan trước và sau tối ưu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đo selectivity là cần thiết.')">C. Đo selectivity của điều kiện lọc</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì phân tích operator là việc nên làm.')">D. Đọc kỹ operator trong plan</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Rủi ro chính khi dùng bitmap index trên bảng giao dịch update liên tục là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì bitmap index trong write-heavy workload có thể gây lock contention rất cao.')">A. Lock contention cao khi ghi dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bitmap index không làm câu SQL mất dấu chấm phẩy.')">B. SQL luôn sai cú pháp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bitmap index không tự tăng partition count.')">C. Tự tăng số partition</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bitmap index không tự thay optimizer mode.')">D. Tự chuyển optimizer sang RULE</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Optimizer mindset</strong>Plan được chọn theo thống kê và cost</div>
+        <div class="summary-item"><strong>Access path</strong>FTS và index scan đều có chỗ dùng</div>
+        <div class="summary-item"><strong>Join choice</strong>Nested loops cho lookup, hash join cho volume lớn</div>
+        <div class="summary-item"><strong>Index types</strong>B-tree, bitmap, composite, function-based có trade-off riêng</div>
+        <div class="summary-item"><strong>Stale stats</strong>Cần làm mới thống kê khi dữ liệu đổi lớn</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Tuning theo niềm tin, không theo evidence</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Explain-plan interpretation task</div><div class="practice-task-body"><p>Giả sử query báo cáo tháng đang chạy 18 phút và plan cho thấy FULL TABLE SCAN trên <code>fct_ledger</code> 120M rows. Đề xuất 3 hướng tuning có ưu tiên.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><ol><li>Rà predicate có selective không, tránh function trên cột lọc.</li><li>Xem khả năng composite index theo <code>(branch_id, ledger_date)</code> nếu pattern truy cập ổn định.</li><li>Xem partitioning theo ngày/tháng để partition pruning giảm phạm vi scan.</li></ol></div></div></div>
+
+        <div class="practice-task"><div class="practice-task-header">Bài 2: Before/after tuning report</div><div class="practice-task-body"><p>Tạo template báo cáo tuning gồm: query id, plan before, plan after, runtime, rows processed, quyết định giữ hay rollback.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><table><tr><th>Field</th><th>Mô tả</th></tr><tr><td>query_id</td><td>Mã truy vấn cần tối ưu</td></tr><tr><td>plan_before</td><td>Operator/cost trước thay đổi</td></tr><tr><td>plan_after</td><td>Operator/cost sau thay đổi</td></tr><tr><td>runtime_ms</td><td>Đo thực nghiệm cùng input</td></tr><tr><td>decision</td><td>Keep / rollback + lý do</td></tr></table></div></div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(4)">← Module trước</button><button class="nav-btn primary" onclick="goNext(4)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m5">
+      <div class="module-header">
+        <div class="module-tag">W6.01.06</div>
+        <div class="module-title">Partitioning, Transactions & Locking Basics</div>
+        <div class="module-subtitle">Thiết kế partition ETL-friendly, hiểu read consistency và tránh lock contention trong batch</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Nhóm</th><th>Nội dung</th><th>Lợi ích cho DE</th></tr>
+        <tr><td>Partitioning</td><td>Range / hash / list</td><td>Giảm scan phạm vi rộng, hỗ trợ batch maintenance</td></tr>
+        <tr><td>Partition pruning</td><td>Filter trùng partition key</td><td>Giảm IO, tăng tốc query/report</td></tr>
+        <tr><td>Transactions</td><td>COMMIT / ROLLBACK</td><td>Kiểm soát tính toàn vẹn batch</td></tr>
+        <tr><td>Locking basics</td><td>Row-level lock, long tx danger</td><td>Giảm contention giữa ETL và truy vấn nghiệp vụ</td></tr>
+        <tr><td>Local vs Global Index</td><td>Ưu tiên local index trên partitioned table</td><td>Drop/archive partition ít rủi ro hơn</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Biết chọn partition strategy cho fact/event tables theo đặc thù ETL.</li>
+        <li>Nắm transaction boundary để batch vừa an toàn vừa không khoá tài nguyên quá lâu.</li>
+        <li>Hiểu read consistency và row-level locking đủ dùng cho Data Engineer.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Partitioning cơ bản cho Oracle DE workloads</h3>
+        <ul>
+          <li><strong>Range partition:</strong> phù hợp fact table theo ngày/tháng, ví dụ <code>txn_date</code>.</li>
+          <li><strong>Hash partition:</strong> phân tán dữ liệu theo key đều hơn, hỗ trợ parallelism.</li>
+          <li><strong>List partition:</strong> phân vùng theo nhóm giá trị rời rạc như region.</li>
+        </ul>
+
+        <div class="cmd-block"><div class="cmd-header"><span>partition_notes.md</span></div><div class="cmd-body"><pre>-- ví dụ range partition cho fact table theo tháng
+CREATE TABLE fct_daily_txn (
+    txn_id         NUMBER,
+    account_id     NUMBER,
+    txn_date       DATE,
+    amount         NUMBER(18,2),
+    status         VARCHAR2(20)
+)
+PARTITION BY RANGE (txn_date) (
+    PARTITION p202601 VALUES LESS THAN (DATE '2026-02-01'),
+    PARTITION p202602 VALUES LESS THAN (DATE '2026-03-01'),
+    PARTITION pmax    VALUES LESS THAN (MAXVALUE)
+);
+
+CREATE INDEX idx_fct_daily_txn_branch_dt
+    ON fct_daily_txn (branch_id, txn_date)
+    LOCAL;
+
+-- Ghi chú vận hành:
+-- Khi archive/drop partition cũ, local index giúp giảm rủi ro invalid index toàn bảng.
+</pre></div></div>
+
+        <p>Với bảng partitioned trong ETL, thường ưu tiên <strong>local index</strong> để khi drop/truncate partition cũ (archive/retention) không làm invalid toàn bộ index của bảng. <strong>Global index</strong> vẫn có chỗ dùng nhưng chi phí maintenance thường cao hơn khi lifecycle partition diễn ra thường xuyên.</p>
+
+        <h3>Partition pruning mindset</h3>
+        <p>Nếu query filter theo cột partition key dạng đúng chuẩn, optimizer có thể đọc ít partition hơn. Ví dụ filter theo <code>txn_date</code> cho tháng cụ thể giúp giảm IO rõ rệt.</p>
+
+        <h3>Transaction basics cho ETL</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>etl_transaction_boundary.sql</span></div><div class="cmd-body"><pre>BEGIN
+  -- 1) Load vào staging
+  -- 2) Dedup source
+  -- 3) MERGE vào target
+  -- 4) Validate duplicate và amount
+  COMMIT;
+EXCEPTION
+  WHEN OTHERS THEN
+    ROLLBACK;
+    RAISE;
+END;
+</pre></div></div>
+
+        <h3>Read consistency và locking cơ bản</h3>
+        <p>Oracle cung cấp read consistency để reader thấy snapshot ổn định. Locking thường ở mức row-level khi update/merge. Tuy vậy, transaction quá dài hoặc batch thiết kế kém vẫn có thể gây lock contention.</p>
+
+        <div class="info-box note">📌 <span>ETL transaction boundary nên theo đơn vị batch hợp lý. Quá nhỏ gây overhead, quá lớn gây lock kéo dài và rollback tốn kém.</span></div>
+        <div class="info-box warn">⚠️ <span>Anti-pattern: gộp toàn bộ ngày dữ liệu khổng lồ vào một transaction duy nhất mà không checkpoint, dễ gây lock contention và rollback đau đớn.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Range partition thường phù hợp nhất với bảng nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì fact/event table theo thời gian hưởng lợi rõ từ range partition.')">A. Fact/event table theo thời gian</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bảng danh mục nhỏ ít biến động thường không cần partition phức tạp.')">B. Bảng lookup rất nhỏ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì audit log có thể partition nhưng không phải mọi bảng text nhỏ đều cần.')">C. Bảng cấu hình 50 dòng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì partition không dành riêng cho bảng temporary.')">D. Chỉ global temporary table</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Partition pruning xảy ra tốt khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì filter bám cột partition key giúp Oracle bỏ qua partition không liên quan.')">A. Predicate bám đúng partition key</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì select * không liên quan trực tiếp pruning.')">B. Luôn dùng SELECT *</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không cần hint mới có pruning.')">C. Bắt buộc dùng hint mọi query</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì COMMIT không kích hoạt pruning.')">D. COMMIT sau mỗi câu SELECT</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Hash partition thường hữu ích để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì hash partition giúp phân tán dữ liệu đều theo key.')">A. Phân tán dữ liệu theo key tương đối đồng đều</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì hash partition không tạo thứ tự thời gian tự nhiên.')">B. Thay thế hoàn toàn range theo thời gian</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì hash partition không dùng cho phân quyền user.')">C. Quản lý role</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì hash partition không thay merge logic incremental.')">D. Thay MERGE trong ETL</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">COMMIT trong ETL có vai trò gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì COMMIT xác nhận transaction thành công và ghi nhận thay đổi.')">A. Xác nhận thay đổi của transaction</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì COMMIT không tối ưu execution plan.')">B. Tối ưu optimizer statistics</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì COMMIT không thay cấu trúc index.')">C. Tự tạo index</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì COMMIT không làm mất nhu cầu validation dữ liệu.')">D. Bỏ qua kiểm tra batch</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">ROLLBACK nên dùng khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì khi phát hiện lỗi trong transaction chưa commit thì rollback để giữ tính nhất quán.')">A. Khi batch lỗi trước khi commit</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì rollback không phải bước bắt buộc sau mỗi query thành công.')">B. Sau mỗi query thành công</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì rollback không dùng để tăng tốc đọc.')">C. Khi query chậm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì rollback không thay thế backup strategy.')">D. Để sao lưu dữ liệu</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Locking cơ bản trong Oracle DML thường ở mức nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì Oracle thường dùng row-level locking cho update/merge.')">A. Row-level locking</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì table lock toàn phần không phải mặc định mọi thao tác.')">B. Luôn khóa toàn bộ database</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì page-level lock không phải cách mô tả chuẩn ở Oracle cho context này.')">C. Chỉ khóa từng page cố định</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì read consistency không đồng nghĩa zero lock tuyệt đối cho write.')">D. Không có lock khi cập nhật</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Rủi ro của long transaction trong ETL là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì long transaction làm tăng lock contention, undo pressure và thời gian rollback.')">A. Lock contention và rollback tốn kém</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì long transaction không tự nâng độ chính xác dữ liệu.')">B. Tự tăng data quality</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không làm optimizer tự chọn plan tốt hơn.')">C. Plan luôn tối ưu hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải cơ chế nén dữ liệu.')">D. Tự nén partition</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Thiết kế transaction boundary hợp lý cho batch là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì boundary theo đơn vị batch có validation giúp cân bằng an toàn và hiệu năng.')">A. Theo batch logic có validate trước commit</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì commit từng dòng tạo overhead lớn.')">B. COMMIT sau mỗi row insert</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì gom cả tháng vào một tx duy nhất thường rủi ro cao.')">C. Một transaction cho toàn bộ tháng dữ liệu rất lớn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bỏ transaction khiến khó rollback có kiểm soát.')">D. Không dùng transaction control</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Partition design ETL-friendly cần bám yếu tố nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì cần bám pattern load, query, retention và maintenance thực tế.')">A. Pattern load/query/retention thực tế</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ dựa vào tên bảng là không đủ.')">B. Tên bảng nghe hợp lý</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số partition càng nhiều không luôn tốt.')">C. Càng nhiều partition càng tốt</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bỏ qua business calendar gây khó vận hành.')">D. Không cần theo lịch nghiệp vụ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern về locking trong batch design là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì batch update lớn thiếu phân lô và thiếu checkpoint dễ gây lock kéo dài.')">A. Update khối lượng cực lớn trong một tx không checkpoint</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chia batch hợp lý là cách giảm lock.')">B. Chia batch theo đơn vị thời gian</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì validate trước commit là thực hành tốt.')">C. Validate trước khi commit</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì giữ query filter partition key là tốt cho pruning.')">D. Filter đúng partition key</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Partition options</strong>Range/hash/list phục vụ mục tiêu khác nhau</div>
+        <div class="summary-item"><strong>Pruning</strong>Filter đúng key giúp giảm IO đáng kể</div>
+        <div class="summary-item"><strong>Transactions</strong>COMMIT/ROLLBACK là khung an toàn cho ETL</div>
+        <div class="summary-item"><strong>Locking</strong>Row-level lock vẫn cần thiết kế batch cẩn trọng</div>
+        <div class="summary-item"><strong>Boundary</strong>Chọn transaction size theo trade-off lock và overhead</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Huge transaction thiếu checkpoint</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Partition design task</div><div class="practice-task-body"><p>Bảng <code>fct_card_txn</code> có 250M rows/năm. Thiết kế partition strategy cho workload: report theo ngày/tháng, retention 36 tháng, load incremental theo ngày.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><ul><li>Chọn range partition theo <code>txn_date</code> (monthly partitions).</li><li>Tạo local index trên <code>(branch_id, txn_date)</code> theo pattern query.</li><li>Retention: drop/archive partition cũ hơn 36 tháng.</li><li>Batch ETL load theo partition hiện hành để giảm lock phạm vi rộng.</li></ul></div></div></div>
+
+        <div class="practice-task"><div class="practice-task-header">Bài 2: Transaction boundary review</div><div class="practice-task-body"><p>Một job đang merge 40M rows trong 1 transaction và gây lock contention. Đề xuất redesign đơn giản cho người mới.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><ol><li>Chia batch theo ngày hoặc theo partition để giảm thời gian giữ lock.</li><li>Mỗi batch: dedup → merge → validate nhanh → commit.</li><li>Nếu lỗi: rollback batch hiện tại, không rollback toàn bộ lịch sử.</li><li>Lưu checkpoint batch_id để rerun có kiểm soát.</li></ol></div></div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">← Module trước</button><button class="nav-btn primary" onclick="goNext(5)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m6">
+      <div class="module-header">
+        <div class="module-tag">W6.01.07</div>
+        <div class="module-title">Artifact: week6_01_oracle_sql_lab/</div>
+        <div class="module-subtitle">Đóng gói portfolio artifact đầy đủ bối cảnh, SQL scripts, tuning decisions và lessons learned</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:87.5%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Thành phần artifact</th><th>Nhiệm vụ</th><th>Giá trị portfolio</th></tr>
+          <tr><td>analytic_queries.sql</td><td>Window functions cho reporting</td><td>Thể hiện SQL analytics năng lực cao</td></tr>
+          <tr><td>grouping_reports.sql</td><td>Subtotal đa cấp bằng GROUPING SETS/ROLLUP/CUBE</td><td>Chứng minh tư duy báo cáo doanh nghiệp</td></tr>
+          <tr><td>merge_incremental.sql</td><td>Idempotent MERGE incremental</td><td>Thể hiện năng lực ETL production</td></tr>
+          <tr><td>tuning_examples.sql</td><td>Before/after plan + index strategy</td><td>Thể hiện tuning mindset có bằng chứng</td></tr>
+          <tr><td>partition_notes.md</td><td>Partition + transaction design</td><td>Cho thấy tư duy vận hành lâu dài</td></tr>
+          <tr><td>reconciliation_checks.sql</td><td>Đối soát sau load</td><td>Nhấn mạnh quality-first</td></tr>
+          <tr><td>README.md</td><td>Bối cảnh, quyết định, bài học</td><td>Tăng độ thuyết phục với recruiter</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Biết cách đóng gói Oracle SQL work thành artifact có câu chuyện kỹ thuật rõ ràng.</li>
+        <li>Đảm bảo mỗi file đều có mục tiêu nghiệp vụ, không chỉ là script rời rạc.</li>
+        <li>Viết README theo format recruiter đọc nhanh vẫn hiểu độ sâu kỹ thuật.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Cấu trúc artifact bắt buộc</h3>
+        <div class="file-tree">week6_01_oracle_sql_lab/
+├── analytic_queries.sql
+├── grouping_reports.sql
+├── merge_incremental.sql
+├── tuning_examples.sql
+├── partition_notes.md
+├── reconciliation_checks.sql
+└── README.md</div>
+
+        <h3>README cần có gì để recruiter đánh giá tốt</h3>
+        <ol>
+          <li><strong>Workload scenario:</strong> mô tả domain và data volume giả lập hợp lý.</li>
+          <li><strong>Business use case:</strong> report nào, đối soát nào, SLA nào.</li>
+          <li><strong>Oracle features used:</strong> analytic, grouping sets, merge, plan, index, partition.</li>
+          <li><strong>Tuning decisions:</strong> quyết định nào đã thử, kết quả before/after.</li>
+          <li><strong>Incremental logic:</strong> watermark, dedup, late-arriving handling, idempotency.</li>
+          <li><strong>Lessons learned:</strong> anti-pattern gặp phải và cách tránh.</li>
+        </ol>
+
+        <div class="cmd-block"><div class="cmd-header"><span>README.md skeleton</span></div><div class="cmd-body"><pre># week6_01_oracle_sql_lab
+
+## Workload scenario
+Daily transaction ingestion for enterprise finance reporting (~8M rows/day source delta).
+
+## Business use case
+- Daily branch-level revenue reconciliation
+- Monthly performance report with multi-level subtotals
+
+## Oracle SQL features used
+- Analytic functions: ROW_NUMBER, LAG, SUM OVER, AVG OVER
+- Advanced aggregation: GROUPING SETS, ROLLUP, CUBE, GROUPING_ID
+- Incremental upsert: MERGE with source dedup and watermark
+- Performance tuning: EXPLAIN PLAN, index strategy, stale stats awareness
+- Data layout: range partitioning for date-based pruning
+
+## Tuning decisions
+- Before: full table scan on ledger fact monthly report
+- After: partition-aware predicate + composite index + refreshed stats
+- Bulk-load path: dùng INSERT /*+ APPEND */ cho vùng staging append-only để tăng throughput
+- Statistics refresh: chạy DBMS_STATS.GATHER_TABLE_STATS sau batch lớn để tránh plan drift
+
+## Incremental logic
+- Sliding watermark window (D-2 to D)
+- Idempotent rerun behavior validated by duplicate checks
+- Late-arriving event handling documented
+
+## Lessons learned
+- Indexes help reads but penalize writes
+- Missing tie-breaker in dedup can break rerun consistency
+- Subtotal rows from GROUPING SETS must be interpreted explicitly
+</pre></div></div>
+
+        <div class="info-box tip">✅ <span>Artifact tốt không chỉ có SQL đúng mà còn thể hiện bạn biết vì sao chọn giải pháp đó và cách kiểm chứng nó trong thực tế.</span></div>
+        <div class="info-box warn">⚠️ <span>Anti-pattern: ném nhiều file SQL rời rạc không có câu chuyện nghiệp vụ, không có validation, không có quyết định tuning.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Vì sao cần cấu trúc thư mục artifact rõ ràng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì cấu trúc rõ giúp reviewer hiểu phạm vi kỹ năng và tái sử dụng dễ.')">A. Dễ review, dễ hiểu và dễ tái sử dụng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đẹp mắt thôi chưa đủ giá trị kỹ thuật.')">B. Chỉ để nhìn đẹp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không thay nhu cầu documentation.')">C. Để khỏi viết README</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không ảnh hưởng trực tiếp license DB.')">D. Để giảm license Oracle</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">README artifact nên ưu tiên nội dung nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì scenario, logic, tuning, validation mới thể hiện năng lực thực chiến.')">A. Scenario, incremental logic, tuning decisions, validation</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì slogan không giúp đánh giá kỹ thuật.')">B. Slogan cá nhân</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ screenshot không cho thấy logic SQL.')">C. Chỉ ảnh màn hình query</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì liệt kê tool không chứng minh khả năng áp dụng.')">D. Chỉ danh sách công nghệ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">File nào phù hợp chứa logic MERGE incremental?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì analytic_queries.sql nên tập trung window/reporting.')">A. analytic_queries.sql</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì merge_incremental.sql là nơi mô tả upsert batch logic.')">B. merge_incremental.sql</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì partition_notes.md chủ yếu tài liệu thiết kế.')">C. partition_notes.md</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì README không nên chứa toàn bộ script SQL.')">D. README.md</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">reconciliation_checks.sql nên gồm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì cần duplicate check, count check và amount reconciliation.')">A. Duplicate, row count và amount reconciliation queries</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì styling CSS không thuộc file SQL.')">B. UI stylesheet cho dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì script cấp quyền user không phải trọng tâm reconciliation.')">C. Chỉ GRANT statements</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ 1 câu SELECT không đủ bao phủ quality checks.')">D. Một câu SELECT ngẫu nhiên</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Tại sao cần ghi lại tuning decisions trong README?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì thể hiện bạn có tư duy thử nghiệm và quyết định dựa trên evidence.')">A. Để chứng minh quyết định có căn cứ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì recruiter không chỉ quan tâm runtime cuối cùng, họ cần cách bạn suy nghĩ.')">B. Vì runtime cuối cùng là đủ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tuning decisions không phải phần dư thừa.')">C. Để tăng độ dài tài liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không liên quan việc né coding test.')">D. Để bỏ qua phần code</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Artifact recruiter-grade thường có đặc điểm nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì có business context, SQL thực tế, validation và lessons learned.')">A. Có ngữ cảnh nghiệp vụ và kiểm chứng kỹ thuật rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ query toy dataset khó thuyết phục mức production mindset.')">B. Chỉ query toy data</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì thiếu documentation khiến khó đánh giá năng lực.')">C. Không cần giải thích gì</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì nhiều file rời rạc không phản ánh tư duy hệ thống.')">D. Càng nhiều file càng tốt</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">File nào mô tả partition strategy và transaction notes?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tuning_examples.sql tập trung query performance examples.')">A. tuning_examples.sql</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì grouping_reports.sql tập trung subtotal reporting.')">B. grouping_reports.sql</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì partition_notes.md dành cho kiến trúc partition và vận hành transaction.')">C. partition_notes.md</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì analytic file không phải nơi ghi runbook partition.')">D. analytic_queries.sql</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Lessons learned trong README nên bao gồm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì nêu anti-pattern và cách khắc phục chứng minh tư duy trưởng thành.')">A. Anti-pattern gặp phải và cách phòng tránh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không cần liệt kê toàn bộ lý thuyết lịch sử DB.')">B. Lịch sử Oracle từ thập niên 80</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ liệt kê công cụ không thể hiện bài học thực tế.')">C. Danh sách phần mềm đã cài</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì câu chung chung không có hành động học được.')">D. Chỉ ghi học được rất nhiều</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Mục tiêu của artifact module này là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì mục tiêu là đóng gói năng lực Oracle SQL theo chuẩn portfolio có thể review.')">A. Đóng gói năng lực thành portfolio có thể review</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải module về quản trị server Oracle.')">B. Cài đặt Oracle server từ đầu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không chỉ tập trung UI.')">C. Thiết kế giao diện dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải module machine learning.')">D. Huấn luyện mô hình dự báo</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Điều nào làm artifact giảm điểm nhất khi phỏng vấn?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì thiếu validation và thiếu business context khiến artifact trông như bài tập rời rạc.')">A. Không có validation và không có bối cảnh nghiệp vụ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tên file chuẩn chỉ là chi tiết nhỏ, không phải yếu tố chính.')">B. Tên file dài</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số lượng SQL không phải vấn đề nếu logic chặt.')">C. Có nhiều câu SQL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì dùng markdown là chuẩn bình thường.')">D. README viết bằng markdown</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Artifact structure</strong>Đủ 7 file đúng vai trò và liên kết logic</div>
+        <div class="summary-item"><strong>README quality</strong>Nêu rõ scenario, features, tuning, lessons learned</div>
+        <div class="summary-item"><strong>Business story</strong>Mỗi script phải gắn use case nghiệp vụ</div>
+        <div class="summary-item"><strong>Validation</strong>Có reconciliation checks để chứng minh data trust</div>
+        <div class="summary-item"><strong>Recruiter angle</strong>Đánh giá năng lực qua quyết định kỹ thuật, không chỉ cú pháp</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Script rời rạc không ngữ cảnh</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1: Draft README mục Workload scenario</div><div class="practice-task-body"><p>Viết 5-7 dòng mô tả workload enterprise giả lập cho artifact của bạn, bao gồm volume và tần suất update.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><p>Ví dụ: Hệ thống xử lý giao dịch thanh toán thẻ, nguồn gửi delta ~8M rows/ngày, có late-arriving events tối đa 48 giờ, yêu cầu báo cáo reconciliation cuối ngày theo chi nhánh với SLA 30 phút sau cutoff.</p></div></div></div>
+
+        <div class="practice-task"><div class="practice-task-header">Bài 2: Portfolio self-review checklist</div><div class="practice-task-body"><p>Tự chấm artifact theo 6 tiêu chí: business context, SQL depth, tuning evidence, incremental safety, validation, readability.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><ol><li>Business context có cụ thể domain và mục tiêu report chưa?</li><li>SQL có dùng đúng analytic/grouping/merge không?</li><li>Tuning có before/after evidence không?</li><li>Incremental có idempotency + late-arriving handling không?</li><li>Validation có duplicate + amount reconciliation không?</li><li>README có đủ dễ đọc cho reviewer trong 5 phút không?</li></ol></div></div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">← Module trước</button><button class="nav-btn primary" onclick="goNext(6)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m7">
+      <div class="module-header">
+        <div class="module-tag">W6.01.08</div>
+        <div class="module-title">Mini Test Tổng Kết</div>
+        <div class="module-subtitle">Đánh giá cuối tuần: analytic, grouping, merge, execution plan, indexing, partitioning, transaction và locking</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. 📋 Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Khối đánh giá</th><th>Phạm vi</th><th>Số câu</th></tr>
+        <tr><td>Review nhanh module 8</td><td>Mindset Oracle SQL DE và readiness</td><td>10 câu</td></tr>
+        <tr><td>Final mini test</td><td>Toàn bộ W6.01.01 đến W6.01.07</td><td>20 câu</td></tr>
+        <tr><td>Kết quả</td><td>Điểm + guidance + reset</td><td>Tự động</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. 🎯 Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Tự kiểm tra mức độ nắm vững Oracle SQL Advanced theo hướng Data Engineering.</li>
+        <li>Phát hiện phần còn yếu để ôn lại trước khi sang module kế tiếp của roadmap.</li>
+        <li>Có tiêu chí điểm rõ ràng và khuyến nghị hành động sau bài test.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <p>Final mini test gồm 20 câu trắc nghiệm, mỗi câu 4 đáp án A/B/C/D. Bài test bao phủ đủ các nhóm năng lực Oracle SQL cho DE: analytic functions, advanced aggregation, MERGE incremental, execution plans, index strategy, partitioning, transaction boundary, locking basics và các điểm vận hành thực chiến như APPEND hint, DBMS_STATS.</p>
+        <div class="info-box tip">✅ <span>Hãy làm test như bối cảnh production: đọc kỹ từng lựa chọn, ưu tiên đáp án phản ánh trade-off và khả năng vận hành lâu dài.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. ❓ Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Oracle SQL cho DE cần ưu tiên điều gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì mục tiêu là query đúng, ổn định, có thể rerun và kiểm chứng.')">A. Tính đúng + ổn định + khả năng kiểm chứng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ nhanh chưa đủ nếu số liệu sai.')">B. Chỉ tốc độ trả kết quả</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì syntax đẹp không thay thế design đúng.')">C. Cú pháp ngắn nhất</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không thể bỏ qua quality checks.')">D. Không cần validation</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Analytic function giúp gì trong reporting?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì có thể giữ chi tiết và thêm metric tổng hợp trên từng dòng.')">A. Giữ detail row và thêm metric tổng hợp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì xoá dữ liệu không phải chức năng analytic.')">B. Xoá row duplicate vật lý</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không tự chuyển schema.')">C. Đổi cấu trúc bảng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không cấp quyền người dùng.')">D. Quản lý role</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">GROUPING_ID chủ yếu dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì GROUPING_ID giúp phân loại dòng subtotal theo cấp tổng hợp.')">A. Nhận diện cấp subtotal trong output</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không dùng để mã hoá dữ liệu.')">B. Mã hoá dữ liệu nhạy cảm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không thay count function.')">C. Thay thế COUNT(*)</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không liên quan privilege.')">D. Cấp quyền select</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">MERGE idempotent cần điều kiện nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì key đúng + source dedup + watermark rõ là nền tảng idempotency.')">A. Merge key chuẩn, source dedup, watermark rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ commit nhanh không đảm bảo idempotent.')">B. Chỉ commit thật nhanh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bỏ ON condition là cực kỳ nguy hiểm.')">C. Không cần ON condition</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì remove logging làm khó audit.')">D. Không lưu metadata batch</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi query chậm, bước đầu tiên nên làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì cần đọc execution plan trước khi quyết định tuning.')">A. Đọc execution plan</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì thêm index ngay có thể gây tác dụng phụ.')">B. Thêm index ngay lập tức</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tăng RAM không giải quyết gốc rễ query logic.')">C. Mua máy mạnh hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì rollback không phải giải pháp tuning query read.')">D. ROLLBACK transaction</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Chọn index hợp lý phụ thuộc vào yếu tố nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì phải bám workload query/write thực tế và selectivity.')">A. Workload thực tế và selectivity</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì theo cảm giác cá nhân dễ sai.')">B. Cảm giác của developer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số lượng index nhiều không bảo đảm tốt.')">C. Càng nhiều index càng tốt</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ dựa naming convention không đủ.')">D. Chỉ dựa tên cột đẹp</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Partition pruning có lợi gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì giảm phạm vi scan nên giảm IO và cải thiện runtime.')">A. Giảm IO do đọc ít partition hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì pruning không tự làm sạch duplicate.')">B. Tự xoá duplicate</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì pruning không thay index maintenance.')">C. Tự rebuild index</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì pruning không thay transaction control.')">D. Tự commit transaction</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Rủi ro lớn của long transactions trong ETL là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì lock contention và rollback tốn thời gian là rủi ro chính.')">A. Lock contention và rollback nặng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì long transaction không tự tăng data quality.')">B. Tăng data quality tự động</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không đảm bảo query nhanh hơn.')">C. Query luôn nhanh hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không liên quan trực tiếp disk quota tăng miễn phí.')">D. Tăng dung lượng đĩa miễn phí</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Một artifact Oracle SQL tốt cần có gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì cần business context, SQL depth, tuning evidence và validation.')">A. Câu chuyện nghiệp vụ + script + tuning + validation</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ notebook không đủ nếu thiếu vận hành SQL.')">B. Chỉ 1 notebook mô tả ý tưởng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì screenshot không thay thế code.')">C. Chỉ ảnh chụp màn hình</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không có README làm khó review.')">D. Không cần README</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Sau bulk load lớn, bước nào giúp giảm rủi ro plan kém ở lần chạy report kế tiếp?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng vì refresh statistics giúp optimizer phản ánh đúng phân bố dữ liệu mới.')">A. GATHER_TABLE_STATS bằng DBMS_STATS</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ COMMIT không cập nhật optimizer statistics.')">B. Chỉ COMMIT và bỏ qua thống kê</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đổi alias không tác động quality statistics.')">C. Đổi alias cột</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì format SQL không thay đổi statistics.')">D. Chỉnh lại format câu SQL</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. 📌 Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Review 10 câu</strong>Nhắc lại mindset cốt lõi trước bài test lớn</div>
+        <div class="summary-item"><strong>Mini test 20 câu</strong>Bao phủ cả phần vận hành: DBMS_STATS và APPEND hint</div>
+        <div class="summary-item"><strong>Chấm điểm tự động</strong>Có mức đánh giá và hướng dẫn ôn tập</div>
+        <div class="summary-item"><strong>Reset nhanh</strong>Làm lại để kiểm tra tiến bộ ngay</div>
+        <div class="summary-item"><strong>Mục tiêu</strong>Tự tin bước sang module tiếp theo</div>
+        <div class="summary-item"><strong>Mindset</strong>Hiểu trade-off, không học máy móc</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div id="final-test">
+          <div class="test-question" data-q="1" data-correct="B"><div class="test-question-title">Q1. Function nào phù hợp nhất để lấy bản ghi mới nhất mỗi customer?</div><div class="test-options"><label class="test-option"><input type="radio" name="q1" value="A"> A. RANK()</label><label class="test-option"><input type="radio" name="q1" value="B"> B. ROW_NUMBER() với PARTITION BY customer_id ORDER BY updated_at DESC</label><label class="test-option"><input type="radio" name="q1" value="C"> C. SUM() OVER</label><label class="test-option"><input type="radio" name="q1" value="D"> D. GROUPING()</label></div></div>
+          <div class="test-question" data-q="2" data-correct="C"><div class="test-question-title">Q2. RANK và DENSE_RANK khác nhau chủ yếu ở điểm nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q2" value="A"> A. DENSE_RANK không cần ORDER BY</label><label class="test-option"><input type="radio" name="q2" value="B"> B. RANK chỉ dùng cho số nguyên</label><label class="test-option"><input type="radio" name="q2" value="C"> C. RANK có thể nhảy bậc khi tie, DENSE_RANK thì không</label><label class="test-option"><input type="radio" name="q2" value="D"> D. Cả hai chỉ dùng với GROUP BY</label></div></div>
+          <div class="test-question" data-q="3" data-correct="A"><div class="test-question-title">Q3. Kỹ thuật nào giúp tạo nhiều mức subtotal có chọn lọc mà không cần UNION ALL dài?</div><div class="test-options"><label class="test-option"><input type="radio" name="q3" value="A"> A. GROUPING SETS</label><label class="test-option"><input type="radio" name="q3" value="B"> B. DISTINCT</label><label class="test-option"><input type="radio" name="q3" value="C"> C. TRUNCATE</label><label class="test-option"><input type="radio" name="q3" value="D"> D. ANALYZE TABLE</label></div></div>
+          <div class="test-question" data-q="4" data-correct="D"><div class="test-question-title">Q4. GROUPING(col)=1 thường biểu thị điều gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> A. Dữ liệu lỗi null</label><label class="test-option"><input type="radio" name="q4" value="B"> B. Cột có unique index</label><label class="test-option"><input type="radio" name="q4" value="C"> C. Cột đang được encrypted</label><label class="test-option"><input type="radio" name="q4" value="D"> D. Cột đang ở mức subtotal/grand total</label></div></div>
+          <div class="test-question" data-q="5" data-correct="B"><div class="test-question-title">Q5. Trong MERGE, WHEN NOT MATCHED THEN thường dùng để?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> A. DELETE record cũ</label><label class="test-option"><input type="radio" name="q5" value="B"> B. INSERT record mới</label><label class="test-option"><input type="radio" name="q5" value="C"> C. COMMIT transaction</label><label class="test-option"><input type="radio" name="q5" value="D"> D. CREATE INDEX</label></div></div>
+          <div class="test-question" data-q="6" data-correct="C"><div class="test-question-title">Q6. Idempotent load nghĩa là?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> A. Chỉ chạy được 1 lần</label><label class="test-option"><input type="radio" name="q6" value="B"> B. Mỗi lần chạy phải xoá toàn bảng</label><label class="test-option"><input type="radio" name="q6" value="C"> C. Rerun cùng input vẫn cho kết quả ổn định</label><label class="test-option"><input type="radio" name="q6" value="D"> D. Không cần transaction</label></div></div>
+          <div class="test-question" data-q="7" data-correct="A"><div class="test-question-title">Q7. Bước đầu tiên hợp lý khi query chậm là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> A. Xem EXPLAIN PLAN/DBMS_XPLAN</label><label class="test-option"><input type="radio" name="q7" value="B"> B. Thêm 10 index mới</label><label class="test-option"><input type="radio" name="q7" value="C"> C. Disable mọi constraint</label><label class="test-option"><input type="radio" name="q7" value="D"> D. Rewrite toàn hệ thống</label></div></div>
+          <div class="test-question" data-q="8" data-correct="D"><div class="test-question-title">Q8. Operator nào thường hợp với join tập dữ liệu lớn?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> A. NESTED LOOPS luôn luôn</label><label class="test-option"><input type="radio" name="q8" value="B"> B. INDEX UNIQUE SCAN</label><label class="test-option"><input type="radio" name="q8" value="C"> C. BITMAP CONVERSION TO ROWIDS</label><label class="test-option"><input type="radio" name="q8" value="D"> D. HASH JOIN</label></div></div>
+          <div class="test-question" data-q="9" data-correct="B"><div class="test-question-title">Q9. Bitmap index thường phù hợp cho trường hợp nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Cột ID unique và update liên tục</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Cột cardinality thấp, workload đọc nhiều</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Mọi bảng OLTP write-heavy</label><label class="test-option"><input type="radio" name="q9" value="D"> D. Khi muốn thay partitioning</label></div></div>
+          <div class="test-question" data-q="10" data-correct="A"><div class="test-question-title">Q10. Stale statistics có thể gây ra điều gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. Optimizer chọn plan kém</label><label class="test-option"><input type="radio" name="q10" value="B"> B. Mất dữ liệu ngay lập tức</label><label class="test-option"><input type="radio" name="q10" value="C"> C. Tự động rollback</label><label class="test-option"><input type="radio" name="q10" value="D"> D. Tự tạo index</label></div></div>
+          <div class="test-question" data-q="11" data-correct="C"><div class="test-question-title">Q11. Sau bulk load lớn, thao tác nào thường cần làm để optimizer có plan đáng tin hơn?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. Chỉ COMMIT rồi chạy tiếp</label><label class="test-option"><input type="radio" name="q11" value="B"> B. Rebuild toàn bộ index ngay</label><label class="test-option"><input type="radio" name="q11" value="C"> C. GATHER_TABLE_STATS bằng DBMS_STATS cho bảng liên quan</label><label class="test-option"><input type="radio" name="q11" value="D"> D. Đổi tên bảng để plan mới</label></div></div>
+          <div class="test-question" data-q="12" data-correct="C"><div class="test-question-title">Q12. Partition strategy phù hợp nhất cho fact table theo ngày là?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. List partition theo status</label><label class="test-option"><input type="radio" name="q12" value="B"> B. Hash partition theo customer_name</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Range partition theo date</label><label class="test-option"><input type="radio" name="q12" value="D"> D. Không partition dù 500M rows</label></div></div>
+          <div class="test-question" data-q="13" data-correct="D"><div class="test-question-title">Q13. Partition pruning đạt hiệu quả cao khi?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. Filter bằng hàm không sargable trên partition key</label><label class="test-option"><input type="radio" name="q13" value="B"> B. Không có điều kiện WHERE</label><label class="test-option"><input type="radio" name="q13" value="C"> C. Chỉ chọn 1 cột</label><label class="test-option"><input type="radio" name="q13" value="D"> D. Predicate bám đúng partition key và khoảng thời gian</label></div></div>
+          <div class="test-question" data-q="14" data-correct="A"><div class="test-question-title">Q14. COMMIT trong ETL mang ý nghĩa gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. Xác nhận transaction thành công</label><label class="test-option"><input type="radio" name="q14" value="B"> B. Huỷ toàn bộ thay đổi</label><label class="test-option"><input type="radio" name="q14" value="C"> C. Tạo statistics mới</label><label class="test-option"><input type="radio" name="q14" value="D"> D. Đổi isolation level tự động</label></div></div>
+          <div class="test-question" data-q="15" data-correct="B"><div class="test-question-title">Q15. Rủi ro của huge transaction không checkpoint là?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Luôn tối ưu hiệu năng</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Lock contention và rollback tốn kém</label><label class="test-option"><input type="radio" name="q15" value="C"> C. Giảm nhu cầu validation</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Tự chống duplicate</label></div></div>
+          <div class="test-question" data-q="16" data-correct="C"><div class="test-question-title">Q16. Validation nào quan trọng sau MERGE?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. Chỉ xem elapsed time</label><label class="test-option"><input type="radio" name="q16" value="B"> B. Chỉ kiểm tra syntax</label><label class="test-option"><input type="radio" name="q16" value="C"> C. Duplicate check + amount reconciliation</label><label class="test-option"><input type="radio" name="q16" value="D"> D. Đổi tên cột</label></div></div>
+          <div class="test-question" data-q="17" data-correct="A"><div class="test-question-title">Q17. Khi dùng ROW_NUMBER để dedup, cần lưu ý gì để ổn định kết quả?</div><div class="test-options"><label class="test-option"><input type="radio" name="q17" value="A"> A. ORDER BY có tie-breaker rõ ràng</label><label class="test-option"><input type="radio" name="q17" value="B"> B. Không cần ORDER BY</label><label class="test-option"><input type="radio" name="q17" value="C"> C. Luôn thêm DISTINCT</label><label class="test-option"><input type="radio" name="q17" value="D"> D. Chỉ dùng GROUP BY</label></div></div>
+          <div class="test-question" data-q="18" data-correct="D"><div class="test-question-title">Q18. Trade-off chính của index là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q18" value="A"> A. Chỉ có lợi cho mọi workload</label><label class="test-option"><input type="radio" name="q18" value="B"> B. Chỉ ảnh hưởng storage, không ảnh hưởng write</label><label class="test-option"><input type="radio" name="q18" value="C"> C. Chỉ dành cho report, không dùng ETL</label><label class="test-option"><input type="radio" name="q18" value="D"> D. Tăng tốc đọc nhưng tăng chi phí ghi/bảo trì</label></div></div>
+          <div class="test-question" data-q="19" data-correct="B"><div class="test-question-title">Q19. Tại sao artifact cần README mô tả tuning decisions?</div><div class="test-options"><label class="test-option"><input type="radio" name="q19" value="A"> A. Để làm file dài hơn</label><label class="test-option"><input type="radio" name="q19" value="B"> B. Để chứng minh tư duy quyết định dựa trên evidence</label><label class="test-option"><input type="radio" name="q19" value="C"> C. Vì SQL không cần code</label><label class="test-option"><input type="radio" name="q19" value="D"> D. Để tránh viết test</label></div></div>
+          <div class="test-question" data-q="20" data-correct="B"><div class="test-question-title">Q20. Trong Oracle ETL batch lớn, mục tiêu chính của INSERT /*+ APPEND */ là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q20" value="A"> A. Bắt buộc thay thế mọi câu MERGE</label><label class="test-option"><input type="radio" name="q20" value="B"> B. Hỗ trợ direct-path insert để tăng throughput bulk load</label><label class="test-option"><input type="radio" name="q20" value="C"> C. Tự động gather statistics sau insert</label><label class="test-option"><input type="radio" name="q20" value="D"> D. Loại bỏ hoàn toàn undo/redo trong mọi trường hợp</label></div></div>
+
+          <div class="test-actions">
+            <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+            <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+          </div>
+          <div class="test-result" id="final-test-result" style="display:none"></div>
+        </div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">← Module trước</button><div></div></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+
+  explain.textContent = (correct ? 'Chính xác. ' : 'Chưa đúng. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0;
+  let answeredCount = 0;
+  const wrongAnswers = [];
+  const unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+
+    if (!selected) {
+      q.classList.add('unanswered');
+      unanswered.push(qNum);
+      return;
+    }
+
+    answeredCount++;
+    if (selected.value === correct) {
+      q.classList.add('correct');
+      correctCount++;
+    } else {
+      q.classList.add('wrong');
+      wrongAnswers.push({ q: qNum, selected: selected.value, correct });
+    }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '';
+  let chipClass = 'warn';
+  let guidance = '';
+
+  if (percent >= 90) {
+    levelText = 'Xuất sắc';
+    chipClass = 'good';
+    guidance = 'Bạn đã nắm rất chắc Oracle SQL Advanced theo mindset Data Engineering.';
+  } else if (percent >= 80) {
+    levelText = 'Tốt';
+    chipClass = 'good';
+    guidance = 'Bạn đạt mức sẵn sàng tốt. Ôn nhẹ các câu sai rồi sang module kế tiếp.';
+  } else if (percent >= 65) {
+    levelText = 'Đạt tối thiểu';
+    chipClass = 'warn';
+    guidance = 'Bạn đã có nền tảng, nhưng nên ôn lại phần còn yếu trước khi đi xa hơn.';
+  } else {
+    levelText = 'Cần ôn thêm';
+    chipClass = 'bad';
+    guidance = 'Bạn nên quay lại W6.01.02-W6.01.06, đặc biệt phần MERGE và execution plan.';
+  }
+
+  const unansweredHtml = unanswered.length
+    ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>`
+    : '';
+
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đáp án đúng <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng.</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>
+    ${unansweredHtml}
+    ${wrongHtml}`;
+
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,634 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week02_Python_DE.html`.
+
+Week02 trong roadmap tập trung vào Python cho DE: `pandas`, `sqlalchemy`, `requests`, `logging`, error handling, và cấu trúc ETL script production-ready. Artifact mục tiêu là một thư mục `week2_python_etl/` gồm `extract.py`, `transform.py`, `load.py`, `pipeline.py`, `README.md`. 
+Format chuẩn vẫn phải bám theo HTML standard của series: hero, sidebar, 6 section/module, interactive quiz, practice, mini test, dark premium UI, consistency với Week00 family. 
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week02_Python_DE.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 2 – Python cho Data Engineer
+
+Allowed sources only:
+- ./Week02_Python_DE.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 02 CORE MISSION:
+This file must teach Python as a Data Engineering tool, not as generic Python programming.
+
+The learner should understand:
+- Python dùng để extract, transform, load dữ liệu
+- pandas cho thao tác dữ liệu thực dụng
+- SQLAlchemy để kết nối database sạch và an toàn
+- requests để gọi API có pagination / rate limit
+- logging và error handling để pipeline debug được
+- cách tổ chức code ETL production-friendly
+- cách build artifact đủ mạnh để đưa vào portfolio
+
+The tutorial must feel stronger than common beginner Python tutorials.
+
+MANDATORY MODULES:
+- W2.01 – Tổng Quan: Python của Data Engineer khác gì?
+- W2.02 – pandas cho Data Engineering
+- W2.03 – SQLAlchemy & Kết Nối Database
+- W2.04 – Gọi REST API & Xử Lý Response
+- W2.05 – Error Handling, Retry & Logging
+- W2.06 – Cấu Trúc ETL Script Production
+- W2.07 – Artifact: week2_python_etl/
+- W2.08 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W2.01
+- why Python matters in DE even when SQL is strong
+- Python for automation, API ingestion, file handling, orchestration helpers
+- Analyst Python vs Data Engineer Python
+- Python as glue code between systems
+- reliability and maintainability mindset
+- why code quality matters in pipelines
+- week outcomes checklist
+
+W2.02
+- pandas role in DE
+- read_csv / read_json / read_parquet
+- dtype awareness
+- null handling
+- fillna / dropna
+- merge / join
+- groupby / agg
+- rename / assign / astype
+- memory-efficient reading
+- chunked reading concept
+- writing output
+- anti-patterns:
+  - loading huge files blindly
+  - not checking dtypes
+  - hidden null explosions
+- examples must feel DE-relevant, not toy notebook style
+
+W2.03
+- SQLAlchemy create_engine
+- connection string
+- engine lifecycle
+- read_sql / execute / to_sql
+- append / replace / fail behavior
+- parameterized queries
+- transaction mindset
+- connection pooling basics
+- context manager usage
+- why SQLAlchemy is better than hardcoded raw connections in many cases
+- realistic PostgreSQL examples
+
+W2.04
+- requests.get / post
+- auth headers
+- Bearer token / API key
+- pagination patterns:
+  - page number
+  - next_page_token
+  - cursor-based
+- response validation
+- JSON parsing
+- timeout
+- retry for transient failures
+- rate limit handling
+- anti-patterns:
+  - infinite pagination loop
+  - no timeout
+  - no status code check
+- API ingestion examples must feel real
+
+W2.05
+- try / except / finally
+- custom exceptions
+- retry patterns
+- exponential backoff concept
+- logging levels
+- structured logging
+- log formatting
+- log file vs console
+- why print() is insufficient in pipelines
+- distinguish transient vs fatal errors
+- practical debugging mindset
+
+W2.06
+- extract / transform / load function separation
+- modular script structure
+- config from environment variables
+- argparse for runtime params
+- __main__ guard
+- type hints
+- docstrings
+- orchestrating the pipeline
+- pipeline(date=...) pattern
+- idempotency awareness
+- simple validation before load
+- realistic code organization, not over-engineered framework
+
+W2.07
+- build realistic portfolio artifact:
+  week2_python_etl/
+  ├── extract.py
+  ├── transform.py
+  ├── load.py
+  ├── pipeline.py
+  ├── config.py (if useful)
+  └── README.md
+- explain each file clearly
+- include believable code snippets
+- README must explain:
+  - objective
+  - sources
+  - transformations
+  - destination
+  - how to run
+  - lessons learned
+- must feel portfolio-ready
+
+W2.08
+- final mini test: 20 questions
+- cover:
+  - pandas
+  - SQLAlchemy
+  - API ingestion
+  - logging / retry
+  - ETL code structure
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- realistic ETL tasks
+- debugging tasks
+- API ingestion tasks
+- data cleaning / transform tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every code block should be believable and runnable
+- code should be Pythonic but beginner-friendly
+- examples must support DE workflows
+- do not turn this into general Python syntax lessons
+- keep focus on data pipelines, reliability, and maintainability
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- generic Python theory dumps
+- shallow toy examples
+- filler text
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week02 scope you are using from roadmap
+2. Which format rules you inherit from Week00
+3. Which assumptions you are making for local Python / PostgreSQL / API examples
+
+Then output the full final content for:
+./Week02_Python_DE.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text
+Use project rules from .claude.
+
+Review ./Week02_Python_DE.html as a senior Data Engineering Python reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- teaching quality
+- Python correctness
+- production realism
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week02 teaches Python for Data Engineers, not generic Python learners.
+Check relevance of:
+- ETL structure
+- file handling
+- API ingestion
+- database interaction
+- logging and error handling
+- modular pipeline code
+- maintainability
+- artifact quality
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- pagination properly
+- timeout and retries
+- transient vs fatal errors
+- structured logging
+- config management
+- safe DB loading
+- parameterized queries
+- idempotency awareness
+- validation before load
+- avoiding notebook-only mindset
+
+D. PYTHON ACCURACY
+Review whether explanations and code are strong enough for:
+- pandas operations
+- SQLAlchemy usage
+- requests patterns
+- logging setup
+- retry patterns
+- ETL code organization
+- CLI / argparse usage
+- environment variable usage
+- type hints and docstrings where helpful
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W2.07 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- chunked reading
+- dtype control
+- connection pooling basics
+- transaction boundaries
+- response validation
+- dead-simple retry decorator
+- config separation
+- main orchestration pattern
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week02 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week02_Python_DE.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week02 becomes a high-value, portfolio-grade Python tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week02_Python_DE.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- Python technical depth
+- Data Engineering realism
+- teaching clarity
+- production mindset
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+Edited dump_html.py
+Ran command: `python dump_html.py Week02_Python_DE.html Week02_text.txt`
+Viewed Week02_text.txt:1-800
+Viewed Week02_text.txt:801-1354
+
+# Week02 Review Report
+
+## 1. Executive Summary
+- **score /10:** 9.5/10. Một tài liệu cực kỳ xuất sắc. Tư duy Data Engineering vô cùng bám sát thực chiến. Khắc phục hoàn hảo lỗi vi phạm số lượng Quiz từ Tuần 1 (đã đủ 10 câu/module).
+- **strongest parts:** Phủ kín những design patterns đắt giá nhất của DE bằng Python (Pagination, Enum/Constants thay vì hardcode, Exponential Backoff với Jitter, Custom JSON logging, Config bằng Dataclasses, Class-based Pipeline). 
+- **biggest weaknesses:** Hứa hẹn giải thích `chunksize` và `argparse` + `__main__` nhưng phần code mẫu lại... quên chưa cung cấp nội dung thực thi thực tế. Lỗi logic tiềm ẩn giữa `to_sql(append)` và Idempotency (Upsert). 
+- **priority level:** Medium (Chỉ là vá code snippet bị thiếu, sườn nội dung và lí thuyết đã hoàn hảo).
+
+## 2. What Already Strong
+- **Data Engineering Relevance:** Phân định rất rạch ròi lý do tại sao DE xài Python (Orchestration, gọi API, load DB) thay vì làm Data Analysis. 
+- **Production Realism:** Đặc biệt khen ngợi module W2.04 và W2.05. Việc đưa `Jitter` vào "Exponential Backoff" và xây định dạng `JSON Format Logging` là kiến thức mà chỉ Senior Engineer đi làm hệ thống phân tán lớn mới biết.
+- **Python Accuracy:** `create_engine` với `pool_size` và `pool_pre_ping`. Dùng Decorator `@retry` bọc `functools.wraps`. Code mẫu `config.py` phân tích và validate Environment variables rất chuẩn mực.
+- **HTML & Quality:** Chuẩn 10 câu hỏi mỗi module. Cấu trúc HTML render rất tốt.
+
+## 3. Critical Gaps
+- **Missing `__main__` and `argparse` Boilerplate:** Ở mục W2.06, lý thuyết giới thiệu *"argparse CLI"* và *"__main__ guard"* rất hay, nhưng trong đoạn code snippet `pipeline.py` lại dừng hình ngay sau hàm `def run()`. Học viên sẽ không thấy code khai báo `parser = argparse.ArgumentParser()` hay khối `if __name__ == '__main__':` để ghép nối Pipeline vào CLI. Đây là thiếu sót rất lớn cản trở người mới làm ra sản phẩm thật.
+- **Mâu thuẫn "Đọc file chunksize" vs "Thực tế code":** Ở mục W2.02, phần mục đích chỉ định "Đọc dữ liệu lớn theo chunk để tránh tràn RAM", nhưng code mẫu lại dùng vòng lặp List Comprehension đẩy tuốt luồn luột vào `pd.concat()` và đọc toàn bộ `pd.read_csv`, điều này trên thực tế sẽ vẫn gây tràn RAM (OOM) nếu file quá to. Cần code minh hoạ đọc `read_csv(chunksize=1000)`.
+- **Mâu thuẫn `to_sql` (Append) và Idempotency:** Trong W2.03, bạn hướng dẫn `df.to_sql(if_exists="append")`. Bản chất hàm này dưới nền là `INSERT`. Nếu User gọi tool này 2 lần cùng ngày, nó sẽ tạo duplicated record. Học viên sẽ bối rối khi phần trước thì bắt UPSERT (ON CONFLICT/MERGE), nhưng function Python lại chỉ dạy `to_sql(append)`.
+
+## 4. Module-by-Module Improvements
+- **W2.02 pandas cho DE:** 
+    - Phải viết minh hoạ 1 vòng `for chunk in pd.read_csv(f, chunksize=50000): process(chunk)` để làm minh chứng sống cho kiến thức memory optimization.
+- **W2.03 SQLAlchemy:** 
+    - Nhấn mạnh rằng `to_sql(method='multi')` hỗ trợ load nhiều dòng một lúc giúp tăng tốc cực đại, nhưng để thực hiện UPSERT (Idempotent) thông qua `to_sql` thì sẽ phải viết `method=callable` custom hoặc phải đẩy vào table staging (`if_exists="replace"`) rồi thực thi câu lệnh SQL MERGE bằng `conn.execute()`. Chỗ này nên nói rõ ranh giới để học viên khỏi sụp hố duplicate.
+- **W2.04 REST API:** 
+    - Trong code có truyền `session` vào hàm (`fetch_offset(session, base_url...)`), nhưng không có đoạn code khởi tạo `session = requests.Session()`. Cần bổ sung khởi tạo ở luồng Main.
+- **W2.06 Cấu trúc Production:** 
+    - Bắt buộc bổ sung đoạn `if __name__ == '__main__':` và khai báo `argparse` gọi `OrderPipeline`. 
+
+## 5. Production Upgrades Recommended
+- **Built-in Session Retry (urllib3):** Trong W2.05 bạn dạy tự code Retry Decorator (rất hữu ích về tư duy). Tuy nhiên ở Production Thực tế, mọi người hay khởi tạo qua cấu hình HTTP Adapter tích hợp thẳng vô Object Session của `requests` (`urllib3.util.retry`). Nên note lại thêm một ý (Fun Fact) về cách cài đặt Retry ngay tại `requests.Session().mount()`.
+- **Connection Leak Warning:** Khuyến nghị bọc `response.close()` hoặc sử dụng Request với Context Manager (`with requests.get(...) as resp:`) đối với các response có tải trọng byte stream lớn.
+- **Secret Scanning Concept:** Ở module W2.06, nên răn đe người học tránh rủi ro lưu `.env` bằng cách giới thiệu một dòng về việc Git Repository hay chạy Secret Scanning.
+
+## 6. Teaching Upgrades Recommended
+- Xuyên suốt script, phần bài tập (Practice Solutions) chỉ là mã "nháp" (hints). Nếu được, W2.07 nên đóng gói thành 1 file zip/ảnh chứa sườn Project hoàn chỉnh minh họa cách các module link lại với nhau thế nào trong Terminal để kích thích trải nghiệm thực tế.
+
+## 7. Portfolio Value Assessment
+- Artifact Portfolio (week2_python_etl) có **độ "sát thương" cực cao** nếu đi phỏng vấn. Nó dẹp bỏ hoàn toàn tư duy xài "Jupyter Notebook" lắt nhắt của các bạn junior, và mang dáng hình một hệ thống app Data Extraction có tính kỉ luật. Thư mục chuẩn, Config Environment chuyên nghiệp, Logging đẹp mắt. 
+
+## 8. Top 10 Immediate Patches
+1. **Thiết yếu:** Bổ sung ngay đoạn code khai báo `argparse` và `if __name__ == '__main__':` vào snippet Pipeline tại module W2.06. 
+2. **Thiết yếu:** Sửa lại code trong W2.02 cho `pd.read_csv()` để thể hiện chuẩn xác khái niệm "chunking iterator" thay vì List Comprehesion ép `pandas.concat()` ngốn sạch RAM. 
+3. Thêm một đoạn code nhỏ khởi tạo `requests.Session()` ở W2.04 để truyền vào hàm gọi API (khớp với biến session trong Parameter).
+4. Thích nghi câu chữ giải thích cho `df.to_sql(if_exists="append")` trong W2.03, nhắc học viên là nó sẽ bị duplicate nếu không đi cùng quy trình Tạm Staging -> SQL MERGE.
+5. Cập nhật lại Code ở W2.05: Mặc dù Backoff Jitter xịn xò, nhưng cần lưu ý nếu API sập hẳn (VD lỗi 401 do token sai) thì phải Raise thẳng chứ không cho phép ngâm Jitter. Đoạn code hiện tại đã dùng `if resp.status_code in [429, 500,...]` (khá ổn). Hãy highlight cơ chế fail-fast này cho Learner hiểu dụng ý.
+6. Module W2.01: Thêm dòng mô tả nhanh về `Pydantic` (nhắn nhe chút xíu thôi) dưới dạng một Framework Data Validation mở rộng sau Pandas nếu muốn kiểm tra Null gắt gao. 
+7. Thêm phần cảnh báo chống Leak Connect bằng việc dùng Context Manager `with` khi đọc file vật lí hay REST API.
+8. Ở Module Config (W2.06), nên cho thêm một Option biến `DEBUG_MODE=True` để có thể ghi đè gán level Log xuống mức Debug dễ dàng thông qua Env.
+9. Đồng bộ nội dung các mẫu Quiz cho khớp 100% với Code minh hoạ mới. Đã test, quiz hiện tại có độ chính xác rất tuyệt vời.
+10. Tại `load.py` trong Yêu cầu W2.07: Bổ sung chỉ thị dùng `df.to_parquet()` với tuỳ chọn `compression='snappy'` để learner quen khái niệm nén dữu liệu vật lý. 
+
+## 9. Final Verdict
+- **patch lightly** (Toàn bộ kiến thức DE được xếp cực khéo và xịn. Chỉ cần dặm vá vài dòng code snippet bị hụt trong `argparse`, `chunking` và `session`).
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade code examples where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen Python for DE vs generic Python framing
+- improve pandas examples so they feel ETL-relevant
+- improve SQLAlchemy transaction / connection explanation
+- improve pagination / timeout / rate limit handling
+- improve retry and structured logging realism
+- improve ETL module structure
+- improve config / argparse / environment variable usage
+- strengthen W2.07 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week02_Python_DE.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text
+Review the patched ./Week02_Python_DE.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week02_Python_DE.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- code blocks still look coherent and believable
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week02_Python_DE.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week02
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo riêng cho Week02
+
+Week02 rất dễ bị viết thành “Python cơ bản cho người mới”.
+Bạn nên thêm 1 dòng này vào prompt build hoặc patch:
+
+```text
+Do not turn Week02 into a generic Python programming page.
+Teach Python as a practical tool for Data Engineering pipelines: extraction, transformation, loading, validation, logging, retries, and maintainable ETL code.
+```
+
+Dòng này rất hữu ích để giữ đúng chất DE-LEARNING.
+
+Nếu bạn muốn, mình tiếp tục viết luôn **full bộ prompt theo từng step cho Week03_Data_Cleaning.html**.

@@ -394,6 +394,29 @@
         </div>
       </div>
 
+      <div class="info-box note">
+        💡 <span><strong>Task Dependency ≠ Data Dependency:</strong> <strong>Task Dependency</strong> là quan hệ lịch chạy (A phải hoàn thành thì scheduler mới cho B chạy). <strong>Data Dependency</strong> là quan hệ dữ liệu (B cần đúng output table/file của A). Thiết kế production tốt phải mô tả rõ cả hai để tránh chạy sai thứ tự hoặc đọc nhầm data cũ.</span>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>artifact_dag_mermaid.md</span></div>
+        <div class="cmd-body"><pre>```mermaid
+graph TD
+    A[Extract Orders API] --> B[Validate & Clean]
+    B --> C[Transform Revenue Daily]
+    C --> D[Load marts.revenue_daily_fact]
+    D --> E[Quality Check]
+    E --> F[Notify Slack]
+
+    %% Task dependency: scheduler chỉ chạy node sau khi node trước SUCCESS
+    %% Data dependency: mỗi node đọc output của node trước
+```
+
+Gợi ý artifact:
+- Ghi rõ với từng edge: "task dependency", "data dependency", hoặc cả hai.
+- Nếu có fan-out/fan-in, annotate thêm điều kiện barrier (chờ đủ branch).</pre></div>
+      </div>
+
       <h3 class="green">Parallel vs Serial Execution</h3>
       <table>
         <tr><th>Loại</th><th>Khi nào dùng</th><th>Ví dụ</th></tr>
@@ -997,6 +1020,10 @@ quality_check <span class="kw">AS</span> (
         📌 <span><strong>Production mindset:</strong> Khi chọn load strategy, hãy viết rõ <strong>grains xử lý</strong> (theo ngày, theo tháng, theo entity), <strong>checkpoint key</strong>, và <strong>kịch bản re-run/backfill</strong>. Đây là phần interviewer DE hỏi rất sâu.</span>
       </div>
 
+      <div class="info-box note">
+        📌 <span><strong>Backfill cần parameterization:</strong> Không hardcode ngày (ví dụ <code>'2024-01-15'</code>) trong script production. Luôn nhận tham số như <code>:start_date</code>, <code>:end_date</code> để có thể reprocess linh hoạt theo window sự cố và tự động hóa qua scheduler/CI job.</span>
+      </div>
+
       <h3 class="blue">Incremental Load: Watermark Pattern</h3>
       <div class="tab-group" id="inc-tabs">
         <div class="tab active" onclick="switchTab('inc-tabs','inc-pg')">🐘 PostgreSQL</div>
@@ -1069,6 +1096,20 @@ quality_check <span class="kw">AS</span> (
 
       <div class="info-box warn">
         ⚠️ <span><strong>Late Arriving Data:</strong> Luôn trừ buffer time (5–15 phút) khỏi watermark để tránh bỏ sót event đến muộn nhưng có timestamp trong window. Với Oracle dùng SYSDATE - N/1440 (N phút).</span>
+      </div>
+
+      <div class="info-box bad">
+        🚨 <span><strong>Timezone Trap (bắt buộc chặn sớm):</strong> Watermark phải thống nhất UTC giữa app server, scheduler và database. Nếu nơi dùng local time, nơi dùng UTC thì có thể miss hoặc duplicate data khi đổi múi giờ/DST. Quy ước an toàn: lưu checkpoint theo UTC và so sánh timestamp cùng chuẩn UTC trong cả query load lẫn query update checkpoint.</span>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>timezone_guard.sql</span></div>
+        <div class="cmd-body"><pre><span class="comment">-- PostgreSQL: ép checkpoint/window về UTC</span>
+<span class="kw">SELECT</span> (<span class="fn">NOW</span>() <span class="kw">AT TIME ZONE</span> <span class="str">'UTC'</span>) <span class="kw">AS</span> run_time_utc;
+
+<span class="comment">-- Oracle: lấy current timestamp theo UTC</span>
+<span class="kw">SELECT</span> (<span class="fn">SYSTIMESTAMP</span> <span class="kw">AT TIME ZONE</span> <span class="str">'UTC'</span>) <span class="kw">AS</span> run_time_utc
+<span class="kw">FROM</span> dual;</pre></div>
       </div>
     </div>
   </div>
@@ -1252,6 +1293,41 @@ quality_check <span class="kw">AS</span> (
         <li>Team DE review và fix thủ công nếu cần</li>
         <li>Có audit trail đầy đủ về data bị lỗi</li>
       </ul>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>runbook_template.md</span></div>
+        <div class="cmd-body"><pre># Incident Runbook — orders_incremental
+
+## 1) Symptom (Triệu chứng)
+- Ví dụ: freshness > 26h, job status FAIL, DLQ tăng đột biến.
+- Alert nhận được lúc: <YYYY-MM-DD HH:mm UTC>
+
+## 2) Impact (Ảnh hưởng)
+- Dataset ảnh hưởng: marts.orders_fact
+- Stakeholder ảnh hưởng: BI dashboard doanh thu sáng
+- SLA có vi phạm không: Có/Không
+
+## 3) Diagnosis (Chẩn đoán)
+- Kiểm tra node fail: Extract / Transform / Load / Check
+- Kiểm tra log chính: <link job log>
+- Kiểm tra source health: API/DB timeout? schema change?
+- Kiểm tra checkpoint watermark và timezone (UTC)
+
+## 4) Resolution (Khắc phục)
+- Nếu transient: retry có kiểm soát (exponential backoff)
+- Nếu data quality: đẩy record lỗi vào pipeline.dead_letter_queue
+- Nếu logic bug: rollback version + fix + backfill theo window
+
+## 5) Verification (Xác nhận)
+- Re-run thành công chưa?
+- Freshness, row_count, null_check đã PASS chưa?
+- SLA đã quay lại trạng thái an toàn chưa?
+
+## 6) Prevention (Phòng ngừa)
+- Bổ sung check nào để phát hiện sớm hơn?
+- Cần update data contract / owner / alert routing không?
+</pre></div>
+      </div>
 
       <div class="tab-group" id="dlq-tabs">
         <div class="tab active" onclick="switchTab('dlq-tabs','dlq-pg')">🐘 PostgreSQL</div>
@@ -1694,6 +1770,10 @@ avg_7d <span class="kw">AS</span> (
         <div class="quiz-explain"></div>
       </div>
 
+      <div class="info-box warn">
+        ⚠️ <span><strong>Alert Fatigue:</strong> Nếu WARN bắn liên tục cho các vấn đề nhỏ mà không có ngưỡng rõ ràng, team sẽ dần bỏ qua cả cảnh báo thật. Vì vậy cần phân tầng alert (INFO/WARN/FAIL), route đúng người, và review định kỳ để giảm nhiễu.</span>
+      </div>
+
       <div class="quiz-item">
         <div class="quiz-q">Nếu freshness check fail (data stale >26h) nhưng row count check PASS, điều đó chỉ ra vấn đề gì?</div>
         <div class="quiz-options">
@@ -1779,6 +1859,18 @@ avg_7d <span class="kw">AS</span> (
 
       <div class="info-box tip">
         ✅ <span><strong>Pro tip:</strong> Lưu Data Contract vào Git repo cùng với code pipeline. Version control giúp track thay đổi và review trước khi merge. Breaking change = cần PR review từ consumer teams.</span>
+      </div>
+
+      <h3 class="green">Ownership Matrix Template (cho artifact)</h3>
+      <table>
+        <tr><th>Domain/Pipeline</th><th>Primary DE Owner</th><th>Secondary DE Owner</th><th>Alert Channel</th><th>Escalation SLA</th></tr>
+        <tr><td>orders_daily_fact</td><td>nguyen.a@company.com</td><td>tran.b@company.com</td><td>#de-alert-orders</td><td>P1: 15 phút · P2: 60 phút</td></tr>
+        <tr><td>revenue_weekly</td><td>le.c@company.com</td><td>pham.d@company.com</td><td>#de-alert-revenue</td><td>P1: 30 phút · P2: 120 phút</td></tr>
+        <tr><td>events_hourly</td><td>hoang.e@company.com</td><td>vo.f@company.com</td><td>#de-alert-events</td><td>P1: 10 phút · P2: 45 phút</td></tr>
+      </table>
+
+      <div class="info-box note">
+        📌 <span><strong>Rule thực chiến:</strong> Mỗi pipeline luôn phải có primary + secondary rõ ràng để tránh single-point-of-failure khi incident xảy ra ngoài giờ hoặc người phụ trách nghỉ phép.</span>
       </div>
     </div>
   </div>

@@ -1,0 +1,653 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week06_01_OracleSQL_Advanced.html`.
+
+File này nên được định vị là một nhánh chuyên sâu song song với PostgreSQL: **Oracle SQL Advanced cho Data Engineer**, tập trung vào analytic SQL, execution plan, indexing, partitioning, MERGE, transactions, và các pattern thực chiến trong môi trường Oracle.
+Mục tiêu không phải học Oracle theo kiểu DBA thuần, mà học **Oracle đủ sâu để làm Data Engineering, warehouse, ETL, tuning, và interview**.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text id="ora6build"
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week06_01_OracleSQL_Advanced.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 06.01 – Oracle SQL Advanced cho Data Engineer
+
+Allowed sources only:
+- ./Week06_01_OracleSQL_Advanced.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 06.01 CORE MISSION:
+This file must teach Oracle SQL as a serious Data Engineering and warehouse skill, not as a generic SQL syntax page.
+
+The learner should understand:
+- Oracle SQL dùng trong DE/warehouse khác gì với SQL cơ bản
+- analytic/window functions trong Oracle
+- MERGE cho incremental loading
+- execution plans và tuning mindset
+- indexes, partitioning, and performance trade-offs
+- transactions, locking, and consistency basics
+- Oracle-specific patterns useful for ETL/reporting
+- how to build an Oracle SQL artifact that looks recruiter-grade
+
+This tutorial must feel stronger than common Oracle syntax guides.
+
+MANDATORY MODULES:
+- W6.01.01 – Tổng Quan: Oracle SQL cho Data Engineer
+- W6.01.02 – Analytic Functions & Reporting SQL
+- W6.01.03 – Advanced Aggregation: GROUPING SETS, ROLLUP, CUBE
+- W6.01.04 – MERGE, Incremental Load & Idempotency
+- W6.01.05 – Execution Plans, Indexes & Query Tuning
+- W6.01.06 – Partitioning, Transactions & Locking Basics
+- W6.01.07 – Artifact: week6_01_oracle_sql_lab/
+- W6.01.08 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W6.01.01
+- why Oracle still matters in enterprise data environments
+- Oracle in banking / finance / large enterprise / legacy-but-critical systems
+- Oracle SQL for ETL, warehouse, reporting, reconciliation
+- difference between generic SQL learner vs DE using Oracle
+- strengths:
+  stability, enterprise features, mature optimizer, partitioning, MERGE
+- limitations / trade-offs:
+  licensing, ecosystem differences, complexity
+- week outcomes checklist
+
+W6.01.02
+- Oracle analytic functions
+- OVER, PARTITION BY, ORDER BY
+- ROW_NUMBER
+- RANK
+- DENSE_RANK
+- LAG
+- LEAD
+- SUM OVER
+- AVG OVER
+- running totals
+- moving averages
+- latest row per key
+- top N per partition
+- dedup with analytic functions
+- reporting-style use cases
+- difference between analytic function and GROUP BY mindset
+- Oracle-specific syntax notes where relevant
+
+W6.01.03
+- GROUPING SETS
+- ROLLUP
+- CUBE
+- GROUPING()
+- GROUPING_ID()
+- multi-level subtotals
+- finance/reporting use cases
+- avoiding long UNION ALL chains
+- how subtotal rows should be interpreted
+- common mistakes when reading aggregated outputs
+- trade-off: expressive queries vs more complex result sets
+
+W6.01.04
+- MERGE in Oracle
+- why MERGE matters for incremental load
+- upsert logic
+- matched vs not matched
+- idempotent load mindset
+- daily incremental loads
+- watermark basics
+- handling late-arriving records
+- dedup before merge
+- validation after merge:
+  inserted count, updated count, duplicate checks
+- anti-pattern:
+  rerun causes duplicates or wrong overwrite
+
+W6.01.05
+- Oracle execution plans
+- EXPLAIN PLAN basics
+- AUTOTRACE mention if useful
+- cost-based optimizer mindset
+- full table scan vs index range scan
+- nested loops
+- hash join
+- sort operations
+- index strategy:
+  B-tree
+  bitmap index
+  composite indexes
+  function-based indexes
+- selectivity
+- stale statistics
+- why indexes help reads but cost writes
+- realistic before/after tuning examples
+- anti-pattern:
+  adding indexes blindly
+
+W6.01.06
+- range/hash/list partitioning intro
+- date-based partitioning for fact/event tables
+- partition pruning
+- ETL-friendly partition design
+- transaction basics
+- COMMIT / ROLLBACK
+- read consistency simplified
+- locking basics
+- row-level locking mindset
+- long transactions dangers
+- ETL transaction boundaries
+- anti-pattern:
+  huge transaction without thought
+  lock contention caused by bad batch design
+
+W6.01.07
+- build realistic portfolio artifact:
+  week6_01_oracle_sql_lab/
+  ├── analytic_queries.sql
+  ├── grouping_reports.sql
+  ├── merge_incremental.sql
+  ├── tuning_examples.sql
+  ├── partition_notes.md
+  ├── reconciliation_checks.sql
+  └── README.md
+- README must explain:
+  - workload scenario
+  - business use case
+  - Oracle SQL features used
+  - tuning decisions
+  - incremental logic
+  - lessons learned
+- must feel portfolio-ready
+
+W6.01.08
+- final mini test: 20 questions
+- cover:
+  - analytic functions
+  - grouping sets / rollup / cube
+  - merge
+  - execution plans
+  - indexing
+  - partitioning
+  - transactions / locking
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- analytic SQL tasks
+- reconciliation/reporting tasks
+- MERGE design tasks
+- explain-plan interpretation tasks
+- partition design tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every SQL example should be believable
+- examples should fit enterprise Oracle environments
+- practical over trivia
+- focus on SQL behavior, ETL usefulness, and tuning mindset
+- do not turn this into generic DBA administration content
+- do not overload with unnecessary Oracle internals for beginners
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- shallow command lists
+- filler text
+- vague tuning advice
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week06.01 scope you are using for Oracle SQL Advanced
+2. Which format rules you inherit from Week00
+3. Which assumptions you are making for sample Oracle workloads and schemas
+
+Then output the full final content for:
+./Week06_01_OracleSQL_Advanced.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text id="ora6review"
+Use project rules from .claude.
+
+Review ./Week06_01_OracleSQL_Advanced.html as a senior Oracle SQL and Data Engineering reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- teaching quality
+- Oracle SQL correctness
+- production realism
+- tuning usefulness
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week06.01 teaches Oracle SQL for Data Engineering and warehouse workloads, not generic syntax study.
+Check relevance of:
+- reporting SQL
+- reconciliation
+- incremental loading
+- merge logic
+- warehouse-style analytics
+- performance tuning
+- enterprise data environments
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- dedup before merge
+- rerun/idempotency mindset
+- stale statistics
+- wrong index choices
+- bitmap vs btree trade-offs
+- partition pruning benefits
+- long transaction risks
+- lock contention
+- validation after incremental load
+- realistic enterprise use cases
+
+D. ORACLE SQL QUALITY
+Review whether explanations are strong enough for:
+- analytic functions
+- grouping sets / rollup / cube
+- merge
+- execution plans
+- indexes
+- partitioning
+- transactions
+- locking basics
+- reconciliation queries
+- tuning decisions
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W6.01.07 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- function-based indexes
+- bitmap index warnings for OLTP-style updates
+- optimizer statistics
+- bind variables mention
+- set-based vs row-by-row processing
+- reconciliation checks after ETL
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week06_01 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text id="ora6patch"
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week06_01_OracleSQL_Advanced.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week06_01 becomes a high-value, portfolio-grade Oracle SQL Advanced tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week06_01_OracleSQL_Advanced.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- Oracle SQL depth
+- teaching clarity
+- production realism
+- enterprise ETL usefulness
+- tuning mindset
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+Viewed Week06_01_OracleSQL_Advanced.html:1-800
+Viewed Week06_01_OracleSQL_Advanced.html:800-1574
+
+Dưới đây là bản **Review Report** chuyên sâu cho tài liệu `Week06_01_OracleSQL_Advanced.html` dưới góc độ của một Senior Data Engineer và Oracle SQL Expert.
+
+# Week06_01 Review Report
+
+## 1. Executive Summary
+- **Score:** 9.5/10
+- **Strongest parts:** Bám sát cực tốt tư duy vận hành (Production/ETL Mindset). Các khái niệm như Idempotency, Watermark, Late-arriving records (W6.01.04) và cách diễn giải Subtotal trong Reporting (W6.01.03) thực sự mang đẳng cấp enterprise. Thiết kế Artifact lab (W6.01.07) là một điểm sáng lớn.
+- **Biggest weaknesses:** Thiếu một số "vũ khí" hạng nặng đặc trưng của Oracle ETL như **Direct Path Insert** (hint `/*+ APPEND */`), code thu thập thống kê **DBMS_STATS**, và cảnh báo về anti-pattern kinh điển **Row-by-row (Cursor) vs Set-based processing**.
+- **Priority level:** Patch lightly (Chỉ cần bổ sung các mảnh ghép nhỏ nhưng mang lại ROI cực cao).
+
+## 2. What Already Strong
+- **Định hướng nghiệp vụ hoàn hảo:** Tài liệu không đi vào việc dạy SQL syntax khô khan mà đánh thẳng vào Reporting, Reconciliation và Incremental ETL. Việc lấy bối cảnh Banking/Finance là vô cùng chính xác với tệp khách hàng của Oracle.
+- **Merge & Idempotency:** Module W6.01.04 giải thích rất rõ cách dùng `ROW_NUMBER()` kết hợp `MERGE` để dedup dữ liệu từ staging, đồng thời có validation checks (duplicate, count, amount). Đây là kiến thức Senior.
+- **Tuân thủ quy chuẩn học tập (HTML Product Quality):** Giao diện đẹp, thống nhất. Các bài Quiz đều tuân thủ nguyên tắc 4 lựa chọn (A, B, C, D) rất khắt khe. Bài Mini Test cuối module lên đến 20 câu, bám sát các trade-off kỹ thuật.
+
+## 3. Critical Gaps
+Dù rất tốt, tài liệu đang bỏ lỡ vài khái niệm mang tính "sống còn" khi làm việc với Oracle quy mô lớn:
+- **Direct Path Insert (`/*+ APPEND */`):** Trong Oracle ETL, việc load hàng chục triệu dòng dữ liệu vào warehouse hiếm khi dùng `INSERT` thông thường vì sẽ làm tràn buffer cache và sinh ra lượng lớn Redo log. Dùng hint `APPEND` là kiến thức bắt buộc.
+- **Thiếu code `DBMS_STATS` thực tế:** Ở W6.01.05 có nhắc đến "Stale statistics", nhưng lại không hướng dẫn người học chạy `EXEC DBMS_STATS.GATHER_TABLE_STATS(...)` - thao tác cơ bản nhất của mọi DE sau khi bulk load.
+- **Cursor (Row-by-row) vs Set-based:** Một lỗi cực kỳ phổ biến của dev chuyển sang làm DE là dùng vòng lặp `FOR rec IN cursor LOOP` để xử lý từng dòng thay vì dùng câu lệnh set-based (như `MERGE`). Cần đưa anti-pattern này vào cảnh báo.
+- **Bind Variables vs Hard Parse:** Query ở W6.01.05 dùng `:p_email` rất chuẩn, nhưng tài liệu quên giải thích *vì sao* phải dùng bind variable trong Oracle (để tránh hard parse và nghẽn Shared Pool).
+
+## 4. Module-by-Module Improvements
+- **W6.01.02:** Thêm một ghi chú nhỏ về `FETCH FIRST N ROWS ONLY` (từ bản 12c trở lên) như một cú pháp thay thế gọn hơn cho việc lấy Top N toàn cục.
+- **W6.01.04:** Bổ sung phần **Set-based vs Row-by-row processing**. Cảnh báo không dùng vòng lặp PL/SQL Cursor để ETL dữ liệu lớn. Thêm một ghi chú về **Direct Path Insert** (`INSERT /*+ APPEND */`).
+- **W6.01.05:** 
+  - Bổ sung script `EXEC DBMS_STATS.GATHER_TABLE_STATS(...)` ngay dưới phần lý thuyết về Stale statistics.
+  - Giải thích ngắn về sức mạnh của Bind Variables.
+  - Nhấn mạnh rủi ro lớn nhất của **Bitmap Index** trên bảng OLTP (write-heavy) là hiện tượng khóa (deadlock/lock contention) rất nghiêm trọng.
+- **W6.01.06:** Khi nói về Partitioning, bổ sung khái niệm **Local Index**. Việc sử dụng Local Index thay vì Global Index là bí quyết giúp quá trình drop/archive partition cũ không làm "chết" toàn bộ hệ thống index.
+
+## 5. Production Upgrades Recommended
+- **Reconciliation Queries:** Trong W6.01.04 (`reconciliation_checks.sql`), có thể đề xuất thêm một query đối soát chéo (ví dụ: dùng `MINUS` operator) để tìm ra những bản ghi có ở Source mà không có ở Target (một kỹ thuật rất phổ biến trong Oracle Data Validation).
+- **Partition Maintenance:** Cập nhật file `partition_notes.md` ở W6.01.07 bằng cách ghi chú thêm rằng "Khi drop partition, cần đảm bảo index là Local để không làm invalid toàn bộ table index".
+
+## 6. Teaching Upgrades Recommended
+- **Sơ đồ giải thích ROLLUP/CUBE:** Sẽ trực quan hơn nếu có một dạng ASCII table nhỏ hoặc mũi tên phân cấp trong W6.01.03 để người học dễ tưởng tượng các "nhánh" subtotal sinh ra như thế nào.
+- **Bổ sung Quiz:** Thêm 1-2 câu hỏi vào Mini Test (W6.01.08) liên quan đến `DBMS_STATS` và rủi ro lock của Bitmap Index để bao phủ được các kiến thức mới thêm vào.
+
+## 7. Portfolio Value Assessment
+- **Giá trị đánh giá:** **Tuyệt vời (Elite).**
+- Bất kỳ một ứng viên Data Engineer nào nộp bài `week6_01_oracle_sql_lab` chứa các chiến thuật watermark, late-arriving handling, before/after tuning explain plans, và reconciliation checks đều sẽ lọt vào mắt xanh của Senior/Lead Engineer. 
+- Mức độ trưởng thành trong việc gói gọn `README.md` với các mục "Tuning decisions" và "Lessons learned" cho thấy ứng viên có Production Mindset, khác biệt hoàn toàn với sinh viên hay junior dev.
+
+## 8. Top 10 Immediate Patches
+1. **[Kỹ thuật]** Bổ sung **Direct Path Insert** (`INSERT /*+ APPEND */`) vào W6.01.04, giải thích công dụng bypass buffer cache và giảm redo/undo log.
+2. **[Kỹ thuật]** Thêm đoạn code cụ thể gọi `DBMS_STATS.GATHER_TABLE_STATS('schema', 'table_name');` vào phần Stale Statistics ở W6.01.05.
+3. **[Kỹ thuật]** Tại W6.01.05 (phần Bitmap Index), thêm cảnh báo đỏ (warning) về rủi ro lock contention cực cao nếu dùng trên bảng thường xuyên có update/insert.
+4. **[Giảng dạy]** Bổ sung mục cảnh báo về anti-pattern: **"Row-by-row (Cursor loop) vs Set-based"** ở W6.01.04.
+5. **[Kỹ thuật]** Thêm ghi chú nhỏ giải thích tại sao lại dùng bind variables (`:p_branch`) trong Oracle (tránh hard parse) ở W6.01.05.
+6. **[Kỹ thuật]** Trong W6.01.06 (Partition), thêm một gạch đầu dòng về **Local Index vs Global Index** và tại sao DE luôn ưu tiên Local Index để dễ maintain (drop/truncate partition).
+7. **[Portfolio]** Thêm tác vụ "Refresh Table Statistics" vào mục `## Tuning decisions` của file `README.md` skeleton (W6.01.07).
+8. **[Kỹ thuật]** Bổ sung việc sử dụng toán tử `MINUS` trong mục Đối soát dữ liệu (`reconciliation_checks.sql`) để tìm lệch dòng.
+9. **[UI/UX]** Bổ sung một text block giải thích phân cấp hierarchy (Country -> Channel -> Detail) bằng giả mã ASCII cho ROLLUP ở W6.01.03.
+10. **[Giảng dạy]** Thêm câu hỏi trắc nghiệm kiểm tra kiến thức về `DBMS_STATS` hoặc `APPEND hint` vào Final Mini Test W6.01.08.
+
+## 9. Final Verdict
+- **patch lightly**
+- Tài liệu thực sự xuất sắc, khung sườn và triết lý (philosophy) đã chuẩn 100%. Các bổ sung (như `APPEND`, `DBMS_STATS`, `Local Index`) chỉ mang tính chất vá lỗ hổng (patching) ở cấp độ chuyên sâu (pro-tier) để giúp file đạt ngưỡng "Perfect".
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade SQL examples and enterprise scenarios where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen enterprise Oracle framing
+- improve analytic function examples
+- improve GROUPING SETS / ROLLUP / CUBE reporting realism
+- improve MERGE + idempotency explanations
+- improve explain plan and optimizer-statistics guidance
+- improve bitmap vs btree trade-offs
+- improve partition design realism
+- improve transaction and lock scenario examples
+- strengthen W6.01.07 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week06_01_OracleSQL_Advanced.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text id="ora6finalreview"
+Review the patched ./Week06_01_OracleSQL_Advanced.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text id="ora6qa"
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week06_01_OracleSQL_Advanced.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- Oracle SQL examples still feel coherent and realistic
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week06_01_OracleSQL_Advanced.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week06_01
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo riêng cho Week06_01
+
+Week này rất dễ bị lệch thành:
+
+* học Oracle syntax rời rạc
+* hoặc học DBA admin quá sâu
+
+Bạn nên thêm 1 dòng này vào prompt build hoặc patch:
+
+```text id="ora6tip"
+Do not turn Week06_01 into a generic Oracle syntax page or a DBA-only administration page.
+Teach Oracle SQL as a practical Data Engineering skill for reporting, reconciliation, incremental loading, performance tuning, and enterprise warehouse workloads.
+```
+
+Nếu bạn muốn, mình có thể viết tiếp ngay **full bộ prompt cho Week08_dbt.html** hoặc **Week10_Airflow.html**.

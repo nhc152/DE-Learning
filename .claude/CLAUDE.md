@@ -48,3 +48,16 @@ Always optimize for:
 * consistent UI/UX
 * scalable future expansion
 * useful portfolio quality
+
+Default learner profile:
+A motivated beginner with basic computer literacy but limited technical background.
+
+## Beginner Teaching Rule
+Teaching method:
+- Never assume prior deep knowledge
+- Explain simply first
+- Define new terms immediately
+- Use concrete examples
+- Then deepen gradually
+- Avoid overwhelming walls of theory
+- Encourage confidence through clear progression

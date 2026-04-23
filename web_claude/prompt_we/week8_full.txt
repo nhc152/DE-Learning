@@ -1,0 +1,646 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week08_dbt.html`.
+
+Week08 là tuần bản lề của modern analytics engineering. Đây là lúc người học chuyển từ SQL scripts rời rạc sang **declarative transformation with dbt**: models, refs, tests, sources, macros, snapshots, documentation, CI mindset. Nếu học tốt tuần này, các tuần warehouse / quality / orchestration sau sẽ mạnh hơn rất nhiều.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text id="w8build"
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+- SQL policy:
+  - Khi phù hợp phải hỗ trợ cả PostgreSQL và Oracle SQL
+  - Nếu khác cú pháp, hiển thị cả 2 version
+  - Dùng tab buttons:
+    [PostgreSQL] [Oracle SQL]
+  - Không dùng plain heading text để so sánh syntax
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week08_dbt.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 8 – dbt cho Data Engineer / Analytics Engineer
+
+Allowed sources only:
+- ./Week08_dbt.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 08 CORE MISSION:
+This file must teach dbt as a modern transformation workflow, not as a tool-install guide.
+
+The learner should understand:
+- vì sao dbt xuất hiện
+- SQL scripts vs dbt project mindset
+- models, refs, sources
+- tests and data quality
+- macros and reusability
+- snapshots for slowly changing data
+- documentation and lineage
+- CI/CD mindset with dbt
+- how to build recruiter-grade dbt portfolio artifacts
+
+This tutorial must feel stronger than common “dbt quickstart” content.
+
+MANDATORY MODULES:
+- W8.01 – Tổng Quan: Vì Sao Cần dbt?
+- W8.02 – Models, ref(), source() & DAG Thinking
+- W8.03 – Tests, Data Quality & Documentation
+- W8.04 – Jinja, Macros & Reusable SQL
+- W8.05 – Incremental Models & Snapshots
+- W8.06 – dbt Project Structure & CI/CD Mindset
+- W8.07 – Artifact: week8_dbt_project/
+- W8.08 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W8.01
+- pain of raw SQL scripts:
+  copy-paste, unclear dependencies, no tests, hard maintenance
+- what dbt solves
+- transform in warehouse paradigm
+- ELT vs ETL positioning
+- dbt for DE vs Analytics Engineer
+- where dbt fits in modern stack
+- week outcomes checklist
+
+W8.02
+- model = select statement as managed transformation
+- staging / intermediate / marts layers
+- ref() dependency management
+- source() for raw tables
+- DAG generated from dependencies
+- modular SQL design
+- naming conventions
+- materializations intro:
+  view, table, incremental, ephemeral
+- anti-pattern:
+  giant 1000-line SQL file
+- examples with realistic models
+
+W8.03
+- schema.yml basics
+- generic tests:
+  not_null
+  unique
+  accepted_values
+  relationships
+- custom tests intro
+- source freshness intro
+- docs generate
+- lineage graph value
+- why trust in metrics depends on tests
+- anti-pattern:
+  no tests on business-critical models
+
+W8.04
+- Jinja basics in dbt
+- variables
+- loops
+- conditionals
+- macros
+- reusable column lists
+- repetitive SQL reduction
+- environment-aware SQL logic
+- package intro (dbt-utils mention if useful)
+- anti-pattern:
+  overengineering everything into macros
+
+W8.05
+- incremental model concept
+- unique_key
+- filtering new data
+- idempotent reruns
+- late-arriving data considerations
+- full-refresh concept
+- snapshots basics
+- track changing dimensions
+- timestamp strategy vs check strategy
+- relationship to SCD Type 2
+- anti-pattern:
+  wrong incremental predicate causes missing rows
+
+W8.06
+- typical dbt project structure
+- models/
+- macros/
+- tests/
+- snapshots/
+- seeds/
+- docs/
+- environments:
+  dev / prod
+- target profiles basics
+- git workflow
+- pull request review mindset
+- CI checks:
+  run modified models
+  run tests
+- production deployment basics
+- anti-pattern:
+  editing prod logic without review
+
+W8.07
+- build realistic portfolio artifact:
+  week8_dbt_project/
+  ├── models/
+  │   ├── staging/
+  │   ├── intermediate/
+  │   └── marts/
+  ├── macros/
+  ├── snapshots/
+  ├── tests/
+  ├── dbt_project.yml
+  ├── packages.yml
+  └── README.md
+- include believable model examples
+- README must explain:
+  - business domain
+  - source tables
+  - model layers
+  - tests added
+  - incremental strategy
+  - lineage value
+  - lessons learned
+- must feel portfolio-ready
+
+W8.08
+- final mini test: 20 questions
+- cover:
+  - models
+  - ref/source
+  - tests
+  - macros
+  - incremental
+  - snapshots
+  - CI/CD mindset
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- model design tasks
+- test design tasks
+- ref/source dependency tasks
+- macro refactor tasks
+- incremental debugging tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every example should be believable
+- focus on transformation workflow, maintainability, trust, and team collaboration
+- do not turn this into only installation steps
+- must connect dbt decisions to real analytics delivery
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- vendor buzzword dumping
+- filler text
+- shallow quickstart explanations
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week08 scope you are using from roadmap
+2. Which format rules you inherit from Week00
+3. Which assumptions you are making for warehouse/database examples
+
+Then output the full final content for:
+./Week08_dbt.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text id="w8review"
+Use project rules from .claude.
+
+Review ./Week08_dbt.html as a senior dbt / Data Engineering reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- teaching quality
+- dbt correctness
+- production realism
+- team workflow usefulness
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week08 teaches dbt as a real transformation framework, not generic marketing content.
+Check relevance of:
+- modular SQL transformations
+- lineage
+- testing
+- CI/CD
+- incremental models
+- snapshots
+- maintainability
+- analytics delivery
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- dependency management
+- broken downstream models
+- no-test risks
+- incremental rerun issues
+- snapshot use cases
+- PR review mindset
+- environment separation
+- docs usefulness
+- team collaboration patterns
+- realistic warehouse workflows
+
+D. DBT QUALITY
+Review whether explanations are strong enough for:
+- ref/source
+- materializations
+- schema tests
+- docs
+- macros
+- incremental models
+- snapshots
+- project structure
+- deployment basics
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W8.07 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- exposures
+- seeds
+- slim CI
+- state comparison
+- selector syntax
+- package governance
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week08 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text id="w8patch"
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week08_dbt.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week08 becomes a high-value, portfolio-grade dbt tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week08_dbt.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- dbt depth
+- teaching clarity
+- production realism
+- collaboration mindset
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+# Week08 Review Report
+
+## 1. Executive Summary
+- **score /10**: 9/10
+- **strongest parts**: Trình tự bài giảng cực kỳ logic đi từ Structure -> Materialization -> Dependency -> Testing -> Docs -> Snapshot -> Macros. Phần giải thích `incremental` với validation query chống duplicate (W8.03) và `snapshot` SCD2 overlap query (W8.07) cực kỳ "thực chiến" và đậm chất Senior. Việc yêu cầu build Artifact (W8.10) với đầy đủ 5 components là xuất sắc.
+- **biggest weaknesses**: Bỏ lỡ khái niệm `Exposures` (cầu nối dbt với BI Dashboard), thiếu ví dụ về sử dụng Package ngoài (như `dbt_utils`), và phần CI/CD (`state:modified+`) chưa giải thích cơ chế `defer` (chìa khóa của Slim CI). Thiếu khái niệm `tags` - vốn rất quan trọng để orchestrate bằng Airflow sau này.
+- **priority level**: LOW (Core content đã quá vững, chỉ cần "vá nhẹ" thêm vài khái niệm là đạt chuẩn Elite).
+
+## 2. What Already Strong
+- **Production Mindset:** Tư duy viết code phải đi kèm test. Việc check idempotency khi viết bảng incremental (W8.03) và check date-overlap range khi làm SCD2 (W8.07) là kỹ năng thực chiến khác biệt hoàn toàn với các khóa học lý thuyết.
+- **Tương thích Oracle/PG:** Cách tách tab cho SQL watermark (`NVL` vs `coalesce`) và Date Diff Macro (W8.08) giải quyết "pain-point" thực tế khi chạy dbt trên môi trường đa DB.
+- **Runbook Design:** Đưa ra được chuỗi lệnh production hợp lý (`deps -> snapshot -> build -> freshness -> docs`) ở W8.09, không chỉ liệt kê lệnh rời rạc.
+
+## 3. Critical Gaps
+- **dbt Packages (`dbt-utils`):** Dù có nhắc tới `packages.yml` ở cây thư mục, bài học chưa có ví dụ dùng package. Việc tạo Surrogate Key bằng `{{ dbt_utils.generate_surrogate_key([...]) }}` là pattern tiêu chuẩn mà 100% DE hiện đại phải dùng.
+- **Exposures:** Dbt docs và Lineage sẽ mất 50% giá trị nếu không map được các model cuối (`marts`) với các công cụ BI (Tableau/Metabase). Exposure là tính năng sinh ra để làm việc này.
+- **Slim CI (Defer):** Ở W8.09 lệnh `dbt build --select state:modified+`, người học sẽ không hiểu "state" lấy từ đâu nếu không được giải thích sơ lược về `--defer` và `--state path/to/prod/manifest`. Đây là bí quyết giúp CI chạy 5 phút thay vì 2 tiếng.
+- **Tags for Orchestration:** Không có phần dạy đánh `tags: ['daily']` trong `schema.yml` hay model config. Trong thực tế, Airflow/Dagster gọi dbt thường quét qua tags chứ ít khi quét folder.
+- **Seeds:** Có lệnh `dbt seed` nhưng thiếu ví dụ áp dụng (như load `country_codes.csv`).
+
+## 4. Module-by-Module Improvements
+- **W8.02 (Project Structure):** Thêm 1 block snippet cho `packages.yml` khai báo tải `dbt-utils`. Bổ sung một ý nhỏ về `seeds/` (vd: chứa file CSV mapping tĩnh).
+- **W8.04 (Dependency):** Thêm 1 phần giới thiệu file `exposures.yml` để nối marts tới Dashboard, giúp lineage graph dài ra tận lớp BI.
+- **W8.06 (Docs):** Giới thiệu thêm `tags` bên cạnh `owner` và `sla` trong block `meta`/`config`.
+- **W8.08 (Macros):** Bổ sung lưu ý: "Đừng phát minh lại bánh xe. Thay vì tự viết macro hash ID, hãy dùng `dbt_utils.generate_surrogate_key(['colA', 'colB'])`".
+- **W8.09 (Commands):** Giải thích Slim CI: Nhắc đến việc `state` cần artifact `manifest.json` từ bản build Prod gần nhất và cờ `--defer` để trỏ về Prod schema, giúp chạy CI tốn chi phí cực thấp.
+
+## 5. Production Upgrades Recommended
+- **Surrogate Key Pattern:** Việc tạo Surrogate Key cho bảng Fact là cực kỳ phổ biến. Đưa nó vào W8.08 như một minh chứng tuyệt vời của việc tái sử dụng Packages.
+- **Slim CI Context:** Thêm 1 info-box ở W8.09: *"Trong công ty lớn, dbt build cả project mất 2 tiếng. Slim CI (state:modified+ kết hợp defer) giúp PR kiểm tra lỗi chỉ mất 5 phút bằng cách chỉ build những model bị đổi và đọc dữ liệu upstream từ Prod."*
+
+## 6. Teaching Upgrades Recommended
+- Bổ sung Quiz về `dbt_utils`.
+- Bổ sung Quiz kiểm tra sự hiểu biết về `tags` hoặc `exposures`.
+- Nhấn mạnh ở W8.05 rằng dbt không chỉ có built-in test, ta có thể dùng package `dbt-expectations` để test Regex, row count, hay data distribution.
+
+## 7. Portfolio Value Assessment
+Artifact W8.10 hiện tại rất tốt. Để nó trở thành "Killer Portfolio", hãy yêu cầu người học:
+1. Có sử dụng một package (như `dbt-utils` để sinh hash key).
+2. Có tạo một file `exposures.yml` nối `dim_players_scd2` tới một dashboard giả lập (chụp ảnh lineage có dashboard màu cam).
+Điều này chứng tỏ ứng viên có tư duy Data Platform End-to-End.
+
+## 8. Top 10 Immediate Patches
+1. **W8.02:** Thêm snippet `packages.yml` khai báo `dbt-utils`.
+2. **W8.02:** Thêm giải thích ngắn về thư mục `seeds/` (dùng load lookup tables tĩnh).
+3. **W8.04 (hoặc W8.06):** Thêm 1 block mã ví dụ `exposures.yml` mô tả cầu nối tới BI Dashboard.
+4. **W8.06:** Thêm thuộc tính `tags: ['daily_job']` vào ví dụ cấu hình YAML.
+5. **W8.08:** Thêm ví dụ sử dụng `{{ dbt_utils.generate_surrogate_key(...) }}` thay vì tự viết Macro.
+6. **W8.09:** Thêm info-box giải thích khái niệm Slim CI (cách truyền cờ `--state` và `--defer`).
+7. **W8.10:** Yêu cầu thêm 1 file `exposures.yml` và dùng 1 macro từ `dbt-utils` vào Artifact.
+8. **W8.11 (Quiz):** Bổ sung câu hỏi về công dụng của `dbt_utils`.
+9. **W8.11 (Quiz):** Bổ sung câu hỏi về `exposures` (hiển thị downstream BI trên lineage).
+10. **W8.11 (Quiz):** Bổ sung câu hỏi về cách Airflow trigger dbt tốt nhất (đáp án là dùng `tags`).
+
+## 9. Final Verdict
+- **patch lightly**
+*(Bộ khung dbt của tài liệu này đã ở mức hoàn hảo, sát sườn với roadmap DE. Chỉ cần thêm vài thao tác vá nhỏ để bổ sung các mảnh ghép chuyên sâu (Packages, Exposures, Slim CI, Tags) là sẽ đưa khóa học này đạt chuẩn Senior/Elite).*
+
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade models/examples/workflows where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen why dbt exists framing
+- improve staging/intermediate/mart layering
+- improve tests and trust examples
+- improve macro practicality
+- improve incremental + late data realism
+- improve snapshot explanations
+- improve CI/CD workflow realism
+- improve docs + lineage value
+- strengthen W8.07 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week08_dbt.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text id="w8finalreview"
+Review the patched ./Week08_dbt.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text id="w8qa"
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week08_dbt.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- dbt examples still feel coherent and realistic
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week08_dbt.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week08
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo riêng cho Week08
+
+Week08 rất dễ bị biến thành:
+
+* hướng dẫn cài dbt
+* hoặc giới thiệu tính năng rời rạc
+
+Bạn nên thêm 1 dòng này vào prompt build hoặc patch:
+
+```text id="w8tip"
+Do not turn Week08 into a dbt installation guide or feature checklist.
+Teach dbt as a practical transformation workflow for maintainable analytics systems with lineage, testing, incremental models, collaboration, and production delivery.
+```

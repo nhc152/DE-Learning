@@ -404,10 +404,11 @@
 <span class="kw">LEFT JOIN</span> median_by_type m <span class="kw">ON</span> t.txn_type = m.txn_type;
 
 <span class="comment">-- Python-equivalent handbook baseline (để map sang cleaning_pipeline.py)</span>
-<span class="comment">-- df = df.drop_duplicates()</span>
+<span class="comment">-- df = (df.sort_values(["transaction_id", "txn_date"], ascending=[True, True])</span>
+<span class="comment">--         .drop_duplicates(subset=["transaction_id"], keep="last"))  # giữ bản ghi mới nhất</span>
 <span class="comment">-- df.columns = [c.lower().replace(" ", "_") for c in df.columns]</span>
 <span class="comment">-- df[num_cols] = df[num_cols].fillna(df[num_cols].median())</span>
-<span class="comment">-- df["date"] = pd.to_datetime(df["date"])</span></pre></div></div>
+<span class="comment">-- df["txn_date"] = pd.to_datetime(df["txn_date"], errors="coerce")</span></pre></div></div>
         <div class="db-panel" id="ora2"><div class="cmd-body"><pre><span class="comment">-- Oracle 19c: NVL/NVL2 + MEDIAN by group + audit flags</span>
 <span class="kw">SELECT</span>
     t.transaction_id,
@@ -432,6 +433,7 @@
 <span class="kw">FROM</span> account_daily_balance;</pre></div></div>
       </div>
       <div class="info-box tip"><span>💡</span><span><strong>Quy tắc vận hành:</strong> với cột critical (key/date), ưu tiên <strong>flag + quarantine</strong> thay vì auto-impute. Với cột measure, dùng median theo nhóm nghiệp vụ và luôn lưu cờ <code>is_imputed</code> để audit downstream.</span></div>
+      <div class="info-box warn"><span>⚠️</span><span><strong>Lưu ý Oracle NVL:</strong> <code>NVL(expr1, expr2)</code> có thể implicit-convert kiểu dữ liệu theo <code>expr1</code>, dễ gây lỗi ngầm khi so sánh/ghép cột khác kiểu; thêm nữa Oracle coi empty string là <code>NULL</code>. Khi cần portable logic giữa PostgreSQL/Oracle, ưu tiên <code>COALESCE</code>/<code>CASE WHEN</code> + <code>CAST</code> tường minh.</span></div>
     </div>
   </div>
   <div class="section">
@@ -658,6 +660,10 @@ bounds <span class="kw">AS</span> (
 <span class="kw">FROM</span> raw_transactions;</pre></div></div>
       </div>
       <div class="info-box tip"><span>💡</span><span><strong>Winsorization vs Trimming:</strong> Trimming xóa outlier rows. Winsorization giữ rows nhưng thay giá trị outlier bằng fence value (upper = Q3+1.5*IQR, lower = Q1-1.5*IQR). Winsorization giữ sample size, robust hơn cho analytics.</span></div>
+      <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Python nhanh: scipy winsorize cho amount</span></div><div class="cmd-body"><pre><span class="kw">from</span> scipy.stats.mstats <span class="kw">import</span> winsorize
+
+<span class="comment"># cap 1% hai đầu phân phối, giữ nguyên số lượng rows</span>
+df[<span class="str">"amount_winsorized"</span>] = winsorize(df[<span class="str">"amount"</span>], limits=[<span class="num">0.01</span>, <span class="num">0.01</span>])</pre></div></div>
       <div class="info-box warn"><span>🧪</span><span><strong>Defensive xử lý outlier:</strong> mặc định nên <strong>flag + quarantine</strong> trước khi cap/xóa. Outlier có thể là tín hiệu gian lận hoặc sự kiện nghiệp vụ hiếm, không phải luôn là dữ liệu lỗi.</span></div>
     </div>
   </div>
@@ -767,8 +773,19 @@ bounds <span class="kw">AS</span> (
     <span class="fn">LOWER</span>(<span class="fn">TRIM</span>(email))                    <span class="kw">AS</span> email_clean,
     <span class="comment">-- Oracle không có unaccent native, dùng UTL_I18N</span>
     <span class="fn">UTL_I18N.TRANSLITERATE</span>(city_name, <span class="str">'Latin'</span>) <span class="kw">AS</span> city_latin
-<span class="kw">FROM</span> customer_data;</pre></div></div>
+<span class="kw">FROM</span> customer_data;
+
+<span class="comment">-- Mapping chuẩn hóa categorical bằng bảng lookup (production pattern)</span>
+<span class="kw">SELECT</span>
+    c.customer_id,
+    c.city_name <span class="kw">AS</span> raw_city,
+    <span class="fn">COALESCE</span>(m.city_canonical, <span class="fn">TRIM</span>(<span class="fn">UPPER</span>(c.city_name))) <span class="kw">AS</span> city_standardized,
+    <span class="kw">CASE WHEN</span> m.city_canonical <span class="kw">IS NULL</span> <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span> <span class="kw">AS</span> is_unmapped_city
+<span class="kw">FROM</span> customer_data c
+<span class="kw">LEFT JOIN</span> ref_city_mapping m
+  <span class="kw">ON</span> <span class="fn">TRIM</span>(<span class="fn">UPPER</span>(c.city_name)) = m.city_raw_key;</pre></div></div>
       </div>
+      <div class="info-box note"><span>🗺️</span><span><strong>Lookup mapping mindset:</strong> thay vì hard-code hàng loạt <code>CASE WHEN</code>, nên quản lý bảng mapping riêng (<code>ref_city_mapping</code>) để business tự cập nhật synonym như HCM/TP HCM/Ho Chi Minh mà không phải sửa code pipeline.</span></div>
     </div>
   </div>
   <div class="section">
@@ -876,6 +893,26 @@ dup_check <span class="kw">AS</span> (
 <span class="kw">FROM</span> base_stats b, dup_check d;</pre></div></div>
       </div>
       <div class="info-box tip"><span>💡</span><span><strong>Oracle có MEDIAN() built-in!</strong> PostgreSQL phải dùng PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col). TRUNC(SYSDATE) - TRUNC(MAX(date)) trong Oracle trả về NUMBER (số ngày) — tương đương CURRENT_DATE - MAX(date) trong PostgreSQL.</span></div>
+      <div class="cmd-block">
+        <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Source-to-Target reconciliation (chống silent data loss)</span></div>
+        <div class="cmd-body"><pre><span class="kw">WITH</span> src <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> src_rows <span class="kw">FROM</span> raw_transactions
+),
+tgt <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> tgt_rows <span class="kw">FROM</span> silver_transactions
+),
+dlq <span class="kw">AS</span> (
+    <span class="kw">SELECT COUNT</span>(*) <span class="kw">AS</span> dlq_rows <span class="kw">FROM</span> transactions_dlq
+)
+<span class="kw">SELECT</span>
+    src.src_rows,
+    tgt.tgt_rows,
+    dlq.dlq_rows,
+    (src.src_rows - (tgt.tgt_rows + dlq.dlq_rows)) <span class="kw">AS</span> unreconciled_rows,
+    <span class="kw">CASE WHEN</span> src.src_rows = (tgt.tgt_rows + dlq.dlq_rows)
+         <span class="kw">THEN</span> <span class="str">'PASS'</span> <span class="kw">ELSE</span> <span class="str">'FAIL'</span> <span class="kw">END</span> <span class="kw">AS</span> s2t_status
+<span class="kw">FROM</span> src, tgt, dlq;</pre></div>
+      </div>
       <div class="info-box note"><span>🧾</span><span><strong>Chuẩn output để commit:</strong> kết quả profiling nên được xuất thành bảng/báo cáo gồm metric, giá trị hiện tại, ngưỡng kỳ vọng, và hành động đề xuất; dùng trực tiếp làm input cho <code>cleaning_pipeline.py</code> và <code>validation_rules.py</code>.</span></div>
     </div>
   </div>
@@ -991,10 +1028,10 @@ rule_ref_integrity <span class="kw">AS</span> (
 
 transaction_schema = DataFrameSchema({
     <span class="str">"transaction_id"</span>: Column(str,
-        checks=[Check.str_matches(<span class="str">r'^TXN[0-9]{10}$'</span>)],
+        checks=[Check.str_matches(<span class="str">r'^TXN[0-9]{10}$'</span>), Check.is_unique()],
         nullable=<span class="kw">False</span>),
     <span class="str">"account_no"</span>: Column(str,
-        checks=[Check.str_length(<span class="num">10</span>, <span class="num">16</span>)],
+        checks=[Check.str_matches(<span class="str">r'^[0-9]{10,16}$'</span>)],
         nullable=<span class="kw">False</span>),
     <span class="str">"amount"</span>: Column(float,
         checks=[Check.greater_than_or_equal_to(<span class="num">0</span>),
@@ -1022,6 +1059,7 @@ transaction_schema = DataFrameSchema({
     print(error_report.head(<span class="num">20</span>))</pre></div>
       </div>
       <div class="info-box note"><span>🛡️</span><span><strong>Defensive programming:</strong> với rule critical (key/date/schema mismatch), nên fail-loudly để chặn load; với rule non-critical có thể quarantine và tiếp tục pipeline có kiểm soát.</span></div>
+      <div class="info-box warn"><span>🚮</span><span><strong>DLQ trong production:</strong> record fail non-critical không nên mất dấu trong console log. Hãy ghi vào bảng <code>transactions_dlq</code> kèm <code>reason_code</code>, <code>failed_rule</code>, <code>ingest_batch_id</code>, và timestamp để team vận hành có thể reprocess có kiểm soát.</span></div>
     </div>
   </div>
   <div class="section">
@@ -1104,6 +1142,8 @@ transaction_schema = DataFrameSchema({
             <div class="cmd-block">
               <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>profiling_report.ipynb — key cells</span></div>
               <div class="cmd-body"><pre><span class="kw">import</span> pandas <span class="kw">as</span> pd, seaborn <span class="kw">as</span> sns
+<span class="kw">from</span> ydata_profiling <span class="kw">import</span> ProfileReport
+
 df = pd.read_csv(<span class="str">'transactions.csv'</span>)
 
 <span class="comment"># 1. Quick stats</span>
@@ -1115,7 +1155,11 @@ sns.heatmap(df.isnull(), yticklabels=False, cbar=False)
 <span class="comment"># 3. IQR Outliers</span>
 Q1=df[<span class="str">'amount'</span>].quantile(0.25); Q3=df[<span class="str">'amount'</span>].quantile(0.75); IQR=Q3-Q1
 outliers = df[(df[<span class="str">'amount'</span>] &lt; Q1-1.5*IQR)|(df[<span class="str">'amount'</span>] &gt; Q3+1.5*IQR)]
-print(f"Outliers: {len(outliers)} rows ({len(outliers)/len(df)*100:.2f}%)")</pre></div>
+print(f"Outliers: {len(outliers)} rows ({len(outliers)/len(df)*100:.2f}%)")
+
+<span class="comment"># 4. Auto profiling artifact (HTML)</span>
+profile = ProfileReport(df, title=<span class="str">"Week03 Data Profiling Report"</span>, explorative=<span class="kw">True</span>)
+profile.to_file(<span class="str">"artifacts/profiling_report.html"</span>)</pre></div>
             </div>
           </div>
         </div>
@@ -1125,7 +1169,7 @@ print(f"Outliers: {len(outliers)} rows ({len(outliers)/len(df)*100:.2f}%)")</pre
         <div class="practice-task-body">
           <p>Python script áp dụng clean pipeline theo đúng checklist của handbook.</p>
           <ul>
-            <li><code>drop_duplicates()</code> với key business + ghi log duplicate_rate trước/sau.</li>
+            <li><code>sort_values([...]).drop_duplicates(subset=['transaction_id'], keep='last')</code> để giữ bản ghi mới nhất theo logic <code>ROW_NUMBER ORDER BY txn_date DESC</code>, kèm log duplicate_rate trước/sau.</li>
             <li>Chuẩn hóa cột: <code>lowercase_underscore</code> để tránh mismatch khi join.</li>
             <li><code>handle_missing(df)</code> — median/mean/domain rule theo từng nhóm cột + <code>is_imputed</code>.</li>
             <li><code>pd.to_datetime(...)</code> cho cột ngày sau bước validate format.</li>

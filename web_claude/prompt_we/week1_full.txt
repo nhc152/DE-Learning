@@ -464,7 +464,88 @@ Improve the file across:
 - artifact realism
 
 PATCH PRIORITIES:
-[PASTE ANTIGRAVITY REVIEW HERE]
+Listed directory DE-Learning
+Listed directory .claude
+Viewed CLAUDE.md:1-51
+Viewed OUTPUT_STANDARD.md:1-223
+Viewed REVIEW_CHECKLIST.md:1-79
+Ran command: `python -c "import html.parser, sys; class HTMLFilter(html.parser.HTMLParser):
+    text = ''
+    def handle_data(self, data):
+        self.text += data
+
+parser = HTMLFilter()
+with open('Week01_SQL_Advanced.html', 'r', encoding='utf-8') as f:
+    parser.feed(f.read())
+with open('Week01_text.txt', 'w', encoding='utf-8') as f:
+    f.write(parser.text)"`
+Edited dump_html.py
+Ran command: `python dump_html.py`
+Edited dump_html.py
+Ran command: `python dump_html.py`
+Viewed Week01_text.txt:1-800
+Viewed Week01_text.txt:1-800
+Viewed Week01_text.txt:801-1009
+Ran command: `echo "Ready to generate"`
+
+# Week01 Review Report
+
+## 1. Executive Summary
+- **score /10:** 8.5/10. Dàn ý chuẩn, tư duy Data Engineering cực kỳ rõ nét và sát thực tế, tuy nhiên vi phạm quy định dự án ở một vài điểm và thiếu một số pattern thiết yếu.
+- **strongest parts:** Phân biệt rõ tư duy SQL của DE so với Analyst; hỗ trợ song song PostgreSQL và Oracle SQL; kiến thức ở SCD2 (Validation Date Overlap) và Incremental Load (Idempotent UPSERT) có chất lượng thực chiến xuất sắc.
+- **biggest weaknesses:** Tuần 1 bắt buộc làm artifact có chứa "Streak Analysis" (gap & islands) nhưng không hề có nội dung dạy; kỹ thuật "Dedup Latest Record bằng ROW_NUMBER()", vốn rất quan trọng với DE, chưa được đề cập; vi phạm quy định cứng về số câu hỏi quiz/mỗi module của dự án. 
+- **priority level:** High (Cần vá lại nội dung trước khi tung ra để đảm bảo học viên có thể hoàn thành Artifact một cách độc lập).
+
+## 2. What Already Strong
+- **Data Engineering Relevance:** Làm cực tốt việc setup tư duy pipeline: học SQL không phải để ra số ad-hoc, mà để pipeline chạy lại an toàn (idempotent, incremental load).
+- **SCD2 & Validation:** Phần SCD2 bao gồm cả việc update/insert chuẩn và kèm luôn query validation để test overlap thời gian - một khía cạnh DE hiếm khóa học nào dạy kĩ.
+- **Dialect Separation:** Lời giải cho PostgreSQL (`ON CONFLICT`, `EXPLAIN ANALYZE`) và Oracle (`MERGE`, `EXPLAIN PLAN`) rất rõ ràng, đáp ứng được nhiều môi trường doanh nghiệp lớn.
+- **HTML & Cấu Trúc:** Chuỗi module tuân thủ cấu trúc 6 mảng (Menu, Mục Đích, Giải Thích, Ôn Tập, Tổng Kết, Thực Hành) gọn gàng, rõ ý và bám sát design UI/UX cao cấp. 
+
+## 3. Critical Gaps
+- **Missing "Dedup latest row per key" Pattern:** Bài toán lấy dòng mới nhất (dedup với `ROW_NUMBER() = 1 ORDER BY updated_at DESC`) là kĩ thuật DE ngày nào cũng dùng, nhưng bị bỏ sót. W1.02 mới chỉ có pattern về lấy Top 3 theo nhóm.
+- **Missing "Streak Analysis / Gap and Island" Pattern:** Trong Artifact W1.07 đòi hỏi ứng viên nộp kết quả file `05_consecutive_active.sql` (Streak analysis - Phân tích chuỗi hoạt động liên tiếp của User), nhưng ở các học phần W1.02 hoàn toàn thiếu lý thuyết để giải quyết loại bài toán nâng cao này.
+- **Quy định Quiz File .claude Violation:** File quy định `OUTPUT_STANDARD.md` bắt buộc `exactly 10 questions per module` cho Quiz. Hiện tại mỗi Module nhỏ chỉ từ 4 đến 6 câu hỏi ôn tập. 
+- **Thiếu minh hoạ "Partition Pruning":** W1.06 có nhắc tới khả năng Partition Pruning để tối ưu scan nhưng trong "Giải Thích Chi Tiết" lại không hề có query example hoặc hình Explain Plan nào để minh hoạ khái niệm này. 
+
+## 4. Module-by-Module Improvements
+- **W1.02 Window Functions:** Bắt buộc bổ sung phần nội dung "Dedup Record Mới Nhất Dùng Window Function" (với filter `rn = 1`) và "Phân Tích Chuỗi / Streak (Gap and Island)" vào bài. 
+- **W1.03 GROUPING SETS:** Nên bổ sung khái niệm dùng `COALESCE` bao quanh hàm `GROUPING()` để tự động thay nhãn `NULL` bằng tên ví dụ như `'Tổng Cộng'`. 
+- **W1.04 SCD Type 1/2/3:** Thêm note giải thích chuyện gì xảy ra với Data Engineering pipeline khi có thao tác "Soft Delete" ở nguồn (chẳng hạn làm thủ thuật tự chèn `effective_to` sớm cho những Record đã bị xóa).
+- **W1.05 Incremental Load:** Phải cảnh báo rắc rối mang tên "Late Arriving Data" (Dữ liệu về muộn hơn do lag mạng) khi sử dụng thuần `timestamp watermark` có thể bị hụt số (thiếu sót Record). 
+- **W1.06 EXPLAIN & Optimize:** 
+    - Thêm Explain Plan trực tiếp so sánh việc có và không có Partition Pruning. 
+    - Giải thích rõ cơ chế "function-on-column anti-pattern" (Dùng hàm trên cột lọc WHERE sẽ làm index scan bị rớt mạng trừ khi dùng expression index).
+- **W1.07 Artifact:** File `05_consecutive_active.sql` và `04_retention.sql` chưa có input cụ thể từ bài học, cần chuẩn hóa danh sách cho khớp với những hàm Window được dạy ở W1.02 để tạo Learner Flow mượt mà. 
+- **W1.08 Mini Test:** 20 câu hỏi cuối khóa ổn, nhưng có thể tinh chỉnh sau khi add thêm Quiz cho từng module.
+
+## 5. Production Upgrades Recommended
+- **Idempotency Caveat - Concurrency:** Trong W1.05 (UPSERT / MERGE), cần nhắc nhẹ learner rằng nhiều tiến trình UPSERT chạy chung một lúc có thể gây hiện tượng Race Condition / Deadlock.
+- **Watermark Best Practice:** Để khắc phục Late Arriving Data, đề xuất thêm một thủ thuật Production là lùi `wm.last_wm` đi 1 giờ (e.g., `- interval '1 hour'`) để hút an toàn các Record trôi nổi chưa update kịp time. 
+
+## 6. Teaching Upgrades Recommended
+- **Sửa Lỗi Đồng Bộ Artifact vs Exercise (Luồng Học):** Hãy dời query ở W1.07 (Artifact) xuống trực tiếp mục "Thực Hành" của các Module W1.02 - W1.06. Lúc này learner học đến đâu viết Artifact đến đó. Ở W1.07 chỉ kiểm kê lại và Commit. 
+- **Giữ chuẩn 10 Queries/Quiz:** Sắp xếp lại file HTML để mỗi module ôn tập đều có chính xác 10 câu trắc nghiệm theo lệnh tại `OUTPUT_STANDARD.md`. 
+- **Explain Plan Output trong Artifact:** Thay vì chỉ dán câu lệnh SQL vào Query phần W1.06, hãy hướng dẫn học viên copy thẳng Result log `EXPLAIN` và dán vào comment (`/* ... */`) làm minh chứng portfolio thực thụ.
+
+## 7. Portfolio Value Assessment
+- Bài làm W1.07 của tuần 1 là một Artifact cực đỉnh, biến toàn bộ học thuyết khô khan của SQL nâng cao thành một kho vũ khí (Pattern Code) có thể đem ứng dụng trong công việc hàng ngày hoặc tham khảo phỏng vấn DE.
+- Assessment: Portfolio rất cứng, thể hiện được sự chuyên nghiệp của ứng viên biết thiết kế Data Warehouse với "Lịch Sử (SCD)" và "Load Gói Nhỏ (Incremental)".
+
+## 8. Top 10 Immediate Patches
+1. Thêm lý thuyết "Deduplication: Latest Record với ROW_NUMBER()" vào W1.02.
+2. Thêm bài học "Gap and Island / Streak Logic" vào W1.02 để đủ khả năng làm Artifact 05.
+3. Bổ sung mục "Late Arriving Data & Catch-up" trong Incremental Load (W1.05). 
+4. Thích nghi số lượng Quiz Practice từng Module tăng lên đủ 10 câu theo đúng `.claude` standards. 
+5. Cảnh báo Anti-Pattern chạy Hàm trực tiếp trên cột bộ lọc ở phần W1.06.
+6. Thêm Execution Plan minh hoạ cho Partition Pruning vào tiết học Tối Ưu Queries (W1.06).
+7. Mở rộng tài liệu hướng dẫn tạo Nhãn NULL an toàn cho báo cáo Grouping Sets với `COALESCE(col, 'ALL')`.
+8. Tích hợp Concept "Source Delete handling (SCD2)" khi dữ liệu nguồn bỗng dưng bốc hơi thì lưu Dimension làm sao ở (W1.04).
+9. Đồng bộ danh sách 11 Queries ở Artifact trùng khớp với bài tập thực hành 6 Section dọc theo các Module trước đó. 
+10. Yêu cầu sinh viên dán Copy Log Output của `EXPLAIN ANALYZE` (hoặc `DBMS_XPLAN`) vào nội dung comment SQL File Artifact để làm minh chứng Optimization đã test chạy thật. 
+
+## 9. Final Verdict
+- **patch strongly** (Bắt buộc phải lấp đầy các khoảng trống tư duy cực kỳ cần thiết cho DE như Dedup, Gap-Island và vá lại số lượng Quiz. Base hiện tại đã rất vững chắc).
 
 MANDATORY EDITING RULES:
 1. First identify which current sections should be preserved
@@ -493,7 +574,8 @@ COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
 EXPECTED RESULT:
 Update only:
 ./Week01_SQL_Advanced.html
-```
+
+
 
 ---
 

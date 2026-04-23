@@ -1,0 +1,623 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week05_Dimensional_Modeling.html`.
+
+Week05 là tuần nền tảng về **Data Warehouse Modeling**. Đây là lúc người học chuyển từ raw tables sang tư duy mô hình hóa phục vụ analytics: fact table, dimension table, star schema, grain, surrogate key, slowly changing dimensions, conformed dimensions, semi-additive measures. Nếu học tốt tuần này, các tuần dbt / warehouse / BI sau sẽ mạnh hơn rất nhiều.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text id="w5build"
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week05_Dimensional_Modeling.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 5 – Dimensional Modeling cho Data Engineer
+
+Allowed sources only:
+- ./Week05_Dimensional_Modeling.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 05 CORE MISSION:
+This file must teach how to model data for analytics, not just create tables.
+
+The learner should understand:
+- why normalized OLTP schemas are not ideal for analytics
+- fact vs dimension tables
+- star schema vs snowflake schema
+- choosing the correct grain
+- measures and dimensions
+- surrogate keys
+- conformed dimensions
+- semi-additive metrics
+- SCD relationship to dimensional models
+- how to design a warehouse model recruiters respect
+
+This tutorial must feel stronger than common “Kimball definitions only” content.
+
+MANDATORY MODULES:
+- W5.01 – Tổng Quan: Vì Sao Cần Dimensional Modeling?
+- W5.02 – Fact Table vs Dimension Table
+- W5.03 – Grain, Keys, Measures, Dimensions
+- W5.04 – Star Schema vs Snowflake Schema
+- W5.05 – Advanced Concepts: Conformed Dimensions & Semi-Additive Facts
+- W5.06 – SCD trong Warehouse Modeling
+- W5.07 – Artifact: week5_dimensional_model/
+- W5.08 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W5.01
+- OLTP vs OLAP modeling mindset
+- why dashboards need fast understandable models
+- why analysts struggle with highly normalized schemas
+- business questions first, tables second
+- common analytics use cases:
+  sales, orders, retention, finance
+- why modeling decisions affect query simplicity and performance
+- week outcomes checklist
+
+W5.02
+- fact table definition
+- business events
+- examples:
+  orders, payments, page_views
+- dimension table definition
+- descriptive context
+- examples:
+  customer, product, date, store
+- foreign key relationships
+- additive measures
+- examples of bad classification:
+  putting metrics in dimensions
+- how to identify facts vs dimensions in raw sources
+
+W5.03
+- grain meaning (one row represents what?)
+- choosing grain before columns
+- transaction grain
+- daily snapshot grain
+- periodic snapshot
+- accumulating snapshot (intro)
+- natural key vs surrogate key
+- why surrogate keys help
+- measures:
+  additive / semi-additive / non-additive
+- dimensions:
+  low-cardinality vs high-cardinality considerations
+- anti-pattern:
+  changing grain mid-table
+
+W5.04
+- star schema structure
+- snowflake schema structure
+- pros / cons of each
+- simplicity vs normalization trade-off
+- BI tool friendliness
+- join complexity
+- maintenance implications
+- when snowflake can be acceptable
+- realistic examples with diagrams in HTML/CSS if possible
+
+W5.05
+- conformed dimensions meaning
+- shared customer/product/date dimensions across marts
+- why consistency matters across dashboards
+- slowly changing shared dimensions concerns
+- semi-additive facts:
+  account balance, inventory level
+- why SUM over time may be wrong
+- correct aggregation patterns
+- intro to bridge tables if useful
+- anti-pattern:
+  duplicate dimensions across teams with conflicting definitions
+
+W5.06
+- connect SCD Type 1/2/3 to dimensions
+- customer address change example
+- current vs historical reporting
+- joining facts to historical dimensions
+- effective dating basics
+- current_flag pattern
+- common mistakes:
+  multiple current rows
+  missing historical joins
+- practical SQL examples
+
+W5.07
+- build realistic portfolio artifact:
+  week5_dimensional_model/
+  ├── source_analysis.md
+  ├── star_schema.md
+  ├── ddl.sql
+  ├── sample_queries.sql
+  ├── metric_definitions.md
+  └── README.md
+- use business case:
+  e-commerce or retail analytics
+- include schema diagrams in markdown/text if useful
+- README must explain:
+  - business requirements
+  - chosen grain
+  - dimensions
+  - facts
+  - trade-offs
+  - lessons learned
+- must feel portfolio-ready
+
+W5.08
+- final mini test: 20 questions
+- cover:
+  - fact/dimension
+  - grain
+  - star vs snowflake
+  - conformed dimensions
+  - semi-additive facts
+  - SCD in modeling
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- modeling tasks
+- identify fact vs dimension tasks
+- grain selection tasks
+- schema critique tasks
+- metric design tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every example should be believable
+- focus on decision-making, not memorization
+- avoid vendor-specific distractions
+- practical warehouse mindset first
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- dry theory dumps
+- filler text
+- vague definitions
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week05 scope you are using from roadmap
+2. Which format rules you inherit from Week00
+3. Which assumptions you are making for business case examples
+
+Then output the full final content for:
+./Week05_Dimensional_Modeling.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text id="w5review"
+Use project rules from .claude.
+
+Review ./Week05_Dimensional_Modeling.html as a senior Data Warehouse modeling reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- teaching quality
+- modeling correctness
+- production usefulness
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week05 teaches modeling for analytics systems, not generic database design.
+Check relevance of:
+- fact/dimension design
+- grain decisions
+- metrics usability
+- schema simplicity
+- BI friendliness
+- historical reporting
+- shared definitions across teams
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- wrong grain consequences
+- duplicate metrics definitions
+- slow analyst queries from bad models
+- semi-additive pitfalls
+- inconsistent customer dimensions
+- historical joins
+- recruiter-grade portfolio artifact realism
+
+D. MODELING QUALITY
+Review whether explanations are strong enough for:
+- fact vs dimension
+- grain
+- surrogate keys
+- star vs snowflake
+- conformed dimensions
+- SCD integration
+- measure types
+- real business modeling decisions
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W5.07 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- date dimension importance
+- degenerate dimensions
+- junk dimensions
+- accumulating snapshot example
+- metric governance
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week05 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text id="w5patch"
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week05_Dimensional_Modeling.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week05 becomes a high-value, portfolio-grade Dimensional Modeling tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week05_Dimensional_Modeling.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- modeling depth
+- teaching clarity
+- production realism
+- business decision quality
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+Listed directory DE-Learning
+Listed directory .claude
+Viewed OUTPUT_STANDARD.md:1-223
+Viewed REVIEW_CHECKLIST.md:1-79
+Viewed Week05_Dimensional_Modeling.html:1-800
+Viewed Week05_Dimensional_Modeling.html:801-1600
+Viewed Week05_Dimensional_Modeling.html:1601-2400
+Viewed Week05_Dimensional_Modeling.html:2401-2764
+
+# Week05 Review Report
+
+## 1. Executive Summary
+- **Score:** 9.5/10
+- **Strongest parts:** Khả năng kết hợp hoàn hảo giữa lý thuyết Kimball thuần túy và kỹ năng triển khai SQL production-grade (PostgreSQL vs Oracle). Các module SCD2 Backfill/Incremental và Cumulative Table Design được viết với tư duy Data Engineer thực chiến xuất sắc.
+- **Biggest weaknesses:** Một số khái niệm cốt lõi của Kimball (Junk Dimension, Degenerate Dimension, Conformed Dimension) bị đẩy xuống phần Câu hỏi ôn tập thay vì có section giải thích chính thức trong bài. Hoàn toàn thiếu vắng khái niệm Role-playing Dimension.
+- **Priority level:** Low (Patch lightly) — Bản thân tài liệu đã đạt chuẩn Senior/Portfolio-grade, chỉ cần "trám" lại một số lỗ hổng lý thuyết nhỏ để trở thành phiên bản hoàn hảo tuyệt đối.
+
+## 2. What Already Strong
+- **SCD2 & Cumulative Patterns:** Xử lý cực kỳ sâu sắc. Việc cung cấp code mẫu phân tách rạch ròi giữa Backfill (TRUNCATE + INSERT với Window Functions) và Incremental (Expire old + Insert new) thể hiện tư duy kiến trúc mạnh mẽ.
+- **Cross-DB Implementation:** Việc đối chiếu syntax xử lý array/JSON giữa PostgreSQL (`JSONB_AGG`) và Oracle (`JSON_ARRAYAGG` trả về `CLOB`) cực kỳ giá trị cho ứng viên làm việc ở môi trường Enterprise.
+- **Anti-pattern Coverage:** Đưa ra đoạn code "anti-pattern" (Full scan raw event log) để làm nổi bật lý do tồn tại và sức mạnh của Cumulative Table là một cách dạy tuyệt vời.
+- **Idempotency & Validation:** Ép người học kiểm tra `invariant count`, overlap intervals, và unique current row sau khi backfill. Đây là tư duy của Senior DE.
+- **UI/UX:** Giao diện học tập đẹp, có tính tương tác cao, các tab code rõ ràng giúp người học không bị ngợp.
+
+## 3. Critical Gaps
+- **Thiếu Role-playing Dimension:** Trong mô hình E-commerce (`fact_orders`), fact thường nối với `dim_date` nhiều lần qua các cột như `order_date_key`, `ship_date_key`, `payment_date_key`. Việc không nhắc đến Role-playing dimension làm mất đi một vũ khí lợi hại của Kimball.
+- **Giấu kiến thức vào Quiz:** Các khái niệm quan trọng như Junk Dimension, Degenerate Dimension, và Conformed Dimension xuất hiện trong Quiz nhưng lại chưa hề được định nghĩa hay giới thiệu ở phần "Giải thích chi tiết". Người học sẽ bị bối rối khi làm bài.
+- **Thiếu "Unknown" Member Design:** Trong DWH thực tế, Fact table không nên chứa FK bị `NULL`. Luôn cần insert 1 row đặc biệt (ví dụ ID = `-1` hoặc `19000101`) vào Dimension table đại diện cho "Unknown" hoặc "N/A". Tài liệu chưa đề cập trick sống còn này.
+
+## 4. Module-by-Module Improvements
+- **W5.02 (Grain, Fact & Dim):** Bổ sung một Section "Các Loại Dimension & Kỹ Thuật Nâng Cao", chính thức giới thiệu: *Degenerate Dimension, Junk Dimension, Role-playing Dimension, và Row "Unknown" (-1)*.
+- **W5.03 (Star vs Snowflake):** Giải thích rõ "Conformed Dimension" trong nội dung bài học. Thêm một sơ đồ hoặc ví dụ text minh họa 1 Fact kết nối với `dim_date` qua nhiều Role-playing keys.
+- **W5.04 (SCD Types):** Thêm một đoạn Note nhỏ giải thích việc sử dụng `hash_diff` (ví dụ MD5/SHA256 trên toàn bộ cột tracked) để detect changes trong thực tế, thay vì so sánh `!=` dài dòng cho hàng chục cột.
+- **W5.06 (Backfill Strategy):** Nhắc nhở thêm best practice về việc DROP/DISABLE Indexes và Foreign Keys trước khi TRUNCATE + bulk INSERT, sau đó REBUILD lại để tối ưu hóa thời gian load.
+
+## 5. Production Upgrades Recommended
+- **Late-Arriving Dimensions:** Đề cập ngắn gọn cách xử lý khi dữ liệu Fact tới trước dữ liệu Dimension (tạo dummy dimension record và update SCD1/SCD2 sau khi dimension data đến).
+- **Tránh NULL Foreign Keys:** Bổ sung rule về Default/Unknown Member (-1) cho dimension.
+- **Checksum/Hash_diff:** Nâng cấp query SCD2 Incremental bằng cách gợi ý kỹ thuật tạo mã hash dòng hiện tại vs dòng mới để tìm ra record cần expire.
+
+## 6. Teaching Upgrades Recommended
+- **Không dạy kiến thức mới qua Quiz:** Đưa các định nghĩa từ đáp án câu 8, 9 (W5.02) và câu 8, 10 (W5.03) lên phần bài giảng chính. Quiz chỉ dùng để ôn tập.
+- **Visual hóa Cumulative Logic:** Ở W5.05, có thể thêm 1 bảng HTML nhỏ mô phỏng trực quan phép `FULL OUTER JOIN`: [Actor có ở Yesterday] + [Actor có ở Today] = [Kết quả Array được ghép lại], giúp não bộ tiếp thu dễ hơn so với việc chỉ đọc mã SQL.
+
+## 7. Portfolio Value Assessment
+- **Đánh giá:** Rất cao. Chất lượng tài liệu thực sự ở mức Senior Reviewer.
+- Việc thí sinh sở hữu Artifact chứa SQL phân loại SCD2 (Backfill + Incremental) kèm Cumulative query theo năm (chuẩn DataExpert) và biết cách validation sau khi ETL là những minh chứng cực mạnh để pass các vòng phỏng vấn Technical Data Engineer. File HTML này bản thân nó là một sản phẩm thể hiện sự am hiểu kiến trúc DWH sâu sắc.
+
+## 8. Top 10 Immediate Patches
+1. Di chuyển định nghĩa Junk Dimension từ Quiz W5.03 lên bài học chính W5.03.
+2. Di chuyển định nghĩa Degenerate Dimension từ Quiz W5.02 lên bài học chính W5.02.
+3. Di chuyển định nghĩa Conformed Dimension từ Quiz W5.03 lên bài học chính W5.03.
+4. Bổ sung giải thích về Role-playing Dimension vào W5.03 (Ví dụ order_date vs ship_date).
+5. Bổ sung kỹ thuật "Row -1 / Unknown Member" vào quy tắc thiết kế Fact/Dim trong W5.02.
+6. Thêm Tip "Sử dụng Hash (MD5) để detect change" khi có quá nhiều cột vào W5.04 (SCD2).
+7. Thêm Tip "Disable Index/FK trước khi Bulk Insert, Rebuild sau khi xong" vào W5.06 (Backfill).
+8. Bổ sung đề cập nhanh đến khái niệm "Late-arriving dimensions" trong thực tế ở W5.06.
+9. Làm rõ lý do phải có `COALESCE(y.films, '[]'::jsonb)` khi xử lý array rỗng (để tránh NULL concatenation) trong script PostgreSQL ở W5.07.
+10. Sửa các câu hỏi Quiz tương ứng để bám vào nội dung đã được đẩy lên phần giải thích thay vì tự giới thiệu khái niệm mới.
+
+## 9. Final Verdict
+- **patch lightly**
+- File hiện tại đã quá xuất sắc về mặt code, format và tư duy kỹ thuật. Chỉ cần bỏ ra một chút công sức "vá" lại vị trí xuất hiện của một vài lý thuyết nâng cao (Junk, Degenerate, Role-playing, Conformed) từ Quiz lên phần bài học, tài liệu này sẽ thực sự vươn tới ngưỡng hoàn mỹ của một Data Engineering Handbook.
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade business scenarios and examples where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen OLTP vs OLAP framing
+- improve fact vs dimension identification exercises
+- improve grain decision examples
+- improve star vs snowflake trade-offs
+- improve semi-additive fact explanations
+- improve conformed dimensions realism
+- improve SCD integration examples
+- strengthen W5.07 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week05_Dimensional_Modeling.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text id="w5finalreview"
+Review the patched ./Week05_Dimensional_Modeling.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text id="w5qa"
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week05_Dimensional_Modeling.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- diagrams/examples still feel coherent
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week05_Dimensional_Modeling.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week05
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo riêng cho Week05
+
+Week05 rất dễ bị biến thành “định nghĩa Kimball”.
+Bạn nên thêm 1 dòng này vào prompt build hoặc patch:
+
+```text id="w5tip"
+Do not turn Week05 into a theory-only data warehousing page.
+Teach dimensional modeling as practical business-friendly analytics design with grain decisions, metric usability, historical reporting, and recruiter-grade portfolio thinking.
+```
+
+Nếu bạn muốn, mình có thể tiếp tục viết ngay **full bộ prompt cho Week06_PostgreSQL_Advanced.html**.

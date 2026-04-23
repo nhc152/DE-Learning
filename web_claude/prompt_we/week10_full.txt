@@ -1,0 +1,647 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week10_Airflow.html`.
+
+Week10 là tuần orchestration rất quan trọng. Đây là lúc người học chuyển từ “chạy script thủ công / cron đơn lẻ” sang **workflow orchestration có dependency, retry, scheduling, observability, backfill, SLA**. Nếu học tốt tuần này, toàn bộ pipeline mindset sẽ nâng cấp mạnh.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text id="w10build"
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+- SQL policy:
+  - Khi phù hợp phải hỗ trợ cả PostgreSQL và Oracle SQL
+  - Nếu khác cú pháp, hiển thị cả 2 version
+  - Dùng tab buttons:
+    [PostgreSQL] [Oracle SQL]
+  - Không dùng plain heading text để so sánh syntax
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week10_Airflow.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 10 – Apache Airflow cho Data Engineer
+
+Allowed sources only:
+- ./Week10_Airflow.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 10 CORE MISSION:
+This file must teach Airflow as a workflow orchestration system, not just a scheduler UI tool.
+
+The learner should understand:
+- vì sao cron không đủ cho data pipelines phức tạp
+- DAG mindset trong Airflow
+- tasks, dependencies, retries
+- scheduling & catchup
+- sensors, hooks, operators
+- observability & debugging
+- backfill & reruns
+- deployment and production best practices
+- how to build recruiter-grade Airflow artifacts
+
+This tutorial must feel stronger than common “Airflow quickstart” content.
+
+MANDATORY MODULES:
+- W10.01 – Tổng Quan: Vì Sao Cần Airflow?
+- W10.02 – DAG, Tasks & Dependencies
+- W10.03 – Scheduling, Catchup & Backfill
+- W10.04 – Operators, Hooks, Sensors & TaskFlow API
+- W10.05 – Retries, Alerts, Debugging & Observability
+- W10.06 – Production Best Practices
+- W10.07 – Artifact: week10_airflow_project/
+- W10.08 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W10.01
+- pain of cron jobs:
+  hidden dependencies
+  no lineage
+  poor retries
+  scattered scripts
+- what Airflow solves
+- orchestration vs transformation distinction
+- where Airflow fits in DE stack
+- Airflow is not a compute engine
+- common use cases:
+  daily ETL, dbt runs, API ingestion, ML batch jobs
+- week outcomes checklist
+
+W10.02
+- DAG definition in Airflow
+- DAG file as code
+- tasks
+- dependencies with >> and <<
+- branching intro
+- parallel tasks
+- Task Groups intro
+- task id design
+- modular DAG design
+- anti-pattern:
+  giant DAG with unclear ownership
+- examples:
+  extract -> validate -> load -> notify
+
+W10.03
+- start_date
+- schedule interval / cron / presets
+- logical date / data interval concept
+- catchup
+- backfill
+- manual trigger
+- rerun failed tasks
+- depends_on_past intro
+- max_active_runs intro
+- anti-pattern:
+  misunderstanding schedule dates
+- safe rerun mindset
+
+W10.04
+- PythonOperator
+- BashOperator
+- SQL operators intro
+- hooks concept
+- connections concept
+- sensors:
+  file arrival
+  external task
+  waiting patterns
+- TaskFlow API with @task
+- XCom basics
+- anti-pattern:
+  passing huge data via XCom
+- practical examples
+
+W10.05
+- retries
+- retry_delay
+- exponential backoff concept
+- SLA miss concept
+- logs
+- task instance states
+- failed vs upstream_failed
+- alerting basics:
+  email / chat / webhook concept
+- debugging stuck DAGs
+- observability mindset:
+  duration, failures, freshness
+
+W10.06
+- DAG code organization
+- reusable utilities
+- environment separation:
+  dev / prod
+- secrets management basics
+- connection governance
+- avoid heavy business logic inside DAG files
+- idempotent tasks
+- resource awareness
+- concurrency basics
+- version control + code review
+- anti-pattern:
+  editing prod DAG directly
+
+W10.07
+- build realistic portfolio artifact:
+  week10_airflow_project/
+  ├── dags/
+  │   ├── daily_sales_pipeline.py
+  │   ├── api_ingestion.py
+  ├── plugins/
+  ├── include/
+  ├── tests/
+  ├── requirements.txt
+  └── README.md
+- include believable DAG examples
+- README must explain:
+  - business workflows
+  - schedules
+  - retries
+  - dependencies
+  - alerts
+  - deployment notes
+  - lessons learned
+- must feel portfolio-ready
+
+W10.08
+- final mini test: 20 questions
+- cover:
+  - DAGs
+  - scheduling
+  - backfill
+  - operators/hooks/sensors
+  - retries
+  - debugging
+  - production practices
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- DAG design tasks
+- scheduling tasks
+- retry/debugging tasks
+- dependency tasks
+- production review tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every example should be believable
+- focus on orchestration mindset, reliability, and operations
+- do not turn this into installation-only guide
+- must connect Airflow decisions to real pipeline delivery
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- vendor buzzword dumping
+- filler text
+- shallow quickstart explanations
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week10 scope you are using from roadmap
+2. Which format rules you inherit from Week00
+3. Which assumptions you are making for local/dev/prod Airflow examples
+
+Then output the full final content for:
+./Week10_Airflow.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text id="w10review"
+Use project rules from .claude.
+
+Review ./Week10_Airflow.html as a senior Airflow / Data Engineering reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- teaching quality
+- Airflow correctness
+- production realism
+- orchestration usefulness
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week10 teaches Airflow as real orchestration, not generic scheduler marketing.
+Check relevance of:
+- DAG design
+- dependencies
+- scheduling
+- reruns
+- observability
+- alerts
+- deployment
+- workflow ownership
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- missed schedules
+- retries after transient failure
+- catchup confusion
+- backfill risks
+- XCom misuse
+- slow sensors
+- DAG sprawl
+- alert fatigue
+- idempotent reruns
+- realistic team workflows
+
+D. AIRFLOW QUALITY
+Review whether explanations are strong enough for:
+- DAG concepts
+- scheduling semantics
+- TaskFlow API
+- operators/hooks/sensors
+- retries
+- logs
+- task states
+- concurrency basics
+- deployment practices
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W10.07 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- pools
+- queues
+- datasets scheduling
+- deferrable operators
+- SLAs vs alerts nuance
+- unit testing DAGs
+Only recommend additions if they materially improve quality.
+
+OUTPUT FORMAT (STRICT):
+
+# Week10 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text id="w10patch"
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week10_Airflow.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week10 becomes a high-value, portfolio-grade Airflow tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week10_Airflow.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- Airflow depth
+- teaching clarity
+- production realism
+- orchestration mindset
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+Dưới đây là bản **Review Report hoàn chỉnh và đầy đủ nhất** dành cho `Week10_Airflow.html`, đã được cân chỉnh sát sao với các quy tắc từ thư mục `.claude/` (`OUTPUT_STANDARD.md`, `REVIEW_CHECKLIST.md`, `CLAUDE.md`).
+
+# Week10 Review Report
+
+## 1. Executive Summary
+- **Score:** 8.5/10
+- **Strongest parts:** Tư duy production thực chiến rất ấn tượng (Idempotency, Sensors, Secrets Backend, SLA, Runbooks, Escalation). Cấu trúc HTML bám sát 6 phần chuẩn mực và giao diện UI premium nhất quán với họ tài liệu Week00.
+- **Biggest weaknesses:** Vi phạm nghiêm trọng tiêu chuẩn `OUTPUT_STANDARD.md` ở phần cấu trúc Quiz (chỉ có 2 đáp án thay vì 4). Hụt các kỹ thuật cốt lõi của Airflow hiện đại như TaskFlow API và Data-aware scheduling (Datasets). Thiếu giải thích cú pháp cho các tab SQL.
+- **Priority level:** High (Cần vá mạnh phần Quiz để đạt đúng cấu trúc format chung của project).
+
+## 2. What Already Strong
+- **Production Mindset:** Giáo trình không dạy bề nổi mà đánh thẳng vào kỹ năng của Senior Engineer: thiết kế task idempotent, dùng deferrable/reschedule sensor thay vì bắt worker đợi vô ích, cấu hình on-call runbook và phân quyền bảo mật credentials bằng secrets backend.
+- **Data Engineering Relevance:** Phân tách cực rõ ràng giữa orchestration (Airflow) và transformation (dbt). Luồng DAG `dbt seed -> run -> test -> sql gate` là kiến trúc chuẩn mực được sử dụng tại các top tech company.
+- **Format UI / UX:** Giao diện Dark-mode đẹp mắt, tab SQL mượt mà, hệ thống menu toggle trực quan. Cấu trúc học liệu (6 phần: Menu -> Mục Đích -> Chi Tiết -> Quiz -> Tổng Kết -> Thực Hành) được duy trì hoàn hảo xuyên suốt 10 module.
+- **Khóa học trọn vẹn (W10.10):** Chốt chặn bằng artifact bàn giao gồm 4 DAG mẫu và README cấu hình local là một quyết định sư phạm rất đắt giá.
+
+## 3. Critical Gaps
+- **Vi phạm Quiz Standard:** Toàn bộ 100 câu hỏi ôn tập trong các module đang chỉ có 2 lựa chọn (A, B). Chuẩn dự án `OUTPUT_STANDARD.md` bắt buộc phải là *4 options each* (A, B, C, D).
+- **Vi phạm SQL Policy:** File đã làm tốt việc hiển thị song song PostgreSQL và Oracle SQL dưới dạng Tab. Tuy nhiên, nó **chưa giải thích** sự khác biệt cú pháp (ví dụ: `INTERVAL '1 day'` vs `TRUNC(SYSDATE)` hay `COALESCE` vs `NVL`), làm giảm tính "beginner-friendly".
+- **Bỏ quên TaskFlow API (`@task`):** Module W10.03 chỉ đề cập tới `PythonOperator` thuần túy mà bỏ qua cú pháp `@task` decorator, vốn là best practice đương đại để viết DAG Pythonic và dễ quản lý XCom hơn.
+- **Thiếu Data-aware scheduling:** Airflow từ bản 2.4+ đã dịch chuyển sang kiến trúc Datasets (kích hoạt DAG dựa trên sự thay đổi dữ liệu thay vì cron job). Bài giảng đang lạm dụng `ExternalTaskSensor` mà quên chưa giới thiệu tính năng này.
+- **Sơ sài ở phần Lời Giải Thực Hành:** Lời giải ở mục Bài Tập Thực Hành (Solution Box) đang ném code vào khá trống không, thiếu đi 1-2 dòng giải thích lý do viết code theo phương pháp *Explain simply first* quy định trong `CLAUDE.md`.
+
+## 4. Module-by-Module Improvements
+- **W10.03 (Core Operators):** Bổ sung đoạn so sánh nhỏ giữa cách viết `PythonOperator` truyền thống và cách viết tinh gọn bằng `@task` (TaskFlow API). Cần thêm khái niệm Celery `Queues` (điều hướng task nặng/nhẹ) đi kèm với `Pools`.
+- **W10.04 (Dependencies & XCom):** 
+  - Bổ sung nội dung giới thiệu `Datasets` (`schedule=[Dataset('s3://my_bucket')]`) như một cách làm hiện đại để kết nối các DAG phụ thuộc nhau.
+  - Sửa lại code ở Bài tập thực hành: Đề bài bảo truyền row_count bằng XCom nhưng code đáp án chưa hề có `ti.xcom_push` hay `ti.xcom_pull`.
+- **W10.06 (Sensors):** Cập nhật parameter `deferrable=True` vào ví dụ về Sensor để bám sát xu hướng tiết kiệm tài nguyên của Airflow hiện đại.
+- **W10.09 (Retry, Timeout, SLA):** Nên thêm cảnh báo nhỏ rằng thông số `SLA` của Airflow đang hoạt động khá chập chờn (buggy) ở một số phiên bản hiện tại, do đó `execution_timeout` kết hợp `on_failure_callback` là lựa chọn đáng tin cậy hơn ở production.
+
+## 5. Production Upgrades Recommended
+- **Mở rộng CI/CD Testing:** W10.10 có đề cập `DagBag test`, cần bổ sung thêm việc chạy linter (Ruff/Black/Flake8) để format code Python và việc test check cyclic dependency trong pipeline trước khi deploy.
+- **Local Dev Standard:** Khuyến khích người học thiết lập môi trường local bằng công cụ chuẩn công nghiệp như `Astro CLI` (`astro dev start`) thay vì tự tay cấu hình Docker từ đầu vốn phức tạp và rườm rà.
+- **Clear State UI:** Bổ sung việc hướng dẫn sử dụng tính năng "Clear Task / Downstream" trên giao diện Web UI như một cách backfill/rerun hằng ngày, thay vì lúc nào cũng phải tạo riêng một file DAG backfill.
+
+## 6. Teaching Upgrades Recommended
+- **SQL Syntax Explain:** Bổ sung phần Text Box giải thích ngắn (1-2 câu) nằm dưới các đoạn code SQL để làm rõ tại sao Oracle lại dùng hàm X còn Postgres dùng hàm Y.
+- **Giải thích Solution:** Dưới đoạn code giải của các Bài Tập Thực Hành, hãy thêm 1 dòng text dạng note giải thích luồng tư duy, ví dụ: `"Ở đây ta set catchup=False để tránh DAG chạy dồn ập lịch sử khi mới deploy..."`.
+- **Minh hoạ trực quan Dependency:** Biểu diễn DAG `A >> [B,C] >> D` bằng một format HTML Graph mô phỏng nhẹ nhàng thay vì chỉ viết text thuần để tăng tính trực quan.
+
+## 7. Portfolio Value Assessment
+- **Value:** Cực kỳ cao. Bằng cách thiết kế nguyên một bộ khung `airflow_dags/` (ETL, dbt, Quality gate, Backfill) ở W10.10, tài liệu giúp người học xây dựng được một "mini-project" có hình dáng hệt như môi trường doanh nghiệp thực tế. Đây là lợi thế tuyệt đối khi mang đi phỏng vấn.
+- **Nâng cấp:** Để điểm Portfolio đạt mức hoàn hảo, hãy bổ sung file `.github/workflows/airflow_ci.yml` vào cấu trúc `airflow_dags/` ở W10.10, chứng minh năng lực thiết lập luồng review và test tự động cho pipeline.
+
+## 8. Top 10 Immediate Patches
+1. **[Quy Chuẩn]** Bổ sung đáp án C, D và giải thích tương ứng cho TẤT CẢ 100 câu hỏi quiz trong 10 module để tuân thủ luật "4 options each".
+2. **[Quy Chuẩn]** Thêm comment giải thích chi tiết logic dưới các Solution Box của bài tập thực hành.
+3. **[Quy Chuẩn]** Thêm đoạn text giải thích sự khác nhau cú pháp giữa PostgreSQL và Oracle SQL ở mỗi module có xuất hiện SQL.
+4. **[Kỹ thuật]** Cập nhật nội dung về TaskFlow API (`@task`) vào module W10.03.
+5. **[Kỹ thuật]** Cập nhật mô hình Data-aware scheduling (`Datasets`) làm giải pháp cross-DAG vào W10.04.
+6. **[Code]** Vá lỗi code snippet thiếu `xcom_push` / `xcom_pull` ở Lời giải thực hành W10.04.
+7. **[Kỹ thuật]** Thêm tuỳ chọn `deferrable=True` vào file cấu hình Sensor trong module W10.06.
+8. **[Portfolio]** Bổ sung file mẫu `.github/workflows/ci.yml` và `docker-compose.yaml` (hoặc hướng dẫn dùng Astro CLI) vào thư mục artifact bàn giao ở W10.10.
+9. **[Kỹ thuật]** Cập nhật `Queues` bên cạnh `Pools` ở module W10.03 để chia routing cho task lớn.
+10. **[Global]** Bổ sung các "External Link" trỏ tới docs chính thức của Airflow ở phần "Mục đích module" để học viên có nguồn tra cứu sâu.
+
+## 9. Final Verdict
+- **patch strongly**
+- **Lý do:** Nội dung về Mindset Data Engineering được thiết kế xuất sắc, tuy nhiên việc vi phạm tiêu chuẩn Format Quiz (thiếu đáp án C, D) áp dụng cho một số lượng câu hỏi quá lớn (100 câu) khiến khối lượng công việc vá lỗi UI/Text là khá lớn. Hơn nữa, việc thiếu vắng các tính năng Airflow hiện đại (`@task`, `Datasets`) buộc phải viết lại một phần nội dung ở các module giữa để đảm bảo chuẩn kiến thức thực chiến ngày nay.
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade DAG examples/workflows where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen cron vs orchestration framing
+- improve scheduling/logical date clarity
+- improve backfill and rerun safety
+- improve TaskFlow and XCom practical usage
+- improve retries / alerting realism
+- improve observability metrics
+- improve production deployment guidance
+- strengthen W10.07 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week10_Airflow.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text id="w10finalreview"
+Review the patched ./Week10_Airflow.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text id="w10qa"
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week10_Airflow.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- Airflow examples still feel coherent and realistic
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week10_Airflow.html only.
+```
+
+---
+
+# 6) Cách dùng đúng cho Week10
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+---
+
+# 7) Mẹo riêng cho Week10
+
+Week10 rất dễ bị biến thành:
+
+* hướng dẫn cài Airflow
+* hoặc giới thiệu UI tính năng
+
+Bạn nên thêm 1 dòng này vào prompt build hoặc patch:
+
+```text id="w10tip"
+Do not turn Week10 into an Airflow installation guide or UI walkthrough.
+Teach Airflow as a practical orchestration system for dependency management, scheduling, retries, observability, safe reruns, and production workflow delivery.
+```
