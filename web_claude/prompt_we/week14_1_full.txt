@@ -441,7 +441,76 @@ Improve the file across:
 - artifact realism
 
 PATCH PRIORITIES:
-[PASTE ANTIGRAVITY REVIEW HERE]
+Listed directory DE-Learning
+Listed directory .claude
+Viewed CLAUDE.md:1-64
+Viewed OUTPUT_STANDARD.md:1-223
+Viewed REVIEW_CHECKLIST.md:1-79
+Viewed Week14_Data_Warehouse.html:1-800
+Viewed Week14_Data_Warehouse.html:801-1398
+
+Đúng với tư duy của một Senior Data Engineer đánh giá một tài liệu đào tạo chuyên sâu, dưới đây là bản báo cáo Audit chi tiết cho tài liệu `Week14_Data_Warehouse.html`. 
+
+Tài liệu hiện tại đã sở hữu một bộ khung kiến trúc cực kỳ xuất sắc, đặc biệt là tư duy "Migration có kiểm soát" và "Cost Control". Tuy nhiên, để đạt đến độ hoàn thiện "Elite Portfolio" cho một Data Engineer, chúng ta cần lấp một số khoảng trống về bảo mật, cơ chế đồng bộ và độ sâu của các ví dụ thực chiến.
+
+***
+
+# Week14 Review Report
+
+## 1. Executive Summary
+- **Score**: 8.5/10
+- **Strongest parts**: Tư duy vận hành production cực tốt (Dual-run migration, Cost control guardrails, Checklist điểm gãy của PostgreSQL). UX/UI HTML và hệ thống Quiz/Mini-test Interactive hoạt động hoàn hảo, đúng sát tiêu chuẩn hệ sinh thái DE-Learning.
+- **Biggest weaknesses**: Thiếu vắng hoàn toàn mảng Security (RBAC, Data Masking), hổng luồng Ingestion (không giải thích cách data từ Postgres lên Cloud DW qua CDC), và các ví dụ code SQL/dbt ở phần Migration/Iceberg còn hơi mỏng.
+- **Priority level**: High (Patch strongly - Giữ nguyên cấu trúc xương sống, nhưng cần đắp thêm "thịt" kỹ thuật vào các module).
+
+## 2. What Already Strong
+- **Cấu trúc sư phạm (Pedagogy)**: Tuân thủ tuyệt đối quy tắc 6 sections/module. Luồng đi từ "Nỗi đau của hệ thống cũ" (W14.01) đến "Giải pháp nền tảng" (W14.02 - 14.06) và kết thúc bằng "Thực thi & Tối ưu" (W14.07 - W14.09) là cực kỳ logic.
+- **Tư duy Thực chiến (Production Realism)**:
+  - Nêu bật được Anti-pattern: "Ép schema cứng quá sớm" (W14.04).
+  - Khái niệm đối soát KPI song song (Dual-run) và lập Rollback plan khi migrate hệ thống.
+  - Tư duy đo lường Cost Control: Quản trị scan bytes và set quota theo team thay vì chỉ lo viết query chạy được.
+- **HTML Learning Product Quality**: Giao diện Premium Dark Mode đồng nhất. 100 câu hỏi quiz interactive và 16 câu mini-test có giải thích (explanation) rõ ràng, tăng tương tác rất tốt cho người học.
+
+## 3. Critical Gaps
+- **Missing Link - Data Ingestion / CDC**: W14.01 nói về Postgres, W14.07 nhảy sang dbt trên Warehouse. Sự thiếu hụt lớn nhất là **Làm sao dữ liệu từ OLTP Postgres sang được OLAP Cloud DW?** Cần nhắc đến Change Data Capture (CDC - Debezium/Airbyte/Fivetran) như một cầu nối bắt buộc.
+- **Security Boundaries & Governance**: Môi trường Cloud DW là môi trường đa người dùng (Multi-tenant nội bộ). Việc không đề cập đến RBAC (Role-Based Access Control), Row-Level Security, hay Dynamic Data Masking (che giấu PII) là một lỗ hổng nghiêm trọng đối với Senior DE.
+- **Semantic Layer**: Khi nhắc đến Lakehouse và serving layer (W14.05), hệ sinh thái hiện đại không thể thiếu Semantic Layer / Metric Store để chống lại vấn đề "Conflicting metrics" (mỗi dashboard tính doanh thu một kiểu).
+- **Thiếu chiều sâu vận hành Iceberg**: Demo Iceberg (W14.06) mới dừng ở DDL (CREATE TABLE). Thứ làm nên giá trị của Iceberg ở Production là các lệnh bảo trì: `rewrite_data_files` (Compaction) và `expire_snapshots`.
+
+## 4. Module-by-Module Improvements
+- **W14.01**: Thêm một mục nhỏ về "Đưa dữ liệu ra ngoài: Tại sao cần CDC?" để tạo cầu nối logic sang Cloud DW.
+- **W14.02**: Trong phần Clustering, cần nhấn mạnh việc theo dõi Clustering Depth/Skew. Clustering sai sẽ làm hệ thống chậm hơn cả không có.
+- **W14.05**: Bổ sung sơ đồ ASCII hoặc Mermaid Architecture cho 4 lớp Lakehouse (Raw -> Silver -> Gold -> Semantic). Mô tả bằng Text/Table hơi khó hình dung cho người mới.
+- **W14.06 (Iceberg)**: Nâng cấp khối code SQL. Bổ sung các lệnh Compaction và Time Travel thực tế hơn thay vì chỉ CREATE TABLE.
+- **W14.07 (dbt Migration)**: Các câu query đối soát hiện tại (Count, Sum) hơi sơ sài. Nên giới thiệu việc dùng package `dbt-audit-helper` (`compare_relations`) để đối soát tự động hàng triệu dòng dữ liệu.
+
+## 5. Production Upgrades Recommended
+- **Tích hợp RBAC & PII Masking**: Khuyến nghị bổ sung một Section hoặc lồng ghép vào **W14.08** về cách thiết kế Role cho Analyst vs Data Scientist, và cách áp dụng chính sách ẩn danh dữ liệu (Data Masking) cho cột email/phone.
+- **Nhận diện "Stale Dashboards / Unused Tables"**: Trong W14.08 (Cost Control), cần thêm một query mẫu (ví dụ query bảng hệ thống `INFORMATION_SCHEMA`) để quét và xóa các bảng không ai truy vấn trong 30 ngày. Đây là trick giảm cost kinh điển của DE.
+
+## 6. Teaching Upgrades Recommended
+- **Sửa Bài Tập Thực Hành (Practice Tasks)**: Hiện tại bài tập W14.08 đang bắt người học liệt kê lý thuyết ("Hãy liệt kê 5 hành động..."). Hãy đổi thành: Đưa ra 1 câu truy vấn SQL thực tế có chứa Anti-pattern (dùng `SELECT *`, quét full date, join trước khi filter) và yêu cầu người học viết lại phiên bản tối ưu. Điều này tạo "muscle memory" tốt hơn.
+- **Show Code, Don't Just Tell**: Nhắc đến "Data Contract" và "Source Freshness" nhiều ở text, nhưng cần show một khối YAML thực tế cấu hình freshness trong dbt.
+
+## 7. Portfolio Value Assessment
+- Artifact ở module **W14.09** là một sáng kiến xuất sắc. Khả năng đóng gói 1 dự án migration hoàn chỉnh có kèm "Migration Notes" và "Cost Comparison" sẽ giúp ứng viên ăn điểm tuyệt đối khi phỏng vấn. 
+- *Đề xuất nâng cấp:* Nên chèn thêm 1-2 khối Markdown Template mẫu cho `cost_comparison.md` (chứa bảng giả định số liệu) để người học hình dung được một bản Report báo cáo cho Engineering Manager trông sẽ như thế nào.
+
+## 8. Top 10 Immediate Patches
+1. **CDC Integration**: Nhắc đến CDC (Change Data Capture) ở W14.01 hoặc W14.07 làm cầu nối Ingestion.
+2. **Iceberg Ops Code**: Bổ sung syntax Compaction và Expire Snapshots vào W14.06.
+3. **dbt Audit Helper**: Đưa khái niệm/code snippet của `audit_helper` vào quy trình Reconcile ở W14.07.
+4. **Data Security**: Bổ sung RBAC & Row/Column-level Security vào W14.08 (hoặc chia tách thành một phần riêng).
+5. **Semantic Layer**: Cập nhật khái niệm Metric Store vào lớp Gold/Serving của Lakehouse (W14.05).
+6. **Freshness Config**: Thêm code block YAML minh họa cấu hình dbt source freshness vào W14.07.
+7. **Stale Data Sweeper**: Thêm một query mẫu hướng dẫn dọn rác (bảng/view không ai dùng) để tối ưu cost (W14.08).
+8. **Mermaid Diagram**: Thay thế hoặc bổ sung sơ đồ trực quan cho cấu trúc Lakehouse thay vì chỉ dùng table (W14.05).
+9. **Refactor Practice W14.08**: Đổi bài tập từ "trả lời lý thuyết" sang "sửa code SQL anti-pattern".
+10. **Artifact Templates**: Cung cấp template mẫu trực quan hơn cho các file `.md` trong W14.09.
+
+## 9. Final Verdict
+- **Quyết định:** **PATCH STRONGLY**
+- **Lý do:** Khung kiến trúc và nội dung cốt lõi đã ở chuẩn Senior. Chỉ cần đắp thêm các mảnh ghép về Security, Ingestion (CDC) và làm dày các ví dụ Code/Config, file này sẽ trở thành một "sát thủ" thực sự trong bộ Handbook Data Engineering. Bỏ qua việc đập đi xây lại, hãy tập trung vào việc tiêm các "mũi tiêm kỹ thuật" (technical depth injections) đã nêu ở phần 8.
 
 MANDATORY EDITING RULES:
 1. First identify which current sections should be preserved

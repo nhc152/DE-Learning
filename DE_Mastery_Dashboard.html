@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DE Mastery Dashboard V2 | Notion Style</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h1>DE Mastery Hub <span style="font-size: 1.5rem;">💎</span></h1>
+                <div id="aml-deadline-badge" class="aml-countdown" style="margin-bottom: 0; padding: 0.5rem 1rem;">
+                    <!-- Countdown injected here -->
+                </div>
+            </div>
+            
+            <nav class="nav-tabs">
+                <div class="nav-tab active" onclick="switchTab('roadmap')">Lộ trình học tập</div>
+                <div class="nav-tab" onclick="switchTab('tasks')">Database Công việc</div>
+            </nav>
+
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; justify-content: flex-end;">
+                <button onclick="exportData()" class="btn-primary" style="margin-top:0; padding: 5px 12px; font-size: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);">
+                    <i data-lucide="download" style="width: 12px; vertical-align: middle;"></i> Export JSON
+                </button>
+                <button onclick="document.getElementById('import-input').click()" class="btn-primary" style="margin-top:0; padding: 5px 12px; font-size: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);">
+                    <i data-lucide="upload" style="width: 12px; vertical-align: middle;"></i> Import JSON
+                </button>
+                <input type="file" id="import-input" style="display: none;" onchange="importData(event)">
+            </div>
+
+            <div class="roadmap-status">
+                <div class="stat-card">
+                    <div class="stat-label">Tiến độ tổng</div>
+                    <div class="stat-value" id="overall-progress-text">0%</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="overall-progress-bar"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Tasks hôm nay</div>
+                    <div class="stat-value" id="today-tasks-count">0 việc</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Dự án trọng tâm</div>
+                    <div class="stat-value" style="color: var(--accent);">AML Go-live</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- TAB 1: ROADMAP -->
+        <div id="tab-roadmap" class="tab-content active">
+            <main class="timeline" id="roadmap-content">
+                <!-- Roadmap content injected by JS -->
+            </main>
+        </div>
+
+        <!-- TAB 2: TASK DATABASE -->
+        <div id="tab-tasks" class="tab-content">
+            <!-- Form nhập liệu (Bước 3) -->
+            <div class="task-form-card">
+                <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="plus-circle"></i> Thêm Task mới
+                </h3>
+                <form id="task-form" onsubmit="handleTaskSubmit(event)">
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Tên Task</label>
+                            <input type="text" id="form-name" placeholder="Ví dụ: Fix lỗi incremental load AML" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Loại</label>
+                            <select id="form-type">
+                                <option value="Dự án">Dự án</option>
+                                <option value="Học tập">Học tập</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Thuộc về</label>
+                            <select id="form-belongs">
+                                <option value="AML">AML</option>
+                                <option value="Postgres">Postgres</option>
+                                <option value="Python">Python</option>
+                                <option value="AWS">AWS</option>
+                                <option value="VCB">VCB</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ngày</label>
+                            <input type="date" id="form-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ưu tiên</label>
+                            <select id="form-priority">
+                                <option value="Thấp">Thấp</option>
+                                <option value="Bình thường" selected>Bình thường</option>
+                                <option value="Gấp">Gấp</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Trạng thái</label>
+                            <select id="form-status">
+                                <option value="To Do">To Do</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Done">Done</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="grid-column: span 3;">
+                            <label>Ghi chú</label>
+                            <textarea id="form-notes" rows="2" placeholder="Link tài liệu hoặc chi tiết..."></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Lưu công việc</button>
+                </form>
+            </div>
+
+            <!-- Dashboard Views (Bước 4) -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                <button class="nav-tab active" id="view-all" onclick="filterTasks('all')">Tất cả</button>
+                <button class="nav-tab" id="view-today" onclick="filterTasks('today')">Hôm nay</button>
+                <button class="nav-tab" id="view-aml" onclick="filterTasks('aml')">Dự án AML</button>
+                <button class="nav-tab" id="view-study" onclick="filterTasks('study')">Học tập</button>
+            </div>
+
+            <table class="notion-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Tên Task</th>
+                        <th>Loại</th>
+                        <th>Thuộc về</th>
+                        <th>Ngày</th>
+                        <th>Ưu tiên</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="task-table-body">
+                    <!-- Tasks injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const roadmapData = [
+            {
+                stage: "GIAI ĐOẠN 0",
+                title: "Setup Môi Trường",
+                week: "Tuần 0",
+                modules: [
+                    {
+                        name: "Cơ sở hạ tầng",
+                        tasks: ["Cài đặt Docker", "Python Environment", "Postgres Container", "Git Setup"],
+                        artifact: "Week00_Setup.html",
+                        artifactName: "Setup Guide"
+                    }
+                ]
+            },
+            {
+                stage: "GIAI ĐOẠN 1",
+                title: "Foundation",
+                week: "Tuần 1–4",
+                modules: [
+                    {
+                        name: "SQL Nâng Cao",
+                        tasks: ["Window functions", "Grouping Sets", "Recursive CTE"],
+                        artifact: "Week01_SQL_Advanced.html",
+                        artifactName: "SQL Advanced"
+                    },
+                    {
+                        name: "Python cho DE",
+                        tasks: ["Pandas", "SQLAlchemy", "Requests API"],
+                        artifact: "Week02_Python_DE.html",
+                        artifactName: "Python ETL"
+                    }
+                ]
+            }
+            // ... (Tiếp tục các tuần khác tương tự)
+        ];
+
+        // --- INITIALIZATION ---
+        function init() {
+            renderRoadmap();
+            renderTasks();
+            updateCountdown();
+            updateProgress();
+            lucide.createIcons();
+            
+            // Set default date to today
+            document.getElementById('form-date').valueAsDate = new Date();
+        }
+
+        // --- NAVIGATION ---
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tab).classList.add('active');
+            event.target.classList.add('active');
+            lucide.createIcons();
+        };
+
+        // --- TASK DATABASE LOGIC ---
+        window.handleTaskSubmit = function(e) {
+            e.preventDefault();
+            const task = {
+                id: Date.now(),
+                name: document.getElementById('form-name').value,
+                type: document.getElementById('form-type').value,
+                belongs: document.getElementById('form-belongs').value,
+                date: document.getElementById('form-date').value,
+                priority: document.getElementById('form-priority').value,
+                status: document.getElementById('form-status').value,
+                notes: document.getElementById('form-notes').value
+            };
+
+            const tasks = JSON.parse(localStorage.getItem('notion-tasks') || '[]');
+            tasks.push(task);
+            localStorage.setItem('notion-tasks', JSON.stringify(tasks));
+            
+            e.target.reset();
+            document.getElementById('form-date').valueAsDate = new Date();
+            renderTasks();
+            updateProgress();
+        };
+
+        window.deleteTask = function(id) {
+            let tasks = JSON.parse(localStorage.getItem('notion-tasks') || '[]');
+            tasks = tasks.filter(t => t.id !== id);
+            localStorage.setItem('notion-tasks', JSON.stringify(tasks));
+            renderTasks();
+            updateProgress();
+        };
+
+        let currentFilter = 'all';
+        window.filterTasks = function(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('#tab-tasks .nav-tab').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            renderTasks();
+        };
+
+        function renderTasks() {
+            const tbody = document.getElementById('task-table-body');
+            let tasks = JSON.parse(localStorage.getItem('notion-tasks') || '[]');
+            
+            // Apply Filters (Bước 4)
+            const today = new Date().toISOString().split('T')[0];
+            if (currentFilter === 'today') tasks = tasks.filter(t => t.date === today);
+            if (currentFilter === 'aml') tasks = tasks.filter(t => t.belongs === 'AML');
+            if (currentFilter === 'study') tasks = tasks.filter(t => t.type === 'Học tập');
+
+            tbody.innerHTML = tasks.map(task => `
+                <tr>
+                    <td>
+                        <div style="font-weight: 600;">${task.name}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${task.notes || ''}</div>
+                    </td>
+                    <td><span class="badge badge-normal" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">${task.type}</span></td>
+                    <td><span class="badge badge-normal" style="background: rgba(168, 85, 247, 0.1); color: var(--secondary);">${task.belongs}</span></td>
+                    <td style="color: var(--text-muted);">${task.date}</td>
+                    <td><span class="badge badge-${task.priority === 'Gấp' ? 'high' : (task.priority === 'Bình thường' ? 'normal' : 'low')}">${task.priority}</span></td>
+                    <td><span class="status-${task.status.toLowerCase().replace(' ', '')}" style="font-weight: 600;">● ${task.status}</span></td>
+                    <td>
+                        <button onclick="deleteTask(${task.id})" style="background:none; border:none; color: var(--danger); cursor:pointer;">
+                            <i data-lucide="trash-2" style="width: 16px;"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('today-tasks-count').innerText = tasks.filter(t => t.date === today).length + " việc";
+            lucide.createIcons();
+        }
+
+        // --- ROADMAP LOGIC ---
+        function renderRoadmap() {
+            const container = document.getElementById('roadmap-content');
+            container.innerHTML = roadmapData.map((stage, sIdx) => `
+                <section class="stage-section">
+                    <div class="stage-title">${stage.title} <span class="stage-badge">${stage.stage}</span></div>
+                    <div class="modules-grid">
+                        ${stage.modules.map((mod, mIdx) => `
+                            <div class="module-card">
+                                <div class="module-name" style="margin-bottom: 1rem;">${mod.name}</div>
+                                <ul class="checklist">
+                                    ${mod.tasks.map((t, tIdx) => {
+                                        const id = `roadmap-${sIdx}-${mIdx}-${tIdx}`;
+                                        const checked = localStorage.getItem(id) === 'true';
+                                        return `<li class="checklist-item ${checked ? 'checked' : ''}" onclick="toggleRoadmap('${id}', this)">
+                                            <div class="checkbox"></div><span>${t}</span>
+                                        </li>`;
+                                    }).join('')}
+                                </ul>
+                            </div>
+                        `).join('')}
+                    </div>
+                </section>
+            `).join('');
+        }
+
+        window.toggleRoadmap = function(id, el) {
+            const isChecked = el.classList.toggle('checked');
+            localStorage.setItem(id, isChecked);
+            updateProgress();
+        };
+
+        // --- UTILS ---
+        function updateProgress() {
+            const total = document.querySelectorAll('#tab-roadmap .checklist-item').length;
+            const done = document.querySelectorAll('#tab-roadmap .checklist-item.checked').length;
+            const progress = Math.round((done / total) * 100) || 0;
+            document.getElementById('overall-progress-text').innerText = progress + '%';
+            document.getElementById('overall-progress-bar').style.width = progress + '%';
+        }
+
+        function updateCountdown() {
+            const goLiveDate = new Date(2026, 5, 1); // 01/06/2026
+            const now = new Date();
+            const diff = goLiveDate - now;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            document.getElementById('aml-deadline-badge').innerHTML = `
+                <div style="font-size: 0.7rem; text-transform: uppercase; font-weight: 800; opacity: 0.8;">AML Go-live Countdown</div>
+                <div style="font-size: 1.2rem; font-weight: 800;">Còn ${days} ngày</div>
+            `;
+        }
+
+        // --- EXPORT / IMPORT LOGIC ---
+        window.exportData = function() {
+            const data = {
+                tasks: JSON.parse(localStorage.getItem('notion-tasks') || '[]'),
+                roadmap: {}
+            };
+            // Collect roadmap state
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('roadmap-')) {
+                    data.roadmap[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DE_Mastery_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        };
+
+        window.importData = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.tasks) localStorage.setItem('notion-tasks', JSON.stringify(data.tasks));
+                    if (data.roadmap) {
+                        for (const key in data.roadmap) {
+                            localStorage.setItem(key, data.roadmap[key]);
+                        }
+                    }
+                    alert("Đã nhập dữ liệu thành công!");
+                    location.reload();
+                } catch (err) {
+                    alert("Lỗi: File không đúng định dạng!");
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

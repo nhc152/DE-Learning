@@ -474,7 +474,75 @@ Improve the file across:
 - artifact realism
 
 PATCH PRIORITIES:
-[PASTE ANTIGRAVITY REVIEW HERE]
+Viewed Week15_Data_Integration.html:1-800
+Viewed Week15_Data_Integration.html:801-1400
+
+Dựa trên các tiêu chuẩn khắt khe nhất của một Senior Data Engineering Architect, dưới đây là bản báo cáo Audit chi tiết cho tài liệu `Week15_Data_Integration.html`. 
+
+Tài liệu hiện tại có một cấu trúc tư duy cực kỳ xuất sắc, chạm đến rất nhiều pain point thực tế của việc vận hành dữ liệu doanh nghiệp. Tuy nhiên, nó vẫn còn thiếu một số mảnh ghép về bảo mật (PII), định danh (Identity Mapping) và các edge-cases kinh điển (Late-arriving data, Hard deletes) để thực sự trở thành tài liệu cấp độ chuyên gia (Pro-tier).
+
+***
+
+# Week15 Review Report
+
+## 1. Executive Summary
+- **Score**: 8.5/10
+- **Strongest parts**: Kiến trúc lộ trình xuất sắc (từ Business Context -> Patterns -> Contracts -> Reliability -> Observability). Tư duy "Production Realism" rất đậm đặc: định nghĩa rõ ràng về DLQ (Dead-letter queue), Idempotency, Poison messages, và đặc biệt là anti-pattern "Job succeeded but data wrong". Thiết kế Artifact W15.07 chuẩn recruiter-grade.
+- **Biggest weaknesses**: Các ví dụ về Batch/API ingestion còn thiếu độ sâu để đối phó với edge-cases kinh điển (không nhắc tới lỗi Late-arriving data khi dùng watermark, thiếu cách xử lý Hard Deletes ở nguồn). Bỏ quên hoàn toàn bài toán Identity Mapping (ghép nối ID giữa nhiều hệ thống) và PII Security Boundary.
+- **Priority level**: **High (Patch strongly)**. Khung sườn đã quá tốt, chỉ cần tiêm thêm chiều sâu kỹ thuật vào các đoạn code/ví dụ để lấp kín các lỗ hổng logic.
+
+## 2. What Already Strong
+- **Cấu trúc Sư phạm (Pedagogy)**: Áp dụng triệt để framework 6-section. Dẫn dắt hợp lý từ "Tại sao phải làm" đến "Làm sao để hệ thống không sập".
+- **Sự tách bạch về kiến trúc (Architecture Clear-cut)**: Tách biệt rõ ràng ranh giới giữa Airflow (Orchestrator), Ingestion Tool (Extract/Load) và dbt (Transform). Hiểu rõ trade-off Build vs Buy.
+- **Vận hành thực chiến (Ops Mindset)**: Giải quyết được Myth "Exactly-once", nhấn mạnh vào cơ chế Retry phân biệt Transient/Fatal errors, và yêu cầu bắt buộc phải có Reconciliation + Runbook.
+- **HTML & UX**: Hệ thống Quiz/Mini Test 20 câu chạy mượt mà, phân loại điểm số và có hướng dẫn hành động (Actionable feedback) xuất sắc.
+
+## 3. Critical Gaps
+- **Watermark & Late Arriving Data**: Trong W15.02, query incremental dùng `updated_at > :last_success_ts`. Ở production, transaction có thể lấy timestamp sớm nhưng commit trễ. Load theo logic này sẽ dẫn đến mất bản ghi vĩnh viễn (Silent data loss). Cần chiến lược Overlap Window.
+- **Deleted Records Handling**: Không thấy nhắc đến việc làm sao Data Warehouse biết một bản ghi đã bị xóa ở nguồn. Batch incremental không bắt được hard deletes. CDC bắt được qua `op_type = 'D'`.
+- **Identity Mapping (Cross-system)**: Tích hợp nhiều hệ thống (CRM, App, Ads) thì bài toán khó nhất là: `crm_contact_id` làm sao map với `app_user_id`? Đây là xương sống của Customer 360 nhưng chưa được nhắc đến trong W15.03.
+- **PII & Data Privacy**: Khi kéo data từ đa nguồn, rủi ro leak PII rất lớn. Contract chưa thể hiện được cơ chế chặn/mask PII ở biên giới hệ thống (Ingestion boundary).
+
+## 4. Module-by-Module Improvements
+- **W15.02 (Integration Patterns)**: 
+  - Nâng cấp `batch_incremental.sql` để thêm khái niệm `Overlap Window` (vd: `updated_at >= :last_success_ts - 1 hour`) để chống late arriving data.
+  - Sửa script pseudo `api_ingest_loop.py` để thể hiện rõ logic *Exponential Backoff + Jitter* thay vì chỉ `sleep()`.
+- **W15.03 (Schema Mapping & Contracts)**: 
+  - Thêm một mục nhỏ về **Identity Mapping** (sử dụng mapping table hoặc deterministic hashing).
+  - Bổ sung trường `"pii_handling": "hash"` vào file `order_events_contract.json` để dạy tư duy security-by-design.
+- **W15.04 (Reliability)**: 
+  - Bổ sung khái niệm **Out-of-order events** vào Idempotency: "Làm sao khi update event đến trước insert event?".
+  - Nhắc đến **Backpressure** khi consumer không xử lý kịp stream event.
+- **W15.06 (Tooling & Architecture)**:
+  - Bổ sung hệ lụy **Compute Cost của việc Over-syncing** (chạy đồng bộ mỗi 5 phút cho bảng dữ liệu mà business chỉ xem báo cáo vào cuối tháng).
+
+## 5. Production Upgrades Recommended
+- **Soft Delete vs Hard Delete Strategy**: Thêm một guideline rõ ràng: "Nếu nguồn dùng Hard Delete, bạn buộc phải dùng CDC hoặc Full Sync + Checksum; Batch Incremental không thể phát hiện record biến mất".
+- **Reconciliation Enhancement**: Câu query đối soát ở W15.05 rất tốt, nhưng ở production, cần thêm so sánh theo trạng thái (vd: "Số đơn hàng trạng thái CANCELLED có khớp không?").
+
+## 6. Teaching Upgrades Recommended
+- Ở phần Retry/DLQ (W15.04), thay vì chỉ viết text, hãy cung cấp một sơ đồ luồng (ASCII hoặc Mermaid) minh họa đường đi của một bản ghi lỗi từ lúc bị reject HTTP 400 -> Quarantine Queue -> Alert Slack. Trực quan sẽ dễ hiểu hơn gấp bội.
+- Sửa lại một vài câu hỏi Quiz ở W15.08 để cover những kiến thức mới như Late-arriving data và Hard deletes.
+
+## 7. Portfolio Value Assessment
+- Artifact **W15.07** đang được thiết kế dạng outline/framework, mang lại mindset xuất sắc.
+- Tuy nhiên, để thực sự gây sốc (Wow factor) cho nhà tuyển dụng, Artifact này nên bổ sung một script thật (Python code giả lập khoảng 50 dòng) tên là `api_ingestion_with_backoff.py` xử lý pagination và rate-limit. Đọc tài liệu thiết kế là tốt, nhưng thấy code có xử lý network failure thì recruiter mới chốt "Hire".
+
+## 8. Top 10 Immediate Patches
+1. Cập nhật query `batch_incremental.sql` (W15.02) để sử dụng Overlap Window thay vì strict watermark.
+2. Nâng cấp pseudo-code API Ingestion (W15.02) để bao gồm Exponential Backoff & Jitter.
+3. Bổ sung chiến lược nhận diện bản ghi bị xóa (Deleted records / Tombstone) vào phần so sánh Batch vs CDC.
+4. Thêm PII tagging/masking policy vào data contract JSON mẫu (W15.03).
+5. Bổ sung concept Identity resolution (ID Mapping) khi kết nối đa nguồn vào W15.03.
+6. Thêm khái niệm "Out-of-order events" vào phần Idempotency (W15.04).
+7. Đưa khái niệm "Backpressure" vào góc độ Reliability (W15.04).
+8. Nhấn mạnh "Chi phí ẩn của Over-syncing" vào phần Tooling/Airflow schedules (W15.06).
+9. Bổ sung mock file `api_ingest_with_retry.py` vào bộ khung Artifact W15.07 để tăng độ "thực chiến".
+10. Cập nhật Final Mini Test (W15.08) để chứa các câu hỏi về Watermark pitfall và Hard delete handling.
+
+## 9. Final Verdict
+- **Quyết định:** **PATCH STRONGLY**
+- **Lý do:** Khung lý thuyết, cấu trúc luồng bài học và mindset vận hành đã đạt chuẩn Senior. Tuy nhiên, việc thiếu vắng các cách xử lý edge-cases kinh điển (như Late arriving data do database commit delay, hard deletes, PII security) khiến tài liệu hơi "sạch sẽ quá" so với một môi trường production bụi bặm. Thực hiện các bản vá nói trên sẽ hoàn thiện bức tranh Data Integration, tạo ra một học liệu cực kỳ đắt giá.
 
 MANDATORY EDITING RULES:
 1. First identify which current sections should be preserved

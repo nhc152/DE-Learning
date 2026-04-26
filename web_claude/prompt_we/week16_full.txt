@@ -1,0 +1,620 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week16_Spark.html` — theo hướng **thật đầy đủ, chi tiết, practical, production-oriented**, bám đúng scope Week16–17 trong roadmap: Spark architecture, transformations vs actions, join strategies, partitioning, bucketing, `sortWithinPartitions`, caching/persistence, Spark UI, và unit testing Spark jobs.  
+Format chuẩn vẫn giữ theo HTML tutorial standard: hero banner, sidebar fixed, 6 section/module, quiz, practice, mini test, inline CSS/JS, no placeholders.  
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text id="w16build"
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week16_Spark.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 16 – Apache Spark cho Data Engineer
+
+Allowed sources only:
+- ./Week16_Spark.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 16 CORE MISSION:
+This file must teach Spark as a distributed data processing system for Data Engineers, not as a generic big-data buzzword page.
+
+The learner should understand:
+- Spark solves what kinds of workload problems
+- Spark architecture: Driver, Executor, Stage, Task, Shuffle
+- lazy evaluation and DAG execution
+- RDD vs DataFrame vs Dataset thinking
+- join strategy decisions
+- partitioning and file layout decisions
+- bucketing and sortWithinPartitions trade-offs
+- caching/persistence trade-offs
+- how to use Spark UI for debugging bottlenecks
+- unit testing Spark transformations
+- how to build recruiter-grade Spark artifacts
+
+This tutorial must feel stronger than common Spark beginner tutorials.
+
+MANDATORY MODULES:
+- W16.01 – Tổng Quan: Vì Sao Cần Apache Spark?
+- W16.02 – Spark Architecture: Driver, Executor, Stage, Task, Shuffle
+- W16.03 – Data Model & Execution Mindset: RDD vs DataFrame vs Dataset, Transformations vs Actions
+- W16.04 – Join Strategies & Shuffle Optimization
+- W16.05 – Partitioning, Bucketing, sortWithinPartitions & File Layout
+- W16.06 – Caching, Persistence, Spark UI & Debugging Bottlenecks
+- W16.07 – Unit Testing Spark Jobs & Code Organization
+- W16.08 – Artifact: spark_jobs/
+- W16.09 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W16.01
+- why Spark exists
+- when pandas / SQL alone is not enough
+- distributed processing mindset
+- Spark for ETL, historical backfills, large joins, large aggregations
+- Spark is not always the answer
+- when Spark is overkill
+- relation to warehouse / dbt / Airflow
+- common DE workloads for Spark
+- week outcomes checklist
+
+W16.02
+- Spark architecture:
+  Driver
+  Executor
+  Cluster manager
+  Stage
+  Task
+  Shuffle
+- how a Spark job executes at high level
+- DAG planning
+- narrow vs wide transformation intuition
+- why shuffle is expensive
+- memory/network/disk trade-offs
+- anti-pattern:
+  talking about Spark without understanding shuffle cost
+- explain simple first, then deeper
+
+W16.03
+- RDD vs DataFrame vs Dataset
+- why DataFrame is default choice for most DE workloads
+- schema awareness
+- Catalyst optimizer intro
+- Transformations vs Actions
+- lazy evaluation
+- lineage
+- examples:
+  filter, select, withColumn, groupBy, join, write
+- anti-pattern:
+  collecting large datasets to driver
+- anti-pattern:
+  using UDF blindly when built-in functions exist
+
+W16.04
+- Join strategies:
+  Broadcast Join
+  Sort-Merge Join
+  Shuffle Hash Join
+- when each join type appears
+- size-based decision making
+- skewed joins intro
+- broadcast hint basics
+- reducing shuffle
+- pre-aggregation before join
+- selecting only needed columns
+- anti-pattern:
+  joining huge wide tables blindly
+- include realistic examples with code
+
+W16.05
+- repartition vs coalesce
+- partitionBy when writing files
+- choosing partition columns
+- too many small files problem
+- too many partitions problem
+- bucketing:
+  when it helps
+  repeated joins
+  trade-offs and maintenance burden
+- sortWithinPartitions:
+  when useful
+  reducing downstream sort/shuffle costs
+- file layout decisions for downstream query engines
+- anti-pattern:
+  partition by high-cardinality field without reason
+
+W16.06
+- cache vs persist
+- storage levels intro
+- when caching helps
+- when caching hurts
+- Spark UI basics:
+  Jobs
+  Stages
+  Tasks
+  SQL tab
+  DAG visualization
+- reading bottlenecks:
+  skew
+  large shuffle
+  spill
+  slow stages
+- debugging mindset:
+  don’t guess, inspect
+- anti-pattern:
+  cache everything
+
+W16.07
+- why Spark jobs need testing
+- transform functions should be testable
+- isolate logic from I/O
+- fake input DataFrames
+- expected output assertions
+- deterministic transformations
+- test organization
+- simple pytest pattern
+- anti-pattern:
+  only manual notebook validation
+
+W16.08
+- build realistic portfolio artifact:
+  spark_jobs/
+  ├── broadcast_join_job.py
+  ├── bucket_join_job.py
+  ├── aggregation_optimized.py
+  ├── sort_within_partitions.py
+  ├── common/
+  │   ├── spark_session.py
+  │   └── transforms.py
+  ├── tests/
+  │   ├── test_transform_functions.py
+  │   └── test_join_logic.py
+  └── README.md
+- artifact must reflect the roadmap:
+  broadcast join demo
+  bucket join before/after
+  aggregation optimization
+  sortWithinPartitions strategy
+  unit tests with fake DataFrame
+- README must explain:
+  - workload scenario
+  - data size assumptions
+  - chosen optimization techniques
+  - before/after thinking
+  - test strategy
+  - lessons learned
+- must feel portfolio-ready
+
+W16.09
+- final mini test: 20 questions
+- cover:
+  - architecture
+  - lazy evaluation
+  - joins
+  - shuffle
+  - repartition/coalesce
+  - bucketing
+  - caching
+  - Spark UI
+  - testing
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- architecture reasoning tasks
+- join strategy decision tasks
+- shuffle diagnosis tasks
+- partition design tasks
+- caching/debugging tasks
+- test-writing tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every example should be believable
+- use PySpark-focused examples unless there is a strong reason otherwise
+- keep code runnable in spirit
+- explain simple first, then deepen
+- avoid turning the file into Spark installation steps only
+- must connect Spark decisions to performance, reliability, and downstream analytics value
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- Spark marketing buzzwords
+- filler text
+- shallow notebook-only examples
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week16 scope you are using from roadmap
+2. Which format rules you inherit from Week00 / prompt standard
+3. Which assumptions you are making for data sizes, cluster setup, and Spark examples
+
+Then output the full final content for:
+./Week16_Spark.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text id="w16review"
+Use project rules from .claude.
+
+Review ./Week16_Spark.html as a senior Spark / Data Engineering Architect and learning-product reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- Spark architecture accuracy
+- teaching quality
+- production realism
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week16 teaches real Spark thinking for Data Engineers, not generic distributed-computing theory.
+Check relevance of:
+- Spark architecture
+- lazy evaluation
+- joins
+- shuffle
+- partitioning
+- bucketing
+- caching
+- Spark UI
+- unit testing
+- workload fit vs overkill
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- shuffle bottlenecks
+- data skew
+- collecting too much to driver
+- too many small files
+- wrong partition columns
+- over-caching
+- wide transformations
+- broadcast misuse
+- testability of jobs
+- realistic batch ETL workflows
+
+D. ARCHITECTURE / PERFORMANCE DECISIONS
+Review whether comparisons are strong enough:
+- pandas vs Spark boundaries
+- RDD vs DataFrame vs Dataset
+- Broadcast Join vs Sort-Merge Join vs Shuffle Hash Join
+- repartition vs coalesce
+- partitioning vs bucketing
+- cache vs recompute
+- Spark vs warehouse boundaries for some workloads
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W16.08 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- skew handling strategies
+- adaptive query execution mention
+- broadcast thresholds intuition
+- file compaction mindset
+- partition count heuristics
+- Spark UI stage interpretation
+- unit-testable transform design
+Only recommend additions if they materially improve quality.
+
+Also check:
+- whether every module supports the required 6-section learning structure
+- whether quiz/practice/final test are strong enough
+- whether the artifact module feels recruiter-grade and realistic
+
+OUTPUT FORMAT (STRICT):
+
+# Week16 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text id="w16patch"
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week16_Spark.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week16 becomes a high-value, portfolio-grade Spark tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week16_Spark.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- Spark depth
+- teaching clarity
+- production realism
+- performance reasoning
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+[PASTE ANTIGRAVITY REVIEW HERE]
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade examples, workloads, and optimization scenarios where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen why Spark exists framing
+- improve architecture explanation with shuffle cost intuition
+- improve RDD vs DataFrame vs Dataset boundaries
+- improve join strategy realism
+- improve skew and shuffle diagnosis
+- improve repartition/coalesce/bucketing trade-offs
+- improve caching and Spark UI debugging examples
+- improve unit testing guidance
+- strengthen W16.08 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week16_Spark.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text id="w16finalreview"
+Review the patched ./Week16_Spark.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text id="w16qa"
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week16_Spark.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- Spark examples still feel coherent and realistic
+- code snippets still look believable
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week16_Spark.html only.
+```
+
+---
+
+# 6) Mẹo riêng cho Week16
+
+Bạn nên thêm dòng này vào prompt build hoặc patch để tránh Claude viết Spark kiểu quá lý thuyết hoặc chỉ tutorial notebook:
+
+```text id="w16tip"
+Do not turn Week16 into a generic Spark introduction or notebook-style demo page.
+Teach Spark as a practical distributed data processing system for ETL, large joins, partition-aware file writing, performance tuning, debugging with Spark UI, and testable production-grade data jobs.
+```
+
+---
+
+# 7) Cách dùng đúng cho Week16
+
+Theo thứ tự:
+
+### Bước 1
+
+Dùng **Prompt build** cho Claude
+
+### Bước 2
+
+Lấy file output gửi sang Antigravity với **Prompt review**
+
+### Bước 3
+
+Paste review đó vào **Prompt patch** cho Claude Code
+
+### Bước 4
+
+Nếu patch lớn, gửi lại Antigravity bằng **Prompt final review ngắn**
+
+### Bước 5
+
+Chạy **Prompt QA cuối** trong Claude Code rồi chốt file
+
+Nếu bạn muốn, mình viết tiếp luôn theo cùng format cho **Week18_Flink_Kafka.html** hoặc **Week20_Modern_OLAP.html**.

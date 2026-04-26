@@ -259,7 +259,7 @@ ORDER BY last_success DESC;</pre></div></div></div>
 FROM dataset_freshness
 WHERE loaded_at < NOW() - INTERVAL '1 day';</pre></div></div></div><div class="tab-content" id="sqlg2or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dataset_name, loaded_at
 FROM dataset_freshness
-WHERE loaded_at < SYSTIMESTAMP - INTERVAL '1' DAY;</pre></div></div></div></div></div>
+WHERE loaded_at < SYSTIMESTAMP - INTERVAL '1' DAY;</pre></div></div></div><div class="info-box note">Khác biệt SQL: PostgreSQL hay dùng <code>NOW() - INTERVAL</code>, Oracle dùng <code>SYSTIMESTAMP - INTERVAL</code> với số lượng đặt trong dấu nháy.</div></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
         <div class="quiz-item"><div class="quiz-q">start_date nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là mốc scheduler bắt đầu xét lịch.')">A. Mốc logic bắt đầu xét lịch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải thời điểm deploy code.')">B. Giờ deploy code</div></div><div class="quiz-explain"></div></div>
         <div class="quiz-item"><div class="quiz-q">catchup=True dùng cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tạo run lịch sử bị thiếu.')">A. Backfill lịch sử</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải tắt retry.')">B. Tắt retry</div></div><div class="quiz-explain"></div></div>
@@ -283,16 +283,26 @@ max_active_runs=1</pre></div></div></div></div></div></div></div>
       <div class="module-header"><div class="module-tag">Tuần 10 · W10.03</div><div class="module-title">Core Operators</div><div class="module-subtitle">Chọn đúng operator và thiết kế task idempotent.</div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>PythonOperator, BashOperator, SQLExecuteQueryOperator</li><li>TaskFlow API</li><li>Idempotent task</li><li>Pool và retry</li></ul></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Hiểu khi nào dùng mỗi operator.</li><li>Giảm coupling logic trong DAG file.</li><li>Bảo vệ pipeline trước lỗi transient.</li></ul></div></div>
-      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>extract = PythonOperator(...)
-transform = BashOperator(...)
-quality = SQLExecuteQueryOperator(...)
-extract >> transform >> quality</pre></div></div><div class="info-box tip">Task ghi dữ liệu cần idempotent: upsert/merge hoặc partition overwrite có kiểm soát.</div><div class="tab-group" id="sqlg3"><div class="tab active" onclick="switchTab('sqlg3','sqlg3pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg3','sqlg3or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg3pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT order_date, COUNT(*)
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>extract = PythonOperator(task_id="extract", python_callable=extract_orders, queue="cpu")
+transform = BashOperator(task_id="transform", bash_command="python jobs/transform_orders.py", queue="spark")
+quality = SQLExecuteQueryOperator(task_id="quality", conn_id="warehouse_conn", sql="SELECT 1", pool="warehouse_small", pool_slots=1)
+extract >> transform >> quality
+
+@task
+def build_partition(ds=None):
+  return {"ds": ds, "partition": ds.replace('-', '')}
+
+@task
+def publish_partition(meta: dict):
+  print(f"publish {meta['partition']}")
+
+publish_partition(build_partition())</pre></div></div><div class="info-box tip">Queue định tuyến task tới nhóm worker phù hợp (cpu/spark/io). Pool giới hạn concurrency trên tài nguyên dùng chung (ví dụ warehouse, API quota).</div><div class="info-box note">TaskFlow API với <code>@task</code> giúp truyền metadata qua XCom tự động, giảm boilerplate khi chỉ cần dữ liệu nhỏ giữa các bước.</div><div class="info-box note">Tài liệu chính thức: <a href="https://airflow.apache.org/docs/apache-airflow/stable/tutorial/taskflow.html" target="_blank" rel="noopener">TaskFlow API</a> · <a href="https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/queues.html" target="_blank" rel="noopener">Queue</a> · <a href="https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/pools.html" target="_blank" rel="noopener">Pool</a></div><div class="tab-group" id="sqlg3"><div class="tab active" onclick="switchTab('sqlg3','sqlg3pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg3','sqlg3or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg3pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT order_date, COUNT(*)
 FROM mart_orders
 WHERE order_date = CURRENT_DATE - INTERVAL '1 day'
 GROUP BY order_date;</pre></div></div></div><div class="tab-content" id="sqlg3or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT order_date, COUNT(*)
 FROM mart_orders
 WHERE order_date = TRUNC(SYSDATE) - 1
-GROUP BY order_date;</pre></div></div></div></div></div>
+GROUP BY order_date;</pre></div></div></div><div class="info-box note">Khác biệt SQL: PostgreSQL thường dùng <code>CURRENT_DATE - INTERVAL</code>, Oracle dùng <code>TRUNC(SYSDATE)</code> hoặc <code>SYSTIMESTAMP</code> cho mốc thời gian.</div></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
         <div class="quiz-item"><div class="quiz-q">Operator nào chạy logic Python thuần?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. PythonOperator chạy callable Python.')">A. PythonOperator</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. BashOperator chạy shell command.')">B. BashOperator</div></div><div class="quiz-explain"></div></div>
         <div class="quiz-item"><div class="quiz-q">BashOperator hợp với tác vụ nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. BashOperator phù hợp gọi CLI/script.')">A. Chạy shell script</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để render UI.')">B. Render web UI</div></div><div class="quiz-explain"></div></div>
@@ -313,10 +323,23 @@ GROUP BY order_date;</pre></div></div></div></div></div>
 
     <div class="module" id="m3">
       <div class="module-header"><div class="module-tag">Tuần 10 · W10.04</div><div class="module-title">Dependencies & XCom</div><div class="module-subtitle">Thiết kế luồng task rõ, giảm coupling và dùng XCom đúng phạm vi.</div></div>
-      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Bitshift dependency</li><li>XCom push/pull</li><li>Trigger rules</li><li>Branching/merge</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Bitshift dependency</li><li>XCom push/pull</li><li>Trigger rules</li><li>Dataset scheduling</li><li>Branching/merge</li></ul></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Vẽ dependency dễ đọc.</li><li>Không lạm dụng XCom cho payload lớn.</li><li>Dùng trigger_rule đúng cho cleanup.</li></ul></div></div>
-      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>extract >> [validate, profile] >> load
-cleanup = EmptyOperator(trigger_rule='all_done')</pre></div></div><div class="info-box note">XCom chỉ phù hợp metadata nhỏ: row_count, file_path, status. Không nhét DataFrame lớn.</div><div class="tab-group" id="sqlg4"><div class="tab active" onclick="switchTab('sqlg4','sqlg4pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg4','sqlg4or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg4pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT COALESCE(s.order_date,t.order_date) AS order_date,
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>daily_orders_dataset = Dataset("s3://lake/gold/orders_daily/")
+
+publish_orders = PythonOperator(
+  task_id="publish_orders",
+  python_callable=build_orders_snapshot,
+  outlets=[daily_orders_dataset]
+)
+consume_orders = PythonOperator(
+  task_id="consume_orders",
+  python_callable=run_investor_metrics,
+  inlets=[daily_orders_dataset]
+)
+
+extract >> [validate, profile] >> publish_orders >> consume_orders
+cleanup = EmptyOperator(trigger_rule='all_done')</pre></div></div><div class="info-box note">XCom chỉ phù hợp metadata nhỏ: row_count, file_path, status. Không nhét DataFrame lớn. Với phụ thuộc liên DAG, ưu tiên Dataset để lineage rõ và ít coupling hơn.</div><div class="tab-group" id="sqlg4"><div class="tab active" onclick="switchTab('sqlg4','sqlg4pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg4','sqlg4or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg4pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT COALESCE(s.order_date,t.order_date) AS order_date,
        COALESCE(s.cnt_src,0) AS src_cnt,
        COALESCE(t.cnt_tgt,0) AS tgt_cnt
 FROM src_daily_count s
@@ -326,7 +349,7 @@ ON s.order_date=t.order_date;</pre></div></div></div><div class="tab-content" id
        NVL(t.cnt_tgt,0) AS tgt_cnt
 FROM src_daily_count s
 FULL OUTER JOIN tgt_daily_count t
-ON s.order_date=t.order_date;</pre></div></div></div></div></div>
+ON s.order_date=t.order_date;</pre></div></div></div><div class="info-box note">Khác biệt SQL: PostgreSQL thường dùng <code>COALESCE</code>, Oracle thường dùng <code>NVL</code>. Khi review query cross-DB, kiểm tra kỹ hàm null-handling trước khi deploy.</div><div class="info-box note">Tài liệu chính thức: <a href="https://airflow.apache.org/docs/apache-airflow/stable/authoring-and-scheduling/datasets.html" target="_blank" rel="noopener">Airflow Datasets</a></div></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
         <div class="quiz-item"><div class="quiz-q">A >> B nghĩa là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. B phụ thuộc A.')">A. B chạy sau A</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chiều phụ thuộc ngược lại.')">B. A chạy sau B</div></div><div class="quiz-explain"></div></div>
         <div class="quiz-item"><div class="quiz-q">[A,B] >> C mặc định yêu cầu gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. all_success: A và B đều success.')">A. A và B đều success</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải chỉ một task xong là đủ.')">B. Một trong hai xong là chạy</div></div><div class="quiz-explain"></div></div>
@@ -340,8 +363,21 @@ ON s.order_date=t.order_date;</pre></div></div></div></div></div>
         <div class="quiz-item"><div class="quiz-q">Lý do giảm coupling giữa task?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dễ test, dễ thay đổi và giảm blast radius.')">A. Dễ bảo trì và debug</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Coupling cao thường làm DAG khó sửa.')">B. Để viết DAG ngắn bất chấp chất lượng</div></div><div class="quiz-explain"></div></div>
       </div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Dependency</strong>Rõ ràng giúp giảm lỗi orchestration.</div><div class="summary-item"><strong>XCom</strong>Chỉ dành cho metadata nhỏ.</div><div class="summary-item"><strong>Trigger rule</strong>Rất quan trọng cho cleanup và nhánh merge.</div><div class="summary-item"><strong>Design</strong>Giảm coupling để pipeline bền vững.</div></div></div></div>
-      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Fan-out/Fan-in cho validate và profile</div><div class="practice-task-body"><ul><li>Thiết kế extract >> [validate, profile] >> load.</li><li>Dùng XCom truyền row_count.</li><li>Cleanup trigger_rule='all_done'.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>extract >> [validate, profile] >> load
-[load, validate, profile] >> cleanup</pre></div></div></div></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Fan-out/Fan-in cho validate và profile</div><div class="practice-task-body"><ul><li>Thiết kế extract >> [validate, profile] >> load.</li><li>Dùng XCom truyền row_count.</li><li>Cleanup trigger_rule='all_done'.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>def extract(**context):
+  context["ti"].xcom_push(key="row_count", value=128430)
+
+extract_task = PythonOperator(task_id="extract", python_callable=extract)
+validate = PythonOperator(task_id="validate", python_callable=validate_orders)
+profile = PythonOperator(task_id="profile", python_callable=profile_orders)
+
+def load(**context):
+  rc = context["ti"].xcom_pull(task_ids="extract", key="row_count")
+  if rc < 100000:
+    raise ValueError("row_count thấp bất thường")
+
+load_task = PythonOperator(task_id="load", python_callable=load)
+extract_task >> [validate, profile] >> load_task
+[load_task, validate, profile] >> cleanup</pre></div></div><div class="info-box note">Vì sao: dùng xcom_push/xcom_pull tường minh giúp bạn thấy rõ điểm phát sinh và điểm tiêu thụ metadata, rất hữu ích khi debug sai lệch số liệu giữa các task.</div></div></div></div></div></div>
       <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">Quay lại W10.03</button><button class="nav-btn primary" onclick="goNext(3)">Sang W10.05</button></div>
     </div>
 
@@ -377,13 +413,19 @@ null_threshold = float(Variable.get("dq_null_threshold", 0.01))</pre></div></div
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>poke vs reschedule</li><li>timeout, soft_fail</li><li>deferrable sensor</li><li>ExternalTaskSensor</li></ul></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Không để sensor giữ slot worker quá lâu.</li><li>Biết đặt timeout phù hợp SLA.</li><li>Thiết lập dependency liên DAG rõ ràng.</li></ul></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>wait_file = FileSensor(mode="reschedule", poke_interval=120, timeout=3600)
-wait_upstream = ExternalTaskSensor(external_dag_id="daily_growth", mode="reschedule")</pre></div></div><div class="info-box note">reschedule và deferrable giúp nhả slot worker trong thời gian chờ dài.</div><div class="tab-group" id="sqlg6"><div class="tab active" onclick="switchTab('sqlg6','sqlg6pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg6','sqlg6or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg6pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, waited_seconds
+wait_upstream = ExternalTaskSensor(
+  task_id="wait_growth_publish",
+  external_dag_id="daily_growth",
+  external_task_id="publish",
+  deferrable=True,
+  timeout=5400
+)</pre></div></div><div class="info-box note">reschedule và deferrable giúp nhả slot worker trong thời gian chờ dài. Nếu cluster có nhiều sensor chờ > 10 phút, nên bật deferrable=True và theo dõi Triggerer.</div><div class="tab-group" id="sqlg6"><div class="tab active" onclick="switchTab('sqlg6','sqlg6pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg6','sqlg6or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg6pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, waited_seconds
 FROM sensor_wait_audit
 WHERE run_date = CURRENT_DATE
 ORDER BY waited_seconds DESC;</pre></div></div></div><div class="tab-content" id="sqlg6or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, waited_seconds
 FROM sensor_wait_audit
 WHERE run_date = TRUNC(SYSDATE)
-ORDER BY waited_seconds DESC;</pre></div></div></div></div></div>
+ORDER BY waited_seconds DESC;</pre></div></div></div><div class="info-box note">Khác biệt SQL: filter ngày hiện tại thường là <code>CURRENT_DATE</code> (PostgreSQL) và <code>TRUNC(SYSDATE)</code> (Oracle).</div><div class="info-box note">Tài liệu chính thức: <a href="https://airflow.apache.org/docs/apache-airflow/stable/authoring-and-scheduling/deferring.html" target="_blank" rel="noopener">Deferrable Operators & Triggers</a></div></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
         <div class="quiz-item"><div class="quiz-q">Sensor dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chờ điều kiện trước khi chạy downstream.')">A. Chờ điều kiện sẵn sàng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để scale DB.')">B. Scale database</div></div><div class="quiz-explain"></div></div>
         <div class="quiz-item"><div class="quiz-q">mode='reschedule' nghĩa là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhả worker slot giữa các lần check.')">A. Nhả slot worker khi chờ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. poke mới giữ slot liên tục.')">B. Giữ slot worker liên tục</div></div><div class="quiz-explain"></div></div>
@@ -397,7 +439,7 @@ ORDER BY waited_seconds DESC;</pre></div></div></div></div></div>
         <div class="quiz-item"><div class="quiz-q">Tối ưu khi có nhiều sensor chờ dài?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng reschedule/deferrable + timeout hợp lý.')">A. reschedule/deferrable và timeout rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. poke_interval=1s thường gây quá tải.')">B. poke_interval=1 giây cho tất cả</div></div><div class="quiz-explain"></div></div>
       </div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Sensor</strong>Chờ điều kiện upstream/data source.</div><div class="summary-item"><strong>reschedule</strong>Giảm tắc slot worker.</div><div class="summary-item"><strong>timeout</strong>Ngăn pipeline treo.</div><div class="summary-item"><strong>ExternalTaskSensor</strong>Chuẩn hoá phụ thuộc liên DAG.</div></div></div></div>
-      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Chờ file + chờ DAG upstream</div><div class="practice-task-body"><ul><li>Dùng FileSensor mode=reschedule.</li><li>Dùng ExternalTaskSensor chờ quality_daily.publish.</li><li>Đặt timeout theo SLA.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>wait_file >> wait_upstream >> run_orders_pipeline</pre></div></div></div></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Chờ file + chờ DAG upstream</div><div class="practice-task-body"><ul><li>Dùng FileSensor mode=reschedule.</li><li>Dùng ExternalTaskSensor chờ quality_daily.publish.</li><li>Đặt timeout theo SLA.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>wait_file >> wait_upstream >> run_orders_pipeline</pre></div></div><div class="info-box note">Vì sao: chuỗi chờ rõ ràng giúp on-call khoanh vùng nhanh đang kẹt ở file arrival hay kẹt ở DAG upstream, giảm thời gian MTTR.</div></div></div></div></div></div>
       <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">Quay lại W10.05</button><button class="nav-btn primary" onclick="goNext(5)">Sang W10.07</button></div>
     </div>
 
@@ -442,7 +484,7 @@ WHERE ds = CURRENT_DATE - INTERVAL '1 day'
 AND unit_profit IS NULL;</pre></div></div></div><div class="tab-content" id="sqlg8or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT COUNT(*) AS null_profit_rows
 FROM mart_profit_daily
 WHERE ds = TRUNC(SYSDATE) - 1
-AND unit_profit IS NULL;</pre></div></div></div></div></div>
+AND unit_profit IS NULL;</pre></div></div></div><div class="info-box note">Khác biệt SQL: logic filter giống nhau, nhưng phép trừ ngày thường khác cú pháp (<code>INTERVAL</code> ở PostgreSQL vs <code>TRUNC(SYSDATE)-n</code> ở Oracle).</div></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
         <div class="quiz-item"><div class="quiz-q">Vì sao orchestration dbt bằng Airflow?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Quản lý lịch, dependency, alert tập trung.')">A. Quản lý lịch và alert tập trung</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để thay dbt compiler.')">B. Thay thế dbt compiler</div></div><div class="quiz-explain"></div></div>
         <div class="quiz-item"><div class="quiz-q">Thứ tự thường dùng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. seed -> run -> test.')">A. dbt seed -> dbt run -> dbt test</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đảo thứ tự làm mất ý nghĩa gate.')">B. dbt test -> dbt run -> dbt seed</div></div><div class="quiz-explain"></div></div>
@@ -472,13 +514,13 @@ AND unit_profit IS NULL;</pre></div></div></div></div></div>
 }
 
 task.execution_timeout = timedelta(minutes=25)
-task.sla = timedelta(minutes=40)</pre></div></div><div class="info-box note">SLA miss là tín hiệu trễ thời gian; task vẫn có thể đang chạy hoặc hoàn thành muộn.</div><div class="tab-group" id="sqlg9"><div class="tab active" onclick="switchTab('sqlg9','sqlg9pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg9','sqlg9or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg9pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, run_date, delay_minutes
+task.sla = timedelta(minutes=40)</pre></div></div><div class="info-box note">SLA miss là tín hiệu trễ thời gian; task vẫn có thể đang chạy hoặc hoàn thành muộn. Trong production mới, SLA callback có thể không ổn định giữa các phiên bản, nên ưu tiên execution_timeout + on_failure_callback + runbook rõ người xử lý.</div><div class="tab-group" id="sqlg9"><div class="tab active" onclick="switchTab('sqlg9','sqlg9pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg9','sqlg9or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg9pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, run_date, delay_minutes
 FROM sla_breach_audit
 WHERE run_date >= CURRENT_DATE - INTERVAL '7 day'
 ORDER BY delay_minutes DESC;</pre></div></div></div><div class="tab-content" id="sqlg9or"><div class="cmd-block"><div class="cmd-body"><pre>SELECT dag_id, task_id, run_date, delay_minutes
 FROM sla_breach_audit
 WHERE run_date >= TRUNC(SYSDATE) - 7
-ORDER BY delay_minutes DESC;</pre></div></div></div></div></div>
+ORDER BY delay_minutes DESC;</pre></div></div></div><div class="info-box note">Khác biệt SQL: PostgreSQL dùng <code>INTERVAL '7 day'</code> còn Oracle thường trừ trực tiếp số ngày trên <code>TRUNC(SYSDATE)</code>.</div><div class="info-box note">Tài liệu chính thức: <a href="https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/tasks.html#timeouts" target="_blank" rel="noopener">Task timeouts</a> · <a href="https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/callbacks.html" target="_blank" rel="noopener">Callbacks</a></div></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
         <div class="quiz-item"><div class="quiz-q">Retry hợp cho loại lỗi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Retry cho lỗi transient tạm thời.')">A. Lỗi transient</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Lỗi logic cố định cần sửa code.')">B. Lỗi logic cố định</div></div><div class="quiz-explain"></div></div>
         <div class="quiz-item"><div class="quiz-q">execution_timeout dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Giới hạn thời gian chạy task.')">A. Chặn task chạy quá lâu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không đổi cron schedule.')">B. Đổi lịch DAG</div></div><div class="quiz-explain"></div></div>
@@ -492,24 +534,32 @@ ORDER BY delay_minutes DESC;</pre></div></div></div></div></div>
         <div class="quiz-item"><div class="quiz-q">Bộ reliability chuẩn gồm?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. retries + timeout + SLA + alert.')">A. Retry + timeout + SLA + alert</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ retries là chưa đủ.')">B. Chỉ retries</div></div><div class="quiz-explain"></div></div>
       </div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Retry</strong>Không thay thế idempotent design.</div><div class="summary-item"><strong>Timeout</strong>Chặn task treo kéo dài.</div><div class="summary-item"><strong>SLA</strong>Đo độ đúng giờ nghiệp vụ.</div><div class="summary-item"><strong>Alert</strong>Phải đủ ngữ cảnh để xử lý ngay.</div></div></div></div>
-      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Nâng reliability cho investor_profit_daily</div><div class="practice-task-body"><ul><li>Đặt retries + exponential backoff.</li><li>Thêm execution_timeout theo baseline.</li><li>Bật SLA + callback alert.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>retries=3
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Bài tập: Nâng reliability cho investor_profit_daily</div><div class="practice-task-body"><ul><li>Đặt retries + exponential backoff.</li><li>Thêm execution_timeout theo baseline.</li><li>Bật SLA + callback alert.</li></ul><button class="solution-toggle" onclick="toggleSolution(this)">Xem lời giải</button><div class="solution-box"><div class="cmd-block"><div class="cmd-body"><pre>def notify_failure(context):
+  dag_id = context["dag"].dag_id
+  task_id = context["task_instance"].task_id
+  run_id = context["run_id"]
+  print(f"[ALERT] {dag_id}.{task_id} failed | run_id={run_id}")
+  print("Runbook: [liên kết runbook nội bộ của team]")
+
+retries=3
 retry_exponential_backoff=True
 execution_timeout=timedelta(minutes=20)
-sla=timedelta(minutes=30)</pre></div></div></div></div></div></div></div>
+on_failure_callback=notify_failure
+# SLA dùng như tín hiệu nghiệp vụ, không thay execution_timeout</pre></div></div><div class="info-box note">Vì sao: callback kèm link runbook giúp người trực xử lý ngay theo checklist chuẩn, thay vì chỉ nhận một cảnh báo chung chung khó hành động.</div></div></div></div></div></div>
       <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(8)">Quay lại W10.08</button><button class="nav-btn primary" onclick="goNext(8)">Sang W10.10</button></div>
     </div>
 
     <div class="module" id="m9">
       <div class="module-header"><div class="module-tag">Tuần 10 · W10.10</div><div class="module-title">Artifact airflow_dags/</div><div class="module-subtitle">Chuẩn bàn giao thư mục DAG và tài liệu chạy local cho learner/team.</div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Cấu trúc artifact bắt buộc</li><li>4 DAG mẫu theo roadmap</li><li>README local setup</li><li>Quality + backfill strategy</li></ul></div></div>
-      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Biết các file bàn giao tối thiểu.</li><li>Hiểu vai trò từng DAG.</li><li>Viết README giúp người mới tự chạy được.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul><li>Biết các file bàn giao tối thiểu.</li><li>Hiểu vai trò từng DAG.</li><li>Thiết lập CI check tối thiểu trước merge.</li><li>Viết README giúp người mới tự chạy được.</li></ul></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-body"><pre>airflow_dags/
 ├── dags/
 │   ├── etl_orders_daily.py
 │   ├── dbt_pipeline.py
 │   ├── data_quality_check.py
 │   └── backfill_historical.py
-└── README.md</pre></div></div><div class="info-box tip">README nên có: docker compose up, tạo connection/variable, trigger test DAG, xem log, teardown.</div><div class="tab-group" id="sqlg10"><div class="tab active" onclick="switchTab('sqlg10','sqlg10pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg10','sqlg10or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg10pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT ds, COUNT(*) total_rows,
+└── README.md</pre></div></div><div class="info-box tip">README nên có: cách chạy bằng Astro CLI hoặc docker compose, tạo connection/variable, trigger test DAG, xem log, teardown và quy tắc rerun task/downstream trên UI.</div><div class="info-box note">Tài liệu chính thức: <a href="https://www.astronomer.io/docs/astro/cli/overview" target="_blank" rel="noopener">Astro CLI</a> · <a href="https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html#testing-a-dag" target="_blank" rel="noopener">DagBag testing</a> · <a href="https://airflow.apache.org/docs/apache-airflow/stable/howto/usage-cli.html" target="_blank" rel="noopener">Airflow local CLI</a></div><div class="tab-group" id="sqlg10"><div class="tab active" onclick="switchTab('sqlg10','sqlg10pg')">PostgreSQL</div><div class="tab" onclick="switchTab('sqlg10','sqlg10or')">Oracle SQL</div></div><div class="tab-content active" id="sqlg10pg"><div class="cmd-block"><div class="cmd-body"><pre>SELECT ds, COUNT(*) total_rows,
 SUM(CASE WHEN unit_profit IS NULL THEN 1 ELSE 0 END) null_profit_rows
 FROM mart_profit_daily
 GROUP BY ds
@@ -519,7 +569,7 @@ SUM(CASE WHEN unit_profit IS NULL THEN 1 ELSE 0 END) null_profit_rows
 FROM mart_profit_daily
 GROUP BY ds
 ORDER BY ds DESC
-FETCH FIRST 7 ROWS ONLY;</pre></div></div></div></div></div>
+FETCH FIRST 7 ROWS ONLY;</pre></div></div></div><div class="info-box note">Khác biệt SQL: PostgreSQL dùng <code>LIMIT</code>, Oracle 12c+ dùng <code>FETCH FIRST ... ROWS ONLY</code> để giới hạn số dòng.</div></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
         <div class="quiz-item"><div class="quiz-q">etl_orders_daily.py thường dùng cho?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là DAG daily ETL chính.')">A. ETL hằng ngày</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Backfill lịch sử thuộc DAG khác.')">B. Chỉ backfill lịch sử</div></div><div class="quiz-explain"></div></div>
         <div class="quiz-item"><div class="quiz-q">data_quality_check.py có mục tiêu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kiểm row count/null/freshness.')">A. Chạy quality gate</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để render dashboard.')">B. Render dashboard</div></div><div class="quiz-explain"></div></div>

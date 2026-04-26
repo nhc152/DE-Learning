@@ -456,7 +456,60 @@ Improve the file across:
 - artifact realism
 
 PATCH PRIORITIES:
-[PASTE ANTIGRAVITY REVIEW HERE]
+# Week06 Review Report
+
+## 1. Executive Summary
+- **score /10:** 8.5/10
+- **strongest parts:** Sự phân định rõ ràng vai trò của PostgreSQL trong DE stack (staging, metadata) thay vì nhầm lẫn với DWH. Cấu trúc bài W6.08 Artifact mang đậm chất thực chiến và cực kỳ có giá trị cho Portfolio. Phần giải thích `EXPLAIN ANALYZE` (Estimated vs Actual) và cơ chế Dead Tuples/VACUUM đi thẳng vào trọng tâm vận hành thay vì lý thuyết suông.
+- **biggest weaknesses:** Thiếu hẳn các công cụ chuẩn đoán runtime (troubleshooting) mà một Senior DE phải dùng hằng ngày như `pg_stat_activity` và `pg_stat_statements`. Thiếu kết nối với khái niệm CDC (Change Data Capture) và WAL - vốn là cách thức ingest data phổ biến nhất từ Postgres hiện nay.
+- **priority level:** MEDIUM (Core content đã rất tốt, chỉ cần đắp thêm các "Senior missing pieces").
+
+## 2. What Already Strong
+- **DE Contextualization:** Module W6.01 làm rất xuất sắc việc "set boundary" (Khi nào dùng Postgres, khi nào phải dùng BigQuery/Snowflake). Đây là tư duy Architecture rất hiếm thấy ở các khóa học SQL thông thường.
+- **Indexing Strategy:** Tập trung vào Selectivity, Composite Index ordering, và Partial Index. Đây là 3 thứ mang lại ROI cao nhất trong tối ưu ETL.
+- **Maintenance Mindset:** Giới thiệu MVCC -> Dead Tuples -> VACUUM theo một chuỗi logic nhân quả rất dễ hiểu, giúp học viên không học vẹt lệnh bảo trì.
+- **Artifact W6.08:** Việc yêu cầu nộp file `explain_examples.sql` kèm số liệu before/after và `maintenance.md` là một ý tưởng tuyệt vời, phản ánh đúng công việc thực tế của một Data Engineer.
+
+## 3. Critical Gaps
+- **Runtime Debugging:** Tài liệu giải thích rất tốt về lock và deadlock, nhưng lại KHÔNG dạy cách tìm ra query nào đang gây lock hệ thống ngay lúc này (Missing `pg_stat_activity`).
+- **Query Profiling at Scale:** Thiếu `pg_stat_statements`. Trước khi chạy `EXPLAIN`, ta phải biết query nào chậm nhất trong hàng ngàn query. Không có tool này, học viên sẽ tối ưu mò.
+- **UPDATE-Heavy Workloads (fillfactor):** Với DE, các bảng Accumulating Snapshot thường bị UPDATE liên tục. Việc không nhắc đến cơ chế **HOT updates (Heap-Only Tuples)** và điều chỉnh `fillfactor` (ví dụ set xuống 90) là một thiếu sót lớn ở cấp độ Senior.
+- **Ecosystem Connection (CDC/WAL):** Postgres thường đóng vai trò là Source DB để đẩy qua Kafka/DWH thông qua Debezium. Việc không nhắc đến **WAL (Write-Ahead Logging)** và **Logical Replication** làm mất đi ngữ cảnh DE hiện đại.
+
+## 4. Module-by-Module Improvements
+- **W6.01 (Tổng Quan):** Bổ sung 1 bullet point về việc Postgres làm nguồn phát CDC (nhắc nhẹ đến WAL và Logical Replication) để kết nối với bức tranh Data Streaming.
+- **W6.02 (Indexing):** Nhấn mạnh thêm về BRIN index: giải thích cơ chế "Block Range" để học viên hiểu tại sao nó cực kỳ nhẹ và hoàn hảo cho bảng time-series append-only (như raw events).
+- **W6.03 (EXPLAIN ANALYZE):** Thêm 1 phần giới thiệu nhanh module `pg_stat_statements` để tìm Top 10 slowest queries.
+- **W6.05 (Transactions & Locking):** Thêm query mẫu sử dụng `pg_stat_activity` để phát hiện "Idle in transaction" và tìm ra thủ phạm gây lock.
+- **W6.06 (VACUUM):** Giới thiệu khái niệm HOT Updates và cách set `fillfactor` < 100 cho các bảng staging/fact bị update nhiều để giảm dead tuples và I/O.
+
+## 5. Production Upgrades Recommended
+- **pg_stat_activity Snippet:** Cung cấp sẵn một query chuẩn để học viên copy/paste khi cần kill các session bị treo.
+- **Connection Pooling Trap:** Ở W6.07 (PgBouncer), cần nhắc đến bẫy "Transaction-level pooling vs Session-level pooling". Nhiều DE dùng Airflow mở session-level qua PgBouncer làm sập pool vì không hiểu cơ chế trả connection.
+
+## 6. Teaching Upgrades Recommended
+- **Trực quan hóa MVCC:** Phần giải thích MVCC ở W6.05 nên có một ví dụ Timeline đơn giản bằng text (T1: Bắt đầu đọc, T2: Update, T1: Vẫn thấy dữ liệu cũ) để người mới dễ hình dung hơn.
+- **Thêm Quiz:** Bổ sung các câu hỏi về việc dùng view nào để check query đang chạy (`pg_stat_activity`), và công dụng của `fillfactor`.
+
+## 7. Portfolio Value Assessment
+Artifact W6.08 đã rất mạnh. Để nó trở nên "Killer", hãy yêu cầu học viên nộp thêm một ảnh chụp output của query `pg_stat_user_tables` hoặc `pg_stat_statements` vào trong `README.md` để chứng minh họ biết cách monitor hệ thống đang hoạt động, chứ không chỉ biết viết SQL chay.
+
+## 8. Top 10 Immediate Patches
+1. **W6.01:** Thêm ý "PostgreSQL làm nguồn CDC qua WAL/Logical Replication".
+2. **W6.02:** Mở rộng giải thích BRIN (nhắc đến Block Range boundaries).
+3. **W6.03:** Thêm 1 Info-box / Script giới thiệu `pg_stat_statements`.
+4. **W6.05:** Bổ sung query mẫu dùng `pg_stat_activity` tìm blocking queries / Idle in transaction.
+5. **W6.06:** Thêm phần hướng dẫn tối ưu UPDATE bằng HOT updates và `fillfactor`.
+6. **W6.07:** Thêm cảnh báo về cấu hình Transaction vs Session pooling trong PgBouncer.
+7. **W6.08:** Thêm yêu cầu đính kèm output monitoring view vào file README của Artifact.
+8. **Quiz W6.09:** Bổ sung 1 câu hỏi về công cụ tìm query đang treo.
+9. **Quiz W6.09:** Bổ sung 1 câu hỏi về cách giảm dead tuple bằng HOT update.
+10. **W6.05:** Làm rõ ví dụ Text Timeline cho MVCC để beginner thân thiện hơn.
+
+## 9. Final Verdict
+- **patch lightly**
+*(Tài liệu đã có bộ khung và tư duy rất chuẩn mực. Chỉ cần vá thêm các module giám sát runtime và tối ưu cấp cao là đạt chuẩn Senior Data Engineer hoàn hảo).*
+
 
 MANDATORY EDITING RULES:
 1. First identify which current sections should be preserved

@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 16 · Apache Spark cho Data Engineer</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .hero p {
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-size: 0.95rem;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid;
+  }
+
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 330px;
+    min-width: 330px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding: 0 16px 12px;
+  }
+
+  .level-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 16px 4px;
+    color: var(--text-muted);
+  }
+
+  .level-label.l3 { color: var(--accent2); }
+
+  .nav-item {
+    display: block;
+    padding: 7px 16px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: var(--highlight);
+    font-weight: 600;
+  }
+
+  .nav-number {
+    display: inline-block;
+    width: 52px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: monospace;
+  }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 980px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    background: var(--surface);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .module-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent);
+  }
+
+  .module-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .module-title { font-size: 1.55rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .progress-bar {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 4px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+  }
+
+  .section {
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  code {
+    font-family: 'Courier New', monospace;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--accent4);
+  }
+
+  .cmd-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+
+  .cmd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: 'Courier New', monospace;
+  }
+
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+
+  .cmd-body { padding: 14px; }
+  pre {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--text);
+  }
+
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+
+  .info-box {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    font-size: 0.84rem;
+    border: 1px solid;
+    display: flex;
+    gap: 10px;
+  }
+
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .quiz-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before {
+    content: 'Q';
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    background: var(--accent);
+    color: #000;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-align: center;
+    line-height: 22px;
+    margin-right: 8px;
+  }
+
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+
+  .quiz-opt {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.84rem;
+    transition: all 0.15s;
+    background: var(--bg);
+  }
+
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+
+  .quiz-explain {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 8px;
+    display: none;
+  }
+
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+
+  .summary-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.82rem;
+  }
+
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .practice-task-header {
+    padding: 12px 16px;
+    background: #d2940015;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--accent5);
+  }
+
+  .practice-task-body { padding: 16px; }
+
+  .solution-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--accent2);
+    margin-top: 10px;
+    transition: all 0.15s;
+  }
+
+  .solution-toggle:hover { background: var(--surface2); }
+
+  .solution-box {
+    margin-top: 10px;
+    display: none;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .solution-box.show { display: block; }
+
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    justify-content: space-between;
+  }
+
+  .nav-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  .test-question {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
+  .test-result {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+  }
+
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+
+  .score-chip {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Data Engineering Handbook Tutorial</h1>
+  <p>Tuần 16 · Apache Spark cho Data Engineer (Production Mindset)</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 3 · Cloud + Big Data</span>
+    <span class="badge badge-orange">Spark optimization thực chiến</span>
+    <span class="badge badge-blue">Portfolio-grade artifact</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương trình Tuần 16</div>
+    <div class="level-label l3">TUẦN 16 · APACHE SPARK</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W16.01</span>Tổng Quan: Vì Sao Cần Spark?</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W16.02</span>Architecture: Driver, Executor, Shuffle</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W16.03</span>Data Model & Execution Mindset</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W16.04</span>Join Strategies & Shuffle Optimization</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W16.05</span>Partitioning, Bucketing, File Layout</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W16.06</span>Cache, Spark UI, Debug Bottleneck</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W16.07</span>Unit Testing Spark Jobs</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W16.08</span>Artifact: spark_jobs/</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W16.09</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="m0">
+      <div class="module-header">
+        <div class="module-tag">Tuần 16 · W16.01</div>
+        <div class="module-title">Tổng Quan: Vì Sao Cần Apache Spark?</div>
+        <div class="module-subtitle">Hiểu đúng bài toán Spark giải quyết và khi nào Spark là overkill</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:11%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <tr><th>Phần</th><th>Nội dung</th><th>Kết quả cần đạt</th></tr>
+            <tr><td>Bài toán</td><td>Vì sao pandas/SQL không đủ ở quy mô lớn</td><td>Biết điều kiện kích hoạt Spark</td></tr>
+            <tr><td>Mindset</td><td>Distributed processing thay vì single-machine</td><td>Đổi cách nghĩ trước khi code</td></tr>
+            <tr><td>Use case DE</td><td>ETL nặng, backfill lịch sử, join lớn, aggregation lớn</td><td>Gắn Spark với công việc DE thực tế</td></tr>
+            <tr><td>Trade-off</td><td>Khi Spark là đúng tool, khi Spark là overkill</td><td>Tránh dùng Spark theo phong trào</td></tr>
+            <tr><td>Tích hợp stack</td><td>Vai trò Spark với warehouse, dbt, Airflow</td><td>Xây bức tranh pipeline end-to-end</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <ul>
+            <li>Hiểu <strong>lý do kinh tế kỹ thuật</strong> khiến Spark tồn tại, thay vì chỉ nhớ định nghĩa.</li>
+            <li>Biết phân biệt workload phù hợp Spark và workload nên giữ ở SQL warehouse hoặc pandas.</li>
+            <li>Nắm output kỳ vọng tuần 16 để chuẩn bị artifact tuyển dụng cuối tuần.</li>
+          </ul>
+          <div class="info-box note">📌 <span>Spark là hệ thống distributed data processing. Giá trị của Spark nằm ở quyết định kiến trúc và tối ưu chi phí chạy job, không nằm ở việc gọi nhiều API.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <h3>1) Spark sinh ra để xử lý workload nào?</h3>
+          <p>Khi dữ liệu vượt khả năng RAM của một máy hoặc khi join/aggregation có chi phí quá lớn trên một node đơn, bạn cần xử lý phân tán. Spark chia công việc ra nhiều executor để chạy song song và gom kết quả.</p>
+
+          <h3>2) Khi nào pandas / SQL đơn thuần không đủ?</h3>
+          <table>
+            <tr><th>Tình huống</th><th>Dấu hiệu</th><th>Hướng phù hợp</th></tr>
+            <tr><td>Pandas local</td><td>OOM khi đọc file lớn, runtime hàng giờ</td><td>Chuyển sang Spark DataFrame</td></tr>
+            <tr><td>Warehouse SQL</td><td>Chi phí query ad-hoc quá cao cho backfill lặp lại</td><td>Dùng Spark job có logic tối ưu rõ</td></tr>
+            <tr><td>Backfill lịch sử</td><td>Cần chạy theo partition 2-3 năm dữ liệu</td><td>Spark + partition-aware writes</td></tr>
+          </table>
+
+          <h3>3) Spark trong hệ sinh thái DE</h3>
+          <ul>
+            <li><strong>Airflow</strong> orchestration: khi nào chạy Spark job, retry, SLA.</li>
+            <li><strong>dbt</strong> modeling ở warehouse: transform SQL có test trong lớp curated.</li>
+            <li><strong>Spark</strong> xử lý nặng: historical backfill, large joins, pre-aggregation.</li>
+            <li><strong>Warehouse</strong> phục vụ BI/query tiêu thụ downstream.</li>
+          </ul>
+
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Pipeline mindset</span></div>
+            <div class="cmd-body"><pre><span class="comment"># Spark không thay thế toàn bộ stack</span>
+Raw ingest → Spark (heavy transform/backfill) → Curated table → dbt marts → BI
+<span class="comment"># Airflow điều phối, Spark xử lý nặng, dbt chuẩn hóa semantic layer</span></pre></div>
+          </div>
+
+          <h3>4) Khi Spark là overkill</h3>
+          <ul>
+            <li>Dữ liệu vài trăm MB và workload chạy 1-2 phút trong SQL/pandas.</li>
+            <li>Team chưa có monitoring/logging/runbook, nhưng cố chạy cluster lớn.</li>
+            <li>Job chỉ làm filter đơn giản, không cần distributed compute.</li>
+          </ul>
+
+          <div class="info-box warn">⚠️ <span>Anti-pattern: dùng Spark chỉ vì “big data trend”. Kết quả thường là chi phí cluster tăng nhưng latency/độ ổn định không cải thiện.</span></div>
+
+          <h3>5) Week outcomes checklist</h3>
+          <ul>
+            <li>Giải thích được Driver/Executor/Stage/Task/Shuffle bằng ví dụ thật.</li>
+            <li>Ra quyết định join strategy theo kích thước data thay vì cảm tính.</li>
+            <li>Đọc Spark UI để tìm bottleneck thay vì đoán mò.</li>
+            <li>Có artifact <code>spark_jobs/</code> với test chạy được.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div>
+        <div class="section-content"><div id="quiz-m0"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>Bản chất Spark</strong>Distributed processing engine cho workload lớn</div>
+            <div class="summary-item"><strong>Không phải mặc định</strong>Spark không luôn tốt hơn SQL/pandas</div>
+            <div class="summary-item"><strong>Use case mạnh</strong>Backfill nặng, join lớn, agg lớn</div>
+            <div class="summary-item"><strong>Stack đúng</strong>Airflow điều phối, Spark compute, dbt semantic</div>
+            <div class="summary-item"><strong>Trọng tâm tuần</strong>Trade-off, hiệu năng, debugging, testing</div>
+            <div class="summary-item"><strong>Đầu ra</strong>Artifact tuyển dụng có before/after thinking</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div>
+        <div class="section-content" style="display:none">
+          <div class="practice-task">
+            <div class="practice-task-header">Architecture reasoning task · Chọn đúng engine</div>
+            <div class="practice-task-body">
+              <p>Team có 2 workload: (1) join 1.2TB clickstream với dimension 80GB mỗi ngày; (2) báo cáo ad-hoc 3 triệu dòng theo tháng. Hãy quyết định workload nào chạy Spark, workload nào để warehouse SQL và nêu lý do chi phí/độ trễ.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <ul>
+                  <li>(1) nên chạy Spark: dữ liệu lớn, join nặng, cần phân tán.</li>
+                  <li>(2) nên để warehouse SQL: kích thước vừa, dễ vận hành, latency thấp hơn.</li>
+                  <li>Mindset đúng: tối ưu tổng thể hệ thống, không ép mọi workload vào Spark.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons"><div></div><button class="nav-btn primary" onclick="goNext(0)">Sang W16.02</button></div>
+    </div>
+
+    <div class="module" id="m1">
+      <div class="module-header">
+        <div class="module-tag">Tuần 16 · W16.02</div>
+        <div class="module-title">Spark Architecture: Driver, Executor, Stage, Task, Shuffle</div>
+        <div class="module-subtitle">Hiểu cách job đi qua DAG và vì sao shuffle là điểm đắt đỏ nhất</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:22%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Thành phần</th><th>Vai trò</th><th>Rủi ro nếu hiểu sai</th></tr>
+          <tr><td>Driver</td><td>Lập plan, điều phối task</td><td>Driver OOM khi collect dữ liệu lớn</td></tr>
+          <tr><td>Executor</td><td>Chạy task, giữ cache/shuffle data</td><td>Memory pressure, spill ra disk</td></tr>
+          <tr><td>Stage/Task</td><td>Đơn vị thực thi theo DAG</td><td>Tuning mù nếu không đọc stage boundary</td></tr>
+          <tr><td>Shuffle</td><td>Redistribute dữ liệu qua network</td><td>Network + disk I/O tăng mạnh</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Nắm được luồng chạy Spark job ở mức hệ thống.</li>
+          <li>Phân biệt <strong>narrow transformation</strong> và <strong>wide transformation</strong> bằng trực giác dữ liệu di chuyển.</li>
+          <li>Biết vì sao shuffle đắt: memory + network + disk.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>1) Cách job chạy ở mức cao</h3>
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Execution flow</span></div>
+          <div class="cmd-body"><pre>Driver nhận code → build logical plan → DAG scheduler tách stages
+→ Task scheduler gửi tasks cho executors → executors chạy và trả result/metrics</pre></div>
+        </div>
+
+        <h3>2) DAG planning và stage boundary</h3>
+        <p>Transformations như <code>select</code>, <code>filter</code> thường là narrow. Các bước như <code>groupBy</code>, <code>join</code> (không broadcast) tạo wide dependency, gây shuffle và mở stage mới.</p>
+
+        <h3>3) Vì sao shuffle đắt?</h3>
+        <ul>
+          <li>Dữ liệu phải serialize, truyền qua network giữa executors.</li>
+          <li>Intermediate data có thể spill xuống disk khi thiếu memory.</li>
+          <li>Tạo nhiều file shuffle nhỏ gây overhead đọc/ghi lớn.</li>
+        </ul>
+
+        <table>
+          <tr><th>Chi phí</th><th>Nguồn gốc</th><th>Tác động</th></tr>
+          <tr><td>Memory</td><td>Sort/aggregation buffer</td><td>GC tăng, spill</td></tr>
+          <tr><td>Network</td><td>Exchange dữ liệu giữa partitions</td><td>Stage kéo dài</td></tr>
+          <tr><td>Disk</td><td>Shuffle spill files</td><td>I/O bottleneck</td></tr>
+        </table>
+
+        <h3>4) Driver OOM vs Executor OOM (phân biệt để xử lý đúng)</h3>
+        <table>
+          <tr><th>Loại OOM</th><th>Dấu hiệu thường gặp</th><th>Nguyên nhân hay gặp</th><th>Hướng xử lý thực tế</th></tr>
+          <tr><td>Driver OOM</td><td>Job fail khi <code>collect()</code>/<code>toPandas()</code> dataset lớn</td><td>Kéo quá nhiều dữ liệu về 1 máy driver</td><td>Giữ dữ liệu ở cluster, chỉ lấy sample nhỏ; xuất kết quả ra storage thay vì collect toàn bộ</td></tr>
+          <tr><td>Executor OOM</td><td>Task fail ở stage join/groupBy, spill tăng mạnh</td><td>Skew nặng, partition quá to, memory per task không đủ</td><td>Giảm skew/shuffle, tune partition size, và cấu hình memory + overhead hợp lý theo YARN/K8s</td></tr>
+        </table>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: bàn về Spark performance mà không định lượng shuffle cost. Đây là sai lầm phổ biến nhất ở tutorial beginner.</span></div>
+
+        <h3>5) Narrow vs wide trực giác nhanh</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>PySpark intuition</span></div><div class="cmd-body"><pre><span class="comment"># Narrow: dữ liệu ở lại trong partition hiện tại</span>
+df1 = df.select("user_id", "event_time").filter("event_time is not null")
+
+<span class="comment"># Wide: cần gom/chia lại dữ liệu theo key</span>
+df2 = df.groupBy("user_id").count()  <span class="comment"># shuffle</span>
+df3 = df.join(dim_users, "user_id")  <span class="comment"># thường shuffle</span></pre></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m1"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Driver</strong>Lập kế hoạch và điều phối công việc</div>
+        <div class="summary-item"><strong>Executor</strong>Chạy task và giữ dữ liệu trung gian</div>
+        <div class="summary-item"><strong>Stage boundary</strong>Thường xuất hiện ở wide transformation</div>
+        <div class="summary-item"><strong>Shuffle cost</strong>Memory + network + disk cùng tăng</div>
+        <div class="summary-item"><strong>Tư duy đúng</strong>Đọc DAG trước khi tuning tham số</div>
+        <div class="summary-item"><strong>Mục tiêu</strong>Giảm dữ liệu phải shuffle</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Shuffle diagnosis task · Vẽ stage boundary</div><div class="practice-task-body">
+          <p>Cho pipeline: read parquet → filter country='VN' → select 6 cột → groupBy(user_id).agg(sum(revenue)) → join dim_users → write parquet. Hãy đánh dấu bước nào có khả năng tạo shuffle và giải thích.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul>
+            <li><code>filter</code>, <code>select</code> thường là narrow, chưa cần shuffle.</li>
+            <li><code>groupBy(user_id)</code> tạo shuffle để gom key.</li>
+            <li><code>join dim_users</code> có thể shuffle (trừ khi broadcast được dim).</li>
+            <li>Tư duy ưu tiên: giảm dữ liệu trước groupBy/join để giảm shuffle volume.</li>
+          </ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(1)">Quay lại W16.01</button><button class="nav-btn primary" onclick="goNext(1)">Sang W16.03</button></div>
+    </div>
+
+    <div class="module" id="m2">
+      <div class="module-header">
+        <div class="module-tag">Tuần 16 · W16.03</div>
+        <div class="module-title">Data Model & Execution Mindset</div>
+        <div class="module-subtitle">RDD vs DataFrame vs Dataset, transformations/actions, lazy evaluation, lineage</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Chủ đề</th><th>Ý chính</th><th>Quy tắc thực chiến</th></tr>
+          <tr><td>RDD</td><td>Low-level, flexible nhưng verbose</td><td>Dùng khi cần control đặc biệt</td></tr>
+          <tr><td>DataFrame</td><td>Schema-aware, optimize tốt</td><td>Default cho đa số DE jobs</td></tr>
+          <tr><td>Dataset</td><td>Typed API mạnh ở Scala</td><td>PySpark thường không dùng Dataset typed</td></tr>
+          <tr><td>Lazy evaluation</td><td>Transformations chưa chạy ngay</td><td>Action mới kích hoạt execution</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Hiểu vì sao DataFrame là lựa chọn mặc định cho Data Engineer.</li>
+          <li>Biết cách đọc lineage và dự đoán chi phí trước khi chạy action.</li>
+          <li>Tránh 2 anti-pattern nguy hiểm: <code>collect()</code> lớn và UDF mù quáng.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>1) RDD vs DataFrame vs Dataset</h3>
+        <table>
+          <tr><th>Tiêu chí</th><th>RDD</th><th>DataFrame</th><th>Dataset (Scala)</th></tr>
+          <tr><td>Schema</td><td>Không bắt buộc</td><td>Có schema rõ</td><td>Typed schema</td></tr>
+          <tr><td>Optimizer</td><td>Hạn chế</td><td>Catalyst + Tungsten</td><td>Catalyst + typed safety</td></tr>
+          <tr><td>Dễ dùng cho DE</td><td>Trung bình</td><td>Cao</td><td>Cao khi team Scala</td></tr>
+        </table>
+
+        <h3>2) DataFrame default choice cho DE</h3>
+        <ul>
+          <li>API declarative, dễ review và dễ tối ưu.</li>
+          <li>Built-in functions phong phú, giảm cần UDF.</li>
+          <li>Catalyst optimizer tự chọn physical plan tốt hơn code low-level thủ công trong đa số case.</li>
+          <li>Khi đọc Parquet/ORC, Spark có thể tận dụng <strong>predicate pushdown</strong> và <strong>vectorized reader</strong> để tránh đọc dữ liệu thừa, đặc biệt hiệu quả với bảng lớn.</li>
+        </ul>
+
+        <h3>3) Transformations vs Actions + lazy evaluation</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>PySpark example</span></div><div class="cmd-body"><pre>from pyspark.sql import functions as F
+
+prepared = (
+    raw_df
+    .filter(F.col("event_date") >= F.lit("2026-01-01"))
+    .select("user_id", "event_date", "amount")
+    .withColumn("amount_usd", F.col("amount") / F.lit(25000))
+)
+
+<span class="comment"># Chưa chạy gì đến đây (lazy)</span>
+prepared.write.mode("overwrite").partitionBy("event_date").parquet("/curated/orders")
+<span class="comment"># Action write mới kích hoạt DAG execution</span></pre></div></div>
+
+        <h3>4) Lineage và debugging</h3>
+        <p>Lineage cho bạn biết dữ liệu đã đi qua những bước nào. Khi job sai kết quả hoặc chậm, hãy quay lại lineage để xem bước nào phình dữ liệu hoặc tạo shuffle không cần thiết.</p>
+
+        <h3>5) Anti-patterns phải tránh</h3>
+        <div class="info-box warn">⚠️ <span><strong>collect() dataset lớn lên driver</strong> có thể làm driver OOM. Chỉ collect sample nhỏ hoặc metric nhỏ.</span></div>
+        <div class="info-box warn">⚠️ <span><strong>Dùng Python UDF bừa bãi</strong> làm giảm khả năng optimize/vectorize. Ưu tiên built-in functions trước.</span></div>
+
+        <div class="cmd-block"><div class="cmd-header"><span>Bad vs better</span></div><div class="cmd-body"><pre><span class="comment"># Bad: collect full table</span>
+rows = df.collect()
+
+<span class="comment"># Better: lấy sample nhỏ để inspect</span>
+sample_rows = df.limit(20).toPandas()
+
+<span class="comment"># Better cho transform: built-in thay vì UDF khi có thể</span>
+df2 = df.withColumn("domain", F.regexp_extract("email", "@(.+)$", 1))</pre></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m2"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Default model</strong>DataFrame cho đa số Spark ETL</div>
+        <div class="summary-item"><strong>Lazy execution</strong>Action mới thực sự chạy DAG</div>
+        <div class="summary-item"><strong>Lineage</strong>Dùng để debug logic và performance</div>
+        <div class="summary-item"><strong>Catalyst</strong>Tạo lợi thế optimize rõ rệt</div>
+        <div class="summary-item"><strong>Tránh collect lớn</strong>Giữ driver an toàn</div>
+        <div class="summary-item"><strong>Tránh UDF mù</strong>Ưu tiên built-in function</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Execution mindset task · Dự đoán action</div><div class="practice-task-body">
+          <p>Đọc đoạn code Spark có 6 transformations và 2 actions (<code>count()</code>, <code>write()</code>). Hãy chỉ ra thời điểm cluster thực thi, và action nào có thể trigger full scan.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Transformations chưa chạy ngay. <code>count()</code> và <code>write()</code> đều là action, đều có thể đọc toàn bộ lineage nếu không cache hoặc không có pruning hợp lệ.</p>
+          </div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(2)">Quay lại W16.02</button><button class="nav-btn primary" onclick="goNext(2)">Sang W16.04</button></div>
+    </div>
+
+    <div class="module" id="m3">
+      <div class="module-header">
+        <div class="module-tag">Tuần 16 · W16.04</div>
+        <div class="module-title">Join Strategies & Shuffle Optimization</div>
+        <div class="module-subtitle">Broadcast Join, Sort-Merge Join, Shuffle Hash Join và quyết định theo kích thước</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:44%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Join type</th><th>Khi nào phù hợp</th><th>Lưu ý</th></tr>
+          <tr><td>Broadcast Join</td><td>Dim nhỏ, fact lớn</td><td>Quan sát <code>spark.sql.autoBroadcastJoinThreshold</code> (mặc định thường 10MB)</td></tr>
+          <tr><td>Sort-Merge Join</td><td>Hai bảng lớn, key join rõ</td><td>Chi phí sort + shuffle cao</td></tr>
+          <tr><td>Shuffle Hash Join</td><td>Một số cluster/config cho phép</td><td>Nhạy với memory phân vùng</td></tr>
+          <tr><td>Skew handling</td><td>Key lệch nặng</td><td>Cần salting/split strategy hoặc AQE skew optimization</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Ra quyết định join theo <strong>data size</strong>, <strong>key distribution</strong>, và <strong>resource</strong>.</li>
+          <li>Giảm shuffle bằng pre-aggregation, projection cột cần thiết, và partition strategy hợp lý.</li>
+          <li>Nhận diện anti-pattern “join bảng rộng mù quáng”.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>1) Broadcast Join</h3>
+        <p>Dùng khi một bảng đủ nhỏ để gửi đến tất cả executors. Fact giữ nguyên partition, dim được broadcast nên giảm shuffle lớn ở fact side.</p>
+        <p>Thực tế production cần kiểm tra <code>spark.sql.autoBroadcastJoinThreshold</code> (thường mặc định ~10MB). Nếu dim vượt ngưỡng, Spark có thể không broadcast trừ khi bạn hint hoặc tune config.</p>
+        <div class="cmd-block"><div class="cmd-header"><span>Broadcast join example</span></div><div class="cmd-body"><pre>from pyspark.sql import functions as F
+
+fact = spark.read.parquet("/raw/orders")           <span class="comment"># ~2TB/day, ~10B rows</span>
+dim  = spark.read.parquet("/raw/customers_dim")    <span class="comment"># ~8MB sau khi select cột cần thiết</span>
+
+result = fact.join(F.broadcast(dim.select("customer_id", "segment")), "customer_id", "left")</pre></div></div>
+
+        <h3>2) Sort-Merge Join</h3>
+        <p>Khi cả hai bảng đều lớn, Spark thường chọn sort-merge join. Nó cần sắp xếp key ở hai phía và shuffle dữ liệu theo key join.</p>
+
+        <h3>3) Shuffle Hash Join</h3>
+        <p>Có thể xuất hiện tùy plan/config. Ưu điểm là bỏ bớt sort trong một số tình huống, nhưng rủi ro memory cao nếu partition không cân bằng.</p>
+
+        <h3>4) Giảm shuffle trong thực tế</h3>
+        <ul>
+          <li><strong>Pre-aggregation</strong>: giảm số dòng trước join.</li>
+          <li><strong>Select cột cần thiết</strong>: giảm width của row.</li>
+          <li><strong>Filter sớm</strong>: cắt bớt dữ liệu đầu vào join.</li>
+        </ul>
+
+        <div class="cmd-block"><div class="cmd-header"><span>Pre-aggregation before join</span></div><div class="cmd-body"><pre>daily_orders = (
+    fact_orders
+    .filter("order_date >= '2026-01-01'")
+    .groupBy("customer_id", "order_date")
+    .agg(F.sum("amount").alias("daily_amount"))
+)
+
+joined = daily_orders.join(F.broadcast(dim_customers.select("customer_id", "region")), "customer_id")</pre></div></div>
+
+        <h3>5) AQE trong Spark 3.x (bắt buộc phải biết)</h3>
+        <p>Adaptive Query Execution (AQE) cho phép Spark tối ưu lại plan ở runtime: coalesce shuffle partitions, xử lý skew join tốt hơn, và trong một số case có thể đổi strategy join khi thống kê runtime cho thấy bảng đủ nhỏ để broadcast.</p>
+        <div class="info-box note">📌 <span>Khi tune Spark 3.x, luôn kiểm tra AQE đang bật và quan sát plan thực tế trong SQL tab. AQE rất mạnh nhưng không thay thế hoàn toàn data modeling và join design.</span></div>
+
+        <h3>6) Skewed join và salting code mẫu</h3>
+        <p>Nếu một key chiếm quá nhiều dòng (ví dụ <code>country='US'</code> chiếm 70%), một vài tasks sẽ chạy lâu bất thường. Đây là skew. Cách xử lý gồm salting key hoặc tách path xử lý key nóng.</p>
+
+        <div class="cmd-block"><div class="cmd-header"><span>Manual salting cho skew join</span></div><div class="cmd-body"><pre>from pyspark.sql import functions as F
+
+salt_buckets = 16
+
+fact_salted = (
+    fact_orders                                     <span class="comment"># ~2TB/day</span>
+    .withColumn("salt", (F.rand(seed=42) * salt_buckets).cast("int"))
+)
+
+dim_expanded = (
+    dim_customers                                   <span class="comment"># bảng nhỏ hơn, có thể nhân bản theo salt</span>
+    .withColumn("salt", F.explode(F.array(*[F.lit(i) for i in range(salt_buckets)])))
+)
+
+joined = fact_salted.join(
+    dim_expanded,
+    on=["customer_id", "salt"],
+    how="left"
+).drop("salt")</pre></div></div>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: join hai bảng cực rộng (nhiều cột) rồi mới filter. Bạn đang shuffle cả dữ liệu không dùng tới.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m3"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Broadcast join</strong>Tốt khi dim nhỏ đủ an toàn để broadcast</div>
+        <div class="summary-item"><strong>Sort-merge join</strong>Phổ biến khi hai bảng đều lớn</div>
+        <div class="summary-item"><strong>Size-based thinking</strong>Kích thước data quyết định chiến lược</div>
+        <div class="summary-item"><strong>Skew awareness</strong>Task chậm bất thường thường do key lệch</div>
+        <div class="summary-item"><strong>Giảm shuffle</strong>Filter, project, pre-aggregate sớm</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Join bảng rộng không chọn cột</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Join strategy decision task</div><div class="practice-task-body">
+          <p>Bảng fact: 900GB, dim_product: 120MB, dim_store: 2.5GB. Hãy đề xuất strategy cho từng join và lý do.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul>
+            <li><code>fact ⨝ dim_product</code>: broadcast join hợp lý (120MB, cần kiểm tra threshold/cluster memory).</li>
+            <li><code>fact ⨝ dim_store</code>: thường sort-merge/shuffle hash tùy plan vì 2.5GB khó broadcast an toàn.</li>
+            <li>Trước cả hai join: filter cột và pre-aggregate để giảm shuffle volume.</li>
+          </ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">Quay lại W16.03</button><button class="nav-btn primary" onclick="goNext(3)">Sang W16.05</button></div>
+    </div>
+
+    <div class="module" id="m4">
+      <div class="module-header">
+        <div class="module-tag">Tuần 16 · W16.05</div>
+        <div class="module-title">Partitioning, Bucketing, sortWithinPartitions & File Layout</div>
+        <div class="module-subtitle">Thiết kế layout dữ liệu để giảm chi phí đọc/ghi và tối ưu downstream query</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Chủ đề</th><th>Nội dung</th><th>Mục tiêu</th></tr>
+        <tr><td>repartition vs coalesce</td><td>Tăng/giảm partition chủ động</td><td>Kiểm soát parallelism và small files</td></tr>
+        <tr><td>partitionBy</td><td>Layout file khi write</td><td>Giúp pruning downstream</td></tr>
+        <tr><td>bucketing</td><td>Hash bucket theo key</td><td>Tối ưu join lặp lại</td></tr>
+        <tr><td>sortWithinPartitions</td><td>Sort cục bộ theo partition</td><td>Giảm global sort cost</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Thiết kế partition column theo truy vấn thật, không theo cảm giác.</li>
+        <li>Hiểu trade-off bucketing: lợi ích join lặp lại vs chi phí maintain.</li>
+        <li>Biết tránh bẫy high-cardinality partition và bùng nổ file nhỏ.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>1) repartition vs coalesce</h3>
+        <ul>
+          <li><code>repartition(n, key)</code>: có shuffle, dùng khi cần phân phối lại dữ liệu rõ ràng.</li>
+          <li><code>coalesce(n)</code>: giảm partition với ít shuffle hơn, phù hợp khi giảm số file trước write.</li>
+        </ul>
+
+        <h3>2) partitionBy khi ghi file + bẫy mặc định 200 partitions</h3>
+        <p><code>spark.sql.shuffle.partitions</code> mặc định thường là 200. Đây không phải con số “đúng cho mọi workload”. Với data lớn (hàng trăm GB đến TB), để default mù quáng có thể gây task quá nặng hoặc quá nhiều file nhỏ tùy pipeline.</p>
+        <p>Heuristic đơn giản: nhắm kích thước output partition khoảng <strong>128MB-256MB</strong> rồi suy ra số partition ban đầu, sau đó đo lại qua Spark UI.</p>
+        <div class="cmd-block"><div class="cmd-header"><span>Write with partitionBy</span></div><div class="cmd-body"><pre>(
+  transformed_df                                  <span class="comment"># ~2.8TB / 18 tháng dữ liệu giao dịch</span>
+  .repartition(1200, "event_date")               <span class="comment"># ví dụ tune theo target 128-256MB/partition</span>
+  .write
+  .mode("overwrite")
+  .partitionBy("event_date")
+  .parquet("s3://de-curated/events")
+)</pre></div></div>
+
+        <h3>3) Chọn partition column như thế nào?</h3>
+        <table>
+          <tr><th>Tiêu chí</th><th>Nên</th><th>Không nên</th></tr>
+          <tr><td>Cardinality</td><td>Thấp-vừa (vd: date, region)</td><td>Rất cao (user_id, transaction_id)</td></tr>
+          <tr><td>Query pattern</td><td>Hay filter theo cột đó</td><td>Hiếm khi filter</td></tr>
+          <tr><td>Growth</td><td>Có thể kiểm soát số partition theo thời gian</td><td>Bùng nổ thư mục/file</td></tr>
+        </table>
+
+        <h3>4) Bucketing và sortWithinPartitions</h3>
+        <p>Bucketing hữu ích khi join lặp lại trên cùng key trong workload ổn định. Đổi lại, pipeline ghi dữ liệu phức tạp hơn và chi phí vận hành tăng.</p>
+
+        <div class="cmd-block"><div class="cmd-header"><span>sortWithinPartitions vs sort global</span></div><div class="cmd-body"><pre>from pyspark.sql import functions as F
+
+optimized = (
+    df.repartition(80, F.col("event_date"))
+      .sortWithinPartitions(F.col("event_date"), F.col("host"))
+)
+<span class="comment"># sortWithinPartitions: sort cục bộ, nhẹ hơn global sort nhiều trường hợp</span></pre></div></div>
+
+        <h3>5) File layout cho downstream engines</h3>
+        <ul>
+          <li>Giữ file size mục tiêu ổn định (ví dụ 128MB-512MB tùy platform).</li>
+          <li>Tránh quá nhiều small files gây overhead metadata và scan.</li>
+          <li>Đồng bộ partition strategy với cách BI/warehouse query thực tế.</li>
+          <li>Ưu tiên Parquet/ORC để tận dụng <strong>predicate pushdown</strong> và <strong>vectorized reader</strong>, giúp giảm bytes đọc từ storage.</li>
+          <li>Nếu dùng Delta Lake/Iceberg, lên kế hoạch compaction/OPTIMIZE định kỳ để kiểm soát small files dài hạn.</li>
+        </ul>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: partition theo cột high-cardinality mà không có nhu cầu filter tương ứng. Hậu quả: hàng triệu file nhỏ, query chậm hơn.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m4"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>repartition</strong>Dùng khi cần phân phối lại dữ liệu rõ ràng</div>
+        <div class="summary-item"><strong>coalesce</strong>Giảm partition để hạn chế file nhỏ</div>
+        <div class="summary-item"><strong>partitionBy</strong>Phục vụ query pruning downstream</div>
+        <div class="summary-item"><strong>Bucketing</strong>Tốt cho join lặp lại nhưng có overhead</div>
+        <div class="summary-item"><strong>sortWithinPartitions</strong>Sort cục bộ, tránh global sort không cần thiết</div>
+        <div class="summary-item"><strong>File layout</strong>Tác động trực tiếp tới chi phí phân tích</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Partition design task</div><div class="practice-task-body">
+          <p>Dataset 2.8TB giao dịch 18 tháng, query chủ yếu theo <code>event_date</code> và <code>country</code>. Hãy đề xuất partition column + mục tiêu số file mỗi ngày.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <ul>
+              <li>Primary partition: <code>event_date</code> vì filter theo ngày là phổ biến nhất.</li>
+              <li><code>country</code> nên cân nhắc là cột thứ hai chỉ khi cardinality vừa và query xuyên quốc gia thường xuyên.</li>
+              <li>Mục tiêu file size ổn định (vd 256MB), dùng compaction để kiểm soát small files.</li>
+            </ul>
+          </div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(4)">Quay lại W16.04</button><button class="nav-btn primary" onclick="goNext(4)">Sang W16.06</button></div>
+    </div>
+
+    <div class="module" id="m5">
+      <div class="module-header">
+        <div class="module-tag">Tuần 16 · W16.06</div>
+        <div class="module-title">Caching, Persistence, Spark UI & Debugging Bottlenecks</div>
+        <div class="module-subtitle">Đọc số liệu thật từ Spark UI để tìm điểm nghẽn thay vì đoán</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Phần</th><th>Nội dung</th><th>Kết quả</th></tr>
+        <tr><td>cache vs persist</td><td>Khi nào dùng và khi nào bỏ</td><td>Không lạm dụng cache</td></tr>
+        <tr><td>Storage level</td><td>MEMORY_ONLY, MEMORY_AND_DISK...</td><td>Chọn theo áp lực tài nguyên</td></tr>
+        <tr><td>Spark UI</td><td>Jobs, Stages, Tasks, SQL, DAG, Environment</td><td>Tìm bottleneck và xác nhận config đã apply</td></tr>
+        <tr><td>Bottleneck signals</td><td>Skew, spill, shuffle lớn, stage chậm</td><td>Đề xuất hành động cụ thể</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Biết khi nào caching thật sự giúp giảm runtime.</li>
+        <li>Đọc Spark UI theo luồng: Jobs → Stage timeline → Task metrics → SQL plan.</li>
+        <li>Xây debugging mindset: <strong>don’t guess, inspect</strong>.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>1) cache vs persist</h3>
+        <ul>
+          <li><code>cache()</code> mặc định tương đương <code>persist(MEMORY_AND_DISK)</code> trong nhiều bối cảnh DataFrame API.</li>
+          <li><code>persist(level)</code> cho phép chọn storage level chi tiết hơn.</li>
+          <li>Cache chỉ đáng khi dataframe được reuse nhiều lần trong cùng job/workflow.</li>
+        </ul>
+
+        <div class="cmd-block"><div class="cmd-header"><span>Cache đúng ngữ cảnh</span></div><div class="cmd-body"><pre>from pyspark import StorageLevel
+
+base = spark.read.parquet("/raw/events").filter("event_date >= '2026-01-01'")
+base = base.persist(StorageLevel.MEMORY_AND_DISK)
+
+kpi1 = base.groupBy("country").count()
+kpi2 = base.groupBy("device_type").agg({"revenue": "sum"})
+
+kpi1.write.mode("overwrite").parquet("/tmp/kpi1")
+kpi2.write.mode("overwrite").parquet("/tmp/kpi2")
+base.unpersist()</pre></div></div>
+
+        <h3>2) Khi caching gây hại</h3>
+        <ul>
+          <li>Cache dataframe quá lớn nhưng chỉ dùng một lần.</li>
+          <li>Cache quá nhiều dataset khiến executor memory pressure tăng và spill nhiều hơn.</li>
+        </ul>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: cache mọi dataframe “cho chắc”. Đây là cách nhanh nhất để làm cluster chậm đi.</span></div>
+
+        <h3>3) Spark UI đọc từ đâu?</h3>
+        <table>
+          <tr><th>Tab</th><th>Xem gì</th><th>Dùng để quyết định gì</th></tr>
+          <tr><td>Jobs</td><td>Job nào lâu nhất</td><td>Ưu tiên tối ưu khu vực nào</td></tr>
+          <tr><td>Stages</td><td>Stage runtime, shuffle read/write, spill</td><td>Xác định stage nghẽn</td></tr>
+          <tr><td>Tasks</td><td>Task chậm bất thường, skew</td><td>Kiểm tra key lệch</td></tr>
+          <tr><td>SQL</td><td>Physical plan, join type</td><td>Xác minh strategy thật sự được dùng</td></tr>
+          <tr><td>DAG</td><td>Stage boundary</td><td>Nhìn nhanh điểm shuffle</td></tr>
+          <tr><td>Environment</td><td>Danh sách Spark configs thực tế đang chạy</td><td>Xác nhận tune như <code>spark.sql.shuffle.partitions</code> đã apply thật</td></tr>
+        </table>
+
+        <h3>4) Bottleneck đọc như thế nào?</h3>
+        <ul>
+          <li><strong>Skew</strong>: vài task chạy lâu vượt trội phần còn lại.</li>
+          <li><strong>Large shuffle</strong>: shuffle read/write tăng đột biến.</li>
+          <li><strong>Spill</strong>: memory không đủ, spill to disk cao.</li>
+          <li><strong>Slow stages</strong>: stage dài bất thường do join/sort nặng.</li>
+          <li><strong>GC pressure</strong>: executor quá nhiều cores/RAM trong 1 process cũng có thể làm GC nặng; thực tế thường bắt đầu với 4-5 cores/executor rồi đo tiếp.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m5"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Cache đúng lúc</strong>Chỉ khi dataframe reuse nhiều lần</div>
+        <div class="summary-item"><strong>Persist level</strong>Chọn theo memory/disk constraints</div>
+        <div class="summary-item"><strong>Spark UI</strong>Nguồn bằng chứng chính khi tối ưu</div>
+        <div class="summary-item"><strong>Skew signal</strong>Một số tasks chậm bất thường</div>
+        <div class="summary-item"><strong>Spill signal</strong>Memory thiếu, disk I/O tăng</div>
+        <div class="summary-item"><strong>Mindset</strong>Không đoán, luôn inspect metrics</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Caching/debugging task · Đọc Spark UI snapshot</div><div class="practice-task-body">
+          <p>Giả sử Stage 7 có shuffle read 480GB, 3/240 tasks chạy gấp 10 lần median, spill cao. Hãy nêu 3 khả năng nguyên nhân và 3 hành động tiếp theo.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul>
+            <li>Khả năng: skew key, join strategy chưa phù hợp, partition size lệch.</li>
+            <li>Hành động: kiểm tra distribution key, thử broadcast/pre-aggregation, tune partitioning trước join.</li>
+            <li>Bổ sung: kiểm tra plan ở SQL tab để xác nhận Spark chọn join gì thực tế.</li>
+          </ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">Quay lại W16.05</button><button class="nav-btn primary" onclick="goNext(5)">Sang W16.07</button></div>
+    </div>
+
+    <div class="module" id="m6">
+      <div class="module-header">
+        <div class="module-tag">Tuần 16 · W16.07</div>
+        <div class="module-title">Unit Testing Spark Jobs & Code Organization</div>
+        <div class="module-subtitle">Tách transform khỏi I/O để test deterministic với fake DataFrame</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:77%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Trụ cột</th><th>Nội dung</th><th>Giá trị</th></tr>
+        <tr><td>Testability</td><td>Tách logic transform khỏi đọc/ghi</td><td>Test nhanh, ổn định</td></tr>
+        <tr><td>Fake DataFrame</td><td>Tạo input nhỏ nhưng đại diện</td><td>Bắt bug logic sớm</td></tr>
+        <tr><td>Assertions</td><td>So sánh schema + dữ liệu kỳ vọng</td><td>Giảm regression</td></tr>
+        <tr><td>Organization</td><td>common/transforms/tests tách rõ</td><td>Dễ maintain dài hạn</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Hiểu tại sao Spark jobs cần test như mọi production code.</li>
+        <li>Áp dụng pattern pytest đơn giản cho transform functions.</li>
+        <li>Tránh anti-pattern chỉ validate thủ công trong notebook.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>1) Tách I/O khỏi business transform</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>transforms.py</span></div><div class="cmd-body"><pre>from pyspark.sql import DataFrame, functions as F
+
+def enrich_orders(df: DataFrame) -> DataFrame:
+    return (
+        df.filter(F.col("amount") > 0)
+          .withColumn("amount_bucket", F.when(F.col("amount") >= 1000, "HIGH").otherwise("LOW"))
+          .select("order_id", "customer_id", "amount_bucket")
+    )</pre></div></div>
+
+        <h3>2) Test với fake DataFrame</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>test_transform_functions.py</span></div><div class="cmd-body"><pre>def test_enrich_orders(spark):
+    input_df = spark.createDataFrame([
+        ("o1", "c1", 1200),
+        ("o2", "c2", 200),
+        ("o3", "c3", -10)
+    ], ["order_id", "customer_id", "amount"])
+
+    actual = enrich_orders(input_df)
+    rows = {(r.order_id, r.amount_bucket) for r in actual.collect()}
+
+    assert rows == {("o1", "HIGH"), ("o2", "LOW")}</pre></div></div>
+
+        <h3>3) Deterministic transformations</h3>
+        <ul>
+          <li>Tránh phụ thuộc timestamp ngẫu nhiên trong test.</li>
+          <li>Nếu cần thời gian, inject clock hoặc fixed literal.</li>
+          <li>Assert cả schema quan trọng, không chỉ row count.</li>
+        </ul>
+
+        <h3>4) Test organization gợi ý</h3>
+        <table>
+          <tr><th>Thư mục</th><th>Nội dung</th></tr>
+          <tr><td>common/</td><td>SparkSession builder, helpers</td></tr>
+          <tr><td>transforms.py</td><td>Pure transformation logic</td></tr>
+          <tr><td>tests/</td><td>Unit test cho transform/join logic</td></tr>
+        </table>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: chỉ chạy notebook và nhìn bằng mắt. Cách này không đủ để chống regression khi refactor.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m6"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Testing cần thiết</strong>Spark job là production code</div>
+        <div class="summary-item"><strong>Tách logic</strong>Pure transform dễ test hơn nhiều</div>
+        <div class="summary-item"><strong>Fake input</strong>Nhỏ nhưng đại diện edge cases</div>
+        <div class="summary-item"><strong>Assertions rõ</strong>So sánh expected output cụ thể</div>
+        <div class="summary-item"><strong>Deterministic</strong>Giảm flaky test</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Không dựa hoàn toàn vào notebook validation</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Test-writing task</div><div class="practice-task-body">
+          <p>Viết test cho hàm chuẩn hóa email domain: input gồm email hợp lệ, email null, email sai format. Yêu cầu assert output và xử lý null an toàn.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Tạo DataFrame nhỏ 4-6 dòng, gọi transform, assert set kết quả mong đợi. Tách trường hợp null/sai format để expected value rõ ràng (vd domain = null).</p></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">Quay lại W16.06</button><button class="nav-btn primary" onclick="goNext(6)">Sang W16.08</button></div>
+    </div>
+
+    <div class="module" id="m7">
+      <div class="module-header">
+        <div class="module-tag">Tuần 16 · W16.08</div>
+        <div class="module-title">Artifact: spark_jobs/ (Portfolio-grade)</div>
+        <div class="module-subtitle">Thiết kế artifact thể hiện tư duy optimization, testing và storytelling kỹ thuật</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Phần</th><th>Bắt buộc</th><th>Giá trị tuyển dụng</th></tr>
+        <tr><td>Code jobs</td><td>Broadcast join, bucket join, optimized agg, sortWithinPartitions</td><td>Thể hiện năng lực tối ưu</td></tr>
+        <tr><td>Common utilities</td><td>Spark session + transforms</td><td>Code organization rõ ràng</td></tr>
+        <tr><td>Tests</td><td>test_transform_functions, test_join_logic</td><td>Production discipline</td></tr>
+        <tr><td>README</td><td>Scenario, assumptions, before/after, lessons learned</td><td>Kể câu chuyện kỹ thuật mạch lạc</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Xây artifact phản ánh đúng roadmap: không demo giả, không ví dụ mơ hồ.</li>
+        <li>Thể hiện khả năng ra quyết định kỹ thuật và kiểm chứng bằng số liệu.</li>
+        <li>Chuẩn bị repo đủ mạnh để nói chuyện phỏng vấn DE mid-senior.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>1) Cấu trúc artifact bắt buộc</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>spark_jobs/</span></div><div class="cmd-body"><pre>spark_jobs/
+├── broadcast_join_job.py
+├── bucket_join_job.py
+├── aggregation_optimized.py
+├── sort_within_partitions.py
+├── common/
+│   ├── spark_session.py
+│   └── transforms.py
+├── tests/
+│   ├── test_transform_functions.py
+│   └── test_join_logic.py
+└── README.md</pre></div></div>
+
+        <h3>2) Nội dung README phải có</h3>
+        <ul>
+          <li>Workload scenario (nguồn dữ liệu, loại bài toán).</li>
+          <li>Data size assumptions (ví dụ fact 800GB/day, dim 200MB).</li>
+          <li>Kỹ thuật tối ưu đã chọn và vì sao chọn.</li>
+          <li>Before/after thinking (runtime, shuffle, file layout).</li>
+          <li>Test strategy với fake DataFrame.</li>
+          <li>Lessons learned: điều gì không làm lại nếu build lần hai.</li>
+        </ul>
+
+        <h3>3) Ví dụ storytelling before/after</h3>
+        <table>
+          <tr><th>Trước</th><th>Sau</th><th>Tác động</th></tr>
+          <tr><td>Join 2 bảng rộng trực tiếp</td><td>Pre-aggregate + broadcast dim nhỏ</td><td>Giảm shuffle và runtime</td></tr>
+          <tr><td>Write không partition strategy</td><td>partitionBy(event_date) + compaction</td><td>Downstream query nhanh hơn</td></tr>
+          <tr><td>Không test transform</td><td>Pytest cho core transforms</td><td>Giảm bug khi refactor</td></tr>
+        </table>
+
+        <div class="info-box tip">✅ <span>Artifact recruiter-grade không cần hoành tráng. Quan trọng là quyết định kỹ thuật có lý do và có bằng chứng đo được.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m7"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Artifact scope</strong>Đủ 4 jobs + common + tests + README</div>
+        <div class="summary-item"><strong>Điểm mạnh</strong>Trade-off và reasoning rõ</div>
+        <div class="summary-item"><strong>Before/after</strong>Phải có số liệu hoặc mô tả đo được</div>
+        <div class="summary-item"><strong>Testing</strong>Không bỏ qua unit tests</div>
+        <div class="summary-item"><strong>Storytelling</strong>Giải thích được tại sao chọn kỹ thuật</div>
+        <div class="summary-item"><strong>Mục tiêu</strong>Đủ sâu để thảo luận trong interview</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Portfolio planning task</div><div class="practice-task-body">
+          <p>Viết skeleton README 8-10 dòng cho <code>spark_jobs/</code> gồm: scenario, data size assumptions, 3 optimization decisions, test strategy, lessons learned.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>README nên có cấu trúc: Context → Data assumptions → Optimization choices → Validation (Spark UI + tests) → Outcome & trade-offs.</p></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">Quay lại W16.07</button><button class="nav-btn primary" onclick="goNext(7)">Sang W16.09</button></div>
+    </div>
+
+    <div class="module" id="m8">
+      <div class="module-header">
+        <div class="module-tag">Tuần 16 · W16.09</div>
+        <div class="module-title">Mini Test Tổng Kết</div>
+        <div class="module-subtitle">20 câu kiểm tra toàn diện: architecture, joins, shuffle, partitioning, caching, Spark UI, testing</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Phần</th><th>Nội dung</th><th>Mục tiêu</th></tr>
+        <tr><td>Review quiz</td><td>10 câu ôn tập nhanh module cuối</td><td>Củng cố mindset trước mini test</td></tr>
+        <tr><td>Final mini test</td><td>20 câu trắc nghiệm 4 lựa chọn</td><td>Đo mức readiness thực chiến</td></tr>
+        <tr><td>Result guidance</td><td>Chấm điểm + gợi ý học lại</td><td>Biết vùng yếu cần bổ sung</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Tự đánh giá mức hiểu Spark ở góc nhìn Data Engineer.</li>
+        <li>Xác định gap trước khi chuyển sang bài build artifact thực tế.</li>
+        <li>Nhấn mạnh tư duy trade-off thay vì học thuộc API.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Hướng dẫn làm mini test</h3>
+        <ul>
+          <li>Mỗi câu chỉ chọn 1 đáp án A/B/C/D.</li>
+          <li>Sau khi làm xong, bấm <strong>Chấm điểm mini test</strong>.</li>
+          <li>Có thể reset và làm lại để cải thiện.</li>
+        </ul>
+
+        <div class="info-box note">📌 <span>Ngưỡng gợi ý: &lt;12 cần ôn lại nền tảng; 12-15 ổn nhưng còn lỗ hổng; 16-18 sẵn sàng build; 19-20 rất vững.</span></div>
+
+        <div id="final-test"></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m8"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Đánh giá toàn diện</strong>Mini test phủ đủ chủ đề Spark quan trọng</div>
+        <div class="summary-item"><strong>Trọng tâm</strong>Tư duy hệ thống và tối ưu chi phí</div>
+        <div class="summary-item"><strong>Kỹ năng cốt lõi</strong>Join strategy + partition + UI debugging</div>
+        <div class="summary-item"><strong>Kỷ luật kỹ thuật</strong>Testing và code organization</div>
+        <div class="summary-item"><strong>Mục tiêu sau tuần</strong>Build artifact có thể đem đi phỏng vấn</div>
+        <div class="summary-item"><strong>Nguyên tắc</strong>Không đoán mò, luôn dựa trên metrics</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Final readiness task</div><div class="practice-task-body">
+          <p>Dựa trên điểm mini test, hãy viết kế hoạch 7 ngày để nâng từ mức hiện tại lên mức sẵn sàng phỏng vấn Spark DE. Kế hoạch phải có: 1 task join, 1 task partition/layout, 1 task UI debugging, 1 task unit test.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Mẫu ngắn: Ngày 1-2 join optimization lab; Ngày 3 partition/file layout lab; Ngày 4 Spark UI bottleneck case; Ngày 5 viết tests; Ngày 6 build README before/after; Ngày 7 review và demo.</p></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(8)">Quay lại W16.08</button><div></div></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const moduleQuizzes = [
+  [
+    { q: "Spark phù hợp nhất cho workload nào?", options: [
+      { label: "A", text: "Join vài nghìn dòng trong notebook", correct: false, explain: "Quy mô này thường không cần distributed engine." },
+      { label: "B", text: "Backfill lịch sử hàng trăm GB đến TB", correct: true, explain: "Đây là kiểu workload Spark phát huy tốt nhờ xử lý phân tán." },
+      { label: "C", text: "Đổi màu dashboard BI", correct: false, explain: "Đây là tác vụ visualization, không phải compute workload của Spark." },
+      { label: "D", text: "Chỉnh markdown README", correct: false, explain: "Không liên quan xử lý dữ liệu lớn." }
+    ]},
+    { q: "Khi nào pandas có thể vẫn là lựa chọn tốt hơn Spark?", options: [
+      { label: "A", text: "Dataset nhỏ, xử lý nhanh trên 1 máy", correct: true, explain: "Nếu dữ liệu vừa RAM và logic đơn giản, pandas gọn hơn." },
+      { label: "B", text: "Join 1TB mỗi ngày", correct: false, explain: "Quy mô này thường vượt giới hạn single-machine." },
+      { label: "C", text: "Backfill 24 tháng dữ liệu clickstream", correct: false, explain: "Đây là ứng viên điển hình cho Spark." },
+      { label: "D", text: "Agg hàng tỷ dòng", correct: false, explain: "Khó phù hợp với pandas local." }
+    ]},
+    { q: "Spark nằm ở đâu trong stack DE hiện đại?", options: [
+      { label: "A", text: "Thay thế hoàn toàn Airflow", correct: false, explain: "Spark không phải orchestrator." },
+      { label: "B", text: "Compute engine cho transform nặng", correct: true, explain: "Spark xử lý khối lượng lớn; Airflow/dbt vẫn có vai trò riêng." },
+      { label: "C", text: "Thay thế hoàn toàn warehouse", correct: false, explain: "Warehouse vẫn quan trọng cho serving và semantic SQL." },
+      { label: "D", text: "Chỉ dùng cho streaming", correct: false, explain: "Spark dùng cho batch lớn rất nhiều." }
+    ]},
+    { q: "Dấu hiệu Spark có thể là overkill?", options: [
+      { label: "A", text: "Pipeline vài trăm MB chạy tốt trong SQL", correct: true, explain: "Không nên tăng độ phức tạp khi workload nhỏ." },
+      { label: "B", text: "Join 800GB fact + 200MB dim", correct: false, explain: "Đây là bài toán rất phù hợp Spark." },
+      { label: "C", text: "Backfill theo partition 2 năm", correct: false, explain: "Spark thường hữu ích cho backfill kiểu này." },
+      { label: "D", text: "Cần phân phối xử lý trên cluster", correct: false, explain: "Đây là lý do chính để dùng Spark." }
+    ]},
+    { q: "Mục tiêu tuần 16 KHÔNG phải là gì?", options: [
+      { label: "A", text: "Ra quyết định join strategy", correct: false, explain: "Đây là mục tiêu chính tuần 16." },
+      { label: "B", text: "Hiểu Driver/Executor/Shuffle", correct: false, explain: "Nằm trong core mission." },
+      { label: "C", text: "Học Spark theo buzzword marketing", correct: true, explain: "Tuần này tập trung thực chiến, không buzzword." },
+      { label: "D", text: "Xây artifact có test", correct: false, explain: "Đây là output bắt buộc." }
+    ]},
+    { q: "Spark thường mạnh trong loại workload nào dưới đây?", options: [
+      { label: "A", text: "Large joins và large aggregations", correct: true, explain: "Đây là nhóm workload Spark xử lý tốt khi tối ưu đúng." },
+      { label: "B", text: "Sửa typo trong file text", correct: false, explain: "Không phải bài toán phân tán." },
+      { label: "C", text: "Thiết kế slide thuyết trình", correct: false, explain: "Không liên quan data processing." },
+      { label: "D", text: "Đổi icon dashboard", correct: false, explain: "Không thuộc compute workload." }
+    ]},
+    { q: "Quan hệ đúng giữa Airflow và Spark là gì?", options: [
+      { label: "A", text: "Airflow chạy task orchestration, Spark xử lý dữ liệu", correct: true, explain: "Đây là phân vai chuẩn trong pipeline." },
+      { label: "B", text: "Spark thay scheduler của Airflow", correct: false, explain: "Spark không thay thế scheduling DAG orchestration." },
+      { label: "C", text: "Airflow chỉ để hiển thị dashboard", correct: false, explain: "Airflow là orchestration platform." },
+      { label: "D", text: "Hai công cụ không thể dùng cùng nhau", correct: false, explain: "Thực tế thường dùng cùng nhau." }
+    ]},
+    { q: "Điểm khác biệt cốt lõi khi học Spark theo mindset DE?", options: [
+      { label: "A", text: "Tập trung vào trade-off hiệu năng và vận hành", correct: true, explain: "DE mindset ưu tiên reliability, cost, performance." },
+      { label: "B", text: "Chỉ học syntax API", correct: false, explain: "Syntax không đủ để vận hành production." },
+      { label: "C", text: "Bỏ qua testing", correct: false, explain: "Testing là bắt buộc cho production jobs." },
+      { label: "D", text: "Không cần hiểu downstream analytics", correct: false, explain: "Layout và output ảnh hưởng trực tiếp downstream." }
+    ]},
+    { q: "Vì sao cần outcomes checklist đầu tuần?", options: [
+      { label: "A", text: "Để đo năng lực bằng tiêu chí rõ ràng", correct: true, explain: "Checklist giúp học có đích và kiểm chứng được." },
+      { label: "B", text: "Để học nhiều thuật ngữ hơn", correct: false, explain: "Mục tiêu checklist là đo output thực tế, không phải số thuật ngữ." },
+      { label: "C", text: "Để bỏ qua phần practice", correct: false, explain: "Practice là phần bắt buộc." },
+      { label: "D", text: "Để không cần mini test", correct: false, explain: "Mini test vẫn cần để tự đánh giá tổng thể." }
+    ]},
+    { q: "Phát biểu đúng về Spark trong roadmap này?", options: [
+      { label: "A", text: "Spark là kỹ năng giai đoạn 3 để xử lý dữ liệu lớn", correct: true, explain: "Roadmap đặt Spark ở Cloud + Big Data phase." },
+      { label: "B", text: "Spark chỉ dành cho ML engineer", correct: false, explain: "Data Engineer dùng Spark rất nhiều cho ETL/backfill." },
+      { label: "C", text: "Spark không liên quan join strategy", correct: false, explain: "Join strategy là chủ đề trọng tâm tuần này." },
+      { label: "D", text: "Spark thay thế hoàn toàn SQL", correct: false, explain: "SQL vẫn là nền tảng trong DE." }
+    ]}
+  ],
+  [
+    { q: "Driver trong Spark có nhiệm vụ chính nào?", options: [
+      { label: "A", text: "Lưu toàn bộ file parquet", correct: false, explain: "Storage chính không nằm ở driver." },
+      { label: "B", text: "Lập kế hoạch và điều phối task", correct: true, explain: "Driver build plan và gửi task tới executors." },
+      { label: "C", text: "Thay thế cluster manager", correct: false, explain: "Cluster manager là thành phần khác." },
+      { label: "D", text: "Chỉ hiển thị UI", correct: false, explain: "Driver không chỉ có nhiệm vụ hiển thị UI." }
+    ]},
+    { q: "Executor chịu trách nhiệm gì?", options: [
+      { label: "A", text: "Chạy task và xử lý dữ liệu phân tán", correct: true, explain: "Executors thực thi task và giữ dữ liệu trung gian/cache." },
+      { label: "B", text: "Viết DAG scheduler", correct: false, explain: "DAG scheduler nằm ở phía driver." },
+      { label: "C", text: "Quản lý IAM permissions", correct: false, explain: "Đây là nhiệm vụ hạ tầng cloud, không phải executor." },
+      { label: "D", text: "Chỉ đọc log", correct: false, explain: "Executor thực thi compute thực sự." }
+    ]},
+    { q: "Wide transformation thường dẫn tới điều gì?", options: [
+      { label: "A", text: "Không tạo stage mới", correct: false, explain: "Wide transformation thường tạo stage boundary mới." },
+      { label: "B", text: "Shuffle dữ liệu giữa partitions", correct: true, explain: "Đây là điểm đặc trưng của wide dependency." },
+      { label: "C", text: "Giảm network về 0", correct: false, explain: "Ngược lại, network có thể tăng mạnh." },
+      { label: "D", text: "Không tốn memory", correct: false, explain: "Sort/agg trong shuffle thường tốn memory." }
+    ]},
+    { q: "Narrow transformation có trực giác nào đúng?", options: [
+      { label: "A", text: "Dữ liệu chủ yếu ở lại partition hiện tại", correct: true, explain: "Narrow dependency ít cần exchange qua network." },
+      { label: "B", text: "Luôn cần shuffle lớn", correct: false, explain: "Narrow thường không cần shuffle lớn." },
+      { label: "C", text: "Luôn chậm hơn wide", correct: false, explain: "Không có quy luật như vậy." },
+      { label: "D", text: "Không thể chain nhiều bước", correct: false, explain: "Có thể chain nhiều bước narrow liên tục." }
+    ]},
+    { q: "Vì sao shuffle đắt đỏ?", options: [
+      { label: "A", text: "Không dùng network, chỉ CPU", correct: false, explain: "Shuffle phụ thuộc mạnh vào network và disk." },
+      { label: "B", text: "Tạo exchange qua network + sort/spill", correct: true, explain: "Đây là bộ chi phí chính của shuffle." },
+      { label: "C", text: "Luôn nhanh hơn map-only", correct: false, explain: "Thường ngược lại." },
+      { label: "D", text: "Không ảnh hưởng stage runtime", correct: false, explain: "Shuffle thường là nguyên nhân stage chậm." }
+    ]},
+    { q: "Anti-pattern lớn trong phân tích Spark architecture là gì?", options: [
+      { label: "A", text: "Đọc DAG trước khi tune", correct: false, explain: "Đây là thói quen tốt." },
+      { label: "B", text: "Không quan tâm chi phí shuffle", correct: true, explain: "Bỏ qua shuffle cost làm mọi tối ưu thiếu nền tảng." },
+      { label: "C", text: "So sánh stage runtimes", correct: false, explain: "Đây là bước phân tích đúng." },
+      { label: "D", text: "Dùng metrics Spark UI", correct: false, explain: "Đây là hướng làm đúng." }
+    ]},
+    { q: "Stage trong Spark thường được tách dựa trên yếu tố nào?", options: [
+      { label: "A", text: "Số dòng trong file README", correct: false, explain: "Không liên quan execution." },
+      { label: "B", text: "Ranh giới shuffle / wide dependency", correct: true, explain: "Stage boundary thường nằm ở các điểm cần exchange." },
+      { label: "C", text: "Màu theme UI", correct: false, explain: "Không liên quan kỹ thuật." },
+      { label: "D", text: "Tên notebook", correct: false, explain: "Tên notebook không quyết định stage." }
+    ]},
+    { q: "Cluster manager trong Spark ecosystem làm gì?", options: [
+      { label: "A", text: "Allocate resource cho executors", correct: true, explain: "Cluster manager cấp phát tài nguyên compute." },
+      { label: "B", text: "Tự viết business logic transform", correct: false, explain: "Business logic do code của bạn quyết định." },
+      { label: "C", text: "Chỉ chạy ở driver laptop", correct: false, explain: "Cluster manager quản lý resource ở mức cluster." },
+      { label: "D", text: "Thay Spark SQL optimizer", correct: false, explain: "Optimizer là Catalyst/Tungsten, không phải cluster manager." }
+    ]},
+    { q: "Task là gì trong Spark?", options: [
+      { label: "A", text: "Đơn vị thực thi nhỏ nhất trong stage", correct: true, explain: "Task chạy trên partition dữ liệu cụ thể." },
+      { label: "B", text: "Tên cho toàn bộ pipeline", correct: false, explain: "Pipeline gồm nhiều jobs/stages/tasks." },
+      { label: "C", text: "File config của Airflow", correct: false, explain: "Không cùng phạm vi công cụ." },
+      { label: "D", text: "Một loại storage level", correct: false, explain: "Task không liên quan storage level." }
+    ]},
+    { q: "Hành động đúng khi thấy job chậm bất thường?", options: [
+      { label: "A", text: "Tăng random executor mà không đo", correct: false, explain: "Tăng resource mù có thể tốn chi phí vô ích." },
+      { label: "B", text: "Vào Spark UI đọc stages/tasks/shuffle trước", correct: true, explain: "Inspect metrics trước mới quyết định tối ưu." },
+      { label: "C", text: "Đổi tên cột cho đẹp", correct: false, explain: "Không giải quyết bottleneck." },
+      { label: "D", text: "Xóa toàn bộ cache mặc định", correct: false, explain: "Cần phân tích nguyên nhân trước." }
+    ]}
+  ],
+  [
+    { q: "DataFrame được ưu tiên trong PySpark DE vì lý do nào?", options: [
+      { label: "A", text: "Catalyst optimizer + API declarative", correct: true, explain: "Đây là lợi thế lớn cho code dễ tối ưu và maintain." },
+      { label: "B", text: "Không có schema", correct: false, explain: "DataFrame có schema rõ ràng." },
+      { label: "C", text: "Luôn nhanh hơn mọi trường hợp", correct: false, explain: "Không có tuyệt đối, nhưng thường tối ưu tốt." },
+      { label: "D", text: "Không cần action để chạy", correct: false, explain: "Vẫn cần action để thực thi." }
+    ]},
+    { q: "Phát biểu đúng về lazy evaluation?", options: [
+      { label: "A", text: "Transformations chạy ngay lập tức", correct: false, explain: "Transformations chủ yếu ghi nhận plan." },
+      { label: "B", text: "Action mới kích hoạt thực thi DAG", correct: true, explain: "Đây là core behavior của Spark execution." },
+      { label: "C", text: "Lazy evaluation chỉ có ở RDD", correct: false, explain: "DataFrame cũng áp dụng lazy execution." },
+      { label: "D", text: "Lazy làm mất khả năng optimize", correct: false, explain: "Ngược lại, lazy cho optimizer nhiều cơ hội hơn." }
+    ]},
+    { q: "Ví dụ nào là action?", options: [
+      { label: "A", text: "withColumn", correct: false, explain: "Đây là transformation." },
+      { label: "B", text: "filter", correct: false, explain: "Đây là transformation." },
+      { label: "C", text: "write.parquet(...) ", correct: true, explain: "Write là action, trigger execution." },
+      { label: "D", text: "select", correct: false, explain: "Đây là transformation." }
+    ]},
+    { q: "Lineage trong Spark hữu ích nhất để làm gì?", options: [
+      { label: "A", text: "Đổi màu theme notebook", correct: false, explain: "Không liên quan lineage." },
+      { label: "B", text: "Theo dõi chuỗi biến đổi để debug và optimize", correct: true, explain: "Lineage giúp truy vết nguồn gốc output và điểm nghẽn." },
+      { label: "C", text: "Thay thế unit test", correct: false, explain: "Lineage không thay thế testing." },
+      { label: "D", text: "Bỏ qua Spark UI", correct: false, explain: "Lineage và UI bổ trợ nhau." }
+    ]},
+    { q: "Anti-pattern với collect() là gì?", options: [
+      { label: "A", text: "Collect vài dòng sample", correct: false, explain: "Sample nhỏ vẫn hợp lý." },
+      { label: "B", text: "Collect dataset lớn lên driver", correct: true, explain: "Rất dễ gây OOM driver." },
+      { label: "C", text: "Dùng show(20) để inspect", correct: false, explain: "Inspect ít dòng thường chấp nhận được." },
+      { label: "D", text: "Dùng limit trước toPandas", correct: false, explain: "Đây là cách an toàn hơn collect full." }
+    ]},
+    { q: "Khi nào nên cân nhắc dùng RDD thay DataFrame?", options: [
+      { label: "A", text: "Khi cần thao tác low-level đặc thù", correct: true, explain: "RDD linh hoạt cho một số bài toán đặc biệt." },
+      { label: "B", text: "Khi muốn viết code dài hơn", correct: false, explain: "Không phải mục tiêu kỹ thuật." },
+      { label: "C", text: "Vì DataFrame không có join", correct: false, explain: "DataFrame hỗ trợ join mạnh mẽ." },
+      { label: "D", text: "Vì Spark không hỗ trợ schema", correct: false, explain: "Spark DataFrame có schema rõ." }
+    ]},
+    { q: "UDF nên được dùng như thế nào?", options: [
+      { label: "A", text: "Dùng mặc định cho mọi transform", correct: false, explain: "UDF có thể làm giảm optimize/vectorization." },
+      { label: "B", text: "Ưu tiên built-in, chỉ dùng UDF khi thật cần", correct: true, explain: "Đây là hướng an toàn về hiệu năng." },
+      { label: "C", text: "Dùng UDF để thay filter/select cơ bản", correct: false, explain: "Built-in thường tốt hơn." },
+      { label: "D", text: "UDF không bao giờ chạy được", correct: false, explain: "UDF vẫn chạy được, chỉ cần cân nhắc trade-off." }
+    ]},
+    { q: "Dataset typed API mạnh nhất ở hệ sinh thái nào?", options: [
+      { label: "A", text: "Scala/Java", correct: true, explain: "Dataset typed chủ yếu phát huy ở Scala/Java." },
+      { label: "B", text: "PySpark thuần", correct: false, explain: "PySpark chủ yếu dùng DataFrame API." },
+      { label: "C", text: "SQL client ngoài Spark", correct: false, explain: "Không đúng ngữ cảnh API." },
+      { label: "D", text: "Airflow DAG", correct: false, explain: "Không liên quan typed Dataset." }
+    ]},
+    { q: "Tại sao schema awareness quan trọng?", options: [
+      { label: "A", text: "Giúp optimizer hiểu kiểu dữ liệu và tối ưu plan", correct: true, explain: "Schema rõ giúp tránh cast lỗi và tối ưu tốt hơn." },
+      { label: "B", text: "Chỉ để đặt tên cột đẹp", correct: false, explain: "Vai trò schema lớn hơn nhiều." },
+      { label: "C", text: "Không ảnh hưởng quality", correct: false, explain: "Schema là nền của data quality." },
+      { label: "D", text: "Schema làm Spark không chạy", correct: false, explain: "Ngược lại, schema giúp chạy ổn định hơn." }
+    ]},
+    { q: "Chuỗi thao tác nào phản ánh execution mindset đúng?", options: [
+      { label: "A", text: "Viết transform → dự đoán shuffle → mới chạy action", correct: true, explain: "Đây là mindset chủ động về hiệu năng." },
+      { label: "B", text: "Chạy action liên tục rồi đoán lỗi", correct: false, explain: "Thiếu phân tích trước khi chạy." },
+      { label: "C", text: "Chỉ đọc log mà không xem plan", correct: false, explain: "Plan/metrics là nguồn quan trọng." },
+      { label: "D", text: "Bỏ qua lineage", correct: false, explain: "Lineage giúp debug tốt hơn." }
+    ]}
+  ],
+  [
+    { q: "Broadcast join thường phù hợp khi nào?", options: [
+      { label: "A", text: "Một bảng nhỏ, một bảng lớn", correct: true, explain: "Bảng nhỏ có thể broadcast để giảm shuffle ở bảng lớn." },
+      { label: "B", text: "Hai bảng đều rất lớn", correct: false, explain: "Trường hợp này thường không broadcast được." },
+      { label: "C", text: "Không có key join", correct: false, explain: "Join vẫn cần key logic rõ ràng." },
+      { label: "D", text: "Bảng nhỏ hơn 1 byte", correct: false, explain: "Nhận định phi thực tế." }
+    ]},
+    { q: "Sort-merge join thường xuất hiện trong tình huống nào?", options: [
+      { label: "A", text: "Hai bảng lớn, join key phù hợp", correct: true, explain: "Spark thường chọn sort-merge khi không thể broadcast." },
+      { label: "B", text: "Bảng dim cực nhỏ", correct: false, explain: "Có thể broadcast tốt hơn." },
+      { label: "C", text: "Join trong pandas local", correct: false, explain: "Không thuộc Spark join strategy." },
+      { label: "D", text: "Khi không có shuffle", correct: false, explain: "Sort-merge thường liên quan shuffle." }
+    ]},
+    { q: "Mục tiêu chính của pre-aggregation trước join là gì?", options: [
+      { label: "A", text: "Tăng số cột trước join", correct: false, explain: "Tăng cột làm row rộng hơn, có thể tệ hơn." },
+      { label: "B", text: "Giảm số dòng/shuffle volume", correct: true, explain: "Pre-aggregation giúp giảm dữ liệu cần trao đổi." },
+      { label: "C", text: "Bỏ hẳn key join", correct: false, explain: "Không thể join nếu mất key cần thiết." },
+      { label: "D", text: "Tắt Spark UI", correct: false, explain: "Không liên quan optimization logic." }
+    ]},
+    { q: "Skewed join thường biểu hiện thế nào?", options: [
+      { label: "A", text: "Tất cả task có thời gian ngang nhau", correct: false, explain: "Skew thường gây chênh lệch lớn giữa tasks." },
+      { label: "B", text: "Một vài tasks chạy lâu bất thường", correct: true, explain: "Đây là tín hiệu điển hình của key lệch." },
+      { label: "C", text: "Không có shuffle read", correct: false, explain: "Skew thường gắn với shuffle phases." },
+      { label: "D", text: "Job luôn fail ngay lập tức", correct: false, explain: "Skew có thể làm chậm mà không fail." }
+    ]},
+    { q: "Broadcast hint có ý nghĩa gì?", options: [
+      { label: "A", text: "Gợi ý Spark ưu tiên broadcast cho bảng đó", correct: true, explain: "Hint giúp định hướng optimizer trong một số tình huống." },
+      { label: "B", text: "Bắt Spark bỏ qua mọi kiểm tra memory", correct: false, explain: "Hint không miễn trừ giới hạn tài nguyên." },
+      { label: "C", text: "Thay thế hoàn toàn join key", correct: false, explain: "Join key vẫn bắt buộc." },
+      { label: "D", text: "Chỉ là comment không tác dụng", correct: false, explain: "Hint có thể ảnh hưởng physical plan." }
+    ]},
+    { q: "Anti-pattern nào gây chi phí join cao?", options: [
+      { label: "A", text: "Select cột cần thiết trước join", correct: false, explain: "Đây là best practice." },
+      { label: "B", text: "Join hai bảng rộng rồi mới filter", correct: true, explain: "Bạn đang shuffle nhiều dữ liệu không cần dùng." },
+      { label: "C", text: "Pre-aggregate fact trước join", correct: false, explain: "Thường giúp giảm shuffle." },
+      { label: "D", text: "Xem plan trong Spark UI", correct: false, explain: "Đây là bước đúng để xác minh strategy." }
+    ]},
+    { q: "Khi dim table tăng dần kích thước, điều gì cần làm?", options: [
+      { label: "A", text: "Giữ broadcast mãi dù memory không đủ", correct: false, explain: "Có thể gây lỗi/áp lực memory lớn." },
+      { label: "B", text: "Đánh giá lại strategy và đo plan/runtime", correct: true, explain: "Join strategy cần cập nhật theo data growth." },
+      { label: "C", text: "Không cần kiểm tra nữa", correct: false, explain: "Data growth làm quyết định cũ lỗi thời." },
+      { label: "D", text: "Xóa hết partition", correct: false, explain: "Không phải hành động mặc định đúng." }
+    ]},
+    { q: "Vì sao size-based decision là bắt buộc trong join?", options: [
+      { label: "A", text: "Vì join type ảnh hưởng trực tiếp shuffle và memory", correct: true, explain: "Sai join type có thể làm runtime tăng mạnh." },
+      { label: "B", text: "Vì recruiter thích nghe từ broadcast", correct: false, explain: "Mục tiêu là hiệu năng thực tế, không buzzword." },
+      { label: "C", text: "Vì Spark không có optimizer", correct: false, explain: "Spark có optimizer nhưng vẫn cần input quyết định tốt." },
+      { label: "D", text: "Vì SQL không có join", correct: false, explain: "SQL vẫn có join đầy đủ." }
+    ]},
+    { q: "Cách giảm shuffle trước join nào hiệu quả?", options: [
+      { label: "A", text: "Lấy đủ mọi cột để chắc chắn", correct: false, explain: "Làm dữ liệu rộng hơn, không tốt." },
+      { label: "B", text: "Filter và projection sớm", correct: true, explain: "Giảm volume dữ liệu phải trao đổi." },
+      { label: "C", text: "Collect về driver rồi join", correct: false, explain: "Dễ OOM và phá distributed model." },
+      { label: "D", text: "Bỏ key join", correct: false, explain: "Join sẽ sai logic." }
+    ]},
+    { q: "Join optimization đúng mindset DE là gì?", options: [
+      { label: "A", text: "Dựa trên plan + metrics thay vì cảm giác", correct: true, explain: "Metrics-driven quyết định ổn định hơn." },
+      { label: "B", text: "Chọn broadcast cho mọi join", correct: false, explain: "Broadcast không phù hợp mọi trường hợp." },
+      { label: "C", text: "Chỉ sửa config, bỏ logic", correct: false, explain: "Logic data shape quan trọng hơn config tuning mù." },
+      { label: "D", text: "Không cần kiểm thử sau tối ưu", correct: false, explain: "Cần verify cả đúng kết quả lẫn hiệu năng." }
+    ]},
+    { q: "Vai trò đúng của AQE trong Spark 3.x là gì?", options: [
+      { label: "A", text: "Tự điều chỉnh plan runtime như coalesce shuffle partitions và tối ưu skew join", correct: true, explain: "Đây là giá trị cốt lõi của AQE trong Spark 3.x." },
+      { label: "B", text: "Thay thế hoàn toàn nhu cầu thiết kế join strategy", correct: false, explain: "AQE hỗ trợ mạnh nhưng không thay hoàn toàn data modeling tốt." },
+      { label: "C", text: "Chỉ hoạt động với pandas", correct: false, explain: "AQE là cơ chế optimizer của Spark SQL/DataFrame." },
+      { label: "D", text: "Làm mọi job luôn nhanh hơn mà không cần kiểm tra UI", correct: false, explain: "Vẫn phải xác minh plan/metrics thực tế trong Spark UI." }
+    ]}
+  ],
+  [
+    { q: "repartition khác coalesce như thế nào?", options: [
+      { label: "A", text: "repartition thường có shuffle, coalesce giảm partition nhẹ hơn", correct: true, explain: "Đây là khác biệt cốt lõi về data movement." },
+      { label: "B", text: "coalesce luôn tăng partition", correct: false, explain: "coalesce thường dùng để giảm partition." },
+      { label: "C", text: "repartition không bao giờ shuffle", correct: false, explain: "repartition thường kéo theo shuffle." },
+      { label: "D", text: "Hai hàm giống hệt nhau", correct: false, explain: "Không đúng về chi phí thực thi." }
+    ]},
+    { q: "partitionBy khi write file giúp gì?", options: [
+      { label: "A", text: "Giúp downstream query pruning theo cột partition", correct: true, explain: "Đây là lợi ích lớn cho scan efficiency." },
+      { label: "B", text: "Làm mất schema", correct: false, explain: "partitionBy không làm mất schema." },
+      { label: "C", text: "Thay thế hoàn toàn indexing", correct: false, explain: "Không phải thay thế tuyệt đối." },
+      { label: "D", text: "Bắt buộc cho mọi bảng nhỏ", correct: false, explain: "Bảng nhỏ có thể không cần partitionBy." }
+    ]},
+    { q: "Cột nào thường KHÔNG nên dùng partitionBy?", options: [
+      { label: "A", text: "event_date", correct: false, explain: "Đây là cột partition phổ biến, hợp lý." },
+      { label: "B", text: "region", correct: false, explain: "Có thể hợp lý nếu cardinality vừa và query thường filter." },
+      { label: "C", text: "user_id cardinality rất cao", correct: true, explain: "Dễ tạo quá nhiều partition/file nhỏ." },
+      { label: "D", text: "year_month", correct: false, explain: "Thường là lựa chọn hợp lý cho time-based query." }
+    ]},
+    { q: "Too many small files gây hậu quả gì?", options: [
+      { label: "A", text: "Giảm overhead metadata", correct: false, explain: "Ngược lại, overhead metadata tăng." },
+      { label: "B", text: "Tăng chi phí listing/scan và giảm hiệu năng", correct: true, explain: "Small files là vấn đề kinh điển của data lake." },
+      { label: "C", text: "Luôn làm query nhanh hơn", correct: false, explain: "Không đúng." },
+      { label: "D", text: "Không ảnh hưởng gì", correct: false, explain: "Ảnh hưởng lớn tới performance và cost." }
+    ]},
+    { q: "Bucketing hữu ích nhất trong tình huống nào?", options: [
+      { label: "A", text: "Join lặp lại cùng key trên dataset lớn", correct: true, explain: "Bucketing có thể giảm chi phí join lặp lại." },
+      { label: "B", text: "Dataset vài MB ad-hoc", correct: false, explain: "Overhead bucketing có thể không đáng." },
+      { label: "C", text: "Không bao giờ join", correct: false, explain: "Bucketing thường phát huy trong join workload." },
+      { label: "D", text: "Để thay thế unit test", correct: false, explain: "Không liên quan testing." }
+    ]},
+    { q: "Trade-off của bucketing là gì?", options: [
+      { label: "A", text: "Không có chi phí vận hành", correct: false, explain: "Bucketing có chi phí maintain và write complexity." },
+      { label: "B", text: "Lợi ích join có thể đổi bằng vận hành phức tạp hơn", correct: true, explain: "Cần cân bằng lợi ích và burden." },
+      { label: "C", text: "Làm Spark bỏ shuffle trong mọi case", correct: false, explain: "Không phải mọi trường hợp." },
+      { label: "D", text: "Chỉ dùng cho Python notebooks", correct: false, explain: "Không đúng ngữ cảnh." }
+    ]},
+    { q: "sortWithinPartitions khác gì sort global?", options: [
+      { label: "A", text: "sortWithinPartitions sort cục bộ theo từng partition", correct: true, explain: "Chi phí thường thấp hơn global sort." },
+      { label: "B", text: "sortWithinPartitions luôn global", correct: false, explain: "Đây là sai khác quan trọng." },
+      { label: "C", text: "sort global không cần shuffle", correct: false, explain: "Global sort thường đòi hỏi exchange/sort lớn." },
+      { label: "D", text: "Hai hàm giống nhau", correct: false, explain: "Không đúng." }
+    ]},
+    { q: "Mục tiêu thiết kế file layout tốt là gì?", options: [
+      { label: "A", text: "Tối ưu downstream query engine và chi phí", correct: true, explain: "Layout quyết định tốc độ scan/pruning." },
+      { label: "B", text: "Làm thư mục càng nhiều càng tốt", correct: false, explain: "Quá nhiều partition/file có thể phản tác dụng." },
+      { label: "C", text: "Chỉ đẹp về tên folder", correct: false, explain: "Tính kỹ thuật quan trọng hơn thẩm mỹ." },
+      { label: "D", text: "Không cần quan tâm truy vấn downstream", correct: false, explain: "Đây là sai lầm phổ biến." }
+    ]},
+    { q: "Nếu cần giảm số file output cuối job, lựa chọn nào thường hợp lý?", options: [
+      { label: "A", text: "coalesce trước write", correct: true, explain: "coalesce thường dùng để giảm partition và số file." },
+      { label: "B", text: "collect rồi tự ghi file thủ công", correct: false, explain: "Dễ OOM và mất lợi thế distributed." },
+      { label: "C", text: "Tăng partition lên cực lớn", correct: false, explain: "Có thể tạo thêm file nhỏ." },
+      { label: "D", text: "Bỏ write partition strategy", correct: false, explain: "Thiếu strategy thường gây layout kém." }
+    ]},
+    { q: "Anti-pattern partitioning nào cần tránh?", options: [
+      { label: "A", text: "Partition theo trường high-cardinality không lý do", correct: true, explain: "Dẫn tới partition explosion và small files." },
+      { label: "B", text: "Đánh giá query pattern trước khi partition", correct: false, explain: "Đây là best practice." },
+      { label: "C", text: "Theo dõi file count và size", correct: false, explain: "Đây là hành động đúng." },
+      { label: "D", text: "Kết hợp partition strategy với downstream use-case", correct: false, explain: "Đây là hướng làm tốt." }
+    ]},
+    { q: "`spark.sql.shuffle.partitions` mặc định 200 nên được hiểu thế nào?", options: [
+      { label: "A", text: "Luôn đúng cho mọi workload nên không cần tune", correct: false, explain: "200 chỉ là mặc định chung, không phản ánh mọi kích thước dữ liệu." },
+      { label: "B", text: "Là điểm khởi đầu, cần tune theo data size và target partition ~128-256MB", correct: true, explain: "Đây là cách thực tế để tránh task quá nặng hoặc quá nhiều file nhỏ." },
+      { label: "C", text: "Chỉ liên quan UI, không ảnh hưởng runtime", correct: false, explain: "Số partition ảnh hưởng trực tiếp shuffle runtime và file layout." },
+      { label: "D", text: "Chỉ dùng cho streaming, batch không dùng", correct: false, explain: "Cấu hình này ảnh hưởng Spark SQL batch jobs rất rõ." }
+    ]}
+  ],
+  [
+    { q: "Khi nào cache mang lại lợi ích rõ nhất?", options: [
+      { label: "A", text: "DataFrame được reuse nhiều lần", correct: true, explain: "Reuse nhiều giúp bù chi phí cache materialization." },
+      { label: "B", text: "DataFrame chỉ dùng đúng một lần", correct: false, explain: "Thường không đáng cache." },
+      { label: "C", text: "Job cực nhỏ vài giây", correct: false, explain: "Overhead cache có thể không cần thiết." },
+      { label: "D", text: "Không có action nào", correct: false, explain: "Không action thì cũng chưa materialize." }
+    ]},
+    { q: "persist khác cache ở điểm nào?", options: [
+      { label: "A", text: "persist cho chọn storage level chi tiết", correct: true, explain: "Đây là lợi ích chính của persist." },
+      { label: "B", text: "cache không lưu gì", correct: false, explain: "cache vẫn lưu theo default level." },
+      { label: "C", text: "persist chỉ dùng cho RDD cũ", correct: false, explain: "DataFrame cũng dùng persist được." },
+      { label: "D", text: "persist luôn nhanh hơn mọi case", correct: false, explain: "Phụ thuộc workload và tài nguyên." }
+    ]},
+    { q: "Tab nào trong Spark UI giúp xem join strategy thực tế?", options: [
+      { label: "A", text: "SQL tab", correct: true, explain: "SQL tab cho physical plan và operator details." },
+      { label: "B", text: "Environment", correct: false, explain: "Environment chủ yếu về config." },
+      { label: "C", text: "Executors only", correct: false, explain: "Executors tab không trực tiếp cho plan join." },
+      { label: "D", text: "Storage only", correct: false, explain: "Storage tab tập trung cache/persist objects." }
+    ]},
+    { q: "Dấu hiệu thường gặp của skew trong UI là gì?", options: [
+      { label: "A", text: "Một vài tasks chạy lâu vượt trội", correct: true, explain: "Skew tạo sự lệch rõ giữa task runtimes." },
+      { label: "B", text: "Mọi task chạy giống nhau", correct: false, explain: "Đây không phải skew." },
+      { label: "C", text: "Không có shuffle read", correct: false, explain: "Skew thường xuất hiện trong stage có shuffle." },
+      { label: "D", text: "Log không in gì", correct: false, explain: "Không phải tín hiệu đặc trưng." }
+    ]},
+    { q: "Spill to disk cao nói lên điều gì?", options: [
+      { label: "A", text: "Memory cho workload hiện tại không đủ", correct: true, explain: "Spill là dấu hiệu data tạm vượt memory buffer." },
+      { label: "B", text: "Job chắc chắn đúng logic", correct: false, explain: "Spill không nói về correctness." },
+      { label: "C", text: "Cluster không dùng network", correct: false, explain: "Không liên quan trực tiếp." },
+      { label: "D", text: "Không ảnh hưởng runtime", correct: false, explain: "Spill cao thường kéo runtime tăng." }
+    ]},
+    { q: "Anti-pattern cache nào phổ biến?", options: [
+      { label: "A", text: "Cache mọi dataframe trong pipeline", correct: true, explain: "Dễ gây memory pressure và phản tác dụng." },
+      { label: "B", text: "Cache dataframe dùng lại 3 lần", correct: false, explain: "Đây là case hợp lý để cache." },
+      { label: "C", text: "Unpersist sau khi dùng xong", correct: false, explain: "Thói quen tốt để giải phóng memory." },
+      { label: "D", text: "Đo runtime trước/sau cache", correct: false, explain: "Đây là cách đánh giá đúng." }
+    ]},
+    { q: "Debugging mindset đúng là gì?", options: [
+      { label: "A", text: "Đoán nguyên nhân và tune ngẫu nhiên", correct: false, explain: "Thiếu bằng chứng dễ gây loop sai." },
+      { label: "B", text: "Inspect metrics trong Spark UI rồi quyết định", correct: true, explain: "Metrics-driven giúp tối ưu bền vững." },
+      { label: "C", text: "Chỉ đổi cấu hình mà không đọc plan", correct: false, explain: "Có thể tối ưu mù và tốn chi phí." },
+      { label: "D", text: "Không cần kiểm tra stage breakdown", correct: false, explain: "Stage breakdown rất quan trọng." }
+    ]},
+    { q: "Khi nào nên unpersist?", options: [
+      { label: "A", text: "Ngay sau khi dataframe cached đã dùng xong", correct: true, explain: "Giải phóng memory để tránh pressure không cần thiết." },
+      { label: "B", text: "Không bao giờ", correct: false, explain: "Giữ cache vô hạn gây lãng phí tài nguyên." },
+      { label: "C", text: "Trước khi chạy action đầu tiên", correct: false, explain: "Lúc đó cache chưa mang lại lợi ích." },
+      { label: "D", text: "Chỉ khi job fail", correct: false, explain: "Unpersist là thao tác quản lý tài nguyên chủ động." }
+    ]},
+    { q: "Jobs tab hữu ích để làm gì đầu tiên?", options: [
+      { label: "A", text: "Xác định job nào tốn thời gian nhất", correct: true, explain: "Giúp ưu tiên khu vực cần tối ưu." },
+      { label: "B", text: "Sửa code trực tiếp", correct: false, explain: "UI không thay code source." },
+      { label: "C", text: "Đổi partitionBy", correct: false, explain: "Đây là quyết định code, không thao tác trực tiếp trên Jobs tab." },
+      { label: "D", text: "Tạo unit tests", correct: false, explain: "Không phải mục tiêu của Jobs tab." }
+    ]},
+    { q: "Large shuffle + slow stage thường gợi ý gì?", options: [
+      { label: "A", text: "Cần xem lại join/groupBy strategy", correct: true, explain: "Đây là nơi thường phát sinh shuffle lớn." },
+      { label: "B", text: "Chỉ cần đổi theme UI", correct: false, explain: "Không tác động hiệu năng." },
+      { label: "C", text: "Bỏ logging", correct: false, explain: "Logging không phải nguyên nhân chính ở đây." },
+      { label: "D", text: "Không cần đo nữa", correct: false, explain: "Cần đo chi tiết hơn để ra quyết định đúng." }
+    ]}
+  ],
+  [
+    { q: "Lý do chính phải test Spark transformations là gì?", options: [
+      { label: "A", text: "Đảm bảo logic đúng và chống regression", correct: true, explain: "Test bảo vệ chất lượng khi code thay đổi." },
+      { label: "B", text: "Thay thế hoàn toàn Spark UI", correct: false, explain: "UI và test phục vụ mục tiêu khác nhau." },
+      { label: "C", text: "Không cần khi có notebook", correct: false, explain: "Notebook validation không đủ tin cậy." },
+      { label: "D", text: "Để giảm số dòng code", correct: false, explain: "Mục tiêu chính là chất lượng và ổn định." }
+    ]},
+    { q: "Code organization nào giúp test dễ nhất?", options: [
+      { label: "A", text: "Tách transform logic khỏi read/write", correct: true, explain: "Pure function transform dễ unit test." },
+      { label: "B", text: "Để mọi thứ trong một notebook", correct: false, explain: "Khó tái sử dụng và khó test tự động." },
+      { label: "C", text: "Gộp config vào business logic", correct: false, explain: "Làm test và maintain khó hơn." },
+      { label: "D", text: "Chỉ test khi release", correct: false, explain: "Nên test thường xuyên trong quá trình dev." }
+    ]},
+    { q: "Fake input DataFrame trong unit test có vai trò gì?", options: [
+      { label: "A", text: "Tạo dữ liệu nhỏ để assert logic cụ thể", correct: true, explain: "Giúp test nhanh và tập trung vào behavior." },
+      { label: "B", text: "Bắt buộc giống full production data", correct: false, explain: "Không cần full scale, chỉ cần đại diện case." },
+      { label: "C", text: "Thay thế integration test hoàn toàn", correct: false, explain: "Unit test không thay thế toàn bộ integration test." },
+      { label: "D", text: "Làm Spark chạy chậm hơn", correct: false, explain: "Fake data nhỏ thường giúp test nhanh." }
+    ]},
+    { q: "Deterministic transformation nghĩa là gì?", options: [
+      { label: "A", text: "Cùng input cho cùng output ổn định", correct: true, explain: "Deterministic giúp test đáng tin cậy." },
+      { label: "B", text: "Output ngẫu nhiên mỗi lần", correct: false, explain: "Ngược nghĩa deterministic." },
+      { label: "C", text: "Không cần assert output", correct: false, explain: "Assert là cốt lõi của testing." },
+      { label: "D", text: "Chỉ chạy trên production", correct: false, explain: "Deterministic là tính chất logic, không phụ thuộc môi trường." }
+    ]},
+    { q: "Anti-pattern testing Spark là gì?", options: [
+      { label: "A", text: "Chỉ nhìn output notebook bằng mắt", correct: true, explain: "Không đủ để phát hiện regression khi code đổi." },
+      { label: "B", text: "Dùng pytest cho transform functions", correct: false, explain: "Đây là best practice." },
+      { label: "C", text: "Tạo fixture SparkSession test", correct: false, explain: "Cách làm chuẩn để tái sử dụng." },
+      { label: "D", text: "Assert expected rows", correct: false, explain: "Là hành động đúng trong unit test." }
+    ]},
+    { q: "Nên assert gì trong test transform?", options: [
+      { label: "A", text: "Chỉ log ra màn hình", correct: false, explain: "Log không thay assert tự động." },
+      { label: "B", text: "Expected rows/schema theo yêu cầu", correct: true, explain: "Assert cụ thể giúp test có giá trị." },
+      { label: "C", text: "Không cần assert nếu chạy không lỗi", correct: false, explain: "Không lỗi chưa chắc đúng logic." },
+      { label: "D", text: "Chỉ đếm số dòng tổng quát", correct: false, explain: "Row count một mình thường chưa đủ." }
+    ]},
+    { q: "Vì sao nên tách test_join_logic.py riêng?", options: [
+      { label: "A", text: "Join chứa nhiều rule business cần kiểm chứng", correct: true, explain: "Join dễ phát sinh bug duplicate/missing records." },
+      { label: "B", text: "Để file trông nhiều hơn", correct: false, explain: "Mục tiêu là clarity, không phải số file." },
+      { label: "C", text: "Để bỏ test transforms", correct: false, explain: "Cả hai đều cần." },
+      { label: "D", text: "Vì pytest bắt buộc đúng tên đó", correct: false, explain: "Tên file linh hoạt, miễn theo convention." }
+    ]},
+    { q: "Khi hàm transform phụ thuộc thời gian hiện tại, nên làm gì?", options: [
+      { label: "A", text: "Inject giá trị thời gian cố định cho test", correct: true, explain: "Giúp test deterministic, tránh flaky." },
+      { label: "B", text: "Dùng random timestamp mỗi lần", correct: false, explain: "Làm test khó lặp lại." },
+      { label: "C", text: "Bỏ test case đó", correct: false, explain: "Không nên bỏ coverage quan trọng." },
+      { label: "D", text: "Chỉ test trên prod", correct: false, explain: "Rất rủi ro và không thực tế." }
+    ]},
+    { q: "Lợi ích tuyển dụng của test trong artifact Spark là gì?", options: [
+      { label: "A", text: "Chứng minh production discipline", correct: true, explain: "Recruiter/interviewer đánh giá cao tính vận hành thực tế." },
+      { label: "B", text: "Chỉ để trang trí README", correct: false, explain: "Test có giá trị kỹ thuật thật." },
+      { label: "C", text: "Thay cho giải thích trade-off", correct: false, explain: "Vẫn cần giải thích quyết định kỹ thuật." },
+      { label: "D", text: "Không ai quan tâm test", correct: false, explain: "Thực tế nhiều team rất quan tâm." }
+    ]},
+    { q: "Pattern pytest đơn giản cho Spark thường gồm gì?", options: [
+      { label: "A", text: "Fixture SparkSession + fake input + assert output", correct: true, explain: "Đây là khung unit test chuẩn, dễ bảo trì." },
+      { label: "B", text: "Chỉ print dataframe", correct: false, explain: "Print không thay thế kiểm thử tự động." },
+      { label: "C", text: "Tạo cluster mới mỗi test", correct: false, explain: "Không cần và rất tốn thời gian." },
+      { label: "D", text: "Không dùng assertion", correct: false, explain: "Assertion là bắt buộc trong test." }
+    ]}
+  ],
+  [
+    { q: "File nào thể hiện demo broadcast join trong artifact?", options: [
+      { label: "A", text: "broadcast_join_job.py", correct: true, explain: "Đây là file bắt buộc theo cấu trúc artifact." },
+      { label: "B", text: "dashboard.css", correct: false, explain: "Không thuộc artifact spark_jobs yêu cầu." },
+      { label: "C", text: "notes.txt", correct: false, explain: "Không phản ánh cấu trúc bắt buộc." },
+      { label: "D", text: "manual.docx", correct: false, explain: "Không phải output chuẩn coding artifact." }
+    ]},
+    { q: "Vì sao cần thư mục common/ trong spark_jobs/?", options: [
+      { label: "A", text: "Tập trung SparkSession và helper transforms", correct: true, explain: "Giúp tái sử dụng code và dễ bảo trì." },
+      { label: "B", text: "Để lưu ảnh chụp màn hình", correct: false, explain: "Không phải mục tiêu chính." },
+      { label: "C", text: "Để bỏ qua unit test", correct: false, explain: "Unit test vẫn bắt buộc." },
+      { label: "D", text: "Vì recruiter chỉ nhìn số folder", correct: false, explain: "Chất lượng tổ chức mới quan trọng." }
+    ]},
+    { q: "README của artifact phải có phần nào?", options: [
+      { label: "A", text: "Workload scenario + data assumptions + optimization choices", correct: true, explain: "Đây là phần cốt lõi để giải thích quyết định kỹ thuật." },
+      { label: "B", text: "Chỉ liệt kê file names", correct: false, explain: "Thiếu reasoning và giá trị học thuật." },
+      { label: "C", text: "Không cần test strategy", correct: false, explain: "Test strategy là phần bắt buộc." },
+      { label: "D", text: "Không cần lessons learned", correct: false, explain: "Lessons learned giúp thể hiện tư duy cải tiến." }
+    ]},
+    { q: "Trong README artifact Spark 3.x, nên bổ sung gì để tăng độ tin cậy kỹ thuật?", options: [
+      { label: "A", text: "Nêu rõ Spark version và danh sách config đã tune (vd shuffle partitions, broadcast threshold)", correct: true, explain: "Giúp reviewer biết quyết định tối ưu gắn với môi trường cụ thể." },
+      { label: "B", text: "Chỉ ghi tên tác giả", correct: false, explain: "Thông tin này không đủ để chứng minh năng lực tối ưu." },
+      { label: "C", text: "Ẩn toàn bộ assumptions", correct: false, explain: "Thiếu assumptions thì trade-off rất khó đánh giá." },
+      { label: "D", text: "Tránh nhắc config để README ngắn", correct: false, explain: "README artifact cần reasoning kỹ thuật, không chỉ ngắn." }
+    ]},
+    { q: "Before/after thinking trong artifact dùng để làm gì?", options: [
+      { label: "A", text: "Chứng minh tối ưu có cơ sở", correct: true, explain: "Cho thấy bạn không tối ưu theo cảm tính." },
+      { label: "B", text: "Trang trí README", correct: false, explain: "Nó phải gắn với số liệu/quan sát thực tế." },
+      { label: "C", text: "Thay thế code", correct: false, explain: "Không thể thay thế implementation." },
+      { label: "D", text: "Bỏ qua Spark UI", correct: false, explain: "Spark UI thường là nguồn đo before/after." }
+    ]},
+    { q: "tests/test_join_logic.py nên tập trung vào gì?", options: [
+      { label: "A", text: "Join correctness và edge cases", correct: true, explain: "Join là nơi dễ lỗi duplicate/missing." },
+      { label: "B", text: "Đổi theme color", correct: false, explain: "Không liên quan Spark artifact." },
+      { label: "C", text: "Viết tiểu sử dự án", correct: false, explain: "README mới là nơi phù hợp." },
+      { label: "D", text: "Đếm số comment trong code", correct: false, explain: "Không phản ánh correctness." }
+    ]},
+    { q: "File nào mô tả tối ưu sort trong artifact?", options: [
+      { label: "A", text: "sort_within_partitions.py", correct: true, explain: "Đây là file bắt buộc để demo strategy sort cục bộ." },
+      { label: "B", text: "runbook.md", correct: false, explain: "Không thuộc cấu trúc artifact yêu cầu." },
+      { label: "C", text: "index.html", correct: false, explain: "Không phải file job Spark bắt buộc." },
+      { label: "D", text: "terraform.tf", correct: false, explain: "Không nằm trong scope module này." }
+    ]},
+    { q: "Điều gì làm artifact “recruiter-grade”?", options: [
+      { label: "A", text: "Code chạy được + reasoning rõ + test", correct: true, explain: "Ba yếu tố này thể hiện năng lực thực chiến." },
+      { label: "B", text: "Tên file thật dài", correct: false, explain: "Không phản ánh chất lượng kỹ thuật." },
+      { label: "C", text: "Nhiều buzzword", correct: false, explain: "Buzzword không thay được kết quả và reasoning." },
+      { label: "D", text: "Không cần assumptions", correct: false, explain: "Assumptions giúp đánh giá tính hợp lý giải pháp." }
+    ]},
+    { q: "Tại sao phải nêu data size assumptions trong README?", options: [
+      { label: "A", text: "Vì quyết định tối ưu phụ thuộc kích thước dữ liệu", correct: true, explain: "Không có assumptions thì trade-off thiếu bối cảnh." },
+      { label: "B", text: "Để README dài hơn", correct: false, explain: "Không phải mục tiêu." },
+      { label: "C", text: "Để tránh viết code", correct: false, explain: "Không đúng vai trò README." },
+      { label: "D", text: "Vì Spark không xử lý data lớn", correct: false, explain: "Spark được dùng chính cho data lớn." }
+    ]},
+    { q: "Nếu artifact chỉ có code mà không có test, điểm yếu lớn nhất là gì?", options: [
+      { label: "A", text: "Khó chứng minh độ tin cậy khi refactor", correct: true, explain: "Thiếu test khiến code thiếu bảo vệ chất lượng." },
+      { label: "B", text: "File size nhỏ hơn", correct: false, explain: "Không liên quan chất lượng." },
+      { label: "C", text: "Dễ đọc hơn luôn", correct: false, explain: "Có thể ngắn hơn nhưng kém tin cậy." },
+      { label: "D", text: "Không ảnh hưởng phỏng vấn", correct: false, explain: "Nhiều interviewer đánh giá cao testing discipline." }
+    ]},
+    { q: "Artifact tuần 16 nên phản ánh điều gì mạnh nhất?", options: [
+      { label: "A", text: "Khả năng ra quyết định Spark optimization có bằng chứng", correct: true, explain: "Đây là thông điệp quan trọng nhất cho DE role." },
+      { label: "B", text: "Số lượng framework dùng càng nhiều càng tốt", correct: false, explain: "Quá nhiều công cụ không cần thiết có thể làm loãng trọng tâm." },
+      { label: "C", text: "Không cần liên hệ roadmap", correct: false, explain: "Artifact cần bám roadmap và mục tiêu tuần." },
+      { label: "D", text: "Chỉ cần chạy local demo", correct: false, explain: "Cần thêm reasoning, tests và production mindset." }
+    ]}
+  ],
+  [
+    { q: "Mini test tuần 16 nên đánh giá điều gì chính?", options: [
+      { label: "A", text: "Khả năng nhớ cú pháp rời rạc", correct: false, explain: "Trọng tâm là tư duy hệ thống và trade-off." },
+      { label: "B", text: "Architecture + optimization + debugging + testing mindset", correct: true, explain: "Đây là core competence của tuần 16." },
+      { label: "C", text: "Thiết kế UI frontend", correct: false, explain: "Không thuộc mục tiêu tuần Spark." },
+      { label: "D", text: "Quản trị mạng nâng cao", correct: false, explain: "Không nằm trong scope module." }
+    ]},
+    { q: "Nếu điểm mini test dưới 12/20, hành động phù hợp nhất?", options: [
+      { label: "A", text: "Ôn lại module nền và làm thêm practice có trọng điểm", correct: true, explain: "Cần củng cố nền tảng trước khi nâng độ khó." },
+      { label: "B", text: "Bỏ Spark chuyển chủ đề khác", correct: false, explain: "Nên vá gap trước, không né kỹ năng cốt lõi." },
+      { label: "C", text: "Chỉ tăng cluster size", correct: false, explain: "Không giải quyết gap kiến thức." },
+      { label: "D", text: "Bỏ qua testing", correct: false, explain: "Testing là phần bắt buộc." }
+    ]},
+    { q: "Ngưỡng 16-18/20 thường phản ánh điều gì?", options: [
+      { label: "A", text: "Sẵn sàng build artifact với mức tự tin tốt", correct: true, explain: "Bạn đã nắm phần lớn kiến thức cốt lõi." },
+      { label: "B", text: "Không cần review gì thêm", correct: false, explain: "Vẫn nên review các câu sai để chắc nền." },
+      { label: "C", text: "Đã là expert tuyệt đối", correct: false, explain: "Cần thực chiến thêm để thành thạo." },
+      { label: "D", text: "Chỉ phù hợp làm lý thuyết", correct: false, explain: "Mục tiêu là áp dụng thực hành." }
+    ]},
+    { q: "Sau mini test, bước nào giúp tăng năng lực nhanh nhất?", options: [
+      { label: "A", text: "Làm lại các case join/partition/UI debugging thực tế", correct: true, explain: "Thực hành có case cụ thể giúp lấp gap hiệu quả." },
+      { label: "B", text: "Đọc thêm buzzword", correct: false, explain: "Buzzword không thay thực hành." },
+      { label: "C", text: "Chỉ ghi chép, không chạy code", correct: false, explain: "Thiếu execution experience." },
+      { label: "D", text: "Tắt Spark UI", correct: false, explain: "UI là công cụ chính để debug." }
+    ]},
+    { q: "Điều gì chứng minh bạn sẵn sàng chuyển sang dự án Spark thật?", options: [
+      { label: "A", text: "Giải thích được trade-off + có code/test chạy được", correct: true, explain: "Đây là bằng chứng thực chiến rõ nhất." },
+      { label: "B", text: "Thuộc lòng định nghĩa Spark", correct: false, explain: "Định nghĩa không đủ để vận hành job." },
+      { label: "C", text: "Không biết đọc Spark UI", correct: false, explain: "Đây là kỹ năng bắt buộc." },
+      { label: "D", text: "Không có README reasoning", correct: false, explain: "Thiếu storytelling kỹ thuật." }
+    ]},
+    { q: "Tại sao reset mini test hữu ích?", options: [
+      { label: "A", text: "Cho phép học lặp lại có phản hồi tức thì", correct: true, explain: "Iteration giúp củng cố kiến thức nhanh." },
+      { label: "B", text: "Để gian lận điểm", correct: false, explain: "Mục tiêu là học, không phải gian lận." },
+      { label: "C", text: "Để bỏ qua phần giải thích", correct: false, explain: "Giải thích là phần học quan trọng." },
+      { label: "D", text: "Không có tác dụng", correct: false, explain: "Reset giúp thực hành lại có hệ thống." }
+    ]},
+    { q: "Trong review cuối tuần, điểm nào phải kiểm tra lại nếu còn yếu?", options: [
+      { label: "A", text: "Join strategy và shuffle reasoning", correct: true, explain: "Đây là năng lực cốt lõi nhất của Spark DE." },
+      { label: "B", text: "Màu sắc sidebar", correct: false, explain: "Không liên quan năng lực Spark." },
+      { label: "C", text: "Tốc độ gõ bàn phím", correct: false, explain: "Không phải tiêu chí kỹ thuật ở đây." },
+      { label: "D", text: "Số emoji trong README", correct: false, explain: "Không ảnh hưởng chất lượng tối ưu." }
+    ]},
+    { q: "Final mini test cần bao phủ chủ đề nào?", options: [
+      { label: "A", text: "Architecture, lazy eval, joins, shuffle, partition, cache, UI, testing", correct: true, explain: "Đây là phạm vi bắt buộc của tuần 16." },
+      { label: "B", text: "Chỉ riêng syntax DataFrame", correct: false, explain: "Phạm vi này quá hẹp." },
+      { label: "C", text: "Chỉ về Airflow", correct: false, explain: "Airflow không phải trọng tâm tuần này." },
+      { label: "D", text: "Chỉ về cloud billing", correct: false, explain: "Không phản ánh đầy đủ kỹ năng Spark." }
+    ]},
+    { q: "Khi review kết quả mini test, cách làm đúng là gì?", options: [
+      { label: "A", text: "Phân tích câu sai theo nhóm năng lực", correct: true, explain: "Giúp lập kế hoạch ôn tập chính xác." },
+      { label: "B", text: "Bỏ qua câu sai", correct: false, explain: "Bỏ qua sẽ giữ nguyên lỗ hổng kiến thức." },
+      { label: "C", text: "Chỉ quan tâm điểm tổng", correct: false, explain: "Điểm tổng không chỉ ra vùng yếu cụ thể." },
+      { label: "D", text: "Không cần làm lại", correct: false, explain: "Làm lại giúp cải thiện retention." }
+    ]},
+    { q: "Mục tiêu thực tế sau W16.09 là gì?", options: [
+      { label: "A", text: "Chuyển kiến thức thành artifact và case phỏng vấn", correct: true, explain: "Kết quả tuần 16 cần đưa vào portfolio thực tế." },
+      { label: "B", text: "Dừng lại ở lý thuyết", correct: false, explain: "Roadmap ưu tiên build artifact." },
+      { label: "C", text: "Không cần code thêm", correct: false, explain: "Cần thực hành để vững kỹ năng." },
+      { label: "D", text: "Chỉ đọc docs", correct: false, explain: "Docs tốt nhưng chưa đủ nếu không build." }
+    ]}
+  ]
+];
+
+const finalTestQuestions = [
+  { q: "Thành phần nào lập kế hoạch và điều phối tasks trong Spark?", correct: "A", options: { A: "Driver", B: "Executor", C: "Shuffle service", D: "Notebook kernel" } },
+  { q: "Action nào kích hoạt thực thi DAG?", correct: "C", options: { A: "select", B: "filter", C: "write.parquet", D: "withColumn" } },
+  { q: "Join nào phù hợp khi dim rất nhỏ so với fact?", correct: "B", options: { A: "Sort-merge join", B: "Broadcast join", C: "Cartesian join", D: "Không join" } },
+  { q: "Dấu hiệu điển hình của skew trong Spark UI là gì?", correct: "D", options: { A: "Tất cả task đều nhanh", B: "Không có stage", C: "Không có shuffle", D: "Một vài task chậm vượt trội" } },
+  { q: "Mục tiêu chính của pre-aggregation trước join là gì?", correct: "A", options: { A: "Giảm dữ liệu phải shuffle", B: "Tăng số cột", C: "Bỏ key join", D: "Tăng độ khó code" } },
+  { q: "AQE trong Spark 3.x hỗ trợ gì nổi bật?", correct: "D", options: { A: "Bỏ hoàn toàn Spark UI", B: "Thay thế mọi join design", C: "Chỉ dùng cho RDD", D: "Runtime optimization như coalesce shuffle partitions và cải thiện skew handling" } },
+  { q: "Cặp nào đúng về partition APIs?", correct: "C", options: { A: "coalesce luôn tăng partition", B: "repartition không shuffle", C: "repartition thường có shuffle; coalesce thường giảm partition", D: "Cả hai giống hệt" } },
+  { q: "Partition by cột high-cardinality thường gây gì?", correct: "B", options: { A: "Tối ưu tuyệt đối", B: "Bùng nổ file nhỏ", C: "Giảm metadata", D: "Không ảnh hưởng" } },
+  { q: "Mặc định 200 của spark.sql.shuffle.partitions nên xử lý thế nào?", correct: "A", options: { A: "Xem là điểm khởi đầu và tune theo data size + target partition", B: "Giữ cố định cho mọi job", C: "Bỏ qua vì không ảnh hưởng shuffle", D: "Chỉ đổi khi job fail" } },
+  { q: "sortWithinPartitions khác sort global ở điểm nào?", correct: "A", options: { A: "Sort cục bộ từng partition", B: "Sort toàn cụm luôn", C: "Không sort", D: "Chỉ dùng cho SQL" } },
+  { q: "Khi nào cache hợp lý?", correct: "D", options: { A: "Dataset dùng một lần", B: "Job quá nhỏ", C: "Không có action", D: "Dataset được reuse nhiều lần" } },
+  { q: "Anti-pattern caching phổ biến là gì?", correct: "B", options: { A: "unpersist sau khi dùng", B: "cache mọi dataframe", C: "đo runtime trước/sau", D: "cache đúng điểm reuse" } },
+  { q: "Tab nào trong Spark UI giúp xem physical plan SQL?", correct: "C", options: { A: "Jobs", B: "Stages", C: "SQL", D: "Environment" } },
+  { q: "Tab nào dùng để xác nhận config tuning (vd shuffle partitions) đã apply?", correct: "D", options: { A: "Jobs", B: "Stages", C: "Storage", D: "Environment" } },
+  { q: "Spill to disk cao thường gợi ý điều gì?", correct: "A", options: { A: "Áp lực memory và I/O cao", B: "Code chắc chắn đúng", C: "Không cần tối ưu", D: "Network bằng 0" } },
+  { q: "Hành động nào dễ gây OOM driver?", correct: "B", options: { A: "limit(20).toPandas()", B: "collect() dataset rất lớn", C: "filter()", D: "select()" } },
+  { q: "Lý do DataFrame là default choice cho DE?", correct: "D", options: { A: "Không cần schema", B: "Không cần optimizer", C: "Không có join", D: "Schema-aware + Catalyst optimize" } },
+  { q: "Vì sao cần tách transform logic khỏi I/O để test?", correct: "A", options: { A: "Dễ unit test deterministic", B: "Để code dài hơn", C: "Để bỏ pytest", D: "Để không cần assert" } },
+  { q: "Trong artifact Spark 3.x, README nên bổ sung gì để dễ review kỹ thuật?", correct: "A", options: { A: "Spark version + configs đã tune", B: "Chỉ screenshot đẹp", C: "Ẩn assumptions", D: "Bỏ phần optimization" } },
+  { q: "Mục tiêu cuối cùng của tuần Spark trong roadmap này là gì?", correct: "C", options: { A: "Chỉ thuộc API", B: "Chỉ chạy notebook demo", C: "Xây artifact có optimization reasoning + tests", D: "Bỏ qua trade-off" } }
+];
+
+function showModule(idx, el) {
+  const modules = document.querySelectorAll('.module');
+  const navItems = document.querySelectorAll('.nav-item');
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+
+  const target = document.getElementById('m' + idx);
+  if (target) target.classList.add('active');
+
+  if (el) {
+    el.classList.add('active');
+  } else if (navItems[idx]) {
+    navItems[idx].classList.add('active');
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goNext(idx) {
+  const navItems = document.querySelectorAll('.nav-item');
+  if (idx + 1 < navItems.length) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  const navItems = document.querySelectorAll('.nav-item');
+  if (idx - 1 >= 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    toggle.textContent = '▼';
+  } else {
+    content.style.display = 'none';
+    toggle.textContent = '▶';
+  }
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const options = item.querySelectorAll('.quiz-opt');
+  const alreadyAnswered = Array.from(options).some(opt => opt.classList.contains('correct') || opt.classList.contains('wrong'));
+  if (alreadyAnswered) return;
+
+  options.forEach(opt => opt.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+
+  const explainEl = item.querySelector('.quiz-explain');
+  explainEl.textContent = (correct ? '✅ Đúng. ' : '❌ Chưa đúng. ') + explanation;
+  explainEl.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  box.classList.toggle('show');
+  btn.textContent = box.classList.contains('show') ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function renderModuleQuizzes() {
+  moduleQuizzes.forEach((questions, moduleIdx) => {
+    const container = document.getElementById(`quiz-m${moduleIdx}`);
+    if (!container) return;
+    container.innerHTML = '';
+
+    questions.forEach((question, qIdx) => {
+      const item = document.createElement('div');
+      item.className = 'quiz-item';
+
+      const qEl = document.createElement('div');
+      qEl.className = 'quiz-q';
+      qEl.textContent = `${qIdx + 1}. ${question.q}`;
+
+      const optionsWrap = document.createElement('div');
+      optionsWrap.className = 'quiz-options';
+
+      question.options.forEach(opt => {
+        const optEl = document.createElement('div');
+        optEl.className = 'quiz-opt';
+        optEl.textContent = `${opt.label}. ${opt.text}`;
+        optEl.onclick = () => answerQuiz(optEl, opt.correct, opt.explain);
+        optionsWrap.appendChild(optEl);
+      });
+
+      const explain = document.createElement('div');
+      explain.className = 'quiz-explain';
+
+      item.appendChild(qEl);
+      item.appendChild(optionsWrap);
+      item.appendChild(explain);
+      container.appendChild(item);
+    });
+  });
+}
+
+function renderFinalTest() {
+  const container = document.getElementById('final-test');
+  let html = '';
+
+  finalTestQuestions.forEach((q, idx) => {
+    const n = idx + 1;
+    html += `<div class="test-question" data-q="${n}" data-correct="${q.correct}">`;
+    html += `<div class="test-question-title">Q${n}. ${q.q}</div>`;
+    html += `<div class="test-options">`;
+    ['A', 'B', 'C', 'D'].forEach(letter => {
+      html += `<label class="test-option"><input type="radio" name="q${n}" value="${letter}"> ${letter}. ${q.options[letter]}</label>`;
+    });
+    html += `</div></div>`;
+  });
+
+  html += `<div class="test-actions">`;
+  html += `<button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>`;
+  html += `<button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>`;
+  html += `</div>`;
+  html += `<div class="test-result" id="final-test-result" style="display:none"></div>`;
+
+  container.innerHTML = html;
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  let correct = 0;
+  let wrong = 0;
+  let unanswered = 0;
+  const wrongQuestions = [];
+
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    const qNum = q.dataset.q;
+    const right = q.dataset.correct;
+    const chosen = q.querySelector(`input[name="q${qNum}"]:checked`);
+
+    if (!chosen) {
+      unanswered += 1;
+      q.classList.add('unanswered');
+      return;
+    }
+
+    if (chosen.value === right) {
+      correct += 1;
+      q.classList.add('correct');
+    } else {
+      wrong += 1;
+      q.classList.add('wrong');
+      wrongQuestions.push(`Q${qNum} (đúng: ${right})`);
+    }
+  });
+
+  const total = finalTestQuestions.length;
+  const scorePercent = Math.round((correct / total) * 100);
+  let guidance = '';
+  let chipClass = 'warn';
+
+  if (correct < 12) {
+    guidance = 'Bạn cần ôn lại nền tảng Spark architecture, lazy evaluation, join strategy và Spark UI trước khi chuyển bài build lớn.';
+    chipClass = 'bad';
+  } else if (correct <= 15) {
+    guidance = 'Bạn đã có nền tương đối ổn. Hãy tập trung vào câu sai liên quan shuffle, partitioning và caching để tăng độ chắc.';
+    chipClass = 'warn';
+  } else if (correct <= 18) {
+    guidance = 'Bạn sẵn sàng triển khai artifact Spark thực chiến. Nên bổ sung thêm một case study UI debugging để hoàn thiện.';
+    chipClass = 'good';
+  } else {
+    guidance = 'Rất tốt. Bạn đang ở mức mạnh để trình bày Spark trade-off trong phỏng vấn DE.';
+    chipClass = 'good';
+  }
+
+  const result = document.getElementById('final-test-result');
+  result.style.display = 'block';
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correct}/${total} (${scorePercent}%)</span>
+      <span class="score-chip">Đúng: ${correct}</span>
+      <span class="score-chip">Sai: ${wrong}</span>
+      <span class="score-chip">Bỏ trống: ${unanswered}</span>
+    </div>
+    <p><strong>Đánh giá:</strong> ${guidance}</p>
+    ${wrongQuestions.length ? `<p><strong>Câu cần review:</strong></p><ul class="mistake-list">${wrongQuestions.map(x => `<li>${x}</li>`).join('')}</ul>` : '<p><strong>Tuyệt vời:</strong> Bạn đã đúng tất cả câu đã chọn.</p>'}
+  `;
+}
+
+function resetFinalTest() {
+  document.querySelectorAll('#final-test input[type="radio"]').forEach(r => r.checked = false);
+  document.querySelectorAll('#final-test .test-question').forEach(q => q.classList.remove('correct', 'wrong', 'unanswered'));
+  const result = document.getElementById('final-test-result');
+  if (result) {
+    result.style.display = 'none';
+    result.innerHTML = '';
+  }
+}
+
+renderModuleQuizzes();
+renderFinalTest();
+</script>
+
+</body>
+</html>

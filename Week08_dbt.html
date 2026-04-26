@@ -40,6 +40,7 @@
   .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
   .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
   .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+  .badge-purple { color: var(--accent4); border-color: var(--accent4); background: #6e40c926; }
 
   .container { display: flex; min-height: calc(100vh - 160px); }
 
@@ -180,18 +181,19 @@
 <body>
 
 <div class="hero">
-  <h1>⚙️ Tuần 8-9 · dbt: Data Build Tool</h1>
-  <p>Giai đoạn 2 · Core Skills · ELT, Modeling, Testing, Documentation, Snapshot, Macros</p>
+  <h1>📘 Data Engineering Handbook Tutorial</h1>
+  <p>Giai đoạn 2 · Tuần 8-9 · dbt: Data Build Tool</p>
   <div class="badge-row">
-    <span class="badge badge-green">Giai đoạn 2 · Core Skills</span>
+    <span class="badge badge-purple">Giai đoạn 2 · Core Skills</span>
     <span class="badge badge-orange">Tuần 8-9 · dbt</span>
     <span class="badge badge-blue">PostgreSQL + Oracle SQL</span>
+    <span class="badge badge-green">Prerequisite: Tuần 5–7 xong</span>
   </div>
 </div>
 
 <div class="container">
   <nav class="sidebar">
-    <div class="sidebar-title">CHƯƠNG TRÌNH HỌC</div>
+    <div class="sidebar-title">Chương Trình Học</div>
     <div class="level-label">▶ TUẦN 8-9 · DBT</div>
     <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W8.01</span>dbt là gì & ELT vs ETL</div>
     <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W8.02</span>Project Structure & Configuration</div>
@@ -237,7 +239,7 @@
             <li>Hiểu lý do ELT phù hợp với cloud warehouse trong modern data stack.</li>
             <li>Nắm đúng scope tuần 8-9 theo roadmap: models, tests, docs, snapshots, macros, commands.</li>
             <li>Nhận diện mindset production: mọi transform phải version-control và testable.</li>
-            <li>Biết giới hạn nguồn handbook hiện tại về dbt để học có định hướng đúng.</li>
+            <li>Hiểu cách kết nối kiến thức tuần 8-9 với nền tảng modeling đã học ở tuần 5-7.</li>
           </ul>
         </div>
       </div>
@@ -246,6 +248,17 @@
         <div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">📖</div>3. 📖 Giải Thích Chi Tiết<span class="section-toggle">▼</span></div>
         <div class="section-content">
           <p>Trong handbook, phần mạnh nhất trước Week 8-9 là Dimensional + Fact Modeling (SCD, incremental, cumulative). dbt ở tuần này nên được xem là lớp chuẩn hóa các pattern đó thành project có DAG, test, docs và quy trình vận hành rõ ràng.</p>
+
+          <table>
+            <tr><th>Thuật ngữ</th><th>Giải thích ngắn</th><th>Ví dụ trong tuần 8-9</th></tr>
+            <tr><td>Lineage</td><td>Bản đồ phụ thuộc giữa các bảng/model</td><td><code>raw.events -&gt; stg_events -&gt; fct_host_activity_monthly</code></td></tr>
+            <tr><td>Idempotent</td><td>Chạy lại nhiều lần vẫn cho kết quả đúng</td><td>Run incremental 2 lần không phát sinh duplicate</td></tr>
+            <tr><td>Freshness</td><td>Độ trễ của dữ liệu nguồn so với hiện tại</td><td><code>dbt source freshness --select source:raw.*</code></td></tr>
+            <tr><td>Artifact</td><td>File metadata dbt tạo sau khi chạy</td><td><code>manifest.json</code>, <code>run_results.json</code></td></tr>
+          </table>
+
+          <div class="info-box tip">✅ <span><strong>Production scenario ngắn:</strong> ingest dữ liệu lúc 06:00, chạy <code>dbt build</code> lúc 06:15, nếu test/freshness fail thì dừng publish dashboard và điều tra trước giờ báo cáo.</span></div>
+
           <table>
             <tr><th>Năng lực từ handbook</th><th>Khi đưa vào dbt</th><th>Giá trị production</th></tr>
             <tr><td><code>actors_history_scd</code> (SCD2)</td><td>Snapshot + model dim lịch sử</td><td>Giữ lịch sử thay đổi ổn định cho BI</td></tr>
@@ -264,8 +277,7 @@
 <span class="output">Model + test + freshness + lineage được cập nhật cùng một chu kỳ</span></pre></div>
           </div>
 
-          <div class="info-box note">📌 <span><strong>Căn cứ handbook local:</strong> <code>intermediate-bootcamp/materials/1-dimensional-data-modeling/homework/homework.md</code>, <code>lecture-lab/incremental_scd_query.sql</code>, <code>materials/2-fact-data-modeling/homework/homework.md</code>, <code>lecture-lab/user_cumulated_populate.sql</code>.</span></div>
-          <div class="info-box warn">⚠️ <span>Handbook hiện thiên về modeling SQL; phần dbt trong tuần này cần bám thêm chuẩn docs chính thức để xác nhận adapter/macros theo môi trường thực tế.</span></div>
+          <div class="info-box warn">⚠️ <span>Khi đưa lên production, luôn kiểm tra lại tương thích adapter/package theo môi trường thực tế (đặc biệt khi chạy đa engine như PostgreSQL và Oracle).</span></div>
         </div>
       </div>
 
@@ -283,7 +295,7 @@
             <div class="summary-item"><strong>Lineage</strong>Tạo tự động qua dependency ref()/source().</div>
             <div class="summary-item"><strong>Engineering</strong>Transform code đi qua Git + PR + CI.</div>
             <div class="summary-item"><strong>Scope tuần 8-9</strong>Models, tests, docs, snapshot, macro, command.</div>
-            <div class="summary-item"><strong>Lưu ý nguồn</strong>Chi tiết dbt được nội suy từ roadmap + thực hành chuẩn.</div>
+            <div class="summary-item"><strong>Lưu ý triển khai</strong>Xác nhận adapter/package theo môi trường trước khi đưa lên production.</div>
           </div>
         </div>
       </div>
@@ -510,6 +522,23 @@ models:
           <tr><td>incremental</td><td>dữ liệu lớn, cập nhật theo thời gian</td><td>Giảm runtime/cost</td><td>Cần key + watermark chuẩn</td></tr>
           <tr><td>ephemeral</td><td>logic trung gian ngắn</td><td>Không tạo object vật lý</td><td>Debug khó hơn vì compile thành CTE</td></tr>
         </table>
+
+        <table>
+          <tr><th>Tình huống thực tế</th><th>Nên chọn</th><th>Lý do</th></tr>
+          <tr><td>Bảng nguồn nhỏ, cập nhật ít</td><td>view</td><td>Nhẹ, dễ chỉnh logic</td></tr>
+          <tr><td>Bảng BI truy vấn lặp lại liên tục</td><td>table</td><td>Đọc nhanh, ổn định latency</td></tr>
+          <tr><td>Events tăng mỗi ngày (10M+ rows)</td><td>incremental</td><td>Giảm thời gian xử lý mỗi batch</td></tr>
+          <tr><td>Logic trung gian chỉ phục vụ 1 model cuối</td><td>ephemeral</td><td>Không cần tạo object trung gian</td></tr>
+        </table>
+
+        <div class="cmd-block">
+          <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Checklist incremental trước khi merge</span></div>
+          <div class="cmd-body"><pre>1) Có unique_key phản ánh đúng business key
+2) Có watermark filter trong is_incremental()
+3) Chạy model 2 lần với cùng dữ liệu
+4) Query kiểm tra duplicate theo business key
+5) Chỉ full-refresh khi có thay đổi logic lớn</pre></div>
+        </div>
 
         <div class="cmd-block">
           <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>fct_host_activity_monthly incremental (map từ homework fact modeling)</span></div>
@@ -1527,7 +1556,7 @@ const quizBank = {
       { q: 'Lineage trong dbt được tạo từ đâu?', truth: 'Từ dependency qua ref() và source().' },
       { q: 'Production mindset của dbt gồm gì?', truth: 'Model phải đi kèm test, docs, và quy trình deploy rõ ràng.' },
       { q: 'Vì sao roadmap đặt dbt ở giai đoạn 2?', truth: 'Vì đây là kỹ năng lõi nối modeling với quality trước orchestration.' },
-      { q: 'Khi handbook thiếu chi tiết dbt nên làm gì?', truth: 'Bám roadmap và thực hành chuẩn, đồng thời ghi rõ phần nội suy hợp lý.' },
+      { q: 'Khi handbook chưa có ví dụ đủ chi tiết dbt nên làm gì?', truth: 'Bám roadmap, luyện theo project thực tế và kiểm chứng lại bằng test/docs trước khi áp dụng production.' },
       { q: 'Lưu ý chính khi dùng dbt với Oracle?', truth: 'Cần kiểm tra adapter/package tương thích và macro adaptation kỹ.' }
     ]
   },

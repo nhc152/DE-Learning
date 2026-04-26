@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 18 · Apache Kafka & Apache Flink</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 45%, #102438 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 330px; min-width: 330px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--text-muted); }
+  .level-label.l4 { color: var(--accent2); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 58px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 980px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.45rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '□'; color: var(--accent5); font-size: 1.1rem; flex-shrink: 0; margin-top: -1px; }
+  .checklist li.done::before { content: '✓'; color: var(--accent2); }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Data Engineering Handbook Tutorial</h1>
+  <p>Tuần 18 · Apache Kafka & Apache Flink cho hệ thống dữ liệu real-time</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 4 · Real-time & Analytics Patterns</span>
+    <span class="badge badge-orange">Kafka + Flink · Reliability + Correctness</span>
+    <span class="badge badge-blue">Portfolio-grade streaming mindset</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương trình Tuần 18</div>
+    <div class="level-label l4">WEEK 18 · STREAMING SYSTEMS</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W18.01</span>Tổng Quan: Vì Sao Cần Streaming?</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W18.02</span>Kafka Fundamentals</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W18.03</span>Semantics, Offsets & Reliability</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W18.04</span>Flink Fundamentals</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W18.05</span>Windows, Watermarks & Late Events</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W18.06</span>Operations & Architecture Decisions</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W18.07</span>Artifact: week18_streaming_project/</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W18.08</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+<div class="module active" id="m0">
+  <div class="module-header">
+    <div class="module-tag">Tuần 18 · W18.01</div>
+    <div class="module-title">Tổng Quan: Vì Sao Cần Streaming Systems?</div>
+    <div class="module-subtitle">Hiểu đúng bài toán kinh doanh trước khi chọn Kafka/Flink</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:12.5%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Phần</th><th>Nội dung</th><th>Kết quả mong đợi</th></tr>
+      <tr><td>Bài toán</td><td>Vì sao batch không đủ trong một số tình huống</td><td>Biết phân biệt nhu cầu realtime thật</td></tr>
+      <tr><td>Use cases</td><td>Fraud, live dashboard, recommendation, alerting, IoT</td><td>Gắn kỹ thuật với business impact</td></tr>
+      <tr><td>Trade-off</td><td>Latency vs complexity vs cost</td><td>Không chọn streaming theo hype</td></tr>
+      <tr><td>Kết tuần</td><td>Checklist năng lực đầu ra</td><td>Biết mình cần đạt gì ở Week18</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Hiểu bản chất event streaming là giải pháp cho bài toán <strong>time-sensitive</strong>, không phải mặc định tốt hơn batch.</li>
+      <li>Biết đánh giá bài toán theo SLA latency, độ chính xác, chi phí vận hành và độ phức tạp hệ thống.</li>
+      <li>Xây tư duy Data Engineer: chọn kiến trúc theo business outcome, không theo tool trend.</li>
+    </ul>
+    <div class="info-box tip">✅ <span>Nếu stakeholder không có yêu cầu phản ứng nhanh theo phút/giây, daily batch vẫn có thể là phương án tốt hơn.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Khi nào batch không đủ?</h3>
+    <p>Batch mạnh ở tính đơn giản và chi phí thấp, nhưng có giới hạn khi business cần phản ứng gần thời gian thực. Ví dụ fraud transaction: phát hiện sau 24 giờ là quá muộn vì thiệt hại đã xảy ra.</p>
+    <table>
+      <tr><th>Use case</th><th>Latency cần thiết</th><th>Vì sao batch yếu</th></tr>
+      <tr><td>Fraud detection</td><td>1-5 giây</td><td>Chặn giao dịch phải xảy ra trước khi giao dịch hoàn tất</td></tr>
+      <tr><td>Live dashboard vận hành</td><td>&lt; 1 phút</td><td>Dashboard trễ 1 ngày không giúp xử lý incident</td></tr>
+      <tr><td>Recommendation in-session</td><td>100ms-5 giây</td><td>Gợi ý sau khi user rời trang là mất giá trị</td></tr>
+      <tr><td>Alerting hệ thống</td><td>vài giây</td><td>Phát hiện trễ làm kéo dài downtime</td></tr>
+      <tr><td>IoT telemetry</td><td>liên tục</td><td>Thiết bị lỗi cần cảnh báo sớm để tránh hỏng chuỗi</td></tr>
+    </table>
+
+    <h3>Latency vs Complexity trade-off</h3>
+    <table>
+      <tr><th>Mô hình</th><th>Latency</th><th>Độ phức tạp</th><th>Phù hợp</th></tr>
+      <tr><td>Daily batch</td><td>Giờ/ngày</td><td>Thấp</td><td>Báo cáo định kỳ, cost-sensitive</td></tr>
+      <tr><td>Micro-batch</td><td>5-15 phút</td><td>Trung bình</td><td>Near real-time đơn giản</td></tr>
+      <tr><td>True streaming</td><td>Giây/sub-second</td><td>Cao</td><td>Fraud, alerting, personalization nhanh</td></tr>
+    </table>
+
+    <h3>Event-driven architecture cơ bản</h3>
+    <ul>
+      <li><strong>Producer</strong> phát sự kiện khi business action xảy ra (order_created, payment_failed).</li>
+      <li><strong>Broker</strong> (Kafka) lưu và phân phối event theo topic.</li>
+      <li><strong>Consumer/Processor</strong> xử lý, enrich, aggregate, alert.</li>
+      <li><strong>Sink systems</strong> nhận kết quả: DWH, cache, alerting, dashboard.</li>
+    </ul>
+
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Decision checklist mẫu</span></div><div class="cmd-body"><pre><span class="comment"># 1) Business SLA</span>
+- Cần phản ứng trong bao lâu? (giây / phút / giờ)
+
+<span class="comment"># 2) Giá trị của dữ liệu mới</span>
+- Dữ liệu trễ 1 giờ còn hữu ích không?
+
+<span class="comment"># 3) Chi phí vận hành</span>
+- Team có đủ năng lực on-call cho hệ streaming chưa?
+
+<span class="comment"># 4) Sai số chấp nhận</span>
+- Chấp nhận duplicate/late event đến mức nào?</pre></div></div>
+
+    <div class="info-box warn">⚠️ <span>Anti-pattern: "Streaming cho mọi pipeline". Nếu không có SLA realtime rõ ràng, bạn sẽ tăng độ phức tạp và chi phí vận hành mà không tăng giá trị kinh doanh.</span></div>
+
+    <h3>Khi nào daily batch là đủ?</h3>
+    <ul>
+      <li>Báo cáo tài chính cuối ngày.</li>
+      <li>ETL nội bộ chỉ cần update buổi sáng.</li>
+      <li>Data science feature table không cần phản ứng tức thời.</li>
+      <li>Team nhỏ, chưa có năng lực vận hành distributed streaming stack.</li>
+    </ul>
+
+    <h3>Week outcomes checklist</h3>
+    <ul class="checklist">
+      <li class="done">Giải thích được vì sao cần Kafka và Flink trong ngữ cảnh business</li>
+      <li class="done">Phân biệt được topic/partition/offset/retention</li>
+      <li class="done">Đánh giá được delivery semantics theo rủi ro dữ liệu</li>
+      <li class="done">Hiểu state, windows, watermark, late events</li>
+      <li class="done">Biết metric nào cần monitor để job chạy ổn định</li>
+      <li class="done">Thiết kế được artifact portfolio có runbook rõ ràng</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Mục tiêu cốt lõi của streaming systems là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Streaming sinh ra để xử lý dữ liệu liên tục với độ trễ thấp.')">A. Xử lý dữ liệu liên tục với độ trễ thấp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì streaming không phải chỉ để thay database hay thay ETL batch hoàn toàn.')">B. Thay thế hoàn toàn mọi hệ thống batch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì độ trễ thấp không tự động giúp lưu trữ rẻ hơn.')">C. Giảm chi phí lưu trữ về gần 0</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì streaming vẫn cần dữ liệu đầu vào thật, không tự tạo dữ liệu mới.')">D. Tự tạo dữ liệu mới cho mô hình AI</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Use case nào thường không cần streaming ngay?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì fraud thường cần phản ứng theo giây.')">A. Chặn giao dịch gian lận real-time</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Báo cáo tổng hợp cuối ngày thường phù hợp batch.')">B. Báo cáo doanh thu cuối ngày</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì alerting hạ tầng cần độ trễ thấp.')">C. Cảnh báo hệ thống sập dịch vụ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì recommendation trong phiên thường cần realtime.')">D. Gợi ý sản phẩm trong lúc user đang duyệt</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Trade-off chính khi chuyển từ batch sang streaming là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bạn đổi lấy latency thấp bằng độ phức tạp vận hành cao hơn.')">A. Giảm latency nhưng tăng complexity vận hành</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì streaming không làm logic business tự đơn giản hơn.')">B. Giảm cả latency lẫn complexity</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì streaming không tự giảm yêu cầu monitoring.')">C. Không cần quan tâm observability</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì streaming vẫn cần quản lý schema, semantics, state rất chặt.')">D. Bỏ hoàn toàn vấn đề chất lượng dữ liệu</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Đâu là mô tả đúng về event-driven architecture?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Producer phát event, broker truyền tải, consumer xử lý.')">A. Producer phát event, broker lưu/phân phối, consumer xử lý</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì event-driven không yêu cầu database polling ở mọi nơi.')">B. Tất cả service phải polling DB mỗi giây</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải hệ event-driven nào cũng đồng bộ theo request-response.')">C. Mọi thành phần gọi API đồng bộ trực tiếp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì event-driven vẫn cần contract schema rõ ràng.')">D. Không cần định nghĩa schema event</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Lý do nào hợp lý để chọn streaming cho fraud detection?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Quyết định phải ra nhanh trước khi giao dịch hoàn tất.')">A. Cần quyết định trong vài giây để giảm thiệt hại</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì streaming không phải để làm dashboard đẹp hơn đơn thuần.')">B. Vì dashboard màu sắc đẹp hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì batch ban đêm không đáp ứng phòng chống gian lận tức thời.')">C. Vì muốn gom dữ liệu đến cuối ngày mới xử lý</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chọn tool theo trend là anti-pattern nguy hiểm.')">D. Vì công ty khác cũng dùng Kafka</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Phát biểu nào đúng về streaming và batch?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Hai mô hình bổ sung nhau, không loại trừ nhau.')">A. Batch và streaming thường cùng tồn tại trong một kiến trúc</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì batch vẫn rất quan trọng cho nhiều bài toán.')">B. Đã có streaming thì batch trở nên vô dụng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì streaming không loại bỏ nhu cầu backfill và historical recompute.')">C. Streaming không cần dữ liệu lịch sử</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì nhiều doanh nghiệp chạy hybrid kiến trúc trong thời gian dài.')">D. Không thể kết hợp cả hai</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Tín hiệu nào cho thấy bạn đang overkill với streaming?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không có SLA realtime rõ mà vẫn build stack phức tạp là over-engineering.')">A. Không có SLA realtime rõ nhưng vẫn triển khai full streaming stack</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì có yêu cầu alerting theo giây thì streaming là hợp lý.')">B. Cần alert sự cố dịch vụ trong vài giây</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì high-value per-minute dashboard có thể cần stream.')">C. Dashboard vận hành cần cập nhật mỗi phút</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì fraud prevention là use case điển hình của stream.')">D. Chặn giao dịch giả mạo theo thời gian thực</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Trong tư duy Data Engineer, quyết định kiến trúc nên bắt đầu từ đâu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bắt đầu từ business SLA và mức độ chấp nhận rủi ro.')">A. Business outcome và SLA</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bắt đầu từ công nghệ yêu thích dễ lệch mục tiêu kinh doanh.')">B. Tool đang hot trên thị trường</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số lượng service hiện có không tự quyết định mô hình xử lý.')">C. Số service trong microservices</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì giao diện dashboard không phải yếu tố quyết định kiến trúc dữ liệu.')">D. Màu sắc dashboard</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Lý do nào khiến monitoring quan trọng hơn khi làm streaming?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Hệ realtime chạy liên tục nên lỗi tích lũy rất nhanh.')">A. Pipeline chạy liên tục, sai lệch nhỏ có thể phình to nhanh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì streaming không phải mô hình tự chữa mọi lỗi.')">B. Vì Kafka tự sửa mọi lỗi logic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì stream không làm mất nhu cầu theo dõi chất lượng dữ liệu.')">C. Vì đã có checkpoint nên không cần cảnh báo</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì dashboard log đơn giản không thay cho observability có cấu trúc.')">D. Vì chỉ cần xem log thủ công cuối tuần</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Kết quả học tập quan trọng nhất của W18.01 là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bạn biết khi nào nên và không nên dùng streaming.')">A. Biết quyết định streaming dựa trên SLA và trade-off</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì W18.01 không nhằm viết production code ngay.')">B. Hoàn thành cluster production full HA ngay</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì W18.01 là mô-đun định hướng, chưa phải tuning chuyên sâu.')">C. Tối ưu kernel hệ điều hành cho broker</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ học thuật ngữ mà không gắn business là chưa đạt.')">D. Nhớ tên nhiều buzzword càng tốt</div></div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+    <div class="summary-item"><strong>Core idea</strong>Streaming phục vụ quyết định nhanh theo sự kiện</div>
+    <div class="summary-item"><strong>Trade-off</strong>Latency thấp đổi lấy complexity cao</div>
+    <div class="summary-item"><strong>Use case fit</strong>Fraud, alerting, live ops dashboard, IoT</div>
+    <div class="summary-item"><strong>Use case not-fit</strong>Báo cáo định kỳ không cần realtime</div>
+    <div class="summary-item"><strong>Anti-pattern</strong>Streaming-first mà không có SLA rõ</div>
+    <div class="summary-item"><strong>Mindset</strong>Business outcome trước, công nghệ sau</div>
+  </div></div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+    <div class="practice-task"><div class="practice-task-header">Bài tập 1: Chọn mô hình xử lý cho 3 bài toán</div><div class="practice-task-body">
+      <p>Phân loại 3 tình huống sau thành <strong>daily batch</strong>, <strong>micro-batch</strong>, hoặc <strong>streaming</strong>: (1) báo cáo doanh thu ngày, (2) cảnh báo lỗi API, (3) gợi ý sản phẩm trong phiên mua.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>(1) daily batch, (2) streaming, (3) streaming hoặc micro-batch rất ngắn tùy SLA. Lý do chính: giá trị dữ liệu giảm nhanh theo thời gian ở (2) và (3).</p></div>
+    </div></div>
+    <div class="practice-task"><div class="practice-task-header">Bài tập 2: Viết SLA statement cho pipeline</div><div class="practice-task-body">
+      <p>Viết 4 dòng: business mục tiêu, latency tối đa, tỷ lệ mất dữ liệu chấp nhận, và hệ quả nếu pipeline trễ.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>SLA example</span></div><div class="cmd-body"><pre>- Objective: phát hiện giao dịch bất thường trước khi settle.
+- Latency: p95 end-to-end &lt; 8 giây.
+- Data loss tolerance: 0 mất event, chấp nhận duplicate xử lý idempotent.
+- Business impact: trễ &gt; 30 giây làm tăng chargeback cost.</pre></div></div></div>
+    </div></div>
+  </div></div>
+
+  <div class="nav-buttons"><div></div><button class="nav-btn primary" onclick="goNext(0)">Sang W18.02</button></div>
+</div>
+
+<div class="module" id="m1">
+  <div class="module-header">
+    <div class="module-tag">Tuần 18 · W18.02</div>
+    <div class="module-title">Kafka Fundamentals: Topics, Partitions, Producers, Consumers</div>
+    <div class="module-subtitle">Nắm cơ chế lưu trữ và phân phối event để scale an toàn</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Chủ đề</th><th>Nội dung bắt buộc</th><th>Ứng dụng</th></tr>
+      <tr><td>Topic/Partition</td><td>Ordering trong partition, scale qua nhiều partition</td><td>Thiết kế throughput</td></tr>
+      <tr><td>Producer/Consumer</td><td>Gửi và đọc event, consumer group</td><td>Tách producer khỏi downstream</td></tr>
+      <tr><td>Retention/Replay</td><td>Lưu event theo thời gian hoặc dung lượng</td><td>Backfill, reprocess</td></tr>
+      <tr><td>Partition key</td><td>Key-based partitioning để giữ ordering cục bộ</td><td>Đảm bảo đúng logic business</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Hiểu đúng 4 khái niệm nền tảng: <strong>topic, partition, offset, consumer group</strong>.</li>
+      <li>Biết cách scale consumer theo partition thay vì scale mù theo số pod.</li>
+      <li>Tránh anti-pattern phổ biến: giả định global ordering trên toàn topic.</li>
+    </ul>
+    <div class="info-box note">📌 <span>Kafka đảm bảo thứ tự trong <strong>một partition</strong>, không đảm bảo thứ tự toàn topic khi có nhiều partition.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Topic và Partition</h3>
+    <p>Topic là luồng logic của event. Partition là shard vật lý để scale throughput và parallelism. Mỗi record có offset tăng dần trong partition.</p>
+    <table>
+      <tr><th>Khái niệm</th><th>Ý nghĩa</th><th>Lưu ý thiết kế</th></tr>
+      <tr><td>Topic</td><td>Danh mục event (vd: orders)</td><td>Đặt tên theo domain, tránh topic đa mục đích</td></tr>
+      <tr><td>Partition</td><td>Phân mảnh dữ liệu của topic</td><td>Số partition giới hạn tối đa consumer active</td></tr>
+      <tr><td>Offset</td><td>Vị trí record trong partition</td><td>Không tái sử dụng để làm ID business</td></tr>
+      <tr><td>Replication</td><td>Nhân bản partition qua broker</td><td>Tăng durability nhưng tốn tài nguyên</td></tr>
+    </table>
+
+    <h3>Producer basics</h3>
+    <ul>
+      <li>Producer gửi record vào topic, có thể kèm key để quyết định partition.</li>
+      <li>Key giống nhau thường vào cùng partition, hữu ích cho ordering theo entity (user_id, account_id).</li>
+      <li>Acks và retries ảnh hưởng mạnh đến độ tin cậy.</li>
+    </ul>
+
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>kafka_producer_demo.py (concept)</span></div><div class="cmd-body"><pre><span class="comment"># key=customer_id để giữ ordering theo customer</span>
+producer.send(
+    topic="orders.events",
+    key=str(customer_id).encode(),
+    value=json.dumps(event).encode()
+)
+<span class="comment"># flush có thể gọi theo batch để giảm overhead</span></pre></div></div>
+
+    <h3>Consumer basics và Consumer Group</h3>
+    <ul>
+      <li>Mỗi consumer group nhận toàn bộ dữ liệu topic theo cơ chế chia partition.</li>
+      <li>Trong cùng group: mỗi partition chỉ do một consumer active đọc tại một thời điểm.</li>
+      <li>Muốn nhiều ứng dụng đọc cùng topic, tạo <strong>group id</strong> khác nhau.</li>
+    </ul>
+
+    <h3>Retention và Replay</h3>
+    <p>Kafka không chỉ là queue tạm thời. Nhờ retention, bạn có thể replay để reprocess khi bug logic hoặc cần backfill metric mới.</p>
+    <div class="info-box tip">✅ <span>Retention + replay giúp bạn sửa pipeline mà không yêu cầu upstream phát lại dữ liệu từ đầu.</span></div>
+
+    <h3>Anti-pattern cần tránh</h3>
+    <div class="info-box warn">⚠️ <span>Giả định global ordering toàn topic. Nếu logic cần thứ tự theo user/order, bắt buộc dùng key partition phù hợp và xử lý idempotent downstream.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Kafka topic là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Topic là luồng logic chứa các event cùng loại.')">A. Luồng logic để lưu và phân phối event</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì topic không phải file cấu hình broker.')">B. File cấu hình của Kafka broker</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì topic không phải consumer group.')">C. Tên của một consumer group</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì topic không đại diện cho một partition duy nhất.')">D. Một partition duy nhất bắt buộc</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Ordering của Kafka được đảm bảo ở đâu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kafka đảm bảo ordering trong từng partition.')">A. Trong từng partition</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì toàn topic có thể xen kẽ thứ tự giữa các partition.')">B. Toàn topic bất kể partition</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì ordering không phụ thuộc vào số broker đơn lẻ.')">C. Chỉ khi có đúng 1 broker</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì ordering không phải thuộc tính của consumer group.')">D. Trong consumer group name</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Consumer group giúp gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Group giúp chia tải đọc giữa nhiều consumer.')">A. Scale đọc dữ liệu theo partition</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì group không dùng để mã hóa dữ liệu.')">B. Mã hóa record trước khi lưu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì group không thay thế retention policy.')">C. Tự động tăng retention vô hạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì group không đảm bảo exactly-once end-to-end.')">D. Loại bỏ hoàn toàn duplicate dữ liệu</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Muốn giữ thứ tự theo user_id, nên làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng user_id làm key để record vào cùng partition.')">A. Dùng user_id làm message key</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì random partition sẽ phá ordering theo user.')">B. Random partition cho đều tải</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tăng partition không tự giữ thứ tự entity.')">C. Chỉ tăng số partition lên rất lớn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tạo nhiều topic không giải quyết ordering theo user trong một luồng.')">D. Tách user thành nhiều topic ngẫu nhiên</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Retention mang lại giá trị nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Retention cho phép replay dữ liệu để xử lý lại.')">A. Replay/backfill khi cần reprocess</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì retention không làm giảm latency tự động.')">B. Giảm latency về 0</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì retention không thay cho backup chiến lược toàn hệ thống.')">C. Thay thế hoàn toàn backup</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì retention không xóa nhu cầu schema governance.')">D. Không cần schema contract nữa</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Nếu topic có 6 partition, cùng group tối đa bao nhiêu consumer active đọc song song?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tối đa 6 consumer active cho 6 partition trong cùng group.')">A. 6</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì 12 consumer sẽ có consumer idle khi thiếu partition.')">B. 12</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì 1 vẫn chạy được nhưng không tối đa hóa parallelism.')">C. 1</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số broker không quyết định trực tiếp số consumer active của một group.')">D. Bằng số broker</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Replication trong Kafka nhằm mục đích nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Replication tăng khả năng chịu lỗi broker.')">A. Tăng durability và fault tolerance</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì replication không phải cơ chế nén dữ liệu.')">B. Nén dữ liệu để tiết kiệm disk</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì replication không tự tăng thứ tự toàn topic.')">C. Đảm bảo global ordering</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì replication không thay cho consumer offset commit.')">D. Quản lý offset phía consumer</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Phát biểu nào là anti-pattern?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là hiểu sai phổ biến về Kafka ordering.')">A. Giả định toàn topic luôn có thứ tự tuyệt đối</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì nói đúng: ordering chỉ đúng trong partition.')">B. Xem ordering theo partition là mặc định Kafka</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì replay là khả năng mạnh của Kafka.')">C. Dùng retention để replay khi fix bug</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì key-based partitioning là kỹ thuật khuyến nghị.')">D. Dùng key để đảm bảo ordering theo entity</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Muốn hai ứng dụng độc lập cùng đọc toàn bộ topic, nên làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng hai consumer group khác nhau.')">A. Dùng hai group id khác nhau</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì cùng group sẽ chia nhau record, không phải cùng nhận toàn bộ.')">B. Dùng cùng một group id</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ tăng partition không làm app thứ hai tự nhận đủ dữ liệu.')">C. Tăng partition rồi giữ nguyên group</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không cần clone topic để nhiều app đọc.')">D. Nhân đôi topic vật lý thủ công</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Chiến lược partition key nào thường hợp lý nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chọn key gắn với đơn vị cần ordering và cân bằng tải.')">A. Key theo business entity cần ordering</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì key ngẫu nhiên phá ordering theo entity.')">B. Key ngẫu nhiên hoàn toàn cho mọi bài toán</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì key cố định sẽ tạo hot partition.')">C. Một key duy nhất cho toàn bộ message</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì để null key liên tục có thể làm khó đảm bảo logic cục bộ.')">D. Không bao giờ dùng key</div></div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+    <div class="summary-item"><strong>Topic</strong>Luồng logic của event theo domain</div>
+    <div class="summary-item"><strong>Partition</strong>Đơn vị scale throughput và ordering cục bộ</div>
+    <div class="summary-item"><strong>Consumer group</strong>Scale đọc qua chia partition</div>
+    <div class="summary-item"><strong>Retention</strong>Nền tảng cho replay và backfill</div>
+    <div class="summary-item"><strong>Partition key</strong>Giữ ordering theo business entity</div>
+    <div class="summary-item"><strong>Anti-pattern</strong>Tin vào global ordering toàn topic</div>
+  </div></div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+    <div class="practice-task"><div class="practice-task-header">Bài tập 1: Thiết kế partition strategy</div><div class="practice-task-body">
+      <p>Use case: hệ thống thanh toán 25k events/giây. Bạn cần vừa giữ ordering theo account_id vừa tránh hot partition. Hãy đề xuất partition key và số partition ban đầu.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Dùng <code>account_id</code> làm key để giữ ordering cục bộ theo tài khoản. Bắt đầu 24-48 partitions tùy throughput thực nghiệm. Theo dõi skew và lag để tăng partition có kiểm soát.</p></div>
+    </div></div>
+    <div class="practice-task"><div class="practice-task-header">Bài tập 2: Kịch bản replay</div><div class="practice-task-body">
+      <p>Consumer tính sai KPI trong 3 giờ do bug code. Viết 4 bước xử lý bằng retention + replay để sửa dữ liệu.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><ol><li>Fix code và deploy version mới.</li><li>Reset consumer offset về thời điểm trước bug.</li><li>Reprocess dữ liệu với consumer idempotent.</li><li>Đối soát KPI đã sửa với batch kiểm chứng.</li></ol></div>
+    </div></div>
+  </div></div>
+
+  <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(1)">Quay lại W18.01</button><button class="nav-btn primary" onclick="goNext(1)">Sang W18.03</button></div>
+</div>
+
+<div class="module" id="m2">
+  <div class="module-header">
+    <div class="module-tag">Tuần 18 · W18.03</div>
+    <div class="module-title">Delivery Semantics, Offsets & Reliability</div>
+    <div class="module-subtitle">Thiết kế pipeline chịu lỗi: duplicate, retry, poison message, dead-letter</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:37.5%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Nhóm</th><th>Kiến thức chính</th><th>Mục tiêu kỹ thuật</th></tr>
+      <tr><td>Offsets</td><td>Vị trí đọc và commit strategy</td><td>Không mất dữ liệu khi restart</td></tr>
+      <tr><td>Semantics</td><td>At-most, at-least, exactly-once</td><td>Chọn theo rủi ro business</td></tr>
+      <tr><td>Reliability patterns</td><td>Idempotent consumer, retries/backoff, DLT</td><td>Xử lý lỗi có kiểm soát</td></tr>
+      <tr><td>Anti-pattern</td><td>Tin exactly-once giải quyết mọi thứ</td><td>Giữ tư duy thực tế production</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Biết cách commit offset để cân bằng giữa tốc độ và tính đúng.</li>
+      <li>Hiểu vì sao downstream vẫn có duplicate dù hệ thống quảng cáo exactly-once.</li>
+      <li>Thiết kế quy trình xử lý poison message và DLT để không làm pipeline kẹt vô hạn.</li>
+    </ul>
+    <div class="info-box warn">⚠️ <span>Exactly-once trong một phạm vi hẹp không đồng nghĩa toàn hệ thống end-to-end là exactly-once.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Offsets và commit strategy</h3>
+    <p>Offset là con trỏ tiến độ đọc của consumer. Commit quá sớm có thể mất dữ liệu, commit quá muộn tăng duplicate khi restart.</p>
+    <table>
+      <tr><th>Chiến lược</th><th>Mô tả</th><th>Rủi ro</th></tr>
+      <tr><td>Auto-commit sớm</td><td>Commit định kỳ trước khi xử lý xong</td><td>Mất dữ liệu khi crash sau commit</td></tr>
+      <tr><td>Manual commit sau xử lý</td><td>Commit khi downstream thành công</td><td>Có thể duplicate khi retry/restart</td></tr>
+      <tr><td>Transaction-aware</td><td>Gắn commit với transaction processing</td><td>Complexity cao, phụ thuộc hệ sink</td></tr>
+    </table>
+
+    <h3>Semantics thực tế</h3>
+    <ul>
+      <li><strong>At-most-once:</strong> không duplicate nhưng có thể mất message.</li>
+      <li><strong>At-least-once:</strong> không mất message nhưng có thể duplicate.</li>
+      <li><strong>Exactly-once:</strong> giảm duplicate trong phạm vi hỗ trợ, vẫn cần thiết kế idempotent end-to-end.</li>
+    </ul>
+
+    <h3>Idempotent consumer cho downstream</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>kafka_consumer_idempotent.py (concept)</span></div><div class="cmd-body"><pre><span class="comment"># unique event_id ở sink để chống duplicate</span>
+INSERT INTO payments_processed(event_id, account_id, amount, processed_at)
+VALUES (%s, %s, %s, now())
+ON CONFLICT (event_id) DO NOTHING;
+
+<span class="comment"># chỉ commit offset sau khi câu lệnh trên thành công</span>
+consumer.commit()</pre></div></div>
+
+    <h3>Poison message, retries, backoff, dead-letter topic</h3>
+    <ul>
+      <li><strong>Poison message</strong>: message lỗi lặp lại và không xử lý được bằng retry ngắn.</li>
+      <li><strong>Retries + backoff</strong>: retry tăng dần khoảng nghỉ để tránh bão lỗi.</li>
+      <li><strong>Dead-letter topic</strong>: chuyển message lỗi sang topic riêng để điều tra thay vì chặn toàn luồng.</li>
+    </ul>
+
+    <div class="cmd-block"><div class="cmd-header"><span>Retry policy mẫu</span></div><div class="cmd-body"><pre>max_retries = 5
+backoff_seconds = [1, 2, 5, 10, 30]
+if retry_exhausted:
+    send_to_topic("orders.events.dlt", original_event, error_context)</pre></div></div>
+
+    <div class="info-box tip">✅ <span>Kết hợp at-least-once + idempotent sink là mô hình rất thực dụng, dễ vận hành hơn chạy theo exactly-once tuyệt đối.</span></div>
+    <div class="info-box warn">⚠️ <span>Anti-pattern: Tin rằng bật exactly-once flag là xong reliability. Bạn vẫn phải xử lý schema evolution, timeout, external side effects và duplicate ở sink ngoài Kafka.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">At-least-once nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không mất message nhưng có khả năng xử lý lặp.')">A. Không mất message, có thể duplicate</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì at-least-once không đảm bảo không duplicate.')">B. Không duplicate tuyệt đối</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì at-least-once không cho phép mất message tùy ý.')">C. Có thể mất message miễn nhanh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đây không phải định nghĩa throughput.')">D. Chỉ nói về tăng throughput</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Commit offset khi nào an toàn nhất với at-least-once?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Commit sau khi xử lý thành công giúp tránh mất dữ liệu.')">A. Sau khi downstream xử lý thành công</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì commit trước xử lý có thể mất dữ liệu khi crash.')">B. Trước khi xử lý message</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không commit sẽ làm đọc lại vô hạn và khó kiểm soát.')">C. Không commit bao giờ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì commit theo cảm giác gây inconsistency.')">D. Commit ngẫu nhiên khi CPU thấp</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Idempotent consumer giúp gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Idempotent xử lý an toàn khi message đến lặp.')">A. Tránh tác động lặp khi gặp duplicate</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì idempotent không làm message tự đúng schema.')">B. Tự sửa schema sai</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì idempotent không thay cho retry policy.')">C. Loại bỏ nhu cầu retry/backoff</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì idempotent không tăng số partition.')">D. Tự scale partition theo tải</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Poison message nên xử lý thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Retry có giới hạn rồi chuyển DLT để điều tra.')">A. Retry có kiểm soát rồi chuyển sang dead-letter topic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì retry vô hạn sẽ kẹt pipeline.')">B. Retry vô hạn cho tới khi tự hết lỗi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bỏ message im lặng làm mất dữ liệu không truy vết.')">C. Bỏ message lỗi mà không ghi dấu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì restart liên tục không giải quyết dữ liệu xấu.')">D. Restart service liên tục</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Dead-letter topic dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách message lỗi để không chặn luồng chính.')">A. Cô lập message lỗi để phân tích và xử lý sau</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì DLT không thay message queue chính.')">B. Thay thế topic chính của business</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì DLT không có mục tiêu giảm chi phí lưu trữ.')">C. Giảm retention xuống 0 cho toàn hệ thống</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì DLT không phải cơ chế tăng security trực tiếp.')">D. Mã hóa tất cả message tự động</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Phát biểu đúng về exactly-once là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Exactly-once có phạm vi và giới hạn, không phải phép màu toàn hệ.')">A. Có ích nhưng không giải quyết mọi lỗi end-to-end</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì vẫn có thể phát sinh vấn đề ở hệ downstream ngoài phạm vi transaction.')">B. Bật lên là loại bỏ toàn bộ duplicate mọi nơi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì exactly-once không phải chỉ dành cho batch.')">C. Chỉ liên quan batch pipeline</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì exactly-once không làm biến mất nhu cầu monitoring.')">D. Không cần observability nữa</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Backoff trong retry có tác dụng chính nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Backoff giảm áp lực lên hệ thống đang lỗi.')">A. Tránh hammer liên tục vào hệ downstream đang sự cố</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì backoff không tăng ordering guarantee.')">B. Tăng ordering toàn topic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì backoff không tăng retention trực tiếp.')">C. Tăng thời gian lưu dữ liệu Kafka</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì backoff không thay thế schema registry.')">D. Thay cho quản lý schema</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Nếu commit offset trước khi ghi DB thành công, rủi ro là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có thể mất dữ liệu vì message bị coi là đã xử lý.')">A. Mất dữ liệu khi consumer crash giữa chừng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì commit sớm không làm tăng duplicate, mà tăng nguy cơ mất dữ liệu.')">B. Duplicate tăng vô hạn nhưng không mất dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì commit sớm không giúp tăng throughput bền vững nếu fail.')">C. Luôn tăng throughput an toàn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì lỗi này nghiêm trọng, không phải chỉ đổi metric dashboard.')">D. Chỉ ảnh hưởng UI dashboard</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Mô hình thực tế phổ biến cho pipeline nghiệp vụ là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. At-least-once + idempotent sink thường là điểm cân bằng tốt.')">A. At-least-once + idempotent consumer/sink</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì at-most-once dễ mất dữ liệu với nghiệp vụ quan trọng.')">B. At-most-once cho mọi payment event</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không retry làm pipeline mong manh.')">C. Không retry, fail là bỏ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì exactly-once end-to-end tuyệt đối hiếm và đắt.')">D. Exactly-once tuyệt đối cho mọi hệ ngoài</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Anti-pattern quan trọng nhất của module này?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tin exactly-once giải quyết hết vấn đề là hiểu sai nguy hiểm.')">A. Coi exactly-once như giải pháp vạn năng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì theo dõi duplicate là thực hành tốt.')">B. Theo dõi duplicate rate downstream</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì dùng DLT có kiểm soát là best practice.')">C. Tách DLT để điều tra lỗi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì commit đúng thời điểm là cần thiết.')">D. Commit offset sau xử lý thành công</div></div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+    <div class="summary-item"><strong>Offset</strong>Con trỏ tiến độ đọc của consumer</div>
+    <div class="summary-item"><strong>Semantics</strong>Chọn theo rủi ro mất dữ liệu vs duplicate</div>
+    <div class="summary-item"><strong>Idempotency</strong>Vũ khí bắt buộc cho downstream thực tế</div>
+    <div class="summary-item"><strong>Poison handling</strong>Retry có giới hạn + dead-letter topic</div>
+    <div class="summary-item"><strong>Reliability</strong>Cần phối hợp nhiều lớp, không có nút thần kỳ</div>
+    <div class="summary-item"><strong>Anti-pattern</strong>Lạm dụng từ khóa exactly-once</div>
+  </div></div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+    <div class="practice-task"><div class="practice-task-header">Bài tập 1: Semantics decision task</div><div class="practice-task-body">
+      <p>Chọn semantics cho 3 luồng: (1) clickstream analytics, (2) payment settlement, (3) email notification. Giải thích vì sao.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>(1) at-least-once + dedupe theo session/user, (2) at-least-once + idempotent ledger cực chặt hoặc transaction-based phạm vi hẹp, (3) at-least-once với idempotent notification key.</p></div>
+    </div></div>
+    <div class="practice-task"><div class="practice-task-header">Bài tập 2: Thiết kế DLT policy</div><div class="practice-task-body">
+      <p>Viết policy gồm max retries, backoff strategy, format message DLT (event_id, error_type, stacktrace rút gọn, first_seen_at).</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><ul><li>max_retries: 5</li><li>backoff: exponential 1s, 2s, 4s, 8s, 16s</li><li>DLT payload: giữ raw_event + metadata lỗi</li><li>runbook: ticket tự động khi DLT rate &gt; ngưỡng</li></ul></div>
+    </div></div>
+  </div></div>
+
+  <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(2)">Quay lại W18.02</button><button class="nav-btn primary" onclick="goNext(2)">Sang W18.04</button></div>
+</div>
+
+<div class="module" id="m3">
+  <div class="module-header">
+    <div class="module-tag">Tuần 18 · W18.04</div>
+    <div class="module-title">Flink Fundamentals: Streams, State, Checkpoints</div>
+    <div class="module-subtitle">Hiểu model xử lý unbounded stream và khôi phục khi lỗi</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Khối kiến thức</th><th>Nội dung</th><th>Kết quả</th></tr>
+      <tr><td>Stream model</td><td>Unbounded data + continuous processing</td><td>Tư duy khác batch job</td></tr>
+      <tr><td>Transformations</td><td>map, filter, keyBy, process</td><td>Xây pipeline xử lý logic</td></tr>
+      <tr><td>State</td><td>Keyed state cho bài toán stateful</td><td>Đếm, session, fraud rules</td></tr>
+      <tr><td>Fault tolerance</td><td>Checkpoint, savepoint, recovery</td><td>Khôi phục không mất trạng thái</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Hiểu vì sao Flink mạnh cho stream processing stateful liên tục.</li>
+      <li>Nắm được khác biệt giữa logic stateless và stateful để chọn đúng pattern.</li>
+      <li>Biết checkpoint/savepoint ảnh hưởng thế nào tới recovery và vận hành production.</li>
+    </ul>
+    <div class="info-box note">📌 <span>Flink xem stream là dữ liệu không giới hạn, nên mọi phép xử lý phải nghĩ theo trạng thái tiến hóa theo thời gian.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Vì sao Flink cho stream processing?</h3>
+    <ul>
+      <li>Latency thấp và ổn định cho pipeline long-running.</li>
+      <li>State management mạnh (keyed state, timers, window state).</li>
+      <li>Checkpointing giúp khôi phục nhất quán sau failure.</li>
+    </ul>
+
+    <h3>Transformations cốt lõi</h3>
+    <table>
+      <tr><th>Transformation</th><th>Dùng khi nào</th><th>Ví dụ</th></tr>
+      <tr><td>map</td><td>Biến đổi từng record</td><td>Parse JSON thành object</td></tr>
+      <tr><td>filter</td><td>Lọc event không hợp lệ</td><td>Giữ event amount &gt; 0</td></tr>
+      <tr><td>keyBy</td><td>Group theo key business</td><td>keyBy(account_id)</td></tr>
+      <tr><td>process</td><td>Logic tùy biến state + timer</td><td>Phát hiện nhiều lần thất bại liên tiếp</td></tr>
+    </table>
+
+    <h3>Stateful processing và keyed state</h3>
+    <p>Stateful logic lưu ngữ cảnh qua thời gian, ví dụ số lần login_fail của mỗi user trong 5 phút. Keyed state là state tách theo key để scale và khôi phục chính xác.</p>
+
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>flink_window_job.py (concept)</span></div><div class="cmd-body"><pre>stream \
+  .key_by(lambda e: e["account_id"]) \
+  .process(FraudRuleProcessFunction())
+
+<span class="comment"># bên trong ProcessFunction: cập nhật keyed state, emit alert khi vượt ngưỡng</span></pre></div></div>
+
+    <h3>Checkpoint, Savepoint, Recovery</h3>
+    <ul>
+      <li><strong>Checkpoint</strong>: snapshot tự động định kỳ phục vụ fault tolerance runtime.</li>
+      <li><strong>Savepoint</strong>: snapshot do người vận hành trigger để migrate/upgrade job.</li>
+      <li>Khi fail, Flink restore state từ checkpoint gần nhất rồi đọc lại source theo offset tương ứng.</li>
+    </ul>
+
+    <h3>Event-time vs Processing-time (nhập môn)</h3>
+    <p>Event-time dựa trên thời điểm sự kiện xảy ra; processing-time dựa trên thời điểm hệ thống nhận dữ liệu. Với log trễ hoặc out-of-order, event-time thường đúng nghiệp vụ hơn.</p>
+
+    <div class="info-box warn">⚠️ <span>Anti-pattern: dùng logic stateless cho bài toán cần lịch sử (session, fraud threshold). Bạn sẽ bỏ lỡ pattern theo chuỗi thời gian.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Flink đặc biệt phù hợp với loại workload nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Flink mạnh ở stream processing stateful liên tục.')">A. Stream processing stateful, long-running</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Flink không chỉ dành cho batch export đơn giản.')">B. Chỉ copy file batch mỗi ngày</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Flink không phải tool visualization dashboard.')">C. Thiết kế giao diện BI</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Flink không thay thế database transaction OLTP.')">D. Thay thế hệ quản trị giao dịch</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">keyBy trong Flink có vai trò gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. keyBy partition stream theo key để xử lý state cục bộ.')">A. Group stream theo key để stateful processing</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì keyBy không có chức năng mã hóa dữ liệu.')">B. Mã hóa dữ liệu khi truyền mạng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì keyBy không tự tạo checkpoint.')">C. Tự động tạo checkpoint mỗi giây</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì keyBy không phải API chỉ dành cho batch.')">D. Chỉ dùng cho batch mode</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Checkpoint chủ yếu phục vụ mục tiêu nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Checkpoint giúp recover state nhất quán sau lỗi.')">A. Fault tolerance và recovery state</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì checkpoint không dùng để nén dữ liệu đầu vào.')">B. Nén dữ liệu Kafka</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì checkpoint không phải cơ chế alerting.')">C. Gửi cảnh báo cho Slack</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì checkpoint không thay cho consumer lag metric.')">D. Đo lag của Kafka consumer</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Savepoint khác checkpoint ở điểm nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Savepoint thường do operator trigger để nâng cấp/migrate job.')">A. Savepoint là snapshot có chủ đích cho vận hành</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì savepoint không phải dạng rollback git commit.')">B. Savepoint chỉ là bản sao source code</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì savepoint không thay thế retention Kafka.')">C. Savepoint dùng để tăng retention topic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì savepoint không phải metric log.')">D. Savepoint là chỉ số throughput</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Stateful processing phù hợp với ví dụ nào nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đếm login_fail theo user cần lưu trạng thái qua thời gian.')">A. Đếm số lần login_fail liên tiếp theo user</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì format chuỗi tĩnh là stateless.')">B. Đổi chữ hoa thành chữ thường cho từng record</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì parse JSON đơn giản không cần state lâu dài.')">C. Parse JSON thành object</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì lọc null value cơ bản là stateless.')">D. Lọc record null field</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Event-time khác processing-time ở điểm nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Event-time dựa trên timestamp khi sự kiện xảy ra thật.')">A. Event-time dùng timestamp nghiệp vụ của sự kiện</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì processing-time là lúc hệ xử lý, không phải lúc sự kiện phát sinh.')">B. Processing-time luôn phản ánh đúng business time</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì event-time không phụ thuộc tốc độ network nhận event.')">C. Event-time là thời điểm consumer commit</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì hai khái niệm không giống nhau và ảnh hưởng kết quả khác.')">D. Hai khái niệm hoàn toàn tương đương</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Vì sao stateless logic có thể sai với bài toán fraud threshold?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không lưu lịch sử thì không biết ngưỡng tích lũy theo thời gian.')">A. Vì không giữ được lịch sử sự kiện cần so ngưỡng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì vấn đề chính không phải cú pháp ngôn ngữ.')">B. Vì Python không hỗ trợ map/filter</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì partition nhiều không thay thế state logic.')">C. Vì có quá nhiều partition</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì checkpoint không tự tạo business state đúng nếu code sai mô hình.')">D. Vì checkpoint bị tắt mặc định</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Quy trình recovery chuẩn sau crash thường là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Restore state checkpoint rồi tiếp tục xử lý từ vị trí tương ứng.')">A. Restore state từ checkpoint và tiếp tục đọc stream</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì xóa state khiến sai kết quả tích lũy.')">B. Xóa toàn bộ state rồi chạy lại từ hiện tại</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì restart không state chỉ phù hợp job thuần stateless.')">C. Chỉ restart process mà bỏ qua checkpoint</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đổi topic mới không phải recovery strategy đúng.')">D. Chuyển qua topic mới để tránh lỗi</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Transformation nào linh hoạt nhất cho logic phức tạp theo state và timer?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ProcessFunction cho phép truy cập state và timer đầy đủ.')">A. process</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì map đơn giản, không phù hợp logic stateful phức tạp.')">B. map</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì filter chỉ dùng loại bỏ record.')">C. filter</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì keyBy chỉ partition stream, không thực hiện logic đầy đủ.')">D. keyBy</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Anti-pattern của module này là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng stateless cho bài toán cần state dẫn đến sai nghiệp vụ.')">A. Dùng stateless logic cho bài toán cần trạng thái</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bật checkpoint là thực hành tốt.')">B. Bật checkpoint định kỳ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì keyBy theo entity là cần thiết.')">C. keyBy theo business key</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì hiểu event-time là kiến thức nền bắt buộc.')">D. Phân biệt event-time và processing-time</div></div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+    <div class="summary-item"><strong>Flink model</strong>Continuous processing trên dữ liệu unbounded</div>
+    <div class="summary-item"><strong>State</strong>Keyed state là lõi của bài toán realtime phức tạp</div>
+    <div class="summary-item"><strong>Transformations</strong>map/filter/keyBy/process kết hợp theo nhu cầu</div>
+    <div class="summary-item"><strong>Checkpoint</strong>Snapshot tự động để recover nhất quán</div>
+    <div class="summary-item"><strong>Savepoint</strong>Snapshot chủ động cho vận hành nâng cấp</div>
+    <div class="summary-item"><strong>Anti-pattern</strong>Bỏ state trong bài toán cần ngữ cảnh lịch sử</div>
+  </div></div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+    <div class="practice-task"><div class="practice-task-header">Bài tập 1: Phân loại stateless vs stateful</div><div class="practice-task-body">
+      <p>Phân loại 4 tác vụ: parse JSON, count failed login theo user trong 10 phút, lọc amount &gt; 0, phát cảnh báo 3 lần fail liên tiếp.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Stateless: parse JSON, lọc amount &gt; 0. Stateful: count failed login, cảnh báo 3 lần fail liên tiếp vì cần giữ lịch sử theo user.</p></div>
+    </div></div>
+    <div class="practice-task"><div class="practice-task-header">Bài tập 2: Kế hoạch recovery</div><div class="practice-task-body">
+      <p>Viết runbook 5 bước khi Flink job crash: kiểm tra checkpoint, restart strategy, verify output, theo dõi lag, xác nhận không mất dữ liệu.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><ol><li>Kiểm tra nguyên nhân lỗi trong logs/metrics.</li><li>Xác nhận checkpoint gần nhất thành công.</li><li>Restart job từ checkpoint/savepoint phù hợp.</li><li>Kiểm tra consumer lag và output consistency.</li><li>Đóng incident khi KPI phục hồi.</li></ol></div>
+    </div></div>
+  </div></div>
+
+  <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">Quay lại W18.03</button><button class="nav-btn primary" onclick="goNext(3)">Sang W18.05</button></div>
+</div>
+
+<div class="module" id="m4">
+  <div class="module-header">
+    <div class="module-tag">Tuần 18 · W18.05</div>
+    <div class="module-title">Windows, Watermarks & Late Events</div>
+    <div class="module-subtitle">Cân bằng correctness và latency khi dữ liệu đến trễ hoặc sai thứ tự</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:62.5%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Nhóm</th><th>Nội dung</th><th>Kết quả</th></tr>
+      <tr><td>Windows</td><td>Tumbling, sliding, session</td><td>Chọn đúng theo business question</td></tr>
+      <tr><td>Watermark</td><td>Tiến độ event-time và out-of-order</td><td>Đóng cửa sổ đúng lúc</td></tr>
+      <tr><td>Late events</td><td>Allowed lateness, side output</td><td>Không mất event quan trọng</td></tr>
+      <tr><td>Trade-off</td><td>Correctness vs latency</td><td>Thiết kế phù hợp SLA</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Hiểu khi nào dùng tumbling, sliding, session windows.</li>
+      <li>Nắm ý nghĩa watermark để xử lý dữ liệu out-of-order.</li>
+      <li>Thiết kế policy cho late data: drop, update result, hoặc route side output.</li>
+    </ul>
+    <div class="info-box tip">✅ <span>Trong hệ phân tán thật, out-of-order là chuyện bình thường. Thiết kế tốt là chấp nhận và xử lý nó có chủ đích.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Ba loại window quan trọng</h3>
+    <table>
+      <tr><th>Window</th><th>Mô tả</th><th>Ví dụ điển hình</th></tr>
+      <tr><td>Tumbling</td><td>Cửa sổ không chồng lấn, kích thước cố định</td><td>Clicks per minute</td></tr>
+      <tr><td>Sliding</td><td>Cửa sổ cố định nhưng trượt theo bước</td><td>Rolling error rate 5 phút cập nhật mỗi 1 phút</td></tr>
+      <tr><td>Session</td><td>Mở/rộng theo khoảng im lặng (gap)</td><td>User session trên web/app</td></tr>
+    </table>
+
+    <h3>Watermark nghĩa là gì?</h3>
+    <p>Watermark là tín hiệu hệ thống dùng để ước lượng rằng event-time đã đi qua một mốc nào đó. Khi watermark vượt qua cuối window, hệ thống có thể emit kết quả window.</p>
+
+    <h3>Out-of-order và late events</h3>
+    <ul>
+      <li><strong>Out-of-order</strong>: event đến không đúng thứ tự thời gian phát sinh.</li>
+      <li><strong>Late event</strong>: event đến sau khi window đã emit lần đầu.</li>
+      <li><strong>Allowed lateness</strong>: khoảng thời gian chấp nhận cập nhật lại kết quả.</li>
+      <li><strong>Side output</strong>: nhánh riêng để thu late quá ngưỡng và xử lý hậu kiểm.</li>
+    </ul>
+
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>flink_late_events_job.py (concept)</span></div><div class="cmd-body"><pre>watermark = forBoundedOutOfOrderness(Duration.ofSeconds(30))
+
+<span class="comment"># window 1 phút, cho phép trễ thêm 2 phút</span>
+window(TumblingEventTimeWindows.of(Time.minutes(1)))
+  .allowedLateness(Time.minutes(2))
+  .sideOutputLateData(late_tag)</pre></div></div>
+
+    <h3>Correctness vs latency trade-off</h3>
+    <table>
+      <tr><th>Chiến lược</th><th>Ưu điểm</th><th>Nhược điểm</th></tr>
+      <tr><td>Watermark ngắn</td><td>Emit nhanh, latency thấp</td><td>Dễ bỏ sót late data</td></tr>
+      <tr><td>Watermark dài</td><td>Kết quả đầy đủ hơn</td><td>Latency cao hơn</td></tr>
+      <tr><td>Allowed lateness + update</td><td>Cân bằng độ đúng</td><td>Downstream phải chấp nhận update/retraction</td></tr>
+    </table>
+
+    <h3>Ví dụ nghiệp vụ thực tế</h3>
+    <ul>
+      <li><strong>Clicks per minute:</strong> tumbling 1 phút, watermark 15-30s.</li>
+      <li><strong>Session analytics:</strong> session window gap 5 phút, cần event-time chuẩn.</li>
+      <li><strong>Delayed transactions:</strong> allowed lateness 2-5 phút, late quá ngưỡng sang side output để reconciliation batch.</li>
+    </ul>
+
+    <div class="info-box warn">⚠️ <span>Anti-pattern: dùng processing-time cho bài toán cần đúng theo thời điểm nghiệp vụ. Kết quả sẽ lệch khi network trễ hoặc source gửi muộn.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Window nào phù hợp cho số click mỗi phút?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tumbling 1 phút cho bucket không chồng lấn rõ ràng.')">A. Tumbling window 1 phút</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì session window không tối ưu cho bucket thời gian cố định.')">B. Session window</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì global window không phù hợp cho metric theo phút.')">C. Global window không giới hạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì count thuần không window sẽ không trả lời câu hỏi theo phút.')">D. Không dùng window</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Watermark dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Watermark cho biết tiến độ event-time để đóng window.')">A. Ước lượng tiến độ event-time và quyết định emit window</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì watermark không nén dữ liệu.')">B. Nén payload Kafka</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì watermark không thay partition key.')">C. Chọn partition key cho producer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì watermark không là metric CPU.')">D. Đo CPU utilization</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Allowed lateness có ý nghĩa gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đây là khoảng chấp nhận event đến trễ để cập nhật kết quả.')">A. Khoảng thời gian chấp nhận late event sau khi window đóng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì allowed lateness không tăng throughput trực tiếp.')">B. Số partition thêm vào topic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải timeout của producer.')">C. Timeout gửi message của producer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải retention của Kafka.')">D. Retention của topic</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Side output cho late data dùng khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng để tách late quá ngưỡng khỏi luồng chính.')">A. Khi muốn xử lý riêng event trễ quá ngưỡng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì side output không phải nơi lưu checkpoint.')">B. Khi cần lưu checkpoint job</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì side output không dùng để scale consumer group.')">C. Khi cần tăng số consumer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì side output không thay schema registry.')">D. Khi muốn đổi schema event</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Window nào phù hợp phân tích session người dùng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Session window dựa trên gap không hoạt động.')">A. Session window</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tumbling có biên cứng, không phản ánh phiên tự nhiên.')">B. Tumbling window cố định</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì sliding có thể dùng nhưng thường không tự nhiên bằng session gap.')">C. Sliding window ngắn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không window sẽ không xác định session boundaries.')">D. Không cần window</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Khi nào processing-time có thể gây sai lệch?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi event đến trễ hoặc out-of-order, processing-time lệch business time.')">A. Khi dữ liệu đến trễ do network/source delay</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì processing-time vẫn có thể dùng cho metric hạ tầng tức thời.')">B. Khi đo CPU local mỗi giây</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì xử lý đồng bộ trong cùng process không phải ví dụ điển hình sai lệch event-time.')">C. Khi đọc file tĩnh một lần</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì serialization format không quyết định processing-time đúng/sai.')">D. Khi đổi từ JSON sang Avro</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Trade-off đúng khi tăng allowed lateness là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Correctness tăng nhưng kết quả cuối có thể chậm hơn.')">A. Correctness tăng, latency có thể tăng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không thể vừa tăng correctness vừa giảm latency mọi tình huống.')">B. Correctness và latency đều luôn cải thiện</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì allowed lateness không làm mất nhu cầu monitoring.')">C. Không cần theo dõi late rate nữa</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì allowed lateness không thay đổi partition count.')">D. Tự động cân bằng partition</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Sliding window thường phù hợp cho câu hỏi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Sliding tốt cho rolling metrics.')">A. Error rate 5 phút cập nhật mỗi 1 phút</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì session window phù hợp hơn cho phiên người dùng.')">B. Xác định phiên truy cập user</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tumbling phù hợp hơn cho bucket cố định không overlap.')">C. Tổng click đúng từng phút không chồng lấn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì batch daily không cần sliding window.')">D. Báo cáo doanh thu cuối ngày</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Đâu là ví dụ late-event scenario thực tế?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. App mobile offline gửi event muộn là tình huống rất thường gặp.')">A. Event từ app mobile gửi lại sau khi có mạng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì event vào ngay không phải late-event.')">B. Event tới đúng thứ tự và đúng thời điểm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì query batch nightly không phải event stream late.')">C. Chạy ETL lúc 1 giờ sáng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tăng CPU worker không tạo late-event concept.')">D. Scale worker từ 2 lên 4</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Anti-pattern của module này là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bỏ event-time khi nghiệp vụ phụ thuộc thời điểm thật sẽ cho kết quả sai.')">A. Dùng processing-time cho bài toán cần event-time</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì định nghĩa watermark rõ là thực hành tốt.')">B. Xác định watermark policy theo dữ liệu thực tế</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì dùng side output cho late events là đúng hướng.')">C. Tách late events vào side output</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chọn window theo business question là best practice.')">D. Chọn tumbling/sliding/session theo câu hỏi nghiệp vụ</div></div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+    <div class="summary-item"><strong>Windows</strong>Tumbling/sliding/session phục vụ câu hỏi khác nhau</div>
+    <div class="summary-item"><strong>Watermark</strong>Cốt lõi để xử lý event-time có out-of-order</div>
+    <div class="summary-item"><strong>Late events</strong>Cần policy rõ: update, drop, hoặc side output</div>
+    <div class="summary-item"><strong>Allowed lateness</strong>Cân bằng giữa độ đúng và độ trễ</div>
+    <div class="summary-item"><strong>Business mapping</strong>Clicks, sessions, delayed transactions đều cần thiết kế khác</div>
+    <div class="summary-item"><strong>Anti-pattern</strong>Dùng processing-time khi event-time mới là chuẩn nghiệp vụ</div>
+  </div></div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+    <div class="practice-task"><div class="practice-task-header">Bài tập 1: Watermark/window decision task</div><div class="practice-task-body">
+      <p>Use case: dashboard số đơn hàng theo phút, dữ liệu mobile có thể trễ đến 90 giây. Chọn loại window, watermark, allowed lateness.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Tumbling 1 phút, watermark khoảng 30-45 giây (theo percentile thực tế), allowed lateness 2 phút để bắt late events. Late hơn nữa đưa side output để reconciliation.</p></div>
+    </div></div>
+    <div class="practice-task"><div class="practice-task-header">Bài tập 2: Late-event reconciliation</div><div class="practice-task-body">
+      <p>Viết kế hoạch xử lý khi tỷ lệ late events vượt 8% trong 15 phút: cảnh báo gì, chỉnh watermark thế nào, và khi nào cần fix upstream timestamp.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><ul><li>Alert on-call khi late_rate &gt; 8%/15m.</li><li>So sánh event_time vs ingest_time để phân loại nguyên nhân.</li><li>Tạm nới watermark/lateness nếu business chấp nhận.</li><li>Mở ticket fix đồng hồ client hoặc retry queue upstream.</li></ul></div>
+    </div></div>
+  </div></div>
+
+  <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(4)">Quay lại W18.04</button><button class="nav-btn primary" onclick="goNext(4)">Sang W18.06</button></div>
+</div>
+
+<div class="module" id="m5">
+  <div class="module-header">
+    <div class="module-tag">Tuần 18 · W18.06</div>
+    <div class="module-title">Operations, Monitoring & Architecture Decisions</div>
+    <div class="module-subtitle">Vận hành streaming như hệ thống production có SLA và governance</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Nhóm vận hành</th><th>Nội dung</th><th>Kết quả</th></tr>
+      <tr><td>Monitoring metrics</td><td>lag, throughput, error rate, checkpoint duration, backpressure, restart count</td><td>Phát hiện sớm sự cố</td></tr>
+      <tr><td>Data contracts</td><td>schema registry, event contracts, topic governance</td><td>Giảm lỗi schema drift</td></tr>
+      <tr><td>Capacity & cost</td><td>retention cost, partition scaling</td><td>Scale có kiểm soát</td></tr>
+      <tr><td>Technology boundaries</td><td>Flink vs Spark Streaming, Kafka vs queue</td><td>Chọn tool theo bài toán</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Thiết lập dashboard và alert rule cho pipeline streaming.</li>
+      <li>Hiểu data contract governance để giảm lỗi producer-consumer mismatch.</li>
+      <li>Biết khi nào không nên chọn streaming để tránh over-engineering.</li>
+    </ul>
+    <div class="info-box warn">⚠️ <span>Pipeline realtime mà không có SLA và alerting rõ ràng sẽ nhanh chóng thành "hệ thống tối" khó vận hành.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Monitoring metrics bắt buộc</h3>
+    <table>
+      <tr><th>Metric</th><th>Ý nghĩa</th><th>Ngưỡng cảnh báo gợi ý</th></tr>
+      <tr><td>Consumer lag</td><td>Tốc độ tiêu thụ có theo kịp ingest hay không</td><td>Tăng liên tục &gt; 10 phút</td></tr>
+      <tr><td>Throughput</td><td>Records/second qua từng stage</td><td>Giảm đột ngột &gt; 30%</td></tr>
+      <tr><td>Error rate</td><td>Tỷ lệ record lỗi parse/validate</td><td>&gt; 1% kéo dài</td></tr>
+      <tr><td>Checkpoint duration</td><td>Thời gian snapshot state</td><td>Tăng vượt 2x baseline</td></tr>
+      <tr><td>Backpressure</td><td>Nghẽn xử lý operator</td><td>High backpressure liên tục</td></tr>
+      <tr><td>Restart count</td><td>Số lần job restart do lỗi</td><td>&gt; 3 lần trong 30 phút</td></tr>
+    </table>
+
+    <h3>Schema Registry và event contracts</h3>
+    <ul>
+      <li>Dùng schema versioning để producer/consumer tiến hóa độc lập có kiểm soát.</li>
+      <li>Định nghĩa field bắt buộc, nullable policy, backward/forward compatibility.</li>
+      <li>Không deploy producer phá schema khi chưa kiểm thử consumer impact.</li>
+    </ul>
+
+    <h3>Topic governance và retention cost</h3>
+    <ul>
+      <li>Chuẩn hóa naming convention theo domain và sensitivity.</li>
+      <li>Xác định owner cho từng topic: ai chịu trách nhiệm SLA, schema, retention.</li>
+      <li>Tối ưu retention dựa trên nhu cầu replay và chi phí disk.</li>
+    </ul>
+
+    <h3>Scaling partitions cẩn thận</h3>
+    <p>Tăng partition giúp scale consumer parallelism nhưng cũng tăng overhead metadata và có thể ảnh hưởng ordering theo key nếu không kiểm soát strategy.</p>
+
+    <h3>Flink vs Spark Streaming và Kafka vs queue (so sánh nhẹ)</h3>
+    <table>
+      <tr><th>So sánh</th><th>Flink</th><th>Spark Streaming</th></tr>
+      <tr><td>Latency</td><td>Rất thấp, thiên realtime continuous</td><td>Micro-batch mạnh, linh hoạt với hệ Spark</td></tr>
+      <tr><td>State/timer</td><td>Rất mạnh cho stateful realtime</td><td>Tốt nhưng pattern khác theo micro-batch</td></tr>
+      <tr><td>Fit</td><td>Alerting, fraud, stream-native</td><td>Khi đã có ecosystem Spark mạnh</td></tr>
+    </table>
+    <table>
+      <tr><th>So sánh</th><th>Kafka</th><th>Queue truyền thống</th></tr>
+      <tr><td>Retention & replay</td><td>Mạnh, lưu log để đọc lại</td><td>Thường thiên xử lý rồi xóa</td></tr>
+      <tr><td>Scale consumption</td><td>Consumer groups + partitions</td><td>Phụ thuộc từng queue system</td></tr>
+      <tr><td>Phù hợp</td><td>Event streaming platform</td><td>Task queue đơn giản, point-to-point</td></tr>
+    </table>
+
+    <h3>Khi nào không chọn streaming?</h3>
+    <ul>
+      <li>Không có SLA realtime rõ.</li>
+      <li>Tần suất dữ liệu thấp, batch mỗi giờ/ngày đủ giá trị.</li>
+      <li>Team chưa có năng lực vận hành distributed stateful jobs.</li>
+      <li>Chi phí vận hành vượt lợi ích business kỳ vọng.</li>
+    </ul>
+
+    <div class="info-box warn">⚠️ <span>Anti-pattern: build realtime pipeline nhưng không định nghĩa SLA, ownership và runbook. Kết quả thường là alert mù và downtime kéo dài.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Metric nào phản ánh consumer theo kịp producer hay không?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Consumer lag cho biết độ trễ tiêu thụ so với đầu vào.')">A. Consumer lag</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì CPU cao chưa chắc lag tăng.')">B. CPU usage đơn lẻ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì disk free không trực tiếp phản ánh tiến độ consume.')">C. Dung lượng ổ đĩa còn lại</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì màu dashboard không phải metric vận hành.')">D. Màu biểu đồ monitoring</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Checkpoint duration tăng đột biến thường gợi ý điều gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có thể state phình to hoặc I/O bottleneck khi snapshot.')">A. State hoặc I/O checkpoint đang gặp bottleneck</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không phải dấu hiệu chắc chắn của schema đổi.')">B. Producer đã đổi schema chắc chắn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì checkpoint duration không nói trực tiếp về quyền truy cập.')">C. IAM permission hết hạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không liên quan trực tiếp theme giao diện.')">D. Dashboard đang bật dark mode</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Schema registry giúp gì trong streaming?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Quản lý version và compatibility giữa producer-consumer.')">A. Quản lý schema version và compatibility</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì schema registry không thay cho observability runtime.')">B. Thay thế monitoring metrics</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì schema registry không tăng partition tự động.')">C. Tự scale partition</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì schema registry không nén toàn bộ payload không mất mát.')">D. Nén dữ liệu về 1/10 mặc định</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Topic governance tốt cần thành phần nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần owner, naming, retention, contract rõ cho mỗi topic.')">A. Owner + naming + retention + contract rõ ràng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ có topic name đẹp không đủ governance.')">B. Chỉ cần đặt tên topic ngắn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không owner sẽ khó xử lý incident.')">C. Không cần owner, ai cũng sửa được</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì retention vô hạn thường tốn chi phí lớn không cần thiết.')">D. Để retention vô hạn cho mọi topic</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Khi nào nên cân nhắc Flink hơn Spark Streaming?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bài toán cần latency rất thấp và stateful realtime phức tạp.')">A. Khi cần stateful realtime latency thấp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chạy batch nightly không cần Flink streaming phức tạp.')">B. Khi chỉ có báo cáo batch cuối ngày</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chọn tool theo slogan không đúng nguyên tắc.')">C. Khi team muốn theo trend</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì UI dashboard không quyết định engine stream.')">D. Khi dashboard cần đổi màu nhanh</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Partition scaling cần cẩn thận vì lý do nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tăng partition ảnh hưởng ordering theo key và overhead hệ thống.')">A. Ảnh hưởng ordering/key distribution và overhead metadata</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tăng partition không tự giảm mọi loại lag.')">B. Luôn giảm lag về 0 ngay lập tức</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì partition không trực tiếp sửa schema lỗi.')">C. Tự sửa lỗi schema tương thích</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tăng partition không làm mất nhu cầu monitoring.')">D. Không cần theo dõi metric nữa</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Điểm khác biệt nổi bật của Kafka so với queue đơn giản là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kafka mạnh ở event log retention và replay.')">A. Retention + replay theo event log</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì cả hai đều có thể chạy phân tán, không phải điểm khác biệt duy nhất.')">B. Chỉ Kafka mới chạy trên nhiều máy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Kafka không thay thế database transaction ACID.')">C. Kafka là RDBMS hoàn chỉnh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Kafka không loại bỏ nhu cầu model dữ liệu.')">D. Kafka không cần schema governance</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Khi nào streaming là overkill?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không có SLA realtime rõ và batch đã đáp ứng là dấu hiệu overkill.')">A. Không có SLA realtime rõ, batch đáp ứng tốt</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì fraud realtime thường không phải overkill.')">B. Cần phản ứng gian lận theo giây</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì alerting vận hành cần near real-time.')">C. Cảnh báo incident cho on-call</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì IoT telemetry tốc độ cao thường hợp với stream.')">D. Luồng IoT dữ liệu liên tục</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Metric nào thuộc nhóm sức khỏe Flink job?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Backpressure và restart count phản ánh sức khỏe xử lý runtime.')">A. Backpressure và restart count</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số slide trình bày không liên quan job health.')">B. Số slide đào tạo</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số bảng trong DWH không trực tiếp là health runtime stream.')">C. Số bảng dimension</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì màu badge UI không liên quan vận hành.')">D. Màu badge trên dashboard</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Anti-pattern lớn nhất của vận hành streaming là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không SLA/rule/ownership khiến hệ thống không thể vận hành ổn định.')">A. Xây pipeline realtime mà không SLA và runbook</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đặt alert threshold có chủ đích là thực hành tốt.')">B. Thiết lập alert theo lag và error rate</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì schema compatibility test là bắt buộc.')">C. Test schema compatibility trước deploy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì rà retention cost định kỳ là governance tốt.')">D. Rà soát retention cost theo tháng</div></div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+    <div class="summary-item"><strong>Observability</strong>Lag, throughput, errors, checkpoint, backpressure là bộ lõi</div>
+    <div class="summary-item"><strong>Contracts</strong>Schema registry giảm rủi ro producer-consumer mismatch</div>
+    <div class="summary-item"><strong>Governance</strong>Topic ownership và retention policy phải rõ</div>
+    <div class="summary-item"><strong>Capacity</strong>Scale partition theo dữ liệu thật, không làm mù</div>
+    <div class="summary-item"><strong>Boundaries</strong>Flink/Spark/Kafka/Queue chọn theo bài toán</div>
+    <div class="summary-item"><strong>Anti-pattern</strong>Realtime không SLA là công thức cho sự cố kéo dài</div>
+  </div></div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+    <div class="practice-task"><div class="practice-task-header">Bài tập 1: Monitoring task</div><div class="practice-task-body">
+      <p>Thiết kế dashboard tối thiểu cho pipeline payment events gồm 6 metric bắt buộc và ngưỡng alert tương ứng.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Gồm: consumer lag, input throughput, output throughput, parse error rate, checkpoint duration, restart count. Alert khi lag tăng liên tục, error &gt;1%, checkpoint duration &gt;2x baseline, restart &gt;3/30m.</p></div>
+    </div></div>
+    <div class="practice-task"><div class="practice-task-header">Bài tập 2: Architecture decision memo</div><div class="practice-task-body">
+      <p>Viết memo ngắn (6-8 dòng) trả lời: tại sao use case dashboard nội bộ update mỗi 2 giờ chưa cần streaming full-stack.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><p>Vì SLA 2 giờ không cần latency giây. Batch mỗi 15-30 phút hoặc micro-batch đủ đáp ứng, giảm complexity vận hành, giảm chi phí on-call, và vẫn đạt mục tiêu nghiệp vụ hiện tại.</p></div>
+    </div></div>
+  </div></div>
+
+  <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">Quay lại W18.05</button><button class="nav-btn primary" onclick="goNext(5)">Sang W18.07</button></div>
+</div>
+
+<div class="module" id="m6">
+  <div class="module-header">
+    <div class="module-tag">Tuần 18 · W18.07</div>
+    <div class="module-title">Artifact: week18_streaming_project/</div>
+    <div class="module-subtitle">Xây portfolio artifact recruiter-grade cho hệ realtime end-to-end</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:87.5%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Artifact</th><th>Mục tiêu</th><th>Evidence cho recruiter</th></tr>
+      <tr><td>Producer/Consumer</td><td>Luồng event thật + idempotent xử lý</td><td>Code reliability thực tế</td></tr>
+      <tr><td>Flink jobs</td><td>Window + late events + state</td><td>Hiểu stream semantics</td></tr>
+      <tr><td>Schema/Runbook/Monitoring</td><td>Contract + vận hành + incident response</td><td>Production mindset</td></tr>
+      <tr><td>README</td><td>Kể câu chuyện business-to-architecture</td><td>Khả năng giao tiếp kỹ thuật</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Biến kiến thức Kafka/Flink thành artifact có thể trình bày khi phỏng vấn.</li>
+      <li>Chứng minh bạn hiểu cả code path và vận hành production path.</li>
+      <li>Tạo repo có cấu trúc rõ, giải thích rõ trade-off kỹ thuật theo business.</li>
+    </ul>
+    <div class="info-box tip">✅ <span>Nhà tuyển dụng đánh giá cao runbook, monitoring plan và reasoning trade-off hơn là demo chạy một lần.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Business scenario gợi ý (believable)</h3>
+    <p><strong>Fintech card transactions</strong>: phát hiện giao dịch bất thường theo cửa sổ thời gian ngắn để gửi cảnh báo risk team trong &lt; 10 giây.</p>
+
+    <h3>Cấu trúc artifact bắt buộc</h3>
+    <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>week18_streaming_project/</span></div><div class="cmd-body"><pre>week18_streaming_project/
+├── kafka_producer_demo.py
+├── kafka_consumer_idempotent.py
+├── flink_window_job.py
+├── flink_late_events_job.py
+├── schemas/
+│   └── event_schema.json
+├── monitoring.md
+├── runbook.md
+└── README.md</pre></div></div>
+
+    <h3>Event schema mẫu</h3>
+    <div class="cmd-block"><div class="cmd-header"><span>schemas/event_schema.json</span></div><div class="cmd-body"><pre>{
+  "event_name": "card_transaction",
+  "event_version": "1.0.0",
+  "fields": [
+    {"name": "event_id", "type": "string", "required": true},
+    {"name": "account_id", "type": "string", "required": true},
+    {"name": "amount", "type": "double", "required": true},
+    {"name": "event_time", "type": "timestamp", "required": true},
+    {"name": "merchant_country", "type": "string", "required": false}
+  ]
+}</pre></div></div>
+
+    <h3>Partition strategy và reliability model</h3>
+    <ul>
+      <li><strong>Partition key:</strong> account_id để giữ ordering theo tài khoản.</li>
+      <li><strong>Semantics:</strong> at-least-once + idempotent sink theo event_id.</li>
+      <li><strong>Late handling:</strong> allowed lateness 2 phút, late quá mức sang side output.</li>
+    </ul>
+
+    <h3>README phải giải thích đủ 7 điểm</h3>
+    <ol>
+      <li>Business scenario và SLA.</li>
+      <li>Event schema và contract evolution.</li>
+      <li>Partition strategy và lý do chọn key.</li>
+      <li>Reliability model (semantics + dedupe).</li>
+      <li>Watermark/window choices.</li>
+      <li>Monitoring plan và alert threshold.</li>
+      <li>Lessons learned và giới hạn hiện tại.</li>
+    </ol>
+
+    <h3>Monitoring plan mẫu</h3>
+    <div class="cmd-block"><div class="cmd-header"><span>monitoring.md (extract)</span></div><div class="cmd-body"><pre>- Kafka consumer lag: alert nếu &gt; 50k records trong 10 phút
+- Flink checkpoint duration: alert nếu &gt; 20s trong 3 lần liên tiếp
+- Parse error rate: alert nếu &gt; 1%
+- Late event ratio: alert nếu &gt; 5%/15 phút
+- Restart count: alert nếu &gt; 2 lần/30 phút</pre></div></div>
+
+    <h3>Runbook mẫu</h3>
+    <div class="cmd-block"><div class="cmd-header"><span>runbook.md (extract)</span></div><div class="cmd-body"><pre>Incident: consumer lag tăng nhanh
+1) Kiểm tra source throughput và partition skew
+2) Kiểm tra backpressure tại Flink operators
+3) Scale consumer/Flink parallelism nếu CPU saturate
+4) Xác nhận checkpoint vẫn thành công
+5) Sau ổn định, tổng kết root cause + action items</pre></div></div>
+
+    <div class="info-box warn">⚠️ <span>Anti-pattern: Artifact chỉ có code demo mà thiếu README reasoning + runbook + monitoring. Recruiter sẽ đánh giá bạn chưa có production mindset.</span></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Artifact Week18 nên chứng minh điều gì mạnh nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần chứng minh cả kỹ thuật xử lý và năng lực vận hành production.')">A. Năng lực end-to-end từ coding tới vận hành</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì giao diện đẹp không phải trọng tâm artifact backend streaming.')">B. Chủ yếu là giao diện dashboard đẹp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ có lý thuyết không đủ thuyết phục recruiter.')">C. Chỉ cần viết mô tả lý thuyết</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số file nhiều không đồng nghĩa chất lượng cao.')">D. Tạo thật nhiều file không cần giải thích</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Vì sao README cần nêu business scenario?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Scenario cho thấy bạn biết nối kỹ thuật với giá trị kinh doanh.')">A. Để giải thích vì sao kiến trúc kỹ thuật được chọn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì README không chỉ để đủ số dòng.')">B. Chỉ để README dài hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì scenario không nhằm thay thế code.')">C. Để không cần code minh họa</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì scenario không phải phần decoration.')">D. Chỉ để trang trí repo</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">File nào chứng minh tư duy contract dữ liệu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. event_schema.json thể hiện định nghĩa field/version rõ ràng.')">A. schemas/event_schema.json</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì producer code đơn lẻ chưa thể hiện contract governance đầy đủ.')">B. kafka_producer_demo.py</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì runbook thiên vận hành incident, không là contract schema chính.')">C. runbook.md</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì monitoring.md là observability plan, không là schema contract.')">D. monitoring.md</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Trong artifact, reliability model hợp lý nhất là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. At-least-once + idempotent sink thực dụng và an toàn.')">A. At-least-once + idempotent consumer/sink</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì at-most-once cho payment/fraud thường rủi ro mất dữ liệu.')">B. At-most-once cho mọi luồng quan trọng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không semantics rõ sẽ khó đảm bảo chất lượng.')">C. Không nêu semantics để linh hoạt</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì exactly-once tuyệt đối toàn hệ hiếm khả thi và khó chứng minh.')">D. Exactly-once tuyệt đối end-to-end mọi thành phần</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Monitoring.md nên có nội dung nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần metric, threshold và cách hành động khi vượt ngưỡng.')">A. Metric + alert thresholds + escalation steps</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ liệt kê tên tool mà không ngưỡng là chưa đủ.')">B. Chỉ tên công cụ Grafana/Prometheus</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì danh sách package không phải monitoring plan.')">C. Danh sách dependency Python</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì screenshot UI không thay cho rule vận hành.')">D. Chỉ ảnh dashboard không chú thích</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">runbook.md phục vụ mục đích nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Runbook hướng dẫn xử lý sự cố có quy trình.')">A. Hướng dẫn xử lý incident theo từng bước</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì runbook không thay cho schema definition.')">B. Định nghĩa schema JSON</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì runbook không phải script chạy producer.')">C. Tạo message mock vào Kafka</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì runbook không phải nơi lưu credential.')">D. Lưu thông tin bí mật hệ thống</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Chi tiết nào làm artifact trở nên recruiter-grade?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có trade-off reasoning + vận hành thực tế là điểm khác biệt lớn.')">A. Giải thích trade-off kỹ thuật gắn business rõ ràng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số lượng dòng code lớn không tự phản ánh chất lượng.')">B. Viết code thật dài nhưng không giải thích</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì copy tutorial không tùy biến thiếu tính thực chiến.')">C. Copy nguyên demo không điều chỉnh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì đặt tên fancy không thay cho nội dung thật.')">D. Đặt tên project thật phức tạp</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Partition strategy nên được trình bày ở đâu trong artifact?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nêu rõ trong README và liên kết code producer/consumer.')">A. Trong README kèm lý do và liên kết code</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì để ẩn trong code làm reviewer khó hiểu kiến trúc.')">B. Chỉ để trong code, không cần giải thích</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì file ảnh không phù hợp cho thông tin kỹ thuật cốt lõi.')">C. Chỉ lưu trong ảnh chụp màn hình</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì commit message không thay tài liệu thiết kế.')">D. Chỉ ghi trong commit message</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Vì sao cần lessons learned trong README?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Thể hiện khả năng phản tư kỹ thuật và cải tiến hệ thống.')">A. Chứng minh tư duy cải tiến và nhìn nhận giới hạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì lessons learned không phải phần thừa.')">B. Không cần vì không ai đọc</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì phần này không nhằm khoe tool nhiều.')">C. Chỉ để liệt kê nhiều framework</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì lessons learned không nên thay thế kết quả kỹ thuật.')">D. Dùng thay cho phần test plan</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Anti-pattern khi làm artifact Week18 là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Demo chạy một lần mà không có vận hành/giải thích thì chưa đủ chuẩn portfolio.')">A. Chỉ demo chạy được, không có runbook và monitoring plan</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì viết schema rõ ràng là điểm cộng.')">B. Có schema version và contract notes</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì có bài học rút ra là thực hành tốt.')">C. Ghi rõ lessons learned và trade-offs</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì mô tả SLA là phần quan trọng của artifact.')">D. Nêu rõ SLA và ngưỡng cảnh báo</div></div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+    <div class="summary-item"><strong>Portfolio value</strong>Chứng minh năng lực thiết kế + triển khai + vận hành</div>
+    <div class="summary-item"><strong>Required files</strong>Producer, consumer, Flink jobs, schema, monitoring, runbook, README</div>
+    <div class="summary-item"><strong>Business narrative</strong>Mỗi quyết định kỹ thuật phải nối với SLA và risk</div>
+    <div class="summary-item"><strong>Reliability</strong>Nêu rõ semantics, idempotency, retry/DLT</div>
+    <div class="summary-item"><strong>Observability</strong>Có metric/threshold/escalation cụ thể</div>
+    <div class="summary-item"><strong>Anti-pattern</strong>Demo đẹp nhưng thiếu production documentation</div>
+  </div></div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+    <div class="practice-task"><div class="practice-task-header">Bài tập 1: Viết README skeleton</div><div class="practice-task-body">
+      <p>Soạn khung README cho project gồm 7 mục bắt buộc: scenario, schema, partitioning, semantics, windows/watermark, monitoring, lessons learned.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>README.md skeleton</span></div><div class="cmd-body"><pre>## Business Scenario
+## SLA and Success Metrics
+## Event Schema and Versioning
+## Partition Strategy
+## Reliability Model
+## Window + Watermark Decisions
+## Monitoring Plan
+## Lessons Learned</pre></div></div></div>
+    </div></div>
+    <div class="practice-task"><div class="practice-task-header">Bài tập 2: Artifact review checklist</div><div class="practice-task-body">
+      <p>Tự chấm artifact theo checklist: có test evidence chưa, có hướng xử lý late events chưa, có runbook incident chưa, có nêu giới hạn chưa.</p>
+      <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+      <div class="solution-box"><ul><li>Pass nếu trả lời được "nếu lag tăng thì làm gì?" trong 3 bước.</li><li>Pass nếu chứng minh được dedupe ở sink.</li><li>Pass nếu giải thích được watermark/lateness dựa trên dữ liệu thật.</li></ul></div>
+    </div></div>
+  </div></div>
+
+  <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">Quay lại W18.06</button><button class="nav-btn primary" onclick="goNext(6)">Sang W18.08</button></div>
+</div>
+
+<div class="module" id="m7">
+  <div class="module-header">
+    <div class="module-tag">Tuần 18 · W18.08</div>
+    <div class="module-title">Mini Test Tổng Kết</div>
+    <div class="module-subtitle">Đánh giá năng lực Kafka/Flink từ fundamentals tới vận hành production</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+    <table>
+      <tr><th>Phần</th><th>Nội dung</th><th>Mục tiêu</th></tr>
+      <tr><td>Ôn nhanh</td><td>Kafka, offsets, semantics, Flink state, windows</td><td>Khóa kiến thức nền</td></tr>
+      <tr><td>Mini test 20 câu</td><td>Đủ các nhóm chủ đề bắt buộc</td><td>Đo mức sẵn sàng thực chiến</td></tr>
+      <tr><td>Feedback kết quả</td><td>Phân loại mức độ và khuyến nghị ôn tập</td><td>Biết phần cần nâng cấp</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+    <ul>
+      <li>Tự kiểm tra mức nắm chắc khái niệm cốt lõi của hệ streaming.</li>
+      <li>Phát hiện lỗ hổng về trade-off reliability/correctness/latency.</li>
+      <li>Chuẩn bị nền tảng để bước sang tuần tiếp theo có yếu tố realtime analytics nâng cao.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+    <h3>Hướng dẫn làm mini test</h3>
+    <ol>
+      <li>Làm tuần tự 20 câu, không tra lại đáp án ngay trong lúc làm.</li>
+      <li>Sau khi chấm điểm, xem nhóm câu sai để quay lại đúng module.</li>
+      <li>Ưu tiên sửa các lỗi tư duy về semantics, watermark và monitoring trước.</li>
+    </ol>
+
+    <div class="info-box note">📌 <span>Mục tiêu không phải điểm tuyệt đối ngay lần đầu, mà là nhận diện đúng phần bạn còn yếu để cải thiện nhanh.</span></div>
+
+    <h3>Mapping ôn tập theo chủ đề</h3>
+    <table>
+      <tr><th>Nhóm kiến thức</th><th>Module liên quan</th><th>Gợi ý ôn lại</th></tr>
+      <tr><td>Kafka basics/partitions</td><td>W18.02</td><td>Ordering, key strategy, consumer groups</td></tr>
+      <tr><td>Semantics/offsets</td><td>W18.03</td><td>Commit timing, idempotency, DLT</td></tr>
+      <tr><td>State/windows/watermarks</td><td>W18.04-W18.05</td><td>Event-time correctness và late handling</td></tr>
+      <tr><td>Monitoring/architecture</td><td>W18.06-W18.07</td><td>SLA, metrics, runbook, governance</td></tr>
+    </table>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="quiz-item"><div class="quiz-q">Điểm khác biệt cốt lõi giữa queue và Kafka trong bối cảnh DE là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kafka mạnh ở retention log và replay cho reprocessing.')">A. Kafka có retention log + replay mạnh cho phân tích</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì queue không tự động kém mọi mặt; tùy use case.')">B. Queue luôn nhanh hơn Kafka trong mọi trường hợp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Kafka không phải RDBMS thay thế.')">C. Kafka thay thế hoàn toàn database transaction</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì Kafka vẫn cần schema contract và governance.')">D. Kafka không cần quản lý schema</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Phương án an toàn phổ biến cho pipeline quan trọng là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. At-least-once + idempotent sink thường thực dụng và ổn định.')">A. At-least-once kết hợp idempotent consumer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì at-most-once có thể mất dữ liệu nghiệp vụ.')">B. At-most-once cho payment events</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bỏ retry khiến hệ mong manh.')">C. Không retry để tiết kiệm tài nguyên</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì exactly-once tuyệt đối toàn chuỗi thường không khả thi.')">D. Exactly-once tuyệt đối end-to-end không cần kiểm chứng</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Khi dữ liệu out-of-order, kỹ thuật nào quan trọng nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Watermark + event-time là nền tảng xử lý out-of-order.')">A. Event-time + watermark policy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì processing-time dễ lệch kết quả nghiệp vụ khi data trễ.')">B. Chỉ dùng processing-time</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tăng partition không giải quyết đúng-sai theo thời gian sự kiện.')">C. Tăng partition Kafka</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì checkpoint không thay cho thiết kế watermark.')">D. Tăng tần suất checkpoint</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Nếu consumer lag tăng đều trong 20 phút, bước đầu nên làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kiểm tra bottleneck throughput/backpressure trước khi scale mù.')">A. Kiểm tra bottleneck và backpressure trước khi scale</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì restart liên tục không xử lý root cause.')">B. Restart job liên tục cho tới khi ổn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì xóa topic gây mất dữ liệu nghiêm trọng.')">C. Xóa topic để lag về 0</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tắt alert che vấn đề thay vì giải quyết.')">D. Tắt cảnh báo monitoring</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Partition key nên dựa vào điều gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dựa vào entity cần ordering và phân bố tải hợp lý.')">A. Business entity cần ordering và cân bằng tải</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chọn key theo cảm tính dễ hot partition.')">B. Chọn ngẫu nhiên theo ngày</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì cùng một key cho mọi record tạo skew lớn.')">C. Dùng một key cố định cho toàn bộ sự kiện</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì bỏ key hoàn toàn thường phá ordering cục bộ.')">D. Không dùng key để đơn giản hóa</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Mục tiêu của dead-letter topic là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cô lập message lỗi để xử lý sau mà không chặn luồng chính.')">A. Tách message lỗi khỏi luồng chính để điều tra</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì DLT không thay thế log audit toàn hệ thống.')">B. Thay thế hoàn toàn audit logging</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì DLT không phải nơi lưu cache ứng dụng.')">C. Lưu cache tốc độ cao</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì DLT không có vai trò giảm latency trực tiếp.')">D. Giảm latency của producer</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Checkpoint trong Flink có ý nghĩa nào đúng nhất?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Checkpoint snapshot state để khôi phục sau lỗi.')">A. Snapshot state định kỳ cho recovery</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì checkpoint không phải batch compaction.')">B. Nén dữ liệu thô để lưu trữ dài hạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì checkpoint không tự validate schema contract.')">C. Tự kiểm tra schema producer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì checkpoint không quyết định partition count.')">D. Tăng số partition Kafka tự động</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Khi nào streaming không nên được ưu tiên?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Không SLA realtime rõ và batch đáp ứng đủ thì stream là overkill.')">A. Khi batch đáp ứng tốt và không có SLA realtime</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì fraud realtime thường cần streaming.')">B. Khi cần phát hiện gian lận theo giây</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì alerting hạ tầng cần phản ứng nhanh.')">C. Khi cần cảnh báo sự cố hệ thống ngay</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì recommendation in-session là ứng viên stream điển hình.')">D. Khi cần cá nhân hóa theo phiên người dùng</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Nếu event-time mới là chuẩn nghiệp vụ, chọn gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng event-time + watermark thay vì processing-time thuần.')">A. Event-time windows với watermark phù hợp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì processing-time có thể sai lệch khi event trễ.')">B. Processing-time cho mọi trường hợp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì không window sẽ khó tổng hợp theo mốc thời gian.')">C. Không dùng window</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ đổi retention không sửa logic time semantics.')">D. Chỉ tăng retention Kafka</div></div><div class="quiz-explain"></div></div>
+    <div class="quiz-item"><div class="quiz-q">Đầu ra nào khiến artifact đáng tin nhất với recruiter?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có code + README reasoning + monitoring + runbook là bộ evidence mạnh.')">A. Code chạy được kèm README, monitoring plan, runbook rõ ràng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ có notebook demo một lần là chưa đủ production mindset.')">B. Chỉ notebook demo chạy một lần</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ lý thuyết thiếu bằng chứng thực hành.')">C. Chỉ bài viết khái niệm không có code</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì số lượng screenshot không thay cho giải thích kỹ thuật.')">D. Chụp nhiều ảnh màn hình nhất có thể</div></div><div class="quiz-explain"></div></div>
+  </div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+    <div class="summary-item"><strong>Readiness target</strong>Nắm đủ Kafka + Flink + vận hành thực tế</div>
+    <div class="summary-item"><strong>Focus areas</strong>Semantics, watermark, reliability, monitoring</div>
+    <div class="summary-item"><strong>Common gaps</strong>Nhầm ordering toàn topic, lạm dụng exactly-once</div>
+    <div class="summary-item"><strong>Correction path</strong>Ôn lại module theo nhóm câu sai</div>
+    <div class="summary-item"><strong>Portfolio link</strong>Kết quả tốt nên đi kèm artifact W18.07 hoàn chỉnh</div>
+    <div class="summary-item"><strong>Mindset</strong>Luôn cân bằng correctness, latency, cost</div>
+  </div></div></div>
+
+  <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+    <div class="practice-task"><div class="practice-task-header">Final Mini Test (20 câu)</div><div class="practice-task-body">
+      <div id="final-test">
+        <div class="test-question" data-q="1" data-correct="B"><div class="test-question-title">Q1. Kafka đảm bảo ordering ở phạm vi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q1" value="A"> A. Toàn cluster</label><label class="test-option"><input type="radio" name="q1" value="B"> B. Trong từng partition</label><label class="test-option"><input type="radio" name="q1" value="C"> C. Theo consumer group name</label><label class="test-option"><input type="radio" name="q1" value="D"> D. Theo broker leader</label></div></div>
+        <div class="test-question" data-q="2" data-correct="C"><div class="test-question-title">Q2. Consumer group giúp đạt mục tiêu gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q2" value="A"> A. Nén dữ liệu</label><label class="test-option"><input type="radio" name="q2" value="B"> B. Mã hóa payload</label><label class="test-option"><input type="radio" name="q2" value="C"> C. Chia tải đọc theo partition</label><label class="test-option"><input type="radio" name="q2" value="D"> D. Tăng retention</label></div></div>
+        <div class="test-question" data-q="3" data-correct="A"><div class="test-question-title">Q3. At-least-once nghĩa là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q3" value="A"> A. Có thể duplicate nhưng không mất dữ liệu</label><label class="test-option"><input type="radio" name="q3" value="B"> B. Không duplicate tuyệt đối</label><label class="test-option"><input type="radio" name="q3" value="C"> C. Luôn mất dữ liệu</label><label class="test-option"><input type="radio" name="q3" value="D"> D. Chỉ áp dụng cho batch</label></div></div>
+        <div class="test-question" data-q="4" data-correct="D"><div class="test-question-title">Q4. Đâu là cách phổ biến để xử lý duplicate downstream?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> A. Tăng partition</label><label class="test-option"><input type="radio" name="q4" value="B"> B. Tắt retry</label><label class="test-option"><input type="radio" name="q4" value="C"> C. Commit offset sớm</label><label class="test-option"><input type="radio" name="q4" value="D"> D. Idempotent consumer theo event_id</label></div></div>
+        <div class="test-question" data-q="5" data-correct="B"><div class="test-question-title">Q5. Poison message nên làm gì sau khi retry quá ngưỡng?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> A. Bỏ im lặng</label><label class="test-option"><input type="radio" name="q5" value="B"> B. Chuyển sang dead-letter topic</label><label class="test-option"><input type="radio" name="q5" value="C"> C. Xóa topic chính</label><label class="test-option"><input type="radio" name="q5" value="D"> D. Tăng TTL DNS</label></div></div>
+        <div class="test-question" data-q="6" data-correct="A"><div class="test-question-title">Q6. Keyed state trong Flink thường gắn với thao tác nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> A. keyBy theo business key</label><label class="test-option"><input type="radio" name="q6" value="B"> B. map không key</label><label class="test-option"><input type="radio" name="q6" value="C"> C. union tất cả stream</label><label class="test-option"><input type="radio" name="q6" value="D"> D. sink trực tiếp</label></div></div>
+        <div class="test-question" data-q="7" data-correct="C"><div class="test-question-title">Q7. Checkpoint dùng để làm gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> A. Đổi schema event</label><label class="test-option"><input type="radio" name="q7" value="B"> B. Tăng số broker</label><label class="test-option"><input type="radio" name="q7" value="C"> C. Snapshot state để recovery</label><label class="test-option"><input type="radio" name="q7" value="D"> D. Xóa lag</label></div></div>
+        <div class="test-question" data-q="8" data-correct="D"><div class="test-question-title">Q8. Savepoint phù hợp nhất cho tình huống nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> A. Đổi màu dashboard</label><label class="test-option"><input type="radio" name="q8" value="B"> B. Gửi email thông báo</label><label class="test-option"><input type="radio" name="q8" value="C"> C. Tăng retention</label><label class="test-option"><input type="radio" name="q8" value="D"> D. Upgrade/migrate job có kiểm soát</label></div></div>
+        <div class="test-question" data-q="9" data-correct="A"><div class="test-question-title">Q9. Window nào không chồng lấn theo khoảng cố định?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Tumbling</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Sliding</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Session</label><label class="test-option"><input type="radio" name="q9" value="D"> D. Global</label></div></div>
+        <div class="test-question" data-q="10" data-correct="C"><div class="test-question-title">Q10. Watermark chủ yếu liên quan đến khái niệm nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. Disk quota</label><label class="test-option"><input type="radio" name="q10" value="B"> B. Producer acks</label><label class="test-option"><input type="radio" name="q10" value="C"> C. Event-time progress</label><label class="test-option"><input type="radio" name="q10" value="D"> D. SSL certificate</label></div></div>
+        <div class="test-question" data-q="11" data-correct="B"><div class="test-question-title">Q11. Allowed lateness cho phép điều gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. Tăng throughput Kafka</label><label class="test-option"><input type="radio" name="q11" value="B"> B. Nhận late events trong khoảng cho phép</label><label class="test-option"><input type="radio" name="q11" value="C"> C. Tự tạo partition</label><label class="test-option"><input type="radio" name="q11" value="D"> D. Bỏ qua schema check</label></div></div>
+        <div class="test-question" data-q="12" data-correct="A"><div class="test-question-title">Q12. Metric nào trực tiếp nhất để biết pipeline bị tụt xử lý?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. Consumer lag</label><label class="test-option"><input type="radio" name="q12" value="B"> B. Số dòng README</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Số commit</label><label class="test-option"><input type="radio" name="q12" value="D"> D. Dung lượng RAM laptop cá nhân</label></div></div>
+        <div class="test-question" data-q="13" data-correct="D"><div class="test-question-title">Q13. Backpressure cao liên tục thường báo hiệu gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. Mạng xã hội tăng follower</label><label class="test-option"><input type="radio" name="q13" value="B"> B. Schema đã tối ưu hoàn hảo</label><label class="test-option"><input type="radio" name="q13" value="C"> C. Không cần theo dõi nữa</label><label class="test-option"><input type="radio" name="q13" value="D"> D. Operator xử lý chậm hơn đầu vào</label></div></div>
+        <div class="test-question" data-q="14" data-correct="B"><div class="test-question-title">Q14. Khi nào streaming có thể là overkill?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. Fraud realtime</label><label class="test-option"><input type="radio" name="q14" value="B"> B. Không có SLA realtime, batch đủ đáp ứng</label><label class="test-option"><input type="radio" name="q14" value="C"> C. Alerting hạ tầng</label><label class="test-option"><input type="radio" name="q14" value="D"> D. IoT telemetry liên tục</label></div></div>
+        <div class="test-question" data-q="15" data-correct="C"><div class="test-question-title">Q15. Mục đích chính của schema registry là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Tăng tốc CPU</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Thay thế dead-letter topic</label><label class="test-option"><input type="radio" name="q15" value="C"> C. Quản lý version và compatibility schema</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Tự tạo dashboard</label></div></div>
+        <div class="test-question" data-q="16" data-correct="A"><div class="test-question-title">Q16. Artifact tuyển dụng tốt nên có gì ngoài code?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. README reasoning + monitoring + runbook</label><label class="test-option"><input type="radio" name="q16" value="B"> B. Chỉ screenshot</label><label class="test-option"><input type="radio" name="q16" value="C"> C. Chỉ danh sách lệnh</label><label class="test-option"><input type="radio" name="q16" value="D"> D. Chỉ badge màu</label></div></div>
+        <div class="test-question" data-q="17" data-correct="D"><div class="test-question-title">Q17. Commit offset quá sớm có thể gây gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q17" value="A"> A. Tăng chất lượng dữ liệu</label><label class="test-option"><input type="radio" name="q17" value="B"> B. Tăng replication factor</label><label class="test-option"><input type="radio" name="q17" value="C"> C. Giảm checkpoint duration</label><label class="test-option"><input type="radio" name="q17" value="D"> D. Mất dữ liệu khi crash giữa xử lý</label></div></div>
+        <div class="test-question" data-q="18" data-correct="B"><div class="test-question-title">Q18. Session window dùng tốt cho bài toán nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q18" value="A"> A. Bucket đúng từng phút cố định</label><label class="test-option"><input type="radio" name="q18" value="B"> B. Phiên người dùng theo khoảng im lặng</label><label class="test-option"><input type="radio" name="q18" value="C"> C. Snapshot cuối ngày</label><label class="test-option"><input type="radio" name="q18" value="D"> D. ETL full refresh</label></div></div>
+        <div class="test-question" data-q="19" data-correct="C"><div class="test-question-title">Q19. Anti-pattern nguy hiểm trong streaming là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q19" value="A"> A. Theo dõi lag thường xuyên</label><label class="test-option"><input type="radio" name="q19" value="B"> B. Dùng idempotent sink</label><label class="test-option"><input type="radio" name="q19" value="C"> C. Build realtime pipeline không SLA rõ</label><label class="test-option"><input type="radio" name="q19" value="D"> D. Viết runbook incident</label></div></div>
+        <div class="test-question" data-q="20" data-correct="A"><div class="test-question-title">Q20. Khi cần ordering theo account_id, giải pháp đúng là?</div><div class="test-options"><label class="test-option"><input type="radio" name="q20" value="A"> A. Dùng account_id làm partition key</label><label class="test-option"><input type="radio" name="q20" value="B"> B. Random key mọi record</label><label class="test-option"><input type="radio" name="q20" value="C"> C. Bỏ key và tăng broker</label><label class="test-option"><input type="radio" name="q20" value="D"> D. Tách mỗi event vào topic riêng</label></div></div>
+
+        <div class="test-actions">
+          <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+          <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+        </div>
+        <div class="test-result" id="final-test-result" style="display:none"></div>
+      </div>
+    </div></div>
+  </div></div>
+
+  <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">Quay lại W18.07</button><div style="text-align:center;color:var(--accent2);font-weight:700">Hoàn thành Tuần 18. Bạn đã có nền tảng streaming systems theo chuẩn production mindset.</div></div>
+</div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+  }
+  explain.textContent = (correct ? 'Chính xác. ' : 'Chưa đúng. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+
+  if (percent >= 90) { levelText = 'Xuất sắc'; chipClass = 'good'; guidance = 'Bạn đã nắm rất chắc Kafka/Flink. Có thể tự tin triển khai artifact nâng cao.'; }
+  else if (percent >= 80) { levelText = 'Tốt'; chipClass = 'good'; guidance = 'Bạn đạt mức sẵn sàng tốt. Hãy rà lại các câu sai để khóa kiến thức.'; }
+  else if (percent >= 65) { levelText = 'Đạt tối thiểu'; chipClass = 'warn'; guidance = 'Bạn có nền tảng, nhưng nên ôn lại semantics và watermark trước khi đi tiếp.'; }
+  else { levelText = 'Cần ôn thêm'; chipClass = 'bad'; guidance = 'Bạn nên quay lại W18.02-W18.06 và làm lại bài thực hành theo runbook.'; }
+
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đáp án đúng <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng.</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+</body>
+</html>

@@ -278,6 +278,7 @@ FROM v$sql
 ORDER BY elapsed_time DESC
 FETCH FIRST 20 ROWS ONLY;</pre></div></div></div>
 
+        <div class="info-box tip">🧠 <span>Khác biệt cú pháp cần nhớ: PostgreSQL dùng <code>now()</code> để lấy thời gian hiện tại, còn Oracle dùng <code>SYSDATE</code>. Hai hàm cùng mục tiêu nhưng khác hệ quản trị.</span></div>
         <div class="info-box note">📌 <span>Trong roadmap expert, migration tốt không phải đổi tool cho nhanh, mà là giảm rủi ro vận hành và giữ KPI đúng sau cutover.</span></div>
       </div></div>
 
@@ -449,6 +450,14 @@ GROUP BY country;</pre></div></div></div>
           <tr><td>Rủi ro thường gặp</td><td>Warehouse bật quá lâu gây tốn credit</td><td>Query thiếu guardrail gây bùng scan bytes</td><td>Thiếu tuning WLM/dist/sort gây nghẽn</td></tr>
         </table>
 
+        <h3>Databricks đứng ở đâu so với warehouse-first?</h3>
+        <table>
+          <tr><th>Góc nhìn</th><th>Databricks/lakehouse platform</th><th>Warehouse-first platform</th></tr>
+          <tr><td>Workload chính</td><td>Mạnh khi BI + DS/ML + data engineering chạy chung trên data lake mở</td><td>Mạnh khi BI/SQL analytics là ưu tiên số 1 và cần vận hành đơn giản</td></tr>
+          <tr><td>Độ mở dữ liệu</td><td>Tận dụng open table formats (Iceberg/Delta) tốt cho portability</td><td>Nhanh vào việc nhưng có thể lock-in mạnh hơn theo từng dịch vụ</td></tr>
+          <tr><td>Yêu cầu năng lực đội</td><td>Cần đội hiểu sâu metadata, file layout, đa-engine operations</td><td>Dễ onboard hơn cho đội BI/SQL-centric</td></tr>
+        </table>
+
         <h3>Service boundaries: nhà cung cấp làm gì, đội DE vẫn phải làm gì</h3>
         <table>
           <tr><th>Vùng trách nhiệm</th><th>Managed bởi nền tảng</th><th>Đội DE vẫn chịu trách nhiệm</th></tr>
@@ -465,6 +474,15 @@ GROUP BY country;</pre></div></div></div>
           <li><strong>Benchmark 3 truy vấn đại diện:</strong> heavy join, daily KPI aggregate, ad-hoc exploration.</li>
           <li><strong>So sánh theo trọng số:</strong> cost predictability, concurrency, ops effort, governance fit.</li>
         </ol>
+
+        <h3>Warehouse sizing và compute isolation (điểm sống còn khi production scale)</h3>
+        <table>
+          <tr><th>Quyết định</th><th>Lợi ích</th><th>Sai lầm thường gặp</th></tr>
+          <tr><td>Tách <code>WH_ETL</code> và <code>WH_BI</code></td><td>ETL backfill không làm nghẽn dashboard giờ cao điểm</td><td>Dùng chung 1 warehouse cho mọi workload</td></tr>
+          <tr><td>Dùng T-shirt sizing (XS/S/M/L)</td><td>Scale nhanh theo loại job, tránh over-provision liên tục</td><td>Giữ warehouse lớn chạy cả ngày dù tải thấp</td></tr>
+          <tr><td>Auto-suspend + auto-resume</td><td>Giảm chi phí idle compute rõ rệt</td><td>Tắt auto-suspend vì "sợ cold start" dù truy vấn thưa</td></tr>
+          <tr><td>Quota theo team/domain</td><td>Kiểm soát budget và trách nhiệm sử dụng tài nguyên</td><td>Không gắn cost ownership cho từng domain</td></tr>
+        </table>
 
         <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>warehouse_selection_matrix.txt</span></div><div class="cmd-body"><pre>- Cost predictability: 30%
 - Concurrency isolation: 25%
@@ -616,6 +634,14 @@ GROUP BY country;</pre></div></div></div>
           <li>Cần quản trị thống nhất metadata/lineage qua nhiều domain dữ liệu.</li>
         </ul>
 
+        <h3>Ranh giới quyết định: warehouse-first hay lakehouse-first?</h3>
+        <table>
+          <tr><th>Bối cảnh</th><th>Nên ưu tiên</th><th>Lý do</th></tr>
+          <tr><td>BI là workload chính, team nhỏ, cần tốc độ triển khai</td><td>Warehouse-first</td><td>Managed services giúp vào vận hành nhanh, ít gánh metadata ban đầu</td></tr>
+          <tr><td>Vừa BI vừa DS/ML, dữ liệu bán cấu trúc tăng nhanh</td><td>Lakehouse-first</td><td>Cần storage mở + table semantics để nhiều engine cùng đọc/ghi an toàn</td></tr>
+          <tr><td>Yêu cầu portability dài hạn, tránh phụ thuộc engine đơn lẻ</td><td>Lakehouse + open table format</td><td>Giảm lock-in chiến lược và tăng khả năng chuyển compute engine</td></tr>
+        </table>
+
         <h3>Khi chưa nên dùng lakehouse đầy đủ</h3>
         <ul>
           <li>Dữ liệu nhỏ, chỉ có BI cơ bản: warehouse managed thuần có thể đơn giản và hiệu quả hơn.</li>
@@ -696,6 +722,20 @@ PARTITIONED BY (days(completion_date), bucket(16, match_id));
 SELECT * FROM lakehouse.matches_bucketed VERSION AS OF 123456789;
 
 ALTER TABLE lakehouse.matches_bucketed ADD COLUMN map_name STRING;</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>iceberg_maintenance.sql</span></div><div class="cmd-body"><pre>-- Bảo trì snapshot để tránh metadata phình to
+CALL catalog.system.expire_snapshots(
+  table => 'lakehouse.matches_bucketed',
+  older_than => TIMESTAMP '2026-03-01 00:00:00',
+  retain_last => 20
+);
+
+-- Gom small files để giảm planning overhead
+CALL catalog.system.rewrite_data_files(
+  table => 'lakehouse.matches_bucketed'
+);</pre></div></div>
+
+        <div class="info-box note">📌 <span>Giá trị lớn của Iceberg là portability: cùng một bảng có thể được đọc bởi nhiều engine (Spark/Trino/Flink) nên giảm lock-in compute engine về dài hạn.</span></div>
 
         <h3>Metadata layers và ý nghĩa performance</h3>
         <table>
@@ -800,12 +840,29 @@ FROM mart.fct_orders
 GROUP BY TRUNC(order_date)
 ORDER BY d DESC;</pre></div></div></div>
 
-        <div class="sql-panel" data-group="sql-mig-1" data-tab="dbt"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>models/marts/fct_orders.sql</span></div><div class="cmd-body"><pre>{{ config(materialized='incremental', unique_key='order_id') }}
-SELECT *
+        <div class="sql-panel" data-group="sql-mig-1" data-tab="dbt"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>models/marts/fct_orders.sql</span></div><div class="cmd-body"><pre>{{ config(
+    materialized='incremental',
+    unique_key='order_id',
+    partition_by={'field': 'order_date', 'data_type': 'date'},
+    cluster_by=['country']
+) }}
+SELECT order_id, order_date, country, net_revenue, updated_at
 FROM {{ ref('stg_orders') }}
 {% if is_incremental() %}
 WHERE updated_at > (SELECT COALESCE(MAX(updated_at), '1970-01-01') FROM {{ this }})
 {% endif %}</pre></div></div></div>
+
+        <div class="info-box tip">🧠 <span>Khác biệt cú pháp thường gặp: PostgreSQL dùng <code>date_trunc('day', ...)</code> còn Oracle dùng <code>TRUNC(...)</code> để gom dữ liệu theo ngày. Logic giống nhau, cú pháp khác nhau theo hệ.</span></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dual_run_flow.txt</span></div><div class="cmd-body"><pre>Sources (OLTP/Events)
+        |
+        +--> dbt target: PostgreSQL (legacy mart)
+        |
+        +--> dbt target: Cloud DW (new mart)
+                    |
+           KPI parity + reconcile report
+                    |
+           Go/No-Go cutover + rollback path</pre></div></div>
 
         <div class="info-box note">📌 <span>Migration dbt thành công khi số liệu đúng trước, rồi mới tối ưu cost/performance. Đừng đảo ngược thứ tự này.</span></div>
       </div></div>
@@ -822,7 +879,7 @@ WHERE updated_at > (SELECT COALESCE(MAX(updated_at), '1970-01-01') FROM {{ this 
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Viết migration checklist cho dbt project</div><div class="practice-task-body">
         <p>Project có 50 models trên PostgreSQL. Hãy lập checklist migration sang Cloud DW gồm: kiểm thử dữ liệu, kiểm soát chi phí, rollback.</p>
         <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
-        <div class="solution-box"><ol><li>Đóng băng KPI logic + baseline metrics.</li><li>Dual-run và đối soát mỗi ngày.</li><li>Alert scan bytes/compute credits.</li><li>Giữ hệ cũ chạy song song 1 sprint để rollback nếu cần.</li></ol></div>
+        <div class="solution-box"><ol><li>Đóng băng KPI logic + baseline metrics.</li><li>Dual-run và đối soát mỗi ngày.</li><li>Alert scan bytes/compute credits.</li><li>Giữ hệ cũ chạy song song 1 sprint để rollback nếu cần.</li></ol><p>Thứ tự này ưu tiên đúng-số-liệu trước, rồi mới tối ưu chi phí. Nếu đảo ngược, bạn có thể tối ưu rất tốt nhưng tối ưu trên KPI sai.</p></div>
       </div></div></div></div>
       <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">← Module trước</button><button class="nav-btn primary" onclick="goNext(6)">Module tiếp theo →</button></div>
     </div>
@@ -893,12 +950,49 @@ SELECT *
 FROM mart.fct_orders
 ORDER BY created_at DESC;</pre></div></div></div>
 
+        <h3>Result cache và metadata cache: đòn bẩy cost bị bỏ sót nhiều nhất</h3>
+        <table>
+          <tr><th>Khái niệm</th><th>Lợi ích</th><th>Lưu ý vận hành</th></tr>
+          <tr><td>Result cache</td><td>Trả lại kết quả truy vấn lặp nếu SQL và dữ liệu không đổi, gần như không tốn compute</td><td>Đổi SQL text nhỏ cũng có thể làm mất cache hit</td></tr>
+          <tr><td>Metadata/file stats cache</td><td>Giảm planning time, tăng pruning hiệu quả</td><td>Cần metadata hygiene và compaction đều đặn</td></tr>
+          <tr><td>BI dashboard cache-aware</td><td>Giảm query lặp vô ích theo chu kỳ refresh</td><td>Phải cân bằng giữa freshness SLA và cost</td></tr>
+        </table>
+
+        <h3>Firefighting script: truy dấu query đốt tiền</h3>
+        <div class="sql-tabs" data-group="sql-m7-history">
+          <button class="sql-tab active" onclick="switchSqlTab(this,'sql-m7-history','snowflake')">Snowflake</button>
+          <button class="sql-tab" onclick="switchSqlTab(this,'sql-m7-history','bigquery')">BigQuery</button>
+        </div>
+
+        <div class="sql-panel active" data-group="sql-m7-history" data-tab="snowflake"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>snowflake_query_history.sql</span></div><div class="cmd-body"><pre>SELECT query_id,
+       user_name,
+       warehouse_name,
+       total_elapsed_time/1000 AS elapsed_sec,
+       bytes_scanned,
+       credits_used_cloud_services
+FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+WHERE start_time >= DATEADD('day', -1, CURRENT_TIMESTAMP())
+ORDER BY bytes_scanned DESC
+LIMIT 20;</pre></div></div></div>
+
+        <div class="sql-panel" data-group="sql-m7-history" data-tab="bigquery"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>bigquery_jobs_cost.sql</span></div><div class="cmd-body"><pre>SELECT job_id,
+       user_email,
+       total_bytes_processed,
+       total_slot_ms,
+       TIMESTAMP_DIFF(end_time, start_time, SECOND) AS elapsed_sec
+FROM `region-us`.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+WHERE creation_time >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY)
+  AND statement_type = 'SELECT'
+ORDER BY total_bytes_processed DESC
+LIMIT 20;</pre></div></div></div>
+
         <h3>Cost/performance trade-off cần nhìn rõ</h3>
         <table>
           <tr><th>Quyết định</th><th>Lợi ích</th><th>Đổi lại</th></tr>
           <tr><td>Tăng pre-aggregation</td><td>Dashboard nhanh hơn, rẻ hơn</td><td>Tăng complexity pipeline/refresh</td></tr>
           <tr><td>Clustering sâu</td><td>Giảm scan cho query lặp lại</td><td>Tăng chi phí bảo trì layout</td></tr>
           <tr><td>Reservation/quota chặt</td><td>Dự báo ngân sách tốt</td><td>Ad-hoc peak có thể chậm nếu set quá thấp</td></tr>
+          <tr><td>Over-partition quá chi tiết</td><td>Prune tốt ở một số query hẹp</td><td>Metadata overhead cao, dễ tăng latency tổng thể</td></tr>
         </table>
 
         <div class="info-box tip">✅ <span>Tối ưu warehouse không phải tối ưu một query. Mục tiêu đúng là tối ưu toàn bộ workload trong giới hạn SLA và ngân sách đã chốt.</span></div>
@@ -916,7 +1010,7 @@ ORDER BY created_at DESC;</pre></div></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. 🔬 Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none"><div class="practice-task"><div class="practice-task-header">Tối ưu 2 query dashboard chậm</div><div class="practice-task-body">
         <p>Query A chạy 95 giây, Query B chạy 130 giây. Hãy liệt kê 5 hành động tối ưu theo thứ tự ưu tiên và giải thích.</p>
         <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
-        <div class="solution-box"><ol><li>Thêm filter partition key bắt buộc.</li><li>Bỏ SELECT *.</li><li>Giảm cardinality trước khi join.</li><li>Tạo bảng aggregate/materialized view.</li><li>Compaction + điều chỉnh clustering.</li></ol></div>
+        <div class="solution-box"><ol><li>Thêm filter partition key bắt buộc.</li><li>Bỏ SELECT *.</li><li>Giảm cardinality trước khi join.</li><li>Tạo bảng aggregate/materialized view.</li><li>Compaction + điều chỉnh clustering.</li></ol><p>Lý do ưu tiên: 2 bước đầu giảm scan bytes ngay nên tác động ROI cao nhất; các bước sau mới xử lý tối ưu sâu và bền vững.</p></div>
       </div></div></div></div>
       <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">← Module trước</button><button class="nav-btn primary" onclick="goNext(7)">Module tiếp theo →</button></div>
     </div>
@@ -962,6 +1056,7 @@ ORDER BY created_at DESC;</pre></div></div></div>
           <tr><td>cost_comparison.md</td><td>Giả định workload + benchmark theo cùng khối lượng dữ liệu</td><td>Có kết luận kèm điều kiện áp dụng, không kết luận tuyệt đối</td></tr>
           <tr><td>iceberg_demo.md</td><td>DDL, snapshot query, schema evolution, compaction policy</td><td>Nêu rõ Iceberg là table format và engine dùng để chạy demo</td></tr>
           <tr><td>README.md</td><td>Mục tiêu, kiến trúc, cách chạy, test plan, lesson learned</td><td>Người mới có thể chạy lại từ đầu trong môi trường sạch</td></tr>
+          <tr><td>README evidence section</td><td>Ảnh lineage dbt + biểu đồ cost before/after</td><td>Thể hiện artifact giống PR kỹ thuật thật, tăng sức nặng portfolio</td></tr>
         </table>
 
         <h3>Template nội dung gợi ý cho review kỹ thuật</h3>
@@ -976,6 +1071,11 @@ ORDER BY created_at DESC;</pre></div></div></div>
 3. Benchmark latency + cost trên cùng bài test
 4. Rủi ro chi phí và guardrail đề xuất
 5. Khuyến nghị theo bối cảnh tổ chức</pre></div></div>
+
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>README evidence checklist</span></div><div class="cmd-body"><pre>- Screenshot dbt lineage graph cho domain đã migrate
+- Ảnh/bảng cost before vs after (cùng query mix)
+- 1 ví dụ query được tối ưu (before/after, bytes scanned)
+- Link tới migration_notes.md và rollback trigger</pre></div></div>
 
         <div class="info-box note">📌 <span>Artifact tốt phải explainable: người review hiểu bạn chọn kiến trúc nào, vì sao chọn, và nếu sai thì rollback thế nào.</span></div>
       </div></div>
@@ -1055,10 +1155,10 @@ ORDER BY created_at DESC;</pre></div></div></div>
           <div class="test-question" data-q="9" data-correct="D"><div class="test-question-title">Q9. Schema evolution trong Iceberg cho phép gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Không đổi schema</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Chỉ đổi tên file</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Rewrite toàn bộ bắt buộc</label><label class="test-option"><input type="radio" name="q9" value="D"> D. Thay đổi schema an toàn theo thời gian</label></div></div>
           <div class="test-question" data-q="10" data-correct="A"><div class="test-question-title">Q10. Bước an toàn trước cutover dbt migration?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. Dual-run và reconcile KPI</label><label class="test-option"><input type="radio" name="q10" value="B"> B. Xóa hệ cũ</label><label class="test-option"><input type="radio" name="q10" value="C"> C. Bỏ test</label><label class="test-option"><input type="radio" name="q10" value="D"> D. Chuyển hết sang ephemeral</label></div></div>
           <div class="test-question" data-q="11" data-correct="C"><div class="test-question-title">Q11. Materialized view nên dùng khi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. Query ad-hoc một lần</label><label class="test-option"><input type="radio" name="q11" value="B"> B. Logic liên tục đổi</label><label class="test-option"><input type="radio" name="q11" value="C"> C. KPI query lặp lại</label><label class="test-option"><input type="radio" name="q11" value="D"> D. Không cần refresh</label></div></div>
-          <div class="test-question" data-q="12" data-correct="D"><div class="test-question-title">Q12. Biện pháp giảm scan bytes hiệu quả?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. Màn hình 4K</label><label class="test-option"><input type="radio" name="q12" value="B"> B. Đổi tên bảng</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Thêm CTE vô tội vạ</label><label class="test-option"><input type="radio" name="q12" value="D"> D. Tránh SELECT * và lọc partition key</label></div></div>
+          <div class="test-question" data-q="12" data-correct="A"><div class="test-question-title">Q12. Khi nào result cache giúp giảm chi phí rõ rệt?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. Query lặp lại với dữ liệu chưa đổi</label><label class="test-option"><input type="radio" name="q12" value="B"> B. Mỗi query đều khác hoàn toàn</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Khi bỏ partition key</label><label class="test-option"><input type="radio" name="q12" value="D"> D. Khi tắt query history</label></div></div>
           <div class="test-question" data-q="13" data-correct="B"><div class="test-question-title">Q13. Small files thường gây gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. Không ảnh hưởng</label><label class="test-option"><input type="radio" name="q13" value="B"> B. Metadata overhead và query chậm</label><label class="test-option"><input type="radio" name="q13" value="C"> C. Tăng độ chính xác</label><label class="test-option"><input type="radio" name="q13" value="D"> D. Giảm cost ngay</label></div></div>
-          <div class="test-question" data-q="14" data-correct="A"><div class="test-question-title">Q14. File bắt buộc trong artifact warehouse_migration?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. cost_comparison.md</label><label class="test-option"><input type="radio" name="q14" value="B"> B. avatar.png</label><label class="test-option"><input type="radio" name="q14" value="C"> C. slides.pptx</label><label class="test-option"><input type="radio" name="q14" value="D"> D. random.txt</label></div></div>
-          <div class="test-question" data-q="15" data-correct="C"><div class="test-question-title">Q15. Source freshness trong dbt dùng để?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Tạo role</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Đổi schema tự động</label><label class="test-option"><input type="radio" name="q15" value="C"> C. Theo dõi độ trễ dữ liệu nguồn</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Nén file parquet</label></div></div>
+          <div class="test-question" data-q="14" data-correct="C"><div class="test-question-title">Q14. Khi cost spike, truy vấn nào nên chạy trước?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. SELECT * từ bảng lớn</label><label class="test-option"><input type="radio" name="q14" value="B"> B. EXPLAIN cho toàn bộ DAG</label><label class="test-option"><input type="radio" name="q14" value="C"> C. Query history để lấy top bytes scanned</label><label class="test-option"><input type="radio" name="q14" value="D"> D. Xóa cache toàn hệ thống</label></div></div>
+          <div class="test-question" data-q="15" data-correct="A"><div class="test-question-title">Q15. Thành phần nào giúp README artifact trông như PR kỹ thuật thật?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Screenshot lineage + cost before/after</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Chỉ cần ảnh bìa đẹp</label><label class="test-option"><input type="radio" name="q15" value="C"> C. Bỏ benchmark</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Không cần evidence</label></div></div>
           <div class="test-question" data-q="16" data-correct="D"><div class="test-question-title">Q16. Mindset từ Spark homework liên hệ trực tiếp DW tuning?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. Chỉ học syntax</label><label class="test-option"><input type="radio" name="q16" value="B"> B. Bỏ qua join strategy</label><label class="test-option"><input type="radio" name="q16" value="C"> C. Không cần sort strategy</label><label class="test-option"><input type="radio" name="q16" value="D"> D. Broadcast/bucket/sort ảnh hưởng mạnh hiệu năng</label></div></div>
 
           <div class="test-actions">
@@ -1270,7 +1370,7 @@ const quizData = {
     { q: "BigQuery thường tính chi phí theo?", o: [["Scan bytes hoặc slot reservation", true, "Đúng mô hình phổ biến."],["Số dashboard", false, "Sai."],["Số user", false, "Sai."],["RAM trình duyệt", false, "Sai."]] },
     { q: "Redshift hợp với bối cảnh nào?", o: [["AWS-first và cần tích hợp sâu IAM/S3", true, "Đúng ecosystem fit."],["Không có đội vận hành", false, "Sai vì vẫn cần tuning nhất định."],["Chỉ dữ liệu nhỏ", false, "Sai."],["Không cần WLM", false, "Sai."]] },
     { q: "Concurrency isolation nghĩa là?", o: [["Tách tài nguyên compute giữa workloads", true, "Đúng tránh nghẽn chéo."],["Mở nhiều tab trình duyệt", false, "Sai."],["Xóa queue hoàn toàn", false, "Sai."],["Không liên quan hiệu năng", false, "Sai."]] },
-    { q: "Ops overhead thường thấp hơn ở nhóm nào?", o: [["Serverless/managed cao", true, "Đúng vì giảm tự quản trị."],["Tự build engine", false, "Sai."],["Local laptop", false, "Sai."],["Không monitoring", false, "Sai."]] },
+    { q: "Bước compute isolation cơ bản khi workload tăng là gì?", o: [["Tách warehouse ETL và BI", true, "Đúng vì giảm nghẽn chéo giữa batch và dashboard."],["Dùng chung một warehouse cho mọi team", false, "Sai dễ gây contention."],["Tắt auto-suspend toàn bộ", false, "Sai vì tăng chi phí idle."],["Chỉ tăng kích thước warehouse rồi giữ nguyên", false, "Sai vì thiếu chiến lược workload isolation."]] },
     { q: "Tiêu chí không thể bỏ qua khi chọn warehouse?", o: [["Team skill fit", true, "Đúng tool tốt nhưng đội không vận hành được vẫn thất bại."],["Logo đẹp", false, "Sai."],["Tên ngắn", false, "Sai."],["Số sticker", false, "Sai."]] },
     { q: "BigQuery mạnh ở workload nào?", o: [["Ad-hoc analytics lớn", true, "Đúng đặc trưng mạnh."],["OLTP transaction", false, "Sai."],["Frontend rendering", false, "Sai."],["Game server", false, "Sai."]] },
     { q: "Snowflake multi-cluster giúp gì?", o: [["Scale concurrency tốt hơn", true, "Đúng."],["Thay modeling", false, "Sai."],["Bỏ test", false, "Sai."],["Bỏ security", false, "Sai."]] },
@@ -1327,13 +1427,13 @@ const quizData = {
   ],
   "w14-08": [
     { q: "Đòn bẩy giảm chi phí scan hiệu quả nhất?", o: [["Chọn cột cần + filter partition", true, "Đúng."],["SELECT *", false, "Sai."],["Đổi tên cột", false, "Sai."],["Tăng brightness", false, "Sai."]] },
-    { q: "Materialized view hợp khi?", o: [["Query KPI lặp lại cao", true, "Đúng."],["Ad-hoc một lần", false, "Sai."],["Logic đổi liên tục", false, "Sai."],["Không có refresh", false, "Sai."]] },
+    { q: "Result cache hữu ích nhất khi nào?", o: [["Query KPI lặp lại, dữ liệu chưa đổi", true, "Đúng vì có thể trả kết quả từ cache với chi phí thấp."],["Mỗi lần query đều khác hoàn toàn", false, "Sai vì cache hit thấp."],["Khi bảng chưa tồn tại", false, "Sai."],["Khi tắt logging", false, "Sai."]] },
     { q: "Compaction nhằm mục tiêu?", o: [["Giảm small files và metadata scan", true, "Đúng."],["Xóa dữ liệu cũ", false, "Sai."],["Ẩn lỗi data quality", false, "Sai."],["Tăng file nhỏ", false, "Sai."]] },
     { q: "Join pattern tốt là?", o: [["Filter trước, join sau", true, "Đúng."],["Join lớn trước", false, "Sai."],["Cross join mặc định", false, "Sai."],["Không điều kiện join", false, "Sai."]] },
     { q: "Liên hệ Spark homework với DW tuning?", o: [["Broadcast/bucket/sort mindset giống tối ưu query", true, "Đúng."],["Không liên quan", false, "Sai."],["Chỉ cho frontend", false, "Sai."],["Chỉ học syntax", false, "Sai."]] },
-    { q: "Guardrail tốt cho cost control?", o: [["Budget alert + query quota", true, "Đúng."],["Tắt logging", false, "Sai."],["Không query review", false, "Sai."],["Cho query vô hạn", false, "Sai."]] },
+    { q: "Khi cost tăng đột biến, nên kiểm tra trước ở đâu?", o: [["Query history (bytes scanned, elapsed, user)", true, "Đúng để thấy query nào đốt tiền nhanh nhất."],["Màu biểu đồ dashboard", false, "Sai."],["Tên schema", false, "Sai."],["Commit message gần nhất", false, "Sai."]] },
     { q: "Trade-off phổ biến khi tối ưu mạnh?", o: [["Tăng complexity vận hành", true, "Đúng."],["Không trade-off", false, "Sai."],["Luôn giảm tốc độ", false, "Sai."],["Mất dữ liệu", false, "Sai cực đoan."]] },
-    { q: "Khi nào nên tránh full history recompute?", o: [["KPI lặp lại có thể incremental/pre-aggregate", true, "Đúng."],["Dataset nhỏ", false, "Sai không cần phức tạp."],["Không có lịch", false, "Sai ngữ cảnh."],["Chưa có dữ liệu", false, "Sai."]] },
+    { q: "Rủi ro của over-partition là gì?", o: [["Metadata overhead cao và planning chậm", true, "Đúng, đặc biệt với bảng lớn và nhiều partition nhỏ."],["Luôn giảm cost", false, "Sai."],["Luôn tăng cache hit", false, "Sai."],["Không ảnh hưởng gì", false, "Sai."]] },
     { q: "Mục tiêu hiệu năng nên gắn với?", o: [["SLA/SLI + budget", true, "Đúng production mindset."],["Cảm giác cá nhân", false, "Sai."],["Ý thích tool", false, "Sai."],["Số slide", false, "Sai."]] },
     { q: "Kết quả mong đợi W14.08?", o: [["Có playbook cost/performance dùng được ngay", true, "Đúng."],["Thuộc benchmark không context", false, "Sai."],["Bỏ monitoring", false, "Sai."],["Bỏ query review", false, "Sai."]] }
   ],
@@ -1344,6 +1444,7 @@ const quizData = {
     { q: "iceberg_demo nên có mục nào?", o: [["Snapshot/time travel/evolution demo", true, "Đúng."],["UI animation", false, "Sai."],["Playlist nhạc", false, "Sai."],["Logo", false, "Sai."]] },
     { q: "README artifact quan trọng vì?", o: [["Giúp người khác chạy lại và review quyết định", true, "Đúng."],["Trang trí repo", false, "Sai."],["Thay test", false, "Sai."],["Không cần nếu code tốt", false, "Sai."]] },
     { q: "Portfolio tốt thể hiện gì?", o: [["Thiết kế + vận hành + trade-off", true, "Đúng."],["Chỉ syntax", false, "Sai."],["Chỉ screenshot", false, "Sai."],["Không lessons learned", false, "Sai."]] },
+    { q: "Evidence nào tăng sức nặng portfolio migration?", o: [["Screenshot lineage và cost before/after", true, "Đúng vì người review nhìn thấy bằng chứng kỹ thuật cụ thể."],["Chỉ mô tả bằng lời", false, "Sai vì thiếu chứng cứ."],["Ẩn toàn bộ benchmark", false, "Sai."],["Xóa migration_notes", false, "Sai."]] },
     { q: "profiles_example có vai trò gì?", o: [["Hướng dẫn config mà không lộ secrets", true, "Đúng."],["Commit password thật", false, "Sai nguy hiểm."],["Tăng số file", false, "Sai."],["Bỏ setup", false, "Sai."]] },
     { q: "Production mindset thể hiện qua?", o: [["Rollback + success metrics + quality checks", true, "Đúng."],["Tên file đẹp", false, "Sai."],["Nhiều emoji", false, "Sai."],["Không runbook", false, "Sai."]] },
     { q: "Artifact nên được kiểm thử thế nào?", o: [["Run lại từ môi trường sạch theo README", true, "Đúng reproducibility."],["Chỉ chạy máy tác giả", false, "Sai."],["Không test", false, "Sai."],["Chỉ đọc code", false, "Sai."]] },

@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 15 · Data Integration</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 45%, #1d2a3a 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 72%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.4px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 330px;
+    min-width: 330px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--accent2); }
+
+  .nav-item {
+    display: block;
+    padding: 7px 16px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 62px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 980px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    background: var(--surface);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.52rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header {
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+
+  code {
+    font-family: 'Courier New', monospace;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--accent4);
+  }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 8px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--accent2);
+    margin-top: 10px;
+    transition: all 0.15s;
+  }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .tab-group { display: flex; gap: 0; margin-top: 8px; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 18px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '□'; color: var(--accent5); font-size: 1.1rem; flex-shrink: 0; margin-top: -1px; }
+  .checklist li.done::before { content: '✓'; color: var(--accent2); }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; color: #000; }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid, .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Data Integration cho Data Engineer · Tuần 15</h1>
+  <p>Từ “kết nối được dữ liệu” sang “tích hợp dữ liệu tin cậy, có ownership, có thể vận hành production”.</p>
+  <div class="badge-row">
+    <span class="badge badge-green">8 modules chuyên sâu</span>
+    <span class="badge badge-orange">Portfolio artifact tuần 15</span>
+    <span class="badge badge-blue">Mini test 20 câu cuối file</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương trình Tuần 15</div>
+    <div class="level-label">TUẦN 15 · DATA INTEGRATION</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W15.01</span>Tổng Quan Data Integration</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W15.02</span>Integration Patterns</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W15.03</span>Schema Mapping & Contracts</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W15.04</span>Reliability & Failure Handling</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W15.05</span>Observability & Reconciliation</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W15.06</span>Tooling & Architecture Decisions</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W15.07</span>Artifact week15_data_integration/</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W15.08</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="m0">
+      <div class="module-header">
+        <div class="module-tag">Tuần 15 · W15.01</div>
+        <div class="module-title">Tổng Quan: Data Integration là gì và vì sao khó?</div>
+        <div class="module-subtitle">Hiểu đúng bối cảnh enterprise: nhiều hệ thống rời rạc, nhiều owner, nhiều độ trễ, nhiều rủi ro nghiệp vụ.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Chủ đề</th><th>Nội dung chính</th><th>Giá trị business</th></tr>
+          <tr><td>Data silos</td><td>CRM, ERP, app DB, files, SaaS, logs tách rời</td><td>Thấy vì sao báo cáo lệch nhau</td></tr>
+          <tr><td>Manual export thất bại</td><td>Copy CSV thủ công không scale</td><td>Giảm phụ thuộc thao tác con người</td></tr>
+          <tr><td>Consistency & timeliness</td><td>Dữ liệu cập nhật lệch giờ, lệch định nghĩa</td><td>Quyết định nhanh nhưng đúng</td></tr>
+          <tr><td>Integration as enabler</td><td>Tạo nền cho finance report, customer 360, inventory sync, attribution</td><td>Mở rộng vận hành liên phòng ban</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Hiểu vì sao tổ chức luôn có nhiều nguồn dữ liệu disconnected.</li>
+          <li>Phân biệt “có data” và “có integrated data đáng tin”.</li>
+          <li>Nắm checklist outcome cho toàn tuần 15 theo mindset vận hành.</li>
+        </ul>
+        <div class="info-box tip">✅ <span>Data Integration không chỉ là ETL job. Nó là bài toán ownership, contract, reliability và SLA giữa nhiều team.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Vì sao hệ thống doanh nghiệp bị phân mảnh?</h3>
+        <ul>
+          <li><strong>CRM</strong> quản lý lead/opportunity.</li>
+          <li><strong>ERP</strong> quản lý đơn hàng, công nợ, tồn kho.</li>
+          <li><strong>App DB</strong> chứa hành vi user theo sản phẩm.</li>
+          <li><strong>SaaS tools</strong> như marketing automation, support desk.</li>
+          <li><strong>Logs/events</strong> từ ứng dụng và hạ tầng.</li>
+        </ul>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: tin rằng “chỉ cần export CSV mỗi ngày” là đủ. Khi volume tăng và nhiều team cùng dùng dữ liệu, cách này gây lệch số, lỗi version file và mất dấu lineage.</span></div>
+
+        <h3>4 ví dụ business cần integration thật sự</h3>
+        <table>
+          <tr><th>Use case</th><th>Nguồn dữ liệu</th><th>Rủi ro nếu tích hợp kém</th></tr>
+          <tr><td>Finance reporting</td><td>ERP + Payment gateway + Refund system</td><td>Sai revenue, chậm closing</td></tr>
+          <tr><td>Customer 360</td><td>CRM + app events + support tickets</td><td>CSKH không thấy đủ bối cảnh</td></tr>
+          <tr><td>Inventory sync</td><td>Warehouse DB + OMS + eCommerce</td><td>Oversell, stockout giả</td></tr>
+          <tr><td>Marketing attribution</td><td>Ad platforms + web analytics + orders</td><td>Đổ sai ngân sách campaign</td></tr>
+        </table>
+
+        <h3>Kiểm tra độ trễ tích hợp (freshness) theo nguồn</h3>
+        <div class="tab-group" id="sqlg101">
+          <div class="tab active" onclick="switchTab('sqlg101','sqlg101pg')">PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sqlg101','sqlg101or')">Oracle SQL</div>
+        </div>
+        <div class="tab-content active" id="sqlg101"><div class="cmd-block"><div class="cmd-header"><span>freshness_audit.sql</span></div><div class="cmd-body"><pre>SELECT source_system,
+       MAX(loaded_at) AS last_loaded_at,
+       EXTRACT(EPOCH FROM (NOW() - MAX(loaded_at))) / 60 AS lag_minutes
+FROM integration_freshness_audit
+GROUP BY source_system
+ORDER BY lag_minutes DESC;</pre></div></div></div>
+        <div class="tab-content" id="sqlg101or"><div class="cmd-block"><div class="cmd-header"><span>freshness_audit.sql</span></div><div class="cmd-body"><pre>SELECT source_system,
+       MAX(loaded_at) AS last_loaded_at,
+       (SYSTIMESTAMP - MAX(loaded_at)) * 24 * 60 AS lag_minutes
+FROM integration_freshness_audit
+GROUP BY source_system
+ORDER BY lag_minutes DESC;</pre></div></div></div>
+
+        <h3>Week outcomes checklist (cuối tuần 15)</h3>
+        <ul class="checklist">
+          <li class="done">Giải thích được vì sao mỗi pattern integration tồn tại</li>
+          <li class="done">Thiết kế được mapping + contract cơ bản cho 2 nguồn trở lên</li>
+          <li class="done">Đề xuất được cơ chế idempotency và dedup</li>
+          <li class="done">Có reconciliation checks và runbook vận hành</li>
+          <li class="done">Hoàn thành artifact tuần 15 ở mức portfolio-grade</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Data Integration tồn tại chủ yếu để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ đổi định dạng file không giải quyết bài toán liên thông dữ liệu.')">A. Chỉ chuyển CSV sang Parquet</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Mục tiêu là hợp nhất dữ liệu đa nguồn để phục vụ vận hành và quyết định.')">B. Liên thông dữ liệu đa nguồn đáng tin cậy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để bỏ luôn data modeling.')">C. Loại bỏ nhu cầu mô hình dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dashboard chỉ là lớp tiêu thụ, không thay thế integration.')">D. Chỉ làm dashboard đẹp hơn</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Vì sao manual export thường thất bại khi scale?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Manual flow dễ lỗi con người, khó kiểm soát version và không có lineage rõ.')">A. Dễ lỗi thao tác và không kiểm soát lineage</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. CSV không phải nguyên nhân duy nhất, vấn đề là quy trình thủ công.')">B. Vì CSV là định dạng cấm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đây không phải lý do cốt lõi.')">C. Vì file quá nhỏ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dù có cloud drive vẫn không giải quyết governance.')">D. Vì thiếu ổ cứng cá nhân</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Data silo là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan số lượng dashboard.')">A. Một team có nhiều dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Index không phản ánh silo.')">B. Database chưa tạo index</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dữ liệu bị cô lập trong hệ thống/team, khó chia sẻ đúng nghĩa.')">C. Dữ liệu bị cô lập và khó liên thông</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đây chỉ là hiện tượng kỹ thuật.')">D. Chỉ là query chạy chậm</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Use case nào thể hiện rõ nhu cầu integration?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Cấu hình theme UI không phải use case integration.')">A. Đổi theme dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Customer 360 cần gom dữ liệu từ CRM, app, support và orders.')">B. Customer 360 đa nguồn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Rename table không phải mục tiêu business.')">C. Đổi tên bảng hàng loạt</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đây là tối ưu giao diện.')">D. Tối ưu màu biểu đồ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Timeliness problem nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải vấn đề syntax SQL.')">A. SQL query thiếu dấu phẩy</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ là phân quyền.')">B. User không có quyền SELECT</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dữ liệu đến quá trễ so với nhu cầu nghiệp vụ.')">C. Dữ liệu không cập nhật đúng thời điểm cần quyết định</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Compression không liên quan trực tiếp timeliness.')">D. Dung lượng dữ liệu bị nén</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Finance reporting cần integration vì lý do nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Revenue thực tế thường phải hợp nhất orders, payments, refunds.')">A. Doanh thu nằm ở nhiều hệ thống khác nhau</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải chỉ do thiếu biểu đồ.')">B. Vì chưa có dashboard pie chart</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Backup DB không tự tạo finance truth.')">C. Vì backup chạy chậm</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đổi server không giải quyết logic hợp nhất.')">D. Vì cần nâng cấp máy chủ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Inventory sync tích hợp kém thường gây gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải lỗi màu dashboard.')">A. Màu báo cáo sai tông</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có thể oversell hoặc stockout giả do số tồn lệch.')">B. Sai tồn kho dẫn tới oversell/stockout</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan trực tiếp ping server.')">C. Mất kết nối VPN ngắn hạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Tên cột dài không phải tác động chính.')">D. Cột dữ liệu tên quá dài</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Phát biểu nào đúng về integration as business enabler?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Integration không phải việc “đẹp code”.')">A. Chủ yếu để code sạch hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ phục vụ team data.')">B. Chỉ giúp team data làm việc nhanh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để giảm số bảng bằng mọi giá.')">C. Mục tiêu là gom tất cả vào 1 bảng</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Integration giúp phòng ban ra quyết định dựa trên dữ liệu đồng nhất, đúng thời điểm.')">D. Tạo nền dữ liệu đồng nhất cho vận hành liên phòng ban</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Điểm khác giữa “có data” và “data integrated tốt”?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ lưu nhiều file chưa là integrated.')">A. Có nhiều file hơn</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Integrated tốt phải có contract, chất lượng và cơ chế vận hành rõ.')">B. Có contract, quality checks và ownership rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ tăng refresh rate không đủ.')">C. Chỉ tăng tần suất cron</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể dựa vào niềm tin manual.')">D. Chỉ cần analyst xác nhận bằng mắt</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Outcome quan trọng nhất sau W15.01 là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Công cụ chỉ là phương tiện.')">A. Nhớ tên thật nhiều vendor</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải chỉ thuộc lý thuyết.')">B. Thuộc định nghĩa data silo</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Biết gắn integration với impact business và rủi ro vận hành thực tế.')">C. Gắn được integration với bài toán business thật</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải mục tiêu của module.')">D. Viết Spark job phức tạp</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Reality</strong>Doanh nghiệp luôn đa hệ thống và phân mảnh</div>
+        <div class="summary-item"><strong>Problem</strong>Manual export không chịu nổi scale</div>
+        <div class="summary-item"><strong>Risk</strong>Lệch số liệu gây quyết định sai</div>
+        <div class="summary-item"><strong>Value</strong>Integration là đòn bẩy liên phòng ban</div>
+        <div class="summary-item"><strong>Mindset</strong>Không chỉ ETL, mà là reliability + ownership</div>
+        <div class="summary-item"><strong>Next</strong>Sang W15.02 để chọn pattern phù hợp</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài tập: Bản đồ nguồn dữ liệu doanh nghiệp giả lập</div><div class="practice-task-body">
+          <p>Chọn một business case (eCommerce hoặc fintech), liệt kê tối thiểu 6 nguồn dữ liệu (CRM/ERP/app DB/files/SaaS/logs), mô tả owner và mức độ cập nhật mong muốn.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>integration_source_map.md</span></div><div class="cmd-body"><pre>- CRM (Salesforce) | Owner: RevOps | Needed latency: 4h
+- ERP (Oracle) | Owner: Finance | Needed latency: D+0 08:00
+- App DB (PostgreSQL) | Owner: Product Eng | Needed latency: 15m
+- Payments API | Owner: Payments Team | Needed latency: 30m
+- Warehouse stock CSV (SFTP) | Owner: Supply Chain | Needed latency: 1h
+- Support SaaS (Zendesk export) | Owner: CX | Needed latency: 6h</pre></div></div></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><div></div><button class="nav-btn primary" onclick="goNext(0)">Sang W15.02</button></div>
+    </div>
+
+    <div class="module" id="m1">
+      <div class="module-header">
+        <div class="module-tag">Tuần 15 · W15.02</div>
+        <div class="module-title">Integration Patterns: Batch, CDC, API, Events, File</div>
+        <div class="module-subtitle">Chọn pattern theo latency, độ phức tạp, ownership và rủi ro vận hành.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Pattern</th><th>Phù hợp khi</th><th>Điểm cần lưu ý</th></tr>
+          <tr><td>Batch</td><td>Không cần real-time, dữ liệu lớn, lịch ổn định</td><td>Latency cao, cần cutoff rõ</td></tr>
+          <tr><td>CDC</td><td>Cần near real-time từ DB nguồn</td><td>Quản lý delete/update và offset</td></tr>
+          <tr><td>API Pull</td><td>Nguồn là SaaS/public API</td><td>Pagination, rate limit, token refresh</td></tr>
+          <tr><td>Event-driven</td><td>Hệ thống async, cần phản ứng nhanh</td><td>Ordering, replay, DLQ</td></tr>
+          <tr><td>File-based</td><td>Đối tác gửi file định kỳ qua SFTP/object storage</td><td>Schema drift và partial file</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Hiểu bản chất từng pattern thay vì nhớ tên tool.</li>
+          <li>Biết chọn pattern theo SLA latency và ownership thực tế.</li>
+          <li>Tránh anti-pattern: ép real-time cho use case chỉ cần batch.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Batch integration</h3>
+        <p>Batch đơn giản để vận hành, phù hợp dữ liệu kế toán và reporting theo mốc giờ/ngày. Sức mạnh: dễ backfill, dễ audit theo lô. Điểm yếu: độ trễ cao.</p>
+
+        <h3>CDC integration</h3>
+        <p>CDC đọc thay đổi từ transaction log, phù hợp đồng bộ near real-time. Bắt buộc xử lý đủ <code>INSERT/UPDATE/DELETE</code> và giữ offset/checkpoint đáng tin cậy.</p>
+
+        <h3>API pull integration</h3>
+        <p>Với SaaS, thường không có DB access. Bạn phải xử lý token expiry, pagination, retry theo rate-limit window, và tránh retry đồng loạt gây thundering herd.</p>
+        <div class="cmd-block"><div class="cmd-header"><span>api_ingest_loop.py (pseudo)</span></div><div class="cmd-body"><pre>next_page = None
+attempt = 0
+base_wait_seconds = 2
+max_wait_seconds = 60
+
+while True:
+  resp = call_api(page_token=next_page)
+
+  if resp.status_code in [429, 503]:
+    wait = min(max_wait_seconds, base_wait_seconds * (2 ** attempt))
+    jitter = random_between(0, 1.5)
+    sleep(wait + jitter)
+    attempt += 1
+    continue
+
+  if resp.status_code >= 400:
+    send_to_quarantine(resp.payload, reason=resp.status_code)
+    break
+
+  write_raw(resp.items)
+  attempt = 0
+
+  if not resp.next_page_token:
+    break
+  next_page = resp.next_page_token</pre></div></div>
+
+        <h3>Event-driven integration</h3>
+        <p>Pub/Sub giúp producer và consumer tách rời. Đổi lại, bạn phải nghĩ về ordering, duplicate events và replay.</p>
+
+        <h3>File-based integration</h3>
+        <p>CSV/JSON/Parquet qua SFTP/object storage vẫn rất phổ biến khi làm việc với đối tác. Cần naming convention, manifest/checksum và rule reject file lỗi.</p>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: Use case báo cáo doanh thu D+1 nhưng lại ép realtime CDC + event stream, gây tăng chi phí, tăng complexity và khó vận hành không cần thiết.</span></div>
+
+        <h3>Chọn pattern theo latency và ownership</h3>
+        <table>
+          <tr><th>SLA latency</th><th>Pattern ưu tiên</th><th>Lý do</th></tr>
+          <tr><td>24 giờ</td><td>Batch / File-based</td><td>Dễ vận hành, cost thấp</td></tr>
+          <tr><td>5-30 phút</td><td>CDC hoặc API incremental</td><td>Cân bằng latency và độ phức tạp</td></tr>
+          <tr><td>&lt; 1 phút</td><td>Event-driven + streaming</td><td>Phản ứng nhanh theo sự kiện</td></tr>
+        </table>
+
+        <h3>Incremental watermark query (an toàn với late-arriving data)</h3>
+        <p>Nếu chỉ dùng <code>updated_at &gt; last_success_ts</code>, bạn có thể mất record commit trễ (late arriving). Production thường dùng <strong>overlap window</strong> rồi dedup ở downstream.</p>
+        <div class="tab-group" id="sqlg102">
+          <div class="tab active" onclick="switchTab('sqlg102','sqlg102pg')">PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sqlg102','sqlg102or')">Oracle SQL</div>
+        </div>
+        <div class="tab-content active" id="sqlg102pg"><div class="cmd-block"><div class="cmd-header"><span>batch_incremental.sql</span></div><div class="cmd-body"><pre>SELECT order_id, updated_at, status
+FROM orders
+WHERE updated_at &gt;= :last_success_ts - INTERVAL '1 hour'
+ORDER BY updated_at ASC
+LIMIT 100000;</pre></div></div></div>
+        <div class="tab-content" id="sqlg102or"><div class="cmd-block"><div class="cmd-header"><span>batch_incremental.sql</span></div><div class="cmd-body"><pre>SELECT order_id, updated_at, status
+FROM orders
+WHERE updated_at &gt;= :last_success_ts - INTERVAL '1' HOUR
+ORDER BY updated_at ASC
+FETCH FIRST 100000 ROWS ONLY;</pre></div></div></div>
+
+        <div class="info-box note">📌 <span>Nếu nguồn có <strong>hard delete</strong>, batch incremental theo watermark sẽ không thấy record đã biến mất. Cần CDC với tombstone (<code>op_type='D'</code>) hoặc full snapshot + checksum để phát hiện delete.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Batch integration mạnh nhất ở điểm nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Batch đơn giản vận hành, dễ kiểm soát theo lô và dễ backfill.')">A. Dễ vận hành và backfill theo lô</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Batch không cho latency thấp nhất.')">B. Luôn nhanh hơn event-driven</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Batch không tự xử lý schema drift.')">C. Tự xử lý schema changes không cần kiểm tra</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Batch không loại bỏ nhu cầu quality checks.')">D. Không cần validation</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">CDC phù hợp nhất khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Báo cáo tuần không cần CDC phức tạp.')">A. Chỉ khi báo cáo tuần</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. CDC phù hợp đồng bộ near real-time từ DB nguồn.')">B. Khi cần cập nhật gần real-time từ DB nguồn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. CDC không thay thế semantic model.')">C. Khi cần dựng semantic layer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. CDC không chỉ dành cho dữ liệu nhỏ.')">D. Chỉ cho bảng dưới 1.000 dòng</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Trong API integration, pagination dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. API thường giới hạn số record mỗi request nên phải lấy theo trang.')">A. Lấy dữ liệu theo từng trang giới hạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Pagination không dùng để mã hóa token.')">B. Mã hóa access token</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan đổi timezone.')">C. Đồng bộ timezone</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để đổi schema DB.')">D. Chuyển đổi schema</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Rate limit gây rủi ro gì nếu không xử lý?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan UI dashboard.')">A. Dashboard đổi màu</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. API trả 429, pipeline mất dữ liệu hoặc fail liên tục.')">B. API bị throttle và ingest bị gián đoạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không làm tăng trực tiếp số cột.')">C. Tự tăng số cột trong bảng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan vacuum.')">D. Tự động chạy vacuum DB</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Event-driven integration đặc trưng bởi điều gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Event-driven không đồng nghĩa query theo giờ.')">A. Chỉ chạy theo cron mỗi giờ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải mô hình đồng bộ blocking toàn bộ.')">B. Mọi service phải synchronous</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Producer phát sự kiện, consumer xử lý bất đồng bộ.')">C. Pub/sub bất đồng bộ theo sự kiện</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ dành cho log file.')">D. Chỉ dùng để lưu log text</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">File-based integration cần guardrail nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần chuẩn tên file, checksum, và rule reject/accept rõ.')">A. Naming convention + checksum + validation</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể chỉ dựa vào người upload.')">B. Chỉ cần đối tác cam kết miệng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Zip file không thay thế data quality checks.')">C. Chỉ cần nén file trước gửi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên append mù mọi file vào bảng đích.')">D. Luôn append mọi file không kiểm tra</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Tiêu chí chọn pattern đầu tiên nên là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Tên vendor không phải tiêu chí đầu tiên.')">A. Vendor nào đang hot</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bắt đầu từ SLA latency và yêu cầu business thực tế.')">B. SLA latency và mức độ critical của use case</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể chọn theo sở thích cá nhân.')">C. Tool dev team thích nhất</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. UI đẹp không quyết định reliability.')">D. Công cụ có dashboard đẹp nhất</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern “real-time mọi thứ” nguy hiểm vì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không làm giảm complexity.')">A. Làm hệ thống đơn giản hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không tự động giảm chi phí.')">B. Giảm chi phí vận hành ngay</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tăng complexity/cost không cần thiết cho use case chỉ cần batch.')">C. Tăng complexity và cost không tạo thêm business value</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan trực tiếp số lượng dashboard.')">D. Làm mất dashboard cũ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">CDC khác batch ở điểm cốt lõi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Cả hai đều có thể dùng SQL.')">A. CDC không dùng SQL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. CDC vẫn cần quality checks.')">B. CDC không cần kiểm thử</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Batch có thể chạy rất ổn với volume lớn.')">C. Batch luôn chính xác hơn CDC</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. CDC dựa trên thay đổi log/offset, batch dựa trên cửa sổ thời gian.')">D. CDC theo stream thay đổi, batch theo lô định kỳ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Với nguồn có hard delete, hướng nào an toàn hơn batch watermark thuần?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Batch watermark thuần không thấy record bị xóa ở nguồn.')">A. Tiếp tục incremental watermark và bỏ qua delete</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. CDC tombstone hoặc snapshot+checksum mới phát hiện delete đáng tin.')">B. CDC có tombstone hoặc full snapshot + checksum</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ tăng tần suất cron không giải quyết delete visibility.')">C. Chạy cron dày hơn mỗi 1 phút</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đổi tên cột không liên quan logic delete.')">D. Đổi tên trường deleted_at</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Batch</strong>Ổn định, dễ audit, latency cao</div>
+        <div class="summary-item"><strong>CDC</strong>Near real-time, cần offset discipline</div>
+        <div class="summary-item"><strong>API</strong>Phụ thuộc token, paging, rate limit</div>
+        <div class="summary-item"><strong>Events</strong>Async, cần xử lý duplicate/order</div>
+        <div class="summary-item"><strong>File</strong>Thực dụng khi làm với đối tác</div>
+        <div class="summary-item"><strong>Decision rule</strong>SLA trước, tool sau</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài tập: Chọn pattern cho 5 luồng dữ liệu</div><div class="practice-task-body">
+          <ul>
+            <li>Revenue reporting D+1</li>
+            <li>Order status cập nhật mỗi 5 phút</li>
+            <li>Ads spend từ API mỗi 1 giờ</li>
+            <li>Partner gửi file tồn kho mỗi 30 phút</li>
+            <li>Clickstream realtime cho fraud signals</li>
+          </ul>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>pattern_selection.md</span></div><div class="cmd-body"><pre>1) Revenue D+1  -> Batch (cost thấp, dễ kiểm soát cutoff)
+2) Order status 5m -> CDC hoặc incremental API
+3) Ads spend 1h -> API pull + pagination + rate limit backoff
+4) Inventory partner -> File-based + checksum + reject flow
+5) Fraud signals -> Event-driven (pub/sub) + DLQ</pre></div></div></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(1)">Quay lại W15.01</button><button class="nav-btn primary" onclick="goNext(1)">Sang W15.03</button></div>
+    </div>
+
+    <div class="module" id="m2">
+      <div class="module-header">
+        <div class="module-tag">Tuần 15 · W15.03</div>
+        <div class="module-title">Schema Mapping, Data Contracts & Validation</div>
+        <div class="module-subtitle">Từ mapping cột đến hợp đồng dữ liệu giữa producer và consumer để ngăn pipeline gãy âm thầm.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Nội dung</th><th>Mục tiêu</th><th>Rủi ro nếu bỏ qua</th></tr>
+          <tr><td>Source vs target schema</td><td>Hiểu khác biệt cấu trúc và kiểu dữ liệu</td><td>Type mismatch, null explosion</td></tr>
+          <tr><td>Field mapping</td><td>Map rõ 1-1, many-1, transform rule</td><td>Sai business meaning</td></tr>
+          <tr><td>Identity mapping</td><td>Nối ID đa hệ thống về cùng thực thể</td><td>Customer 360 sai do join nhầm người</td></tr>
+          <tr><td>Data contract</td><td>Thống nhất expectation producer/consumer</td><td>Schema change làm gãy downstream</td></tr>
+          <tr><td>PII boundary</td><td>Định nghĩa field nào phải hash/mask/tokenize</td><td>Rò rỉ dữ liệu nhạy cảm xuyên hệ thống</td></tr>
+          <tr><td>Validation checks</td><td>Bắt lỗi sớm trước publish</td><td>"job green" nhưng data sai</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Biết thiết kế mapping logic cho type conversion, null handling, enum normalization.</li>
+          <li>Hiểu contract như “API của dữ liệu”, không chỉ tài liệu mô tả cột.</li>
+          <li>Dựng bộ validation tối thiểu: row count, required cols, duplicates, domain rules.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Ví dụ mapping source → target</h3>
+        <table>
+          <tr><th>Source field</th><th>Target field</th><th>Rule</th></tr>
+          <tr><td>customer_id (string)</td><td>customer_key (bigint)</td><td>Cast + reject non-numeric</td></tr>
+          <tr><td>status ("new","won","lost")</td><td>lifecycle_status</td><td>Normalize enum về dictionary chuẩn</td></tr>
+          <tr><td>amount_text (varchar)</td><td>amount (decimal)</td><td>Parse tiền tệ + mặc định null nếu invalid</td></tr>
+          <tr><td>country (nullable)</td><td>country_code</td><td>Null → "UNKNOWN" theo contract</td></tr>
+        </table>
+
+        <h3>Data contract tối thiểu</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>order_events_contract.json (rút gọn)</span></div><div class="cmd-body"><pre>{
+  "dataset": "order_events",
+  "version": "1.2.0",
+  "required_columns": ["event_id", "event_time", "order_id", "event_type"],
+  "event_type_allowed": ["created", "paid", "cancelled", "refunded"],
+  "null_policy": {
+    "order_id": "forbidden",
+    "coupon_code": "allowed"
+  },
+  "pii_policy": {
+    "customer_email": "hash_sha256",
+    "customer_phone": "tokenize",
+    "shipping_address": "mask_partial"
+  },
+  "breaking_change_requires": "version bump + consumer approval"
+}</pre></div></div>
+
+        <h3>Identity mapping (xương sống của Customer 360)</h3>
+        <p>Khi tích hợp CRM, app và payment, cùng một khách hàng thường có nhiều ID khác nhau. Cần bảng map định danh để nối đúng thực thể, tránh cộng dồn sai doanh thu hoặc tính trùng người dùng.</p>
+        <div class="cmd-block"><div class="cmd-header"><span>identity_resolution.sql</span></div><div class="cmd-body"><pre>SELECT c.crm_contact_id,
+       a.app_user_id,
+       p.payment_customer_id,
+       COALESCE(idm.global_customer_key, md5(lower(c.email))) AS global_customer_key
+FROM crm_contacts c
+LEFT JOIN app_users a
+  ON lower(c.email) = lower(a.email)
+LEFT JOIN payment_customers p
+  ON regexp_replace(c.phone, '[^0-9]', '', 'g') = p.phone_normalized
+LEFT JOIN identity_map idm
+  ON idm.source_system = 'crm'
+ AND idm.source_id = c.crm_contact_id;</pre></div></div>
+
+        <h3>Schema evolution: additive vs breaking</h3>
+        <ul>
+          <li><strong>Additive change</strong>: thêm cột mới optional, consumer cũ vẫn chạy.</li>
+          <li><strong>Breaking change</strong>: đổi tên cột, đổi type incompatible, đổi semantic enum.</li>
+        </ul>
+        <div class="info-box warn">⚠️ <span>Anti-pattern: producer thêm/đổi cột âm thầm rồi đẩy vào production, khiến pipeline downstream fail sau nhiều giờ.</span></div>
+
+        <h3>Validation checks trước khi publish</h3>
+        <div class="tab-group" id="sqlg103">
+          <div class="tab active" onclick="switchTab('sqlg103','sqlg103pg')">PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sqlg103','sqlg103or')">Oracle SQL</div>
+        </div>
+        <div class="tab-content active" id="sqlg103"><div class="cmd-block"><div class="cmd-header"><span>validation_checks.sql</span></div><div class="cmd-body"><pre>-- 1) Required columns simulated check by null rate
+SELECT COUNT(*) AS null_order_id
+FROM stg_orders
+WHERE order_id IS NULL;
+
+-- 2) Duplicate event id
+SELECT event_id, COUNT(*)
+FROM stg_order_events
+GROUP BY event_id
+HAVING COUNT(*) &gt; 1;
+
+-- 3) Domain rule
+SELECT COUNT(*) AS invalid_amount
+FROM stg_orders
+WHERE amount &lt; 0;</pre></div></div></div>
+        <div class="tab-content" id="sqlg103or"><div class="cmd-block"><div class="cmd-header"><span>validation_checks.sql</span></div><div class="cmd-body"><pre>-- 1) Required columns simulated check by null rate
+SELECT COUNT(*) AS null_order_id
+FROM stg_orders
+WHERE order_id IS NULL;
+
+-- 2) Duplicate event id
+SELECT event_id, COUNT(*)
+FROM stg_order_events
+GROUP BY event_id
+HAVING COUNT(*) &gt; 1;
+
+-- 3) Domain rule
+SELECT COUNT(*) AS invalid_amount
+FROM stg_orders
+WHERE amount &lt; 0;</pre></div></div></div>
+
+        <h3>SCD reference data ảnh hưởng mapping</h3>
+        <p>Nếu mapping vào dimension có thay đổi chậm (ví dụ region hierarchy), bạn phải xác định lookup theo effective_date thay vì lookup theo snapshot hiện tại để tránh rewrite lịch sử sai.</p>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Schema mapping dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Mapping định nghĩa cách chuyển dữ liệu nguồn sang mô hình đích có ngữ nghĩa đúng.')">A. Chuyển dữ liệu nguồn sang target theo rule rõ ràng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải chỉ để đổi tên bảng.')">B. Chỉ đổi tên bảng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay thế monitoring.')">C. Loại bỏ nhu cầu kiểm tra chất lượng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để tối ưu UI.')">D. Tăng tốc dashboard rendering</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Data contract phản ánh điều gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ là tài liệu trang trí.')">A. Chỉ tài liệu mô tả tùy chọn</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Contract là cam kết dữ liệu giữa producer và consumer.')">B. Cam kết cấu trúc và semantic giữa producer-consumer</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải script SQL chạy lịch.')">C. Một cron schedule</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay đổi quyền IAM.')">D. Cấu hình phân quyền cloud</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Enum normalization có ý nghĩa gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải mã hóa dữ liệu.')">A. Mã hóa toàn bộ cột text</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan chỉ số index.')">B. Tạo thêm index cho enum</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chuẩn hóa các giá trị tương đương về cùng chuẩn semantic.')">C. Chuẩn hóa giá trị nhiều biến thể về cùng danh mục</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải xoá cột enum.')">D. Loại bỏ enum khỏi schema</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Validation nào bắt duplicate record?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Group by key + having count&gt;1 là check cơ bản cho duplicate.')">A. GROUP BY key HAVING COUNT(*) &gt; 1</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. LIMIT không phát hiện duplicate.')">B. LIMIT 100</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. ORDER BY không phát hiện duplicate.')">C. ORDER BY created_at</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. VACUUM không phục vụ rule validation này.')">D. VACUUM ANALYZE</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Identity mapping giúp tránh lỗi nào trong Customer 360?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu không map định danh đa nguồn, một người có thể bị tính thành nhiều khách hàng khác nhau.')">A. Join nhầm người do mỗi hệ thống dùng ID khác nhau</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Identity mapping không thay cho index tuning.')">B. Query chậm do thiếu index</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan đổi theme dashboard.')">C. Màu dashboard không đồng nhất</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải giải pháp backup log.')">D. Mất file log hệ điều hành</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Breaking schema change là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Thêm cột optional thường là additive.')">A. Thêm cột optional</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Đổi tên/đổi type incompatible khiến consumer cũ fail.')">B. Đổi type incompatible hoặc đổi tên cột đang dùng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Thêm comment không phải breaking.')">C. Thêm comment vào metadata</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Tạo view mới không nhất thiết breaking.')">D. Tạo view read-only</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Null handling theo contract nên làm thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể “tuỳ cảm giác” theo từng run.')">A. Xử lý tuỳ theo người trực ca</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần policy rõ: forbidden/allowed/default per field.')">B. Định nghĩa policy null theo từng field</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên fill toàn bộ bằng 0.')">C. Fill mọi null thành 0</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Bỏ qua null sẽ che lỗi chất lượng.')">D. Không kiểm tra null</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">SCD reference data ảnh hưởng mapping vì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan dung lượng log chính.')">A. Làm tăng log ingestion</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ thay đổi tên cột.')">B. Chỉ ảnh hưởng naming convention</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Lookup sai effective date có thể rewrite lịch sử sai.')">C. Cần join theo thời điểm hiệu lực để giữ lịch sử đúng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể bỏ qua dimension history.')">D. Có thể bỏ qua vì đã có surrogate key</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern nguy hiểm nhất của module này?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Silent schema change là nguyên nhân phổ biến gây gãy pipeline.')">A. Silent schema changes không thông báo</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dùng table hơi dài không phải anti-pattern lớn.')">B. Tên bảng dài</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Viết README không gây hại.')">C. Có quá nhiều tài liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Index không thuộc anti-pattern trọng tâm module này.')">D. Tạo thêm index composite</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Check row count reconciliation dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để phân quyền user.')">A. Cấp quyền database</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay logging.')">B. Thay thế log hệ thống</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. So khớp số lượng bản ghi source-target theo window ingest.')">C. Phát hiện thiếu/mất bản ghi sau tích hợp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để chọn visualization.')">D. Chọn chart BI</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Mapping</strong>Xác định rõ rule chuyển đổi trường dữ liệu</div>
+        <div class="summary-item"><strong>Contract</strong>Thống nhất kỳ vọng producer-consumer</div>
+        <div class="summary-item"><strong>Validation</strong>Bắt lỗi trước khi publish downstream</div>
+        <div class="summary-item"><strong>Evolution</strong>Phân biệt additive và breaking changes</div>
+        <div class="summary-item"><strong>SCD impact</strong>Lookup phải theo thời điểm hiệu lực</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Silent schema change phải bị chặn</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài tập: Thiết kế mapping + contract cho order integration</div><div class="practice-task-body">
+          <p>Tạo bảng mapping cho 12 cột từ API orders sang bảng <code>fct_orders</code>, định nghĩa policy null và enum normalization cho <code>payment_status</code>.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>mapping_snippet.md</span></div><div class="cmd-body"><pre>- order_total_text -> order_amount_decimal (parse currency, reject invalid)
+- payment_status_raw -> payment_status_norm
+  map: {"paid_ok":"PAID", "settled":"PAID", "void":"CANCELLED"}
+- customer_phone nullable -> customer_phone (allow null)
+- order_id null policy -> forbidden (reject record)</pre></div></div></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(2)">Quay lại W15.02</button><button class="nav-btn primary" onclick="goNext(2)">Sang W15.04</button></div>
+    </div>
+
+    <div class="module" id="m3">
+      <div class="module-header">
+        <div class="module-tag">Tuần 15 · W15.04</div>
+        <div class="module-title">Reliability: Idempotency, Retries, Partial Failures</div>
+        <div class="module-subtitle">Thiết kế pipeline replay-safe thay vì cầu nguyện “rerun sẽ tự đúng”.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Khối</th><th>Nội dung cốt lõi</th><th>Kết quả mong muốn</th></tr>
+          <tr><td>Idempotency</td><td>Rerun/replay không tạo duplicate sai</td><td>Pipeline an toàn khi retry</td></tr>
+          <tr><td>Retries</td><td>Backoff + phân loại transient/fatal</td><td>Giảm false-fail và tránh retry vô ích</td></tr>
+          <tr><td>Checkpoint/offset</td><td>Lưu vị trí xử lý đã cam kết</td><td>Resume chính xác sau sự cố</td></tr>
+          <tr><td>DLQ/poison message</td><td>Tách bản ghi độc để không chặn toàn luồng</td><td>Tăng throughput hệ thống</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Hiểu idempotency theo góc nhìn dữ liệu, không chỉ code.</li>
+          <li>Thiết kế retry policy có kỷ luật (exponential backoff + jitter).</li>
+          <li>Xử lý partial file loads, poison messages và myth “exactly-once”.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Idempotency trong integration là gì?</h3>
+        <p>Một record được xử lý lại nhiều lần nhưng target state vẫn đúng như xử lý một lần. Thực tế thường dùng <strong>natural key + event_time/version</strong> hoặc <strong>idempotency key</strong>.</p>
+        <p>Edge case khó: <strong>out-of-order events</strong> (event update đến trước event create). Guardrail thực tế là so sánh version/event_time khi upsert, chỉ chấp nhận bản ghi mới hơn và giữ track trạng thái chờ nếu thiếu bản ghi gốc.</p>
+
+        <h3>Replay-safe pipeline</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>replay_safe_flow.md</span></div><div class="cmd-body"><pre>1) Read batch/events
+2) Validate + normalize
+3) Upsert by business key
+4) Commit checkpoint ONLY after target write success
+5) Emit reconciliation metrics</pre></div></div>
+
+        <h3>Retries: transient vs fatal</h3>
+        <table>
+          <tr><th>Loại lỗi</th><th>Ví dụ</th><th>Cách xử lý</th></tr>
+          <tr><td>Transient</td><td>HTTP 429/503, DB connection timeout</td><td>Retry + backoff + jitter</td></tr>
+          <tr><td>Fatal</td><td>Schema mismatch, contract violation</td><td>Fail-fast + alert + không retry vô hạn</td></tr>
+        </table>
+
+        <h3>Partial file load & poison message</h3>
+        <p>File có 1.000.000 record, 100 record lỗi format: không nên drop cả file hoặc nuốt lỗi. Cách chuẩn: route record lỗi vào <code>dead_letter_queue</code> để xử lý sau, phần hợp lệ vẫn đi tiếp nếu policy cho phép.</p>
+
+        <h3>Backpressure khi consumer xử lý không kịp</h3>
+        <p>Nếu tốc độ ingest vượt tốc độ xử lý downstream, queue lag sẽ tăng và SLA vỡ dây chuyền. Cần cơ chế pause/resume, giới hạn concurrency, và alert theo consumer lag thay vì chỉ nhìn job status.</p>
+        <div class="cmd-block"><div class="cmd-header"><span>failure_flow.md (ASCII)</span></div><div class="cmd-body"><pre>API Source
+   |
+   v
+Ingestion Worker --(429/503)--> Retry Queue (exponential backoff + jitter)
+   |
+   +--(400 invalid payload)--> Quarantine/DLQ --> Alert on-call --> Fix mapping/contract
+   |
+   +--(success)--> Raw/Staging --> Idempotent Upsert --> Checkpoint Commit</pre></div></div>
+
+        <div class="info-box note">📌 <span>Exactly-once “tuyệt đối” hiếm khi có trong hệ thống phân tán end-to-end. Thực tế production thường là at-least-once + idempotent writes + reconciliation.</span></div>
+        <div class="info-box warn">⚠️ <span>Anti-pattern: rerun job sau lỗi nhưng append toàn bộ vào bảng đích, tạo duplicate âm thầm khiến báo cáo phình số.</span></div>
+
+        <h3>Dedup + upsert theo key</h3>
+        <div class="tab-group" id="sqlg104">
+          <div class="tab active" onclick="switchTab('sqlg104','sqlg104pg')">PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sqlg104','sqlg104or')">Oracle SQL</div>
+        </div>
+        <div class="tab-content active" id="sqlg104"><div class="cmd-block"><div class="cmd-header"><span>idempotent_upsert.sql</span></div><div class="cmd-body"><pre>INSERT INTO fct_order_status (order_id, status, event_time, source_event_id)
+SELECT order_id, status, event_time, source_event_id
+FROM stg_order_status
+ON CONFLICT (source_event_id)
+DO UPDATE SET
+  status = EXCLUDED.status,
+  event_time = EXCLUDED.event_time
+WHERE fct_order_status.event_time &lt;= EXCLUDED.event_time;</pre></div></div></div>
+        <div class="tab-content" id="sqlg104or"><div class="cmd-block"><div class="cmd-header"><span>idempotent_upsert.sql</span></div><div class="cmd-body"><pre>MERGE INTO fct_order_status t
+USING stg_order_status s
+ON (t.source_event_id = s.source_event_id)
+WHEN MATCHED THEN UPDATE SET
+  t.status = s.status,
+  t.event_time = s.event_time
+  WHERE t.event_time &lt;= s.event_time
+WHEN NOT MATCHED THEN
+  INSERT (order_id, status, event_time, source_event_id)
+  VALUES (s.order_id, s.status, s.event_time, s.source_event_id);</pre></div></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Idempotency giúp gì cho integration?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chạy lại không làm sai dữ liệu đích là mục tiêu cốt lõi.')">A. Rerun an toàn, không nhân bản dữ liệu sai</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không đảm bảo tăng tốc tuyệt đối.')">B. Luôn chạy nhanh hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay thế monitoring.')">C. Không cần log nữa</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không loại bỏ nhu cầu contract.')">D. Không cần data contract</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Retry nên áp dụng cho lỗi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Lỗi logic/schema không nên retry vô ích.')">A. Lỗi schema mismatch</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Transient failures phù hợp retry có backoff.')">B. Lỗi transient như timeout/429/503</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Duplicates do logic sai không giải bằng retry.')">C. Duplicate key do mapping sai</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Null contract violation là fatal.')">D. Vi phạm contract bắt buộc</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Checkpoint/offset dùng để?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Lưu vị trí đã xử lý giúp resume chính xác.')">A. Lưu vị trí xử lý đã commit</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để đổi timezone.')">B. Đồng bộ timezone nguồn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để nén dữ liệu.')">C. Nén file lớn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay parser schema.')">D. Chuyển kiểu dữ liệu</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Partial file load nên xử lý thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Drop toàn bộ file có thể làm mất dữ liệu hợp lệ.')">A. Huỷ cả file ngay lập tức mọi trường hợp</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách lỗi vào DLQ/quarantine và xử lý theo policy.')">B. Route record lỗi vào DLQ/quarantine theo rule</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên bỏ qua record lỗi âm thầm.')">C. Nuốt lỗi để job xanh</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể để retry vô hạn.')">D. Retry vô hạn toàn file</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Poison message là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải message đến sớm.')">A. Message đến trước lịch</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Record luôn lỗi lặp lại khiến consumer kẹt nếu không tách riêng.')">B. Record lỗi lặp lại, cần tách khỏi luồng chính</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải message dung lượng nhỏ.')">C. Message quá nhỏ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải message duplicate hợp lệ.')">D. Message duplicate hợp lệ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Out-of-order events nên được xử lý theo nguyên tắc nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng version/event_time guard để từ chối bản ghi cũ hơn, tránh overwrite sai state.')">A. Chỉ cập nhật khi event mới hơn theo version/event_time</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Append mù sẽ làm state sai khi event đến lệch thứ tự.')">B. Append mọi event theo thứ tự nhận được</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên bỏ qua kiểm tra thứ tự hoàn toàn.')">C. Tắt kiểm tra event_time để tăng tốc</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể sửa bằng cách retry vô hạn.')">D. Retry vô hạn đến khi đúng</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">DLQ có vai trò gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. DLQ giữ record lỗi để xử lý sau, tránh chặn toàn pipeline.')">A. Cô lập lỗi mà không làm tắc luồng chính</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. DLQ không thay thế main queue.')">B. Thay thế hàng đợi chính</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để tăng CPU.')">C. Tự scale hạ tầng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải nơi lưu metric.')">D. Chỉ lưu thống kê</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Exactly-once myth nói gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể coi exactly-once miễn phí trong mọi thành phần.')">A. Mọi hệ thống mặc định exactly-once end-to-end</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải bỏ retry là xong.')">B. Tắt retry để đạt exactly-once</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Thực tế thường dùng at-least-once + idempotent write + reconciliation.')">C. Cần thiết kế thực dụng thay vì tin tuyệt đối vào exactly-once</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan loại DB duy nhất.')">D. Chỉ cần chuyển sang NoSQL</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Backoff trong retry nhằm mục tiêu gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Giãn thời gian retry để giảm áp lực hệ thống đang lỗi.')">A. Giảm áp lực lên hệ thống nguồn/đích khi lỗi tạm thời</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để tăng số bản ghi.')">B. Tăng throughput bằng mọi giá</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay validation.')">C. Bỏ qua kiểm tra dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không để tăng độ trễ có chủ đích.')">D. Làm pipeline chậm hơn</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern “rerun duplicates downstream” xảy ra khi?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi write theo append mù và thiếu dedup/idempotency key.')">A. Thiếu dedup key và append mù khi rerun</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Do log rotate không phải nguyên nhân chính.')">B. Log rotate hằng ngày</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nén Parquet không gây duplicate logic.')">C. File dùng Parquet thay CSV</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Index DB không phải lý do chính.')">D. Bảng đích có index</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Idempotency</strong>Nền tảng của rerun an toàn</div>
+        <div class="summary-item"><strong>Retry</strong>Dùng cho transient, không dùng cho fatal</div>
+        <div class="summary-item"><strong>Checkpoint</strong>Commit sau write thành công</div>
+        <div class="summary-item"><strong>DLQ</strong>Tách record lỗi để giữ throughput</div>
+        <div class="summary-item"><strong>Exactly-once</strong>Ưu tiên thiết kế thực dụng</div>
+        <div class="summary-item"><strong>Guardrail</strong>Dedup key + reconciliation bắt buộc</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài tập: Thiết kế retry/failure policy cho API ingestion</div><div class="practice-task-body">
+          <p>Xây policy cho 4 loại lỗi: 429, 503, 400 schema invalid, timeout DB write. Ghi rõ lỗi nào retry, lỗi nào fail-fast, lỗi nào vào DLQ.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>retry_policy.yml</span></div><div class="cmd-body"><pre>429: retry (max 8, exponential backoff + jitter)
+503: retry (max 5, exponential backoff)
+400_schema_invalid: fail-fast + alert + quarantine payload
+db_write_timeout: retry (max 3), then park batch and page on-call
+poison_message: route DLQ after 2 attempts</pre></div></div></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">Quay lại W15.03</button><button class="nav-btn primary" onclick="goNext(3)">Sang W15.05</button></div>
+    </div>
+
+    <div class="module" id="m4">
+      <div class="module-header">
+        <div class="module-tag">Tuần 15 · W15.05</div>
+        <div class="module-title">Observability, Reconciliation & Operations</div>
+        <div class="module-subtitle">Từ "job succeeded" sang "data đúng, đúng giờ, và team biết xử lý sự cố".</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Khối theo dõi</th><th>Chỉ số cốt lõi</th><th>Mục tiêu vận hành</th></tr>
+          <tr><td>Logs</td><td>Error details, record-level diagnostics</td><td>Debug nhanh root cause</td></tr>
+          <tr><td>Metrics</td><td>Freshness, throughput, lag, error rate</td><td>Theo dõi health theo thời gian</td></tr>
+          <tr><td>Alerts</td><td>SLA breach, failure spikes, reconciliation mismatch</td><td>Phản ứng đúng người, đúng thời điểm</td></tr>
+          <tr><td>Reconciliation</td><td>Count/total/hash source vs target</td><td>Xác nhận dữ liệu đúng chứ không chỉ job xanh</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Phân biệt rõ logs vs metrics vs alerts để thiết kế monitoring đúng lớp.</li>
+          <li>Biết cách dựng reconciliation checks cho count/totals/hash.</li>
+          <li>Nắm khung runbook và quy tắc truyền thông SLA khi có incident.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Logs vs Metrics vs Alerts</h3>
+        <table>
+          <tr><th>Thành phần</th><th>Trả lời câu hỏi nào?</th><th>Ví dụ</th></tr>
+          <tr><td>Logs</td><td>"Lỗi gì xảy ra? ở record nào?"</td><td>JSON parse error tại line 420</td></tr>
+          <tr><td>Metrics</td><td>"Hệ thống đang khoẻ không?"</td><td>lag_minutes, rows_per_minute</td></tr>
+          <tr><td>Alerts</td><td>"Có cần hành động ngay không?"</td><td>lag &gt; 30 phút cho luồng critical</td></tr>
+        </table>
+
+        <h3>Reconciliation tối thiểu</h3>
+        <ul>
+          <li><strong>Row count</strong>: source và target chênh lệch vượt ngưỡng.</li>
+          <li><strong>Totals</strong>: tổng tiền, số order, số user active.</li>
+          <li><strong>Hash/checksum</strong>: phát hiện drift trên tập dữ liệu.</li>
+          <li><strong>Status-level checks</strong>: so khớp theo trạng thái nghiệp vụ (ví dụ CANCELLED/REFUNDED) để bắt sai lệch semantic.</li>
+        </ul>
+
+        <h3>SQL mẫu cho reconciliation</h3>
+        <div class="tab-group" id="sqlg105">
+          <div class="tab active" onclick="switchTab('sqlg105','sqlg105pg')">PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sqlg105','sqlg105or')">Oracle SQL</div>
+        </div>
+        <div class="tab-content active" id="sqlg105"><div class="cmd-block"><div class="cmd-header"><span>reconciliation_daily.sql</span></div><div class="cmd-body"><pre>WITH src AS (
+  SELECT ds,
+         status,
+         COUNT(*) cnt,
+         COALESCE(SUM(amount),0) total_amount
+  FROM src_orders_daily
+  GROUP BY ds, status
+), tgt AS (
+  SELECT ds,
+         status,
+         COUNT(*) cnt,
+         COALESCE(SUM(amount),0) total_amount
+  FROM fct_orders_daily
+  GROUP BY ds, status
+)
+SELECT COALESCE(s.ds, t.ds) AS ds,
+       COALESCE(s.status, t.status) AS status,
+       COALESCE(s.cnt,0) AS src_cnt,
+       COALESCE(t.cnt,0) AS tgt_cnt,
+       COALESCE(s.total_amount,0) AS src_total,
+       COALESCE(t.total_amount,0) AS tgt_total
+FROM src s
+FULL OUTER JOIN tgt t
+  ON s.ds = t.ds AND s.status = t.status
+ORDER BY ds DESC, status;</pre></div></div></div>
+        <div class="tab-content" id="sqlg105or"><div class="cmd-block"><div class="cmd-header"><span>reconciliation_daily.sql</span></div><div class="cmd-body"><pre>WITH src AS (
+  SELECT ds,
+         status,
+         COUNT(*) cnt,
+         NVL(SUM(amount),0) total_amount
+  FROM src_orders_daily
+  GROUP BY ds, status
+), tgt AS (
+  SELECT ds,
+         status,
+         COUNT(*) cnt,
+         NVL(SUM(amount),0) total_amount
+  FROM fct_orders_daily
+  GROUP BY ds, status
+)
+SELECT NVL(s.ds, t.ds) AS ds,
+       NVL(s.status, t.status) AS status,
+       NVL(s.cnt,0) AS src_cnt,
+       NVL(t.cnt,0) AS tgt_cnt,
+       NVL(s.total_amount,0) AS src_total,
+       NVL(t.total_amount,0) AS tgt_total
+FROM src s
+FULL OUTER JOIN tgt t
+  ON s.ds = t.ds AND s.status = t.status
+ORDER BY ds DESC, status;</pre></div></div></div>
+
+        <h3>Incident response và SLA communication</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>runbook_minimum.md</span></div><div class="cmd-body"><pre>1) Xác định impact (dataset nào, phòng ban nào bị ảnh hưởng)
+2) Xác định owner trực ca
+3) Kiểm tra freshness + reconciliation dashboard
+4) Quyết định rerun / rollback / isolate
+5) Cập nhật ETA và trạng thái SLA cho stakeholder
+6) Postmortem trong 24h với action items</pre></div></div>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: "job succeeded" nhưng không có reconciliation check. Đây là nguyên nhân phổ biến khiến dashboard xanh nhưng số liệu sai.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Logs chủ yếu giúp trả lời câu hỏi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Logs giúp debug chi tiết lỗi và ngữ cảnh record.')">A. Lỗi gì xảy ra và xảy ra ở đâu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đây là vai trò chính của metrics.')">B. Hệ thống có khỏe theo thời gian không</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đây là chức năng alerts.')">C. Có cần gọi on-call ngay không</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Logs không để chọn tool kiến trúc.')">D. Nên mua tool nào</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Metric nào phản ánh độ trễ dữ liệu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. CPU không phản ánh freshness business trực tiếp.')">A. CPU usage</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Freshness lag_minutes là chỉ số trực tiếp của độ trễ dữ liệu.')">B. lag_minutes / data_freshness</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Màu giao diện không phải metric vận hành.')">C. Theme color</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Font size không liên quan.')">D. Font size log</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Reconciliation check nên gồm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Count + totals + checksum/hashing là bộ tối thiểu thường dùng.')">A. Count, totals, checksum/hashing</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ count không đủ bảo vệ chất lượng.')">B. Chỉ row count</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ logs không thay reconciliation.')">C. Chỉ log text</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ dashboard màu xanh không có giá trị chứng minh.')">D. Chỉ dashboard xanh</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Alert tốt cần chứa gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Alert quá chung khiến người trực không hành động được.')">A. Chỉ dòng "Pipeline failed"</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Alert cần ngữ cảnh xử lý: impact, owner, runbook, run_id.')">B. Impact + owner + runbook + run_id</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể chỉ gửi screenshot.')">C. Chỉ ảnh dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên bỏ context.')">D. Chỉ thời gian lỗi</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Throughput dùng để theo dõi gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Throughput phản ánh tốc độ xử lý records/events theo thời gian.')">A. Tốc độ xử lý dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải số lần login.')">B. Lượt đăng nhập user</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải số lượng dashboard.')">C. Số dashboard đang mở</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải số cột trong schema.')">D. Số cột dữ liệu</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Freshness SLA breach nên xử lý bước đầu thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần đánh giá impact và thông báo ETA sớm theo runbook.')">A. Đánh giá impact + kích hoạt runbook + cập nhật ETA</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên im lặng chờ tự hồi.')">B. Chờ tự hồi, không thông báo</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Rerun mù dễ làm tệ hơn.')">C. Rerun ngay không kiểm tra</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên xoá log.')">D. Xoá toàn bộ log lỗi</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Checksum/hash reconciliation hữu ích khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để đổi kiểu dữ liệu.')">A. Khi cần convert VARCHAR sang NUMBER</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi row count bằng nhau nhưng nghi ngờ nội dung đã drift.')">B. Khi count bằng nhau nhưng giá trị có thể lệch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan phân quyền.')">C. Khi user thiếu quyền SELECT</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải mục đích chính của backup.')">D. Khi cần giảm kích thước backup</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Incident runbook quan trọng vì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Runbook giúp team xử lý nhất quán, giảm MTTR và phụ thuộc cá nhân.')">A. Chuẩn hóa phản ứng sự cố và giảm MTTR</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để thay testing.')">B. Thay thế kiểm thử pipeline</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ dành cho audit.')">C. Chỉ phục vụ compliance report</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không để tránh giao tiếp stakeholder.')">D. Giảm nhu cầu báo cáo SLA</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern "job succeeded but data wrong" thường do?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải vì máy chủ quá mạnh.')">A. Máy chủ cấu hình cao</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải vì dùng SQL chuẩn.')">B. Dùng ANSI SQL</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Thiếu reconciliation và validation sau load.')">C. Thiếu kiểm tra dữ liệu sau khi job kết thúc</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan màu chart.')">D. Dashboard dùng dark mode</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Metric + alert nào nên ưu tiên cho luồng critical?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ theo dõi CPU không đủ theo business SLA.')">A. Chỉ CPU và RAM</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Freshness lag + error rate + reconciliation mismatch là bộ cốt lõi.')">B. Freshness lag + error rate + reconciliation mismatch</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ số user login không phản ánh integration health.')">C. Lượt login nội bộ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Số lượng bảng không phải alert operational.')">D. Tổng số bảng schema</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Logs</strong>Chi tiết lỗi để debug</div>
+        <div class="summary-item"><strong>Metrics</strong>Health theo thời gian và SLA</div>
+        <div class="summary-item"><strong>Alerts</strong>Kích hoạt hành động đúng người</div>
+        <div class="summary-item"><strong>Reconciliation</strong>Xác minh dữ liệu đúng, không chỉ job xanh</div>
+        <div class="summary-item"><strong>Runbook</strong>Chuẩn hoá phản ứng sự cố</div>
+        <div class="summary-item"><strong>Ops mindset</strong>Communicate impact + ETA rõ ràng</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài tập: Thiết kế dashboard observability cho 1 pipeline critical</div><div class="practice-task-body">
+          <p>Đề xuất 8 metrics và 5 alert rules cho pipeline <code>investor_revenue_daily</code>, kèm ngưỡng cụ thể và owner xử lý.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>observability_spec.md</span></div><div class="cmd-body"><pre>Metrics:
+- lag_minutes
+- rows_ingested
+- rows_rejected
+- api_error_rate
+- dedup_drop_count
+- reconciliation_row_diff
+- reconciliation_amount_diff
+- pipeline_duration_sec
+
+Alerts:
+- lag_minutes &gt; 45 (critical)
+- reconciliation_amount_diff != 0 (critical)
+- rows_rejected / rows_ingested &gt; 0.5% (warning)
+- api_error_rate &gt; 5% for 10m (warning)
+- no_success_run by 09:00 (critical)</pre></div></div></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(4)">Quay lại W15.04</button><button class="nav-btn primary" onclick="goNext(4)">Sang W15.06</button></div>
+    </div>
+
+    <div class="module" id="m5">
+      <div class="module-header">
+        <div class="module-tag">Tuần 15 · W15.06</div>
+        <div class="module-title">Tooling & Architecture Decisions</div>
+        <div class="module-subtitle">Build vs buy, lock-in, cost, bảo mật, ownership: chọn đúng stack thay vì sưu tầm công cụ.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Option</th><th>Điểm mạnh</th><th>Đánh đổi</th></tr>
+          <tr><td>Managed connectors (Airbyte/Fivetran style)</td><td>Nhanh triển khai, ít code</td><td>Chi phí dài hạn + lock-in</td></tr>
+          <tr><td>Custom code ingestion</td><td>Linh hoạt cao, kiểm soát chi tiết</td><td>Tốn engineering effort và on-call</td></tr>
+          <tr><td>Streaming ecosystem (Kafka-based)</td><td>Phù hợp event-driven scale lớn</td><td>Ops complexity cao</td></tr>
+          <tr><td>ELT + dbt + orchestration (Airflow)</td><td>Rõ phân vai ingest/transform/schedule</td><td>Cần ownership rõ giữa team</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Hiểu mối quan hệ giữa integration tools, dbt và orchestration.</li>
+          <li>Đánh giá build-vs-buy theo năng lực team, SLA và tổng chi phí sở hữu.</li>
+          <li>Đưa quyết định tool có accountability, không theo trend.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>ETL tool vs custom code vs ELT platform</h3>
+        <table>
+          <tr><th>Tiêu chí</th><th>Managed connector</th><th>Custom code</th><th>Hybrid (managed + custom)</th></tr>
+          <tr><td>Time-to-market</td><td>Nhanh</td><td>Chậm hơn</td><td>Trung bình</td></tr>
+          <tr><td>Flexibility</td><td>Vừa phải</td><td>Cao</td><td>Cao với luồng critical</td></tr>
+          <tr><td>Ops burden</td><td>Thấp</td><td>Cao</td><td>Có kiểm soát</td></tr>
+          <tr><td>Cost predictability</td><td>Dễ tăng theo volume</td><td>Chi phí nhân sự/on-call</td><td>Cân bằng</td></tr>
+        </table>
+
+        <h3>dbt và Airflow nằm ở đâu trong integration stack?</h3>
+        <ul>
+          <li><strong>Integration layer</strong>: lấy dữ liệu vào raw/staging.</li>
+          <li><strong>dbt</strong>: transform/model/testing trong warehouse.</li>
+          <li><strong>Airflow</strong>: orchestrate toàn chuỗi ingest → transform → quality → publish.</li>
+        </ul>
+
+        <h3>Vendor lock-in và bảo mật credentials</h3>
+        <p>Nếu chọn managed connector, bạn cần kế hoạch escape: export config, chuẩn hóa schema trung gian, giữ contract độc lập với vendor. Credentials phải vào secrets manager, không hardcode trong repo.</p>
+
+        <div class="cmd-block"><div class="cmd-header"><span>tool_decision_matrix.md</span></div><div class="cmd-body"><pre>Decision weights:
+- Business criticality: 30%
+- Latency requirement: 20%
+- Team expertise: 20%
+- Total cost of ownership: 20%
+- Lock-in risk tolerance: 10%</pre></div></div>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: stack có quá nhiều tool nhưng không rõ owner. Khi sự cố xảy ra, không ai chịu trách nhiệm end-to-end.</span></div>
+
+        <h3>Cost view cho integration runs</h3>
+        <p>Đừng chỉ đo “job chạy được chưa”; hãy đo “sync dày như vậy có tạo business value không”. Over-syncing (ví dụ chạy mỗi 5 phút cho báo cáo tháng) làm tăng cost compute, API bill và on-call noise.</p>
+        <div class="tab-group" id="sqlg106">
+          <div class="tab active" onclick="switchTab('sqlg106','sqlg106pg')">PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sqlg106','sqlg106or')">Oracle SQL</div>
+        </div>
+        <div class="tab-content active" id="sqlg106"><div class="cmd-block"><div class="cmd-header"><span>integration_cost_monitor.sql</span></div><div class="cmd-body"><pre>SELECT run_date,
+       connector_name,
+       schedule_frequency,
+       rows_loaded,
+       estimated_cost_usd,
+       business_consumption_window,
+       CASE
+         WHEN schedule_frequency = '5m' AND business_consumption_window = 'monthly' THEN 'OVER_SYNCED'
+         ELSE 'OK'
+       END AS sync_efficiency_flag
+FROM integration_cost_audit
+WHERE run_date &gt;= CURRENT_DATE - INTERVAL '14 day'
+ORDER BY run_date DESC, estimated_cost_usd DESC;</pre></div></div></div>
+        <div class="tab-content" id="sqlg106or"><div class="cmd-block"><div class="cmd-header"><span>integration_cost_monitor.sql</span></div><div class="cmd-body"><pre>SELECT run_date,
+       connector_name,
+       schedule_frequency,
+       rows_loaded,
+       estimated_cost_usd,
+       business_consumption_window,
+       CASE
+         WHEN schedule_frequency = '5m' AND business_consumption_window = 'monthly' THEN 'OVER_SYNCED'
+         ELSE 'OK'
+       END AS sync_efficiency_flag
+FROM integration_cost_audit
+WHERE run_date &gt;= TRUNC(SYSDATE) - 14
+ORDER BY run_date DESC, estimated_cost_usd DESC;</pre></div></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Điểm mạnh lớn nhất của managed connectors là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Managed connectors giúp triển khai nhanh và giảm effort code ban đầu.')">A. Triển khai nhanh, ít code ban đầu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải luôn rẻ hơn mọi phương án.')">B. Luôn rẻ nhất dài hạn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không đảm bảo linh hoạt tối đa.')">C. Linh hoạt tuyệt đối cho mọi case</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Vẫn cần governance và ownership.')">D. Không cần ownership team</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Custom ingestion code phù hợp khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Với use case đơn giản có thể không cần custom.')">A. Mọi trường hợp</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Khi logic đặc thù/critical cần kiểm soát sâu và vendor không đáp ứng.')">B. Khi cần logic đặc thù và kiểm soát sâu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên chọn chỉ vì “thích code”.')">C. Khi team muốn code nhiều hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan đổi theme dashboard.')">D. Khi cần đổi màu UI</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">dbt liên quan gì đến integration?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. dbt xử lý transform/testing sau khi dữ liệu đã được ingest vào warehouse.')">A. Transform/model/testing sau lớp ingest</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. dbt không thay thế API connectors.')">B. Trực tiếp thay mọi connector API</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. dbt không thay secrets manager.')">C. Quản lý mật khẩu hệ thống</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. dbt không phải message broker.')">D. Là hàng đợi event</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Airflow trong ngữ cảnh module này là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Airflow không phải data warehouse.')">A. Hệ quản trị kho dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Airflow điều phối workflow ingest-transform-quality-end-to-end.')">B. Orchestrator cho workflow integration end-to-end</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải tool BI.')">C. Công cụ dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải công cụ mã hóa dữ liệu.')">D. Encryption gateway</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Vendor lock-in là rủi ro gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Phụ thuộc sâu vào vendor làm chi phí/chuyển đổi tương lai tăng cao.')">A. Khó rời vendor khi chi phí hoặc yêu cầu thay đổi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải lỗi cú pháp SQL.')">B. Sai cú pháp SQL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải do thiếu dashboard.')">C. Thiếu báo cáo BI</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan timezone DB.')">D. Lệch timezone</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Security baseline cho credentials là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Hardcode trong repo là rủi ro lớn.')">A. Lưu trực tiếp trong code DAG</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Dùng secrets manager/connection vault với rotation.')">B. Lưu trong secrets manager và rotate định kỳ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Lưu trong README là không an toàn.')">C. Ghi trong README nội bộ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên chia sẻ bằng chat.')">D. Gửi qua chat nhóm</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Build-vs-buy nên quyết định dựa trên?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Sở thích cá nhân không đủ.')">A. Team thích công nghệ nào</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Số sao GitHub không phải tiêu chí quyết định.')">B. Repo nào nhiều stars</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần cân bằng SLA, kỹ năng team, TCO, lock-in và ownership.')">C. SLA + năng lực team + TCO + lock-in + ownership</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên chỉ dựa giá license tháng đầu.')">D. Giá tháng đầu thấp nhất</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern lớn nhất trong lựa chọn tooling?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Quá nhiều công cụ mà không có owner end-to-end sẽ tạo chaos vận hành.')">A. Nhiều tool nhưng không rõ ownership</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dùng ít tool chưa chắc anti-pattern.')">B. Dùng 1 tool cho POC</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Có decision matrix là tốt.')">C. Làm decision matrix trước khi mua</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Thử nghiệm nhỏ có kiểm soát là hợp lý.')">D. Chạy pilot 2 tuần</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Kết quả mong muốn sau W15.06 là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải thuộc danh sách vendor.')">A. Nhớ 20 tên công cụ</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có logic chọn kiến trúc và tool dựa trên trade-off thực tế.')">B. Ra quyết định kiến trúc có lý do, trade-off rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không cần thay hết stack ngay.')">C. Đổi toàn bộ hệ thống trong 1 sprint</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đây không phải mục tiêu chính.')">D. Chỉ làm slide trình bày</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Hidden cost của over-syncing là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Sync quá dày làm tăng API/compute cost và on-call noise dù business không cần.')">A. Tăng chi phí và noise vận hành mà không tăng business value</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Over-syncing không làm lock-in tự biến mất.')">B. Tự giảm vendor lock-in</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không giúp giảm tải cluster một cách tự động.')">C. Giảm tài nguyên hạ tầng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không cải thiện semantic quality mặc định.')">D. Tự sửa lỗi contract</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Managed</strong>Nhanh nhưng có lock-in/cost</div>
+        <div class="summary-item"><strong>Custom</strong>Linh hoạt nhưng nặng vận hành</div>
+        <div class="summary-item"><strong>Hybrid</strong>Thực dụng cho đa dạng use case</div>
+        <div class="summary-item"><strong>dbt</strong>Transform/testing sau ingest</div>
+        <div class="summary-item"><strong>Airflow</strong>Điều phối end-to-end workflow</div>
+        <div class="summary-item"><strong>Rule</strong>Ownership rõ quan trọng hơn “tool xịn”</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài tập: Build-vs-buy decision cho công ty mid-size</div><div class="practice-task-body">
+          <p>Bạn có 12 nguồn dữ liệu, 3 luồng near real-time, team data gồm 5 người. Hãy chọn stack integration và giải thích vì sao.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>decision_recommendation.md</span></div><div class="cmd-body"><pre>- Managed connectors cho 8 nguồn SaaS chuẩn (time-to-market)
+- Custom ingestion cho 2 nguồn critical có logic đặc thù
+- CDC pipeline cho 2 DB transactional cần SLA 10-15 phút
+- Airflow orchestrate toàn chuỗi, dbt xử lý transform + tests
+- Secrets backend tập trung, cost dashboard theo connector
+- Owner map: từng connector và từng SLA có primary/secondary</pre></div></div></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">Quay lại W15.05</button><button class="nav-btn primary" onclick="goNext(5)">Sang W15.07</button></div>
+    </div>
+
+    <div class="module" id="m6">
+      <div class="module-header">
+        <div class="module-tag">Tuần 15 · W15.07</div>
+        <div class="module-title">Artifact: week15_data_integration/ (Portfolio-grade)</div>
+        <div class="module-subtitle">Đóng gói design + mapping + runbook đủ sâu để nhà tuyển dụng thấy tư duy production Data Engineer.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Artifact</th><th>Mục tiêu</th><th>Deliverable quality</th></tr>
+          <tr><td>architecture.md</td><td>Giải thích luồng end-to-end và pattern từng nguồn</td><td>Có latency, ownership, failure path</td></tr>
+          <tr><td>source_to_target_mapping.xlsx</td><td>Mapping field-level có transform rule</td><td>Có null policy + enum normalize</td></tr>
+          <tr><td>api_ingestion_spec.md</td><td>API auth/pagination/rate-limit/retry</td><td>Có contract + error handling</td></tr>
+          <tr><td>cdc_design.md</td><td>Offset/checkpoint/delete handling</td><td>Có replay-safe strategy</td></tr>
+          <tr><td>reconciliation_checks.sql</td><td>Kiểm so khớp source-target</td><td>Count + totals + mismatch flags</td></tr>
+          <tr><td>runbook.md + README.md</td><td>Vận hành sự cố và lessons learned</td><td>Có impact, owner, escalation</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Xây artifact thật để chứng minh năng lực integration cho recruiter/interviewer.</li>
+          <li>Thực hành kết nối nhiều nguồn và pattern trong cùng một business case.</li>
+          <li>Biến kiến thức tuần 15 thành deliverables có thể review độc lập.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Business case đề xuất (thực tế tuyển dụng)</h3>
+        <p><strong>Retail omnichannel</strong>: tích hợp dữ liệu từ app orders DB, CRM SaaS, payment API, ERP inventory và events checkout.</p>
+
+        <div class="cmd-block"><div class="cmd-header"><span>week15_data_integration/</span></div><div class="cmd-body"><pre>week15_data_integration/
+├── architecture.md
+├── source_to_target_mapping.xlsx
+├── api_ingestion_spec.md
+├── api_ingestion_with_backoff.py
+├── cdc_design.md
+├── reconciliation_checks.sql
+├── runbook.md
+└── README.md</pre></div></div>
+
+        <h3>Nếu chưa tạo file .xlsx trong repo</h3>
+        <p>Trong README, mô tả rõ sheet dự kiến cho <code>source_to_target_mapping.xlsx</code>:</p>
+        <ul>
+          <li><code>Sheet 1 - field_mapping</code>: source_field, target_field, transform_rule, null_policy.</li>
+          <li><code>Sheet 2 - domain_rules</code>: enum normalization, range checks.</li>
+          <li><code>Sheet 3 - ownership</code>: producer owner, consumer owner, escalation.</li>
+        </ul>
+
+        <h3>README bắt buộc phải trả lời</h3>
+        <ul class="checklist">
+          <li class="done">Hệ thống nào đang được tích hợp?</li>
+          <li class="done">Pattern nào được chọn cho từng nguồn?</li>
+          <li class="done">Schema mapping logic và contract nằm ở đâu?</li>
+          <li class="done">Failure handling + retry strategy ra sao?</li>
+          <li class="done">Reconciliation plan như thế nào?</li>
+          <li class="done">Tooling decisions và trade-offs?</li>
+          <li class="done">Lessons learned cho lần triển khai sau?</li>
+        </ul>
+
+        <h3>Script mẫu tăng độ thuyết phục portfolio</h3>
+        <div class="cmd-block"><div class="cmd-header"><span>api_ingestion_with_backoff.py (rút gọn)</span></div><div class="cmd-body"><pre>import random
+import time
+
+def call_with_retry(fetch_page, page_token):
+    attempt = 0
+    while attempt &lt; 8:
+        resp = fetch_page(page_token)
+        if resp.status_code in (429, 503):
+            wait = min(60, (2 ** attempt)) + random.uniform(0, 1.2)
+            time.sleep(wait)
+            attempt += 1
+            continue
+        if resp.status_code &gt;= 400:
+            raise RuntimeError(f"fatal api error: {resp.status_code}")
+        return resp
+    raise RuntimeError("retry exhausted")
+
+# checkpoint chỉ commit sau khi write thành công
+# để tránh mất dữ liệu khi job dừng giữa chừng</pre></div></div>
+
+        <h3>Reconciliation SQL mẫu cho artifact</h3>
+        <div class="tab-group" id="sqlg107">
+          <div class="tab active" onclick="switchTab('sqlg107','sqlg107pg')">PostgreSQL</div>
+          <div class="tab" onclick="switchTab('sqlg107','sqlg107or')">Oracle SQL</div>
+        </div>
+        <div class="tab-content active" id="sqlg107"><div class="cmd-block"><div class="cmd-header"><span>reconciliation_checks.sql</span></div><div class="cmd-body"><pre>SELECT ds,
+       source_cnt,
+       target_cnt,
+       source_total_amount,
+       target_total_amount,
+       CASE
+         WHEN source_cnt = target_cnt
+          AND source_total_amount = target_total_amount THEN 'PASS'
+         ELSE 'FAIL'
+       END AS reconciliation_status
+FROM reconciliation_daily_snapshot
+ORDER BY ds DESC;</pre></div></div></div>
+        <div class="tab-content" id="sqlg107or"><div class="cmd-block"><div class="cmd-header"><span>reconciliation_checks.sql</span></div><div class="cmd-body"><pre>SELECT ds,
+       source_cnt,
+       target_cnt,
+       source_total_amount,
+       target_total_amount,
+       CASE
+         WHEN source_cnt = target_cnt
+          AND source_total_amount = target_total_amount THEN 'PASS'
+         ELSE 'FAIL'
+       END AS reconciliation_status
+FROM reconciliation_daily_snapshot
+ORDER BY ds DESC;</pre></div></div></div>
+
+        <div class="info-box note">📌 <span>Recruiter-grade nghĩa là người ngoài team đọc README vẫn hiểu: bối cảnh business, quyết định kiến trúc, cách xử lý sự cố và giới hạn của giải pháp.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Mục tiêu chính của artifact tuần 15 là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Artifact phải chứng minh năng lực thiết kế và vận hành integration thực tế.')">A. Chứng minh năng lực integration theo chuẩn portfolio</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để trang trí repo.')">B. Làm repo đẹp hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ để tổng hợp lý thuyết.')">C. Ghi chép định nghĩa tool</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay thế coding interview.')">D. Bỏ qua phần vận hành</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">File nào mô tả logic chọn pattern theo nguồn?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. architecture.md nên mô tả end-to-end flows và pattern decisions.')">A. architecture.md</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. runbook tập trung xử lý sự cố.')">B. runbook.md</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. reconciliation SQL chỉ kiểm tra dữ liệu.')">C. reconciliation_checks.sql</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. README tóm tắt, không thay architecture chi tiết.')">D. README.md duy nhất</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">source_to_target_mapping.xlsx cần có gì quan trọng?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ tên cột là chưa đủ.')">A. Chỉ danh sách cột nguồn</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần transform rule, null policy, và ownership rõ.')">B. Mapping rule chi tiết + null policy + owner</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Screenshot không thay mapping table.')">C. Chỉ ảnh chụp màn hình</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể bỏ field-level mapping.')">D. Chỉ tóm tắt high-level</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">api_ingestion_spec.md nên có phần nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể chỉ ghi endpoint URL.')">A. Chỉ endpoint URL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không đủ nếu thiếu rate-limit/retry.')">B. Chỉ auth token</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần auth, pagination, rate-limit, retry, error contract.')">C. Auth + pagination + rate limit + retry + error handling</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan màu chart.')">D. Layout dashboard</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">cdc_design.md cần làm rõ điều gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải danh sách BI charts.')">A. Danh sách chart KPI</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần offset/checkpoint, update/delete handling, replay strategy.')">B. Offset/checkpoint + delete/update + replay-safe</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ nêu công cụ.')">C. Chỉ tên connector</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải tài liệu UI.')">D. Quy chuẩn màu giao diện</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">runbook.md tốt phải có?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Runbook cần impact, owner, step xử lý, escalation, communication.')">A. Impact + owner + steps + escalation + SLA comms</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ viết “rerun lại” là quá thiếu.')">B. Một dòng: rerun job</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể chỉ để trống.')">C. Không cần nếu có alert</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay bằng screenshot.')">D. Chỉ ảnh log</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">README artifact nên nhấn mạnh điều gì với recruiter?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên chỉ liệt kê công cụ.')">A. Danh sách tool đã cài</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ nói lý thuyết.')">B. Định nghĩa ETL/ELT</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần nêu bài toán, quyết định, trade-offs và cách vận hành sự cố.')">C. Bài toán thật + decision rationale + operations readiness</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải kho ảnh minh họa.')">D. Bộ sưu tập screenshot</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Nếu chưa tạo file .xlsx thực tế, cách làm đúng là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Mô tả cấu trúc sheet rõ trong README và nêu kế hoạch tạo file.')">A. Mô tả cấu trúc sheet chi tiết và scope trong README</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên giả vờ file tồn tại.')">B. Để trống và không giải thích</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên dùng file sai mục đích thay thế mà không ghi chú.')">C. Thay bằng ảnh random</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên bỏ mapping section.')">D. Bỏ luôn mapping</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Reconciliation file nên phục vụ mục tiêu nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để tính ranking người dùng.')">A. Xếp hạng khách hàng VIP</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Phát hiện mismatch source-target theo count/totals/status.')">B. Phát hiện lệch dữ liệu sau integration</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để đổi schema tự động.')">C. Tự migrate schema</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để backup file.')">D. Sao lưu tài liệu</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Hoàn thiện module này giúp gì khi phỏng vấn?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ “biết tên tool”.')">A. Chứng minh biết nhiều buzzword</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cho thấy bạn biết thiết kế integration có thể vận hành, không chỉ demo code.')">B. Chứng minh tư duy thiết kế + vận hành production</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan viết UI animation.')">C. Chứng minh kỹ năng animation web</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay cho khả năng trao đổi trade-off.')">D. Tránh mọi câu hỏi kiến trúc</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Artifact set</strong>Đủ 7 file theo chuẩn tuần 15</div>
+        <div class="summary-item"><strong>Business case</strong>Đa nguồn, đa pattern, có ràng buộc thực tế</div>
+        <div class="summary-item"><strong>Mapping</strong>Field-level, policy rõ</div>
+        <div class="summary-item"><strong>Failure plan</strong>Runbook + escalation rõ</div>
+        <div class="summary-item"><strong>Reconciliation</strong>SQL checks có PASS/FAIL</div>
+        <div class="summary-item"><strong>Portfolio value</strong>Recruiter đọc được và đánh giá được</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài tập: Viết README portfolio-ready cho week15_data_integration/</div><div class="practice-task-body">
+          <p>Viết README gồm 7 mục: systems integrated, chosen patterns, schema mapping logic, failure handling, reconciliation plan, tooling decisions, lessons learned.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>README outline</span></div><div class="cmd-body"><pre>## 1) Business Context
+## 2) Integrated Systems
+## 3) Pattern Decisions (with SLA)
+## 4) Mapping & Data Contracts
+## 5) Reliability & Failure Handling
+## 6) Reconciliation & Monitoring
+## 7) Tooling Trade-offs + Lessons Learned</pre></div></div></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">Quay lại W15.06</button><button class="nav-btn primary" onclick="goNext(6)">Sang W15.08</button></div>
+    </div>
+
+    <div class="module" id="m7">
+      <div class="module-header">
+        <div class="module-tag">Tuần 15 · W15.08</div>
+        <div class="module-title">Mini Test Tổng Kết</div>
+        <div class="module-subtitle">Tổng hợp patterns, contracts, retries, reconciliation và kiến trúc tool choice.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Phần</th><th>Nội dung đánh giá</th><th>Mục tiêu</th></tr>
+          <tr><td>Review Quiz</td><td>10 câu ôn tập module W15.08</td><td>Ôn tư duy trước mini test</td></tr>
+          <tr><td>Final Mini Test</td><td>20 câu trắc nghiệm tổng hợp tuần 15</td><td>Đo readiness thực chiến</td></tr>
+          <tr><td>Grading guidance</td><td>Xuất sắc / Tốt / Đạt tối thiểu / Cần ôn thêm</td><td>Ra quyết định học tiếp hay ôn lại</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Tự đánh giá mức hiểu biết integration theo production mindset.</li>
+          <li>Xác định phần còn yếu: pattern selection, contract, reliability, ops.</li>
+          <li>Chốt kế hoạch cải thiện trước khi chuyển sang tuần tiếp theo.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Cách làm mini test hiệu quả</h3>
+        <ol>
+          <li>Làm 10 câu review trước để “warm-up” tư duy.</li>
+          <li>Làm mini test 20 câu một mạch, không đoán mù.</li>
+          <li>Sau khi chấm điểm, đọc kỹ câu sai và viết action items.</li>
+        </ol>
+
+        <h3>Khung tự đánh giá sau điểm số</h3>
+        <ul>
+          <li><strong>&gt;= 90%</strong>: sẵn sàng thiết kế integration artifact độc lập.</li>
+          <li><strong>80-89%</strong>: tốt, cần luyện thêm tình huống failure thực tế.</li>
+          <li><strong>65-79%</strong>: ôn lại modules yếu trước khi mở rộng.</li>
+          <li><strong>&lt; 65%</strong>: quay lại từ W15.02 đến W15.06 và làm lại practice.</li>
+        </ul>
+
+        <div class="info-box tip">✅ <span>Mục tiêu cuối tuần 15 không phải điểm tuyệt đối, mà là bạn giải thích được quyết định integration bằng trade-off business + kỹ thuật.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập (10 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Data contract giúp gì cho downstream?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để làm báo cáo màu sắc.')">A. Đổi màu dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Contract bảo vệ downstream khỏi thay đổi schema/semantic bất ngờ.')">B. Giảm gãy pipeline khi nguồn thay đổi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay thế backup.')">C. Tạo backup tự động</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải để tăng CPU.')">D. Tăng hiệu năng máy chủ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Idempotent pipeline nghĩa là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chạy lại không làm dữ liệu đích sai lệch.')">A. Chạy lại an toàn không tạo sai số</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không đồng nghĩa chạy nhanh hơn.')">B. Luôn nhanh hơn pipeline khác</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không bỏ nhu cầu alert.')">C. Không cần cảnh báo</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không loại bỏ test.')">D. Không cần kiểm thử</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Reconciliation dùng để xác nhận điều gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để rename cột.')">A. Đổi tên cột</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ kiểm tra DAG success.')">B. Chỉ kiểm tra trạng thái job</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Kiểm tra dữ liệu source-target có khớp không.')">C. Dữ liệu đích có khớp dữ liệu nguồn không</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải công cụ BI.')">D. Chọn chart visual</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Retry backoff nên áp dụng khi?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Schema mismatch là fatal, không nên retry vô hạn.')">A. Lỗi contract/schema sai</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Lỗi transient như 429/503/timeout phù hợp retry có backoff.')">B. Lỗi tạm thời từ nguồn hoặc mạng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không retry cho lỗi logic cố định.')">C. Duplicate do logic mapping sai</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không retry vô nghĩa cho dữ liệu invalid.')">D. Poison message format sai</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">DLQ giúp điều gì trong vận hành?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không để xoá toàn bộ lỗi.')">A. Xoá record lỗi khỏi hệ thống</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không dùng để tăng tốc CPU.')">B. Tự scale cluster</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách bản ghi lỗi để luồng chính tiếp tục chạy.')">C. Cô lập poison messages và giảm tắc nghẽn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thay SLA communication.')">D. Thay thế thông báo sự cố</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Build-vs-buy quyết định tốt cần gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên chọn theo hype.')">A. Tool đang trend</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cân bằng SLA, kỹ năng team, cost, lock-in, ownership.')">B. Ma trận trade-off thực tế</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể dựa vào giao diện đẹp.')">C. Dashboard của vendor đẹp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên quyết định theo cảm tính.')">D. Linh cảm cá nhân</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Pattern nào thường hợp cho báo cáo D+1?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Batch thường hợp lý cho báo cáo D+1.')">A. Batch integration</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Event-driven có thể quá mức cần thiết.')">B. Event streaming bắt buộc</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. CDC không phải luôn cần cho D+1.')">C. CDC realtime mọi bảng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên quyết định theo trend.')">D. Tool mới nhất thị trường</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern nguy hiểm nhất với integration stack?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhiều tool không owner dẫn đến chaos khi sự cố.')">A. Quá nhiều công cụ nhưng không rõ ownership</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Có runbook là tốt.')">B. Có runbook chi tiết</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Có contract versioning là tốt.')">C. Version hóa data contract</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Có reconciliation SQL là thực hành tốt.')">D. Viết reconciliation checks</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Tại sao "job succeeded" chưa đủ?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Job xanh không đảm bảo dữ liệu đúng và đầy đủ.')">A. Vì dữ liệu vẫn có thể sai hoặc thiếu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Job success không tự cập nhật contract.')">B. Vì contract tự động cập nhật</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan đổi tool.')">C. Vì cần đổi vendor mới</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải do dashboard chậm.')">D. Vì BI render chậm</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Kết quả tốt nhất sau tuần 15 là?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không chỉ thuộc thuật ngữ.')">A. Thuộc định nghĩa ETL/ELT</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Có khả năng thiết kế integration artifact đáng tin và giải thích trade-off.')">B. Thiết kế được integration artifact có thể vận hành</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không cần đổi hết stack để đạt mục tiêu.')">C. Viết lại toàn bộ hệ thống cũ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Điểm số không phải mục tiêu duy nhất.')">D. Chỉ đạt 100% test</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Pattern fit</strong>Chọn theo SLA và nghiệp vụ</div>
+        <div class="summary-item"><strong>Contracts</strong>Bảo vệ downstream khỏi thay đổi âm thầm</div>
+        <div class="summary-item"><strong>Reliability</strong>Idempotency + retry policy + DLQ</div>
+        <div class="summary-item"><strong>Observability</strong>Metrics + reconciliation + runbook</div>
+        <div class="summary-item"><strong>Tooling</strong>Build-vs-buy có trade-off rõ</div>
+        <div class="summary-item"><strong>Portfolio</strong>Artifact tuần 15 phải đọc được và vận hành được</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▶</span></div><div class="section-content" style="display:none">
+        <div class="practice-task"><div class="practice-task-header">Bài tập: Self-assessment trước mini test</div><div class="practice-task-body">
+          <p>Viết 5 dòng tự đánh giá: điểm mạnh, điểm yếu, 2 action item cho tuần tới và 1 rủi ro vận hành bạn còn lo lắng nhất.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><div class="cmd-block"><div class="cmd-header"><span>self_assessment.txt</span></div><div class="cmd-body"><pre>- Mạnh: chọn pattern theo SLA khá chắc.
+- Yếu: còn lúng túng ở schema evolution breaking changes.
+- Action 1: viết thêm 2 contract examples có versioning.
+- Action 2: mô phỏng incident runbook với lag breach.
+- Rủi ro lớn: rerun thiếu idempotency ở luồng payment events.</pre></div></div></div>
+        </div></div>
+
+        <div class="section" id="final-test"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">★</div>Mini Test Cuối Tuần (20 câu)<span class="section-toggle">▼</span></div><div class="section-content">
+          <div class="test-question" data-q="1" data-correct="B"><div class="test-question-title">Q1. Use case báo cáo doanh thu D+1 nên ưu tiên pattern nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q1" value="A"> A. Event streaming bắt buộc</label><label class="test-option"><input type="radio" name="q1" value="B"> B. Batch integration</label><label class="test-option"><input type="radio" name="q1" value="C"> C. CDC mọi bảng</label><label class="test-option"><input type="radio" name="q1" value="D"> D. API realtime 1 giây/lần</label></div></div>
+          <div class="test-question" data-q="2" data-correct="C"><div class="test-question-title">Q2. Trong API ingestion, pagination chủ yếu dùng để?</div><div class="test-options"><label class="test-option"><input type="radio" name="q2" value="A"> A. Mã hóa token</label><label class="test-option"><input type="radio" name="q2" value="B"> B. Nén payload</label><label class="test-option"><input type="radio" name="q2" value="C"> C. Lấy dữ liệu theo trang</label><label class="test-option"><input type="radio" name="q2" value="D"> D. Đồng bộ timezone</label></div></div>
+          <div class="test-question" data-q="3" data-correct="A"><div class="test-question-title">Q3. Data contract giúp giảm rủi ro nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q3" value="A"> A. Downstream gãy do schema change âm thầm</label><label class="test-option"><input type="radio" name="q3" value="B"> B. Mất điện datacenter</label><label class="test-option"><input type="radio" name="q3" value="C"> C. Quá tải CPU local dev</label><label class="test-option"><input type="radio" name="q3" value="D"> D. Lỗi màu dashboard</label></div></div>
+          <div class="test-question" data-q="4" data-correct="D"><div class="test-question-title">Q4. Check nào phát hiện duplicate records?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> A. ORDER BY created_at</label><label class="test-option"><input type="radio" name="q4" value="B"> B. LIMIT 100</label><label class="test-option"><input type="radio" name="q4" value="C"> C. VACUUM ANALYZE</label><label class="test-option"><input type="radio" name="q4" value="D"> D. GROUP BY key HAVING COUNT(*) &gt; 1</label></div></div>
+          <div class="test-question" data-q="5" data-correct="B"><div class="test-question-title">Q5. Retry nên áp dụng cho lỗi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> A. Schema mismatch</label><label class="test-option"><input type="radio" name="q5" value="B"> B. HTTP 429/503 tạm thời</label><label class="test-option"><input type="radio" name="q5" value="C"> C. Contract violation nghiêm trọng</label><label class="test-option"><input type="radio" name="q5" value="D"> D. Mapping logic sai cố định</label></div></div>
+          <div class="test-question" data-q="6" data-correct="C"><div class="test-question-title">Q6. DLQ dùng để làm gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> A. Thay thế toàn bộ main queue</label><label class="test-option"><input type="radio" name="q6" value="B"> B. Xoá sạch record lỗi</label><label class="test-option"><input type="radio" name="q6" value="C"> C. Cô lập poison messages</label><label class="test-option"><input type="radio" name="q6" value="D"> D. Tăng RAM hệ thống</label></div></div>
+          <div class="test-question" data-q="7" data-correct="A"><div class="test-question-title">Q7. Idempotent pipeline nghĩa là?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> A. Rerun không làm sai dữ liệu đích</label><label class="test-option"><input type="radio" name="q7" value="B"> B. Luôn chạy nhanh hơn</label><label class="test-option"><input type="radio" name="q7" value="C"> C. Không cần checkpoint</label><label class="test-option"><input type="radio" name="q7" value="D"> D. Không cần reconciliation</label></div></div>
+          <div class="test-question" data-q="8" data-correct="B"><div class="test-question-title">Q8. Vì sao strict watermark (<code>updated_at &gt; last_success_ts</code>) có thể gây mất dữ liệu?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> A. Vì query chạy quá nhanh</label><label class="test-option"><input type="radio" name="q8" value="B"> B. Vì commit trễ làm record rơi ngoài cửa sổ ingest</label><label class="test-option"><input type="radio" name="q8" value="C"> C. Vì thiếu dashboard alert</label><label class="test-option"><input type="radio" name="q8" value="D"> D. Vì dùng SQL thay Python</label></div></div>
+          <div class="test-question" data-q="9" data-correct="D"><div class="test-question-title">Q9. Reconciliation tốt thường gồm?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Chỉ row count</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Chỉ log text</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Chỉ job status</label><label class="test-option"><input type="radio" name="q9" value="D"> D. Count + totals + checksum</label></div></div>
+          <div class="test-question" data-q="10" data-correct="B"><div class="test-question-title">Q10. Event-driven phù hợp khi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. D+1 reporting cố định</label><label class="test-option"><input type="radio" name="q10" value="B"> B. Cần phản ứng nhanh theo sự kiện</label><label class="test-option"><input type="radio" name="q10" value="C"> C. Chỉ có file SFTP</label><label class="test-option"><input type="radio" name="q10" value="D"> D. Team không muốn monitor</label></div></div>
+          <div class="test-question" data-q="11" data-correct="A"><div class="test-question-title">Q11. Build-vs-buy cần cân nhắc điều gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. SLA, expertise team, TCO, lock-in</label><label class="test-option"><input type="radio" name="q11" value="B"> B. Tool nào đang viral</label><label class="test-option"><input type="radio" name="q11" value="C"> C. Logo vendor</label><label class="test-option"><input type="radio" name="q11" value="D"> D. Màu giao diện</label></div></div>
+          <div class="test-question" data-q="12" data-correct="C"><div class="test-question-title">Q12. Thành phần nào orchestrate chuỗi ingest → transform → quality?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. dbt alone</label><label class="test-option"><input type="radio" name="q12" value="B"> B. JDBC driver</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Airflow (orchestrator)</label><label class="test-option"><input type="radio" name="q12" value="D"> D. BI dashboard</label></div></div>
+          <div class="test-question" data-q="13" data-correct="D"><div class="test-question-title">Q13. Anti-pattern nghiêm trọng trong tool stack là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. Có decision matrix</label><label class="test-option"><input type="radio" name="q13" value="B"> B. Có owner rotation</label><label class="test-option"><input type="radio" name="q13" value="C"> C. Có runbook escalation</label><label class="test-option"><input type="radio" name="q13" value="D"> D. Nhiều tool nhưng không ownership</label></div></div>
+          <div class="test-question" data-q="14" data-correct="B"><div class="test-question-title">Q14. Schema evolution nào thường là additive?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. Đổi type incompatible</label><label class="test-option"><input type="radio" name="q14" value="B"> B. Thêm cột optional</label><label class="test-option"><input type="radio" name="q14" value="C"> C. Đổi tên cột critical</label><label class="test-option"><input type="radio" name="q14" value="D"> D. Xóa cột đang dùng</label></div></div>
+          <div class="test-question" data-q="15" data-correct="A"><div class="test-question-title">Q15. Freshness metric giúp theo dõi gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Độ trễ dữ liệu so với SLA</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Màu giao diện report</label><label class="test-option"><input type="radio" name="q15" value="C"> C. Số lượng chart</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Số lượng user login</label></div></div>
+          <div class="test-question" data-q="16" data-correct="C"><div class="test-question-title">Q16. Producer đổi enum semantic mà không báo trước là vi phạm gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. Chỉ vi phạm coding style</label><label class="test-option"><input type="radio" name="q16" value="B"> B. Không vi phạm gì</label><label class="test-option"><input type="radio" name="q16" value="C"> C. Vi phạm data contract</label><label class="test-option"><input type="radio" name="q16" value="D"> D. Vi phạm dashboard guideline</label></div></div>
+          <div class="test-question" data-q="17" data-correct="D"><div class="test-question-title">Q17. Vì sao “job succeeded” chưa đủ?</div><div class="test-options"><label class="test-option"><input type="radio" name="q17" value="A"> A. Vì chưa có theme dark</label><label class="test-option"><input type="radio" name="q17" value="B"> B. Vì chưa có alert email</label><label class="test-option"><input type="radio" name="q17" value="C"> C. Vì chưa chạy VACUUM</label><label class="test-option"><input type="radio" name="q17" value="D"> D. Vì dữ liệu vẫn có thể sai/mất</label></div></div>
+          <div class="test-question" data-q="18" data-correct="A"><div class="test-question-title">Q18. Nếu nguồn có hard delete, cách nào đáng tin để phát hiện record bị xóa?</div><div class="test-options"><label class="test-option"><input type="radio" name="q18" value="A"> A. CDC tombstone hoặc snapshot + checksum</label><label class="test-option"><input type="radio" name="q18" value="B"> B. Chỉ tăng tần suất cron ingest</label><label class="test-option"><input type="radio" name="q18" value="C"> C. Chạy VACUUM thường xuyên hơn</label><label class="test-option"><input type="radio" name="q18" value="D"> D. Chỉ so row count weekly</label></div></div>
+          <div class="test-question" data-q="19" data-correct="A"><div class="test-question-title">Q19. Trường nào trong contract thể hiện security-by-design cho dữ liệu nhạy cảm?</div><div class="test-options"><label class="test-option"><input type="radio" name="q19" value="A"> A. pii_policy</label><label class="test-option"><input type="radio" name="q19" value="B"> B. event_type_allowed</label><label class="test-option"><input type="radio" name="q19" value="C"> C. required_columns</label><label class="test-option"><input type="radio" name="q19" value="D"> D. dataset</label></div></div>
+          <div class="test-question" data-q="20" data-correct="B"><div class="test-question-title">Q20. Mục tiêu cuối tuần 15 là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q20" value="A"> A. Chỉ biết tên công cụ</label><label class="test-option"><input type="radio" name="q20" value="B"> B. Thiết kế integration đáng tin và giải thích được trade-off</label><label class="test-option"><input type="radio" name="q20" value="C"> C. Chỉ đạt điểm quiz cao</label><label class="test-option"><input type="radio" name="q20" value="D"> D. Xây dashboard thật nhiều</label></div></div>
+
+          <div class="test-actions">
+            <button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button>
+            <button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button>
+          </div>
+          <div class="test-result" id="final-test-result" style="display:none"></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">Quay lại W15.07</button><div style="text-align:center;color:var(--accent2);font-weight:700">Hoàn thành Tuần 15 · Data Integration</div></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+
+  opts.forEach(o => {
+    o.style.pointerEvents = 'none';
+    if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+      o.classList.add('correct');
+    }
+  });
+  if (!correct) el.classList.add('wrong');
+
+  explain.textContent = (correct ? 'Chính xác. ' : 'Chưa đúng. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function switchTab(groupId, tabId) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  const tabs = group.querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  const clickedTab = group.querySelector(`[onclick*="${tabId}"]`);
+  if (clickedTab) clickedTab.classList.add('active');
+  const siblings = group.parentElement.querySelectorAll('.tab-content');
+  siblings.forEach(c => c.classList.remove('active'));
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0;
+  let answeredCount = 0;
+  const wrongAnswers = [];
+  const unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+
+    if (!selected) {
+      q.classList.add('unanswered');
+      unanswered.push(qNum);
+      return;
+    }
+
+    answeredCount++;
+    if (selected.value === correct) {
+      q.classList.add('correct');
+      correctCount++;
+    } else {
+      q.classList.add('wrong');
+      wrongAnswers.push({ q: qNum, selected: selected.value, correct });
+    }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '';
+  let chipClass = 'warn';
+  let guidance = '';
+
+  if (percent >= 90) {
+    levelText = 'Xuất sắc';
+    chipClass = 'good';
+    guidance = 'Bạn đã sẵn sàng thiết kế integration flow mức production cho bài toán thực tế.';
+  } else if (percent >= 80) {
+    levelText = 'Tốt';
+    chipClass = 'good';
+    guidance = 'Bạn đạt ngưỡng tốt. Nên luyện thêm 1-2 tình huống failure/reconciliation để chắc tay.';
+  } else if (percent >= 65) {
+    levelText = 'Đạt tối thiểu';
+    chipClass = 'warn';
+    guidance = 'Bạn có nền tảng cơ bản. Hãy ôn lại W15.03-W15.05 trước khi sang module nâng cao hơn.';
+  } else {
+    levelText = 'Cần ôn thêm';
+    chipClass = 'bad';
+    guidance = 'Bạn nên quay lại W15.02-W15.06, làm lại practice tasks và test lại.';
+  }
+
+  const unansweredHtml = unanswered.length
+    ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>`
+    : '';
+
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đáp án đúng <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng.</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>
+    ${unansweredHtml}
+    ${wrongHtml}`;
+
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+
+</body>
+</html>
