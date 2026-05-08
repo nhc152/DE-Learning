@@ -495,7 +495,70 @@ Improve the file across:
 - artifact realism
 
 PATCH PRIORITIES:
-[PASTE ANTIGRAVITY REVIEW HERE]
+Viewed Week16_Spark.html:1-800
+Viewed Week16_Spark.html:801-1600
+Viewed Week16_Spark.html:1601-2125
+
+# Week16 Review Report
+
+## 1. Executive Summary
+- **Score:** 8.5/10
+- **Strongest parts:** Tư duy DE thực chiến (anti-patterns, đánh đổi chi phí), cấu trúc module học theo chuỗi logic (từ architecture -> optimize -> debug -> test), thiết kế UI cực kỳ chuyên nghiệp và tương tác tốt. Yêu cầu Artifact cuối tuần có giá trị portfolio rất cao.
+- **Biggest weaknesses:** Bỏ sót hoàn toàn **Adaptive Query Execution (AQE)** (tính năng cốt lõi của Spark 3.x), thiếu các tham số cấu hình sinh tử như `spark.sql.shuffle.partitions` và `autoBroadcastJoinThreshold`, và xử lý Data Skew chỉ dừng ở lý thuyết (thiếu code mẫu salting).
+- **Priority level:** High (cần patch các kiến thức của Spark 3.x để file thực sự mang tầm vóc của một Senior DE năm 2024+).
+
+## 2. What Already Strong
+- **Tư duy Production (Production Mindset):** Bài viết không dạy "thuộc lòng API" mà dạy cách tư duy: cấm dùng `collect()` bừa bãi, không join bảng rộng mù quáng, không lạm dụng `cache()`.
+- **Tách biệt I/O và Transformations (W16.07):** Hướng dẫn học viên viết pure functions cho transformations và unit test bằng fake DataFrame là một điểm nhấn **đắt giá nhất** của tài liệu này. Rất hiếm tutorial cho beginner làm được việc này.
+- **Spark UI Debugging (W16.06):** Thay vì đoán mò nguyên nhân chậm, tài liệu ép người học nhìn vào Stage, Task, Spill, và Shuffle metrics.
+- **Artifact Design (W16.08):** Format yêu cầu của repo `spark_jobs/` hoàn toàn là chuẩn mực tuyển dụng hiện đại (có unit tests, code organization tốt, và storytelling before/after trong README).
+
+## 3. Critical Gaps
+- **Adaptive Query Execution (AQE) Missing:** Spark 3.0+ bật sẵn AQE. Chức năng tự động gộp (coalesce) shuffle partitions, tối ưu skew join runtime, và tự động chuyển sort-merge thành broadcast join là những "vũ khí tối thượng" của Spark hiện đại. Tài liệu hiện tại giống như đang dạy tối ưu Spark 2.4.
+- **The "200 Partitions" Trap:** Bỏ qua tham số `spark.sql.shuffle.partitions` (mặc định = 200). Mọi Data Engineer đều từng gặp lỗi spill data do để default 200 partitions cho data cỡ TB.
+- **Salting Code Example:** Giải thích Skew Join tốt nhưng thiếu hẳn một đoạn code mẫu mô tả kỹ thuật Salting (thêm random key để phân tán tải).
+- **Predicate Pushdown & Vectorized Reader:** Chưa nhắc đến sức mạnh của file Parquet/ORC khi kết hợp với Spark Catalyst (đẩy filter xuống tầng storage để tránh load data thừa lên memory).
+
+## 4. Module-by-Module Improvements
+- **W16.02 (Architecture):** Cần làm rõ 2 loại Out Of Memory (OOM): Driver OOM (thường do `collect`) vs Executor OOM (thường do join/groupBy data skew). Có thể nhắc nhẹ về YARN/K8s memory overhead.
+- **W16.03 (Execution Mindset):** Nhấn mạnh lý do `DataFrame` cực nhanh là do nó tận dụng được *Parquet Predicate Pushdown* (không đọc dữ liệu thừa từ đĩa).
+- **W16.04 (Joins & Shuffle):** 
+  - Đưa cấu hình `spark.sql.autoBroadcastJoinThreshold` (default 10MB) vào phần Broadcast.
+  - Viết 1 mục ngắn giới thiệu sự thần kỳ của **AQE Skew Join Optimization**.
+  - Cung cấp một code snippet nhỏ về "Salting" cho Skew Join bằng manual code.
+- **W16.05 (Partitioning):** BẮT BUỘC nhắc đến tham số `spark.sql.shuffle.partitions` và công thức heuristic cơ bản (Target file size = 128MB - 256MB).
+- **W16.06 (Spark UI):** Nên thêm tab `Environment` vào bảng các tab cần xem. Đây là nơi duy nhất xác nhận xem các config mình tune (như executor memory, shuffle partitions) đã thực sự được apply chưa.
+
+## 5. Production Upgrades Recommended
+- **Cập nhật kiến thức Spark 3.x:** Thêm một mục ngắn hoặc note (Alert Box) về AQE ở phần Shuffle/Join để học viên biết Spark đã thông minh hơn rất nhiều.
+- **Memory Tuning Heuristics:** Cung cấp nguyên tắc cơ bản: không phải cứ cấp thật nhiều vCore/RAM cho một Executor là tốt (tránh overhead Garbage Collection quá lớn, thường set tầm 4-5 cores/executor).
+- **File Compaction/OPTIMIZE:** Khi nói về file layout, có thể nhắc nhẹ rằng nếu dùng các định dạng hiện đại như Delta Lake / Iceberg thì việc xử lý small files đã được gói gọn bằng lệnh `OPTIMIZE`.
+
+## 6. Teaching Upgrades Recommended
+- **Tăng tính thực tế cho code:** Trong các đoạn mã Python hiện tại, bổ sung các comment ước lượng kích thước dữ liệu (VD: `# fact_table: 2TB/day, 10B rows`). Điều này giúp học viên neo tư duy "kích thước quyết định chiến lược".
+- **Mini-test Upgrades:** Thêm 2-3 câu hỏi vào bộ W16.09 liên quan đến AQE, config `shuffle.partitions`, và hiện tượng OOM.
+
+## 7. Portfolio Value Assessment
+**Giá trị thực chiến vô cùng xuất sắc.** 
+- Khác biệt so với 95% các portfolio "Hello World" ngoài kia là việc yêu cầu viết **Unit Test** cho Spark và chia thư mục `common/`.
+- Tiêu chí đánh giá bằng **Before/After thinking** trong thư mục `spark_jobs/` chính xác là điều các Hiring Managers ở vị trí Senior/Lead DE muốn đọc.
+- Nếu học viên làm được artifact này, họ hoàn toàn có thể pass các vòng phỏng vấn kỹ thuật sâu của các công ty công nghệ lớn.
+
+## 8. Top 10 Immediate Patches
+1. Thêm giới thiệu về **Adaptive Query Execution (AQE)** vào W16.04.
+2. Thêm cảnh báo về cạm bẫy mặc định **200 `spark.sql.shuffle.partitions`** vào W16.05.
+3. Đề cập đến `spark.sql.autoBroadcastJoinThreshold` trong phần Broadcast Join (W16.04).
+4. Viết 1 snippet code mẫu mô tả thủ thuật **Salting** cho Data Skew.
+5. Thêm khái niệm **Predicate Pushdown** vào phần File Layout (W16.05) để học viên hiểu giá trị của Parquet.
+6. Cập nhật Mini-test: Thêm 1 câu hỏi về tính năng của AQE.
+7. Cập nhật Mini-test: Thêm 1 câu hỏi về cách tính và set số lượng shuffle partitions.
+8. Ở W16.06 (Spark UI), bổ sung tab **Environment** để debug configuration.
+9. Làm rõ khái niệm **Executor OOM vs Driver OOM** ở W16.02.
+10. Tại phần Artifact (W16.08), yêu cầu ứng viên ghi rõ version Spark (khuyến khích 3.x) và danh sách config đã tune trong file `README.md`.
+
+## 9. Final Verdict
+**PATCH STRONGLY**
+Tài liệu có nền tảng sư phạm và tư duy engineering cực tốt, form UI rất đẹp. Tuy nhiên, nội dung kỹ thuật hiện tại đang phản ánh "Best Practices của Spark 2.x". Bạn cần patch các tính năng của hệ sinh thái Spark 3.x (đặc biệt là AQE và các config tuning thiết yếu) để nâng tầm tài liệu lên chuẩn mực Architect/Senior DE hiện đại.
 
 MANDATORY EDITING RULES:
 1. First identify which current sections should be preserved
