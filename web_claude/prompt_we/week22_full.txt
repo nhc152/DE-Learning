@@ -1,0 +1,561 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week22_KPI_Dashboard.html`.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week22_KPI_Dashboard.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 22 – KPI, Experimentation & Dashboard cho Data Engineer
+
+Allowed sources only:
+- ./Week22_KPI_Dashboard.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 22 CORE MISSION:
+This file must teach KPI and dashboard work as trustworthy data product design, not as chart-making.
+
+The learner should understand:
+- KPI là gì và vì sao dễ sai
+- metric definition và metric ownership
+- North Star Metric vs supporting metrics
+- leading vs lagging indicators
+- guardrail metrics
+- dashboard design for decision-making
+- executive vs operational dashboards
+- A/B testing fundamentals
+- experiment metrics and interpretation
+- how to build recruiter-grade KPI/dashboard artifacts
+
+This tutorial must feel stronger than common dashboard design tips.
+
+MANDATORY MODULES:
+- W22.01 – Tổng Quan: KPI, Metrics & Decision-Making
+- W22.02 – North Star Metric, Supporting Metrics & Guardrails
+- W22.03 – Metric Definitions, Ownership & Data Trust
+- W22.04 – Dashboard Design: Executive vs Operational vs Exploratory
+- W22.05 – A/B Testing Fundamentals cho Data Engineer
+- W22.06 – Experiment Readout, Pitfalls & Business Interpretation
+- W22.07 – Artifact: week22_kpi_dashboard/
+- W22.08 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W22.01
+- KPI vs metric vs measure
+- why dashboards fail when metrics are unclear
+- decision-first dashboard mindset
+- business question → metric → dataset → dashboard
+- vanity metrics vs actionable metrics
+- examples:
+  revenue, retention, activation, churn, conversion, SLA
+- why Data Engineers must care about metric definitions
+- week outcomes checklist
+
+W22.02
+- North Star Metric meaning
+- supporting metrics
+- input/output metrics
+- leading vs lagging indicators
+- guardrail metrics
+- metric tree concept
+- examples by domain:
+  e-commerce
+  SaaS
+  marketplace
+  fintech
+- anti-pattern:
+  optimizing one metric while damaging business health
+
+W22.03
+- metric definition document
+- numerator / denominator
+- grain
+- filters
+- timezone
+- late-arriving data
+- bot/internal traffic exclusion
+- ownership
+- certified metrics
+- data lineage to dashboard
+- source of truth
+- anti-pattern:
+  same KPI calculated differently across teams
+
+W22.04
+- dashboard types:
+  executive summary
+  operational monitoring
+  exploratory analysis
+- dashboard users and decisions
+- layout hierarchy
+- KPI cards
+- trend charts
+- breakdowns
+- drill-downs
+- freshness indicators
+- annotations
+- alert thresholds
+- avoiding chart clutter
+- anti-pattern:
+  one dashboard for everyone
+
+W22.05
+- experiment basics
+- hypothesis
+- control vs treatment
+- randomization
+- allocation
+- primary metric
+- guardrail metric
+- sample size intuition
+- p-value / confidence interval beginner explanation
+- statistical vs practical significance
+- data logging requirements for experiments
+- anti-pattern:
+  peeking too early and declaring winner
+
+W22.06
+- experiment readout structure
+- how to interpret lift
+- segmentation pitfalls
+- novelty effects
+- seasonality
+- multiple testing risk
+- instrumentation bugs
+- missing exposure events
+- business recommendation
+- decision memo
+- anti-pattern:
+  reporting numbers without recommendation
+
+W22.07
+- build realistic portfolio artifact:
+  week22_kpi_dashboard/
+  ├── metric_framework.md
+  ├── metric_definitions.md
+  ├── dashboard_wireframe.md
+  ├── dashboard_queries.sql
+  ├── experiment_design.md
+  ├── experiment_readout.md
+  ├── data_quality_checks.sql
+  └── README.md
+- README must explain:
+  - business context
+  - target users
+  - KPI framework
+  - dashboard decisions
+  - experiment design
+  - data quality checks
+  - lessons learned
+- dashboard can be implemented in Tableau Public / Metabase / Looker Studio / static mockup
+- must feel portfolio-ready
+
+W22.08
+- final mini test: 20 questions
+- cover:
+  - KPI vs metrics
+  - North Star
+  - guardrails
+  - metric definitions
+  - dashboard design
+  - A/B testing
+  - experiment interpretation
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- KPI definition tasks
+- metric tree design tasks
+- dashboard critique tasks
+- experiment design tasks
+- experiment readout tasks
+- data quality check tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every SQL/example should be believable
+- focus on decision quality, metric trust, and business usefulness
+- do not turn this into generic visualization tips
+- must connect dashboard decisions to data modeling, quality, and business action
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- vague KPI talk
+- dashboard aesthetics-only advice
+- filler text
+- shallow experiment explanation
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week22 scope you are using from roadmap
+2. Which format rules you inherit from Week00 / prompt standard
+3. Which assumptions you are making for business domain, dashboard users, and experiment examples
+
+Then output the full final content for:
+./Week22_KPI_Dashboard.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text
+Use project rules from .claude.
+
+Review ./Week22_KPI_Dashboard.html as a senior Analytics Engineering / Data Product reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- metric logic quality
+- dashboard decision quality
+- experimentation correctness
+- teaching quality
+- production realism
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA / ANALYTICS RELEVANCE
+Ensure Week22 teaches KPI/dashboard as trustworthy data products, not chart-making.
+Check relevance of:
+- metric definitions
+- metric ownership
+- source of truth
+- decision-first dashboarding
+- data quality checks
+- dashboard freshness
+- business context
+- experiment interpretation
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- KPI definition drift
+- inconsistent numerator/denominator
+- timezone issues
+- bot/internal traffic exclusions
+- late-arriving data
+- dashboard stale data
+- alert fatigue
+- vanity metrics
+- p-hacking / peeking
+- instrumentation bugs
+
+D. EXPERIMENTATION QUALITY
+Review whether explanations are strong enough for:
+- hypothesis
+- control/treatment
+- primary metric
+- guardrails
+- randomization
+- sample size intuition
+- p-value / confidence interval
+- statistical vs practical significance
+- experiment readout
+- business recommendation
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W22.07 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- metric certification
+- semantic layer mention
+- stakeholder review workflow
+- dashboard SLAs
+- experiment exposure logging
+- guardrail regression handling
+- narrative readout format
+Only recommend additions if they materially improve quality.
+
+Also check:
+- whether every module supports the required 6-section learning structure
+- whether quiz/practice/final test are strong enough
+- whether the artifact module feels recruiter-grade and realistic
+
+OUTPUT FORMAT (STRICT):
+
+# Week22 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week22_KPI_Dashboard.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week22 becomes a high-value, portfolio-grade KPI / Dashboard / Experimentation tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week22_KPI_Dashboard.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- metric logic correctness
+- dashboard decision quality
+- experimentation accuracy
+- teaching clarity
+- production realism
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+[PASTE ANTIGRAVITY REVIEW HERE]
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade examples, metrics, dashboard scenarios, and experiment logic where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen KPI vs metric vs measure framing
+- improve metric definition examples
+- improve North Star / guardrail metric tree
+- improve dashboard user/decision mapping
+- improve freshness and data quality checks
+- improve A/B testing explanation without overcomplicating
+- improve experiment readout and business recommendation
+- strengthen W22.07 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week22_KPI_Dashboard.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text
+Review the patched ./Week22_KPI_Dashboard.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week22_KPI_Dashboard.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- SQL examples still feel coherent and realistic
+- metric definitions are clear and not vague
+- dashboard logic is decision-oriented
+- experiment examples are not misleading
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week22_KPI_Dashboard.html only.
+```
+
+---
+
+# 6) Mẹo riêng cho Week22
+
+```text
+Do not turn Week22 into a generic dashboard design or visualization tips page.
+Teach KPI, dashboards, and experimentation as trustworthy data products for decision-making, with metric definitions, ownership, quality checks, guardrails, and business recommendations.
+```

@@ -1,0 +1,660 @@
+Được. Week24 là tuần cực kỳ quan trọng vì đây không còn là “học từng mảnh” nữa mà là:
+
+* tổng hợp toàn bộ roadmap
+* biến kiến thức thành portfolio thực sự
+* mô phỏng production-grade DE project
+* chuẩn bị mindset phỏng vấn / tuyển dụng / handoff
+* chứng minh năng lực end-to-end
+
+Nên Week24 phải có cảm giác như:
+
+> “Junior → real Data Engineer transition”
+
+Dưới đây là **full bộ prompt theo từng step** cho `Week24_Capstone.html`.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week24_Capstone.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 24 – Data Engineering Capstone Project
+
+Allowed sources only:
+- ./Week24_Capstone.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 24 CORE MISSION:
+This file must help learners combine all previous weeks into a realistic end-to-end Data Engineering project.
+
+The learner should understand:
+- how to design a complete DE system
+- architecture reasoning
+- ingestion → storage → transformation → serving → monitoring
+- business requirements translation
+- batch + streaming integration
+- data quality
+- orchestration
+- warehouse/lakehouse decisions
+- KPI/dashboard layer
+- maintenance and operations
+- portfolio presentation
+- interview storytelling
+- production trade-offs
+
+This tutorial must feel like a real-world capstone project guide, not a toy portfolio project.
+
+MANDATORY MODULES:
+- W24.01 – Tổng Quan: Capstone Project là gì và mục tiêu cuối cùng
+- W24.02 – Business Problem & Architecture Design
+- W24.03 – Ingestion Layer: Batch, CDC, APIs, Streaming
+- W24.04 – Storage & Transformation Layer
+- W24.05 – Serving Layer: Warehouse, OLAP, KPI Dashboard
+- W24.06 – Reliability, Observability & Operations
+- W24.07 – Portfolio, Documentation & Interview Storytelling
+- W24.08 – Artifact: week24_capstone/
+- W24.09 – Mini Test Tổng Kết
+
+MANDATORY CAPSTONE SCENARIO:
+The tutorial must use ONE realistic business scenario consistently across modules.
+
+Choose ONE scenario such as:
+- E-commerce analytics platform
+- Food delivery analytics platform
+- Fintech transaction analytics
+- SaaS product analytics
+- Ride-hailing analytics
+- Streaming media analytics
+
+The same scenario must persist across:
+- ingestion
+- transformations
+- warehouse
+- dashboards
+- streaming
+- monitoring
+- incident handling
+- portfolio artifacts
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W24.01
+- why capstone matters
+- portfolio vs tutorial difference
+- end-to-end DE mindset
+- “data pipeline” vs “data platform”
+- balancing simplicity vs realism
+- how recruiters evaluate DE projects
+- week outcomes checklist
+
+W24.02
+- business requirements gathering
+- stakeholder mapping
+- SLAs and freshness needs
+- high-level architecture diagram
+- source systems:
+  OLTP DB
+  APIs
+  events
+  files
+- choosing:
+  warehouse
+  lakehouse
+  OLAP
+  orchestration
+  streaming
+- trade-off reasoning
+- anti-pattern:
+  choosing tools only because trendy
+
+W24.03
+- ingestion architecture:
+  batch
+  CDC
+  API ingestion
+  Kafka/event ingestion
+- bronze/raw layer
+- schema evolution handling
+- retries
+- idempotency
+- watermark/checkpoint ideas
+- ingestion observability
+- anti-pattern:
+  no replay strategy
+
+W24.04
+- transformation layers:
+  bronze/silver/gold
+  staging/intermediate/marts
+- dbt-style transformations
+- fact/dimension modeling
+- partitioning strategy
+- Spark/Flink role if applicable
+- data quality checks
+- orchestration flow
+- anti-pattern:
+  business logic duplicated everywhere
+
+W24.05
+- warehouse serving
+- OLAP serving
+- KPI/dashboard layer
+- semantic consistency
+- certified metrics
+- dashboard freshness
+- dashboard ownership
+- executive vs operational dashboards
+- anti-pattern:
+  dashboards with unclear source-of-truth
+
+W24.06
+- monitoring:
+  freshness
+  failures
+  lag
+  costs
+  quality
+- incident handling
+- runbooks
+- lineage
+- impact analysis
+- SLA/SLO/SLI
+- post-mortem culture
+- anti-pattern:
+  no ownership after deployment
+
+W24.07
+- GitHub portfolio structure
+- README quality
+- architecture explanation
+- screenshots and diagrams
+- interview storytelling:
+  why chosen architecture
+  trade-offs
+  scaling decisions
+  failures learned
+- what recruiters actually care about
+- anti-pattern:
+  huge architecture with no explanation
+
+W24.08
+- build realistic portfolio artifact:
+  week24_capstone/
+  ├── architecture/
+  │   ├── system_design.md
+  │   └── diagrams/
+  ├── ingestion/
+  ├── transformations/
+  ├── orchestration/
+  ├── warehouse/
+  ├── dashboards/
+  ├── monitoring/
+  ├── tests/
+  ├── runbooks/
+  ├── README.md
+  └── interview_notes.md
+
+- artifact must include:
+  - realistic architecture
+  - ingestion design
+  - SQL transformations
+  - orchestration flow
+  - dashboard examples
+  - monitoring plan
+  - incident handling plan
+  - data quality checks
+  - trade-off explanations
+  - scaling considerations
+
+README must explain:
+- business problem
+- architecture decisions
+- tooling choices
+- ingestion patterns
+- warehouse/lakehouse decisions
+- monitoring/reliability
+- costs and trade-offs
+- lessons learned
+- future improvements
+
+Must feel:
+- recruiter-grade
+- production-minded
+- believable
+- end-to-end complete
+
+W24.09
+- final mini test: 20 questions
+- cover:
+  - architecture
+  - ingestion
+  - warehouse
+  - streaming
+  - orchestration
+  - dashboards
+  - observability
+  - maintenance
+  - portfolio storytelling
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- architecture design tasks
+- ingestion strategy tasks
+- warehouse modeling tasks
+- orchestration planning tasks
+- monitoring/incident tasks
+- portfolio review tasks
+- interview storytelling tasks
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every example should be believable
+- architecture decisions must feel realistic
+- focus on trade-offs and production mindset
+- must connect every system decision to business needs
+- avoid toy projects
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- architecture buzzword dumping
+- filler text
+- unrealistic FAANG-scale systems for beginners
+
+IMPORTANT:
+The DataExpert-io/data-engineer-handbook repository is the primary roadmap and topic-scope reference.
+
+However:
+- do NOT merely summarize handbook resources
+- transform roadmap topics into a cohesive production-grade learning experience
+- preserve the practical mindset of the handbook ecosystem
+- enrich weak areas with operational realism, debugging mindset, and architecture reasoning
+- keep progression beginner-friendly first, then deepen gradually
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week24 scope you are using from roadmap
+2. Which format rules you inherit from Week00 / prompt standard
+3. Which business scenario you selected and why
+4. Which assumptions you are making for scale, latency, and team size
+
+Then output the full final content for:
+./Week24_Capstone.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text
+Use project rules from .claude.
+
+Review ./Week24_Capstone.html as a senior Data Engineering Architect, Hiring Reviewer, and learning-product reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- architecture realism
+- production mindset
+- teaching quality
+- portfolio value
+- interview readiness
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. END-TO-END DATA ENGINEERING RELEVANCE
+Ensure Week24 teaches complete Data Engineering system thinking, not isolated tools.
+Check relevance of:
+- ingestion
+- orchestration
+- transformations
+- warehouse/lakehouse
+- streaming
+- monitoring
+- dashboards
+- reliability
+- maintenance
+- ownership
+- portfolio presentation
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- realistic business constraints
+- cost/performance trade-offs
+- freshness SLAs
+- schema evolution
+- data quality failures
+- replay/backfill strategy
+- incident handling
+- observability
+- ownership
+- scaling trade-offs
+- realistic architecture boundaries
+
+D. ARCHITECTURE / DECISION QUALITY
+Review whether comparisons and reasoning are strong enough:
+- warehouse vs lakehouse
+- batch vs streaming
+- Spark vs warehouse SQL
+- orchestration choices
+- OLAP serving vs warehouse serving
+- managed services vs open-source
+- build vs buy decisions
+- simplicity vs scalability
+
+E. PORTFOLIO / HIRING QUALITY
+Review whether:
+- the capstone feels recruiter-grade
+- the architecture feels believable
+- README expectations are strong enough
+- the project could realistically impress hiring managers
+- interview storytelling guidance is useful
+- artifacts feel realistic and cohesive
+
+F. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W24.08 artifact looks serious and useful
+
+G. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- infra cost awareness
+- deployment/versioning
+- CI/CD mention
+- rollback strategy
+- data contracts
+- semantic layer
+- dashboard governance
+- team collaboration workflow
+Only recommend additions if they materially improve quality.
+
+Also check:
+- whether every module supports the required 6-section learning structure
+- whether quiz/practice/final test are strong enough
+- whether the artifact module feels recruiter-grade and realistic
+
+OUTPUT FORMAT (STRICT):
+
+# Week24 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio / Hiring Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week24_Capstone.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week24 becomes a high-value, recruiter-grade, production-oriented Data Engineering Capstone tutorial.
+
+Allowed sources only:
+- ./Week24_Capstone.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- architecture realism
+- production mindset
+- end-to-end coherence
+- portfolio value
+- hiring readiness
+- interview storytelling
+- operational realism
+
+PATCH PRIORITIES:
+[PASTE ANTIGRAVITY REVIEW HERE]
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade architecture reasoning and artifacts where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen business-problem framing
+- improve architecture trade-off reasoning
+- improve ingestion/replay/reliability strategy
+- improve warehouse/lakehouse decision clarity
+- improve observability/maintenance realism
+- improve README/interview storytelling guidance
+- improve recruiter-facing artifact quality
+- improve scaling/cost realism
+- strengthen W24.08 artifact so it feels truly portfolio-grade
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week24_Capstone.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text
+Review the patched ./Week24_Capstone.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Would this realistically impress recruiters/interviewers?
+6. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week24_Capstone.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- architecture examples still feel coherent and realistic
+- portfolio guidance is actionable
+- artifact quality feels recruiter-grade
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week24_Capstone.html only.
+```
+
+---
+
+# 6) Mẹo riêng cho Week24
+
+```text
+Do not turn Week24 into a generic portfolio advice page or architecture buzzword collection.
+Teach learners how to combine all previous weeks into a believable, production-minded, recruiter-grade Data Engineering project with clear business goals, architecture reasoning, operational ownership, and interview storytelling.
+```

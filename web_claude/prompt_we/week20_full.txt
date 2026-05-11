@@ -1,0 +1,610 @@
+Được. Dưới đây là **full bộ prompt theo từng step** cho `Week20_Modern_OLAP.html`.
+
+---
+
+# 1) Prompt build cho Claude Extension / Claude Code
+
+```text
+Tôi đang xây dựng bộ tài liệu học Data Engineering dạng HTML tương tác.
+Apply project rules from .claude.
+
+Nguồn chính:
+- Repo: ./data-engineer-handbook
+- File roadmap local: DE_Roadmap_Expert_NHC.md
+- File cấu trúc local: PROMPT_Build_DE_Tutorial_HTML.md
+- File format mẫu local: Week00_Setup.html
+
+Nguyên tắc chung:
+- Output bằng tiếng Việt
+- Giữ thuật ngữ kỹ thuật tiếng Anh khi phù hợp
+- Dạy theo mindset của Data Engineer
+- Practical, production-oriented, không generic
+- Giữ consistency với family của Week00
+- Mỗi module phải có đủ 6 section chuẩn:
+  1. Menu Tổng Thể
+  2. Mục Đích Module
+  3. Giải Thích Chi Tiết
+  4. Câu Hỏi Ôn Tập
+  5. Tổng Kết
+  6. Bài Tập Thực Hành
+- HTML standalone, inline CSS/JS
+- Dark premium UI
+- Sidebar + hero + interactive quiz + practice + mini test cuối file
+
+Use project rules from .claude.
+
+Current task:
+Create or strongly upgrade:
+./Week20_Modern_OLAP.html
+
+Goal:
+Build a high-quality, portfolio-grade tutorial for:
+
+Tuần 20 – Modern OLAP cho Data Engineer
+
+Allowed sources only:
+- ./Week20_Modern_OLAP.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+WEEK 20 CORE MISSION:
+This file must teach Modern OLAP as practical analytics-serving architecture, not as a list of fast databases.
+
+The learner should understand:
+- why OLAP engines exist
+- OLTP vs OLAP vs Warehouse vs Modern OLAP
+- columnar storage and vectorized execution
+- pre-aggregation and materialized views
+- DuckDB for local analytics
+- ClickHouse for fast analytical serving
+- Druid / Pinot style real-time OLAP concepts
+- latency, freshness, concurrency, and cost trade-offs
+- how to choose OLAP engines for real workloads
+- how to build recruiter-grade Modern OLAP artifacts
+
+This tutorial must feel stronger than common “DuckDB vs ClickHouse” overview content.
+
+MANDATORY MODULES:
+- W20.01 – Tổng Quan: Modern OLAP là gì và vì sao cần?
+- W20.02 – OLTP vs OLAP vs Data Warehouse vs Modern OLAP
+- W20.03 – DuckDB: Local Analytics & Parquet-Native Workflow
+- W20.04 – ClickHouse: Columnar OLAP cho Event / Time-series Analytics
+- W20.05 – Real-time OLAP: Druid / Pinot Concepts
+- W20.06 – Performance Patterns: Partitioning, Pre-aggregation, Materialized Views
+- W20.07 – Architecture Decisions: Chọn Engine nào cho Workload nào?
+- W20.08 – Artifact: week20_modern_olap/
+- W20.09 – Mini Test Tổng Kết
+
+MANDATORY TOPICS TO COVER DEEPLY:
+
+W20.01
+- why traditional databases struggle with analytical workloads
+- why dashboards need fast aggregations
+- OLAP as analytics-serving layer
+- workloads:
+  event analytics
+  product analytics
+  logs
+  time-series
+  operational dashboards
+- difference between “store data” and “serve analytics fast”
+- when Modern OLAP is useful
+- when it is overkill
+- week outcomes checklist
+
+W20.02
+- OLTP:
+  row-oriented
+  transactions
+  point lookups
+  small reads/writes
+- OLAP:
+  columnar scans
+  aggregations
+  many rows, few columns
+- Data Warehouse:
+  governed analytics platform
+  transformations and marts
+- Modern OLAP:
+  low-latency analytical serving
+  high concurrency dashboards
+  event-heavy workloads
+- compare:
+  PostgreSQL vs DuckDB vs ClickHouse vs BigQuery/Snowflake
+- anti-pattern:
+  forcing PostgreSQL to serve high-volume dashboards
+
+W20.03
+- DuckDB basics
+- local analytical engine
+- embedded database mindset
+- querying CSV / Parquet directly
+- why DuckDB is excellent for local development and analytics prototyping
+- SQL over files
+- Parquet-native workflow
+- limitations:
+  not designed as distributed serving engine
+  not multi-user production warehouse replacement
+- use cases:
+  local exploration
+  CI data checks
+  analyst notebooks
+  lightweight batch validation
+- example queries over Parquet
+- anti-pattern:
+  treating DuckDB as replacement for every warehouse
+
+W20.04
+- ClickHouse basics
+- columnar storage
+- MergeTree family concept
+- order key / primary key mindset
+- partitioning by date
+- compression
+- fast aggregation
+- event analytics
+- time-series / logs / product events
+- ingestion patterns:
+  batch insert
+  Kafka ingestion mention
+- strengths:
+  speed, compression, dashboard performance
+- weaknesses:
+  updates/deletes are not OLTP-style
+  schema and table design matter
+- anti-pattern:
+  designing ClickHouse tables like normalized OLTP schema
+
+W20.05
+- Real-time OLAP concept
+- Apache Druid / Apache Pinot style architecture
+- ingestion from Kafka
+- segments
+- indexing
+- rollups
+- low-latency dashboard use cases
+- event-time ingestion
+- freshness vs correctness trade-off
+- when real-time OLAP is justified
+- when ClickHouse or warehouse is enough
+- anti-pattern:
+  real-time OLAP without true real-time business need
+
+W20.06
+- partitioning
+- clustering/order key
+- sorting
+- compression
+- pre-aggregation
+- materialized views
+- rollups
+- approximate aggregations:
+  uniq / approximate count distinct concept
+- avoiding SELECT *
+- query shape matters
+- dashboard query patterns
+- cost/performance mindset
+- anti-pattern:
+  adding materialized views without knowing query workload
+
+W20.07
+- decision framework:
+  DuckDB vs ClickHouse vs Druid/Pinot vs Warehouse
+- criteria:
+  data volume
+  latency
+  concurrency
+  freshness
+  operational burden
+  cost
+  query patterns
+  update/delete needs
+  team maturity
+- realistic workload examples:
+  local data exploration
+  executive BI
+  product event analytics
+  real-time fraud dashboard
+  logs observability
+- build vs buy considerations
+- vendor/open-source trade-offs
+- anti-pattern:
+  choosing engine based on popularity instead of workload
+
+W20.08
+- build realistic portfolio artifact:
+  week20_modern_olap/
+  ├── duckdb_demo/
+  │   ├── query_parquet.sql
+  │   └── README.md
+  ├── clickhouse_demo/
+  │   ├── schema.sql
+  │   ├── ingestion_example.sql
+  │   ├── dashboard_queries.sql
+  │   └── README.md
+  ├── real_time_olap_design.md
+  ├── benchmark_notes.md
+  ├── engine_decision_matrix.md
+  └── README.md
+- artifact should demonstrate:
+  - same analytical question on different engines
+  - why ClickHouse is faster for event aggregation
+  - where DuckDB is useful locally
+  - when real-time OLAP is justified
+- README must explain:
+  - workload scenario
+  - data model
+  - query patterns
+  - chosen engine
+  - performance/cost trade-offs
+  - lessons learned
+- must feel portfolio-ready
+
+W20.09
+- final mini test: 20 questions
+- cover:
+  - OLTP vs OLAP
+  - DuckDB
+  - ClickHouse
+  - Druid/Pinot concepts
+  - materialized views
+  - pre-aggregation
+  - decision framework
+- support score grading + reset + result guidance
+
+HTML / UX REQUIREMENTS:
+- Follow Week00 family style
+- Hero banner
+- Badge row
+- Fixed sidebar
+- Main content area
+- Active module switching
+- Collapsible sections
+- Terminal-style code blocks
+- Tip / Warn / Note boxes
+- Interactive quiz
+- Practice tasks with hidden solutions
+- Final mini test
+- Responsive mobile
+
+Required JS functions:
+- showModule(idx, el)
+- goNext(idx)
+- goPrev(idx)
+- toggleSection(header)
+- answerQuiz(el, correct, explanation)
+- toggleSolution(btn)
+- gradeFinalTest()
+- resetFinalTest()
+
+QUIZ REQUIREMENTS:
+Each module must contain exactly 10 review questions.
+Each question must have:
+- 4 options A/B/C/D
+- correct answer
+- explanation
+Wrong answers must explain why wrong.
+
+PRACTICE REQUIREMENTS:
+Each module must have practical exercises.
+Must include:
+- engine selection tasks
+- query pattern critique tasks
+- table design tasks
+- performance reasoning tasks
+- dashboard workload analysis
+- hidden solution button:
+  💡 Xem lời giải
+
+TECHNICAL QUALITY RULES:
+- no placeholders
+- no “...” shortcuts
+- every SQL/example should be believable
+- focus on workload fit and performance reasoning
+- do not turn this into a tool comparison list only
+- must connect OLAP design choices to analytics speed, concurrency, cost, and business value
+
+CONTENT STYLE:
+- mentor-like
+- clear
+- practical
+- calm
+- confident
+- beginner friendly
+- production mindset
+- real-world examples
+- explain simple first, then deepen
+- compare trade-offs
+- mention anti-patterns
+
+Avoid:
+- robotic wording
+- hype language
+- filler text
+- shallow vendor comparisons
+
+BEFORE WRITING:
+First briefly state:
+1. Which Week20 scope you are using from roadmap
+2. Which format rules you inherit from Week00 / prompt standard
+3. Which assumptions you are making for data volume, dashboard workload, and engine examples
+
+Then output the full final content for:
+./Week20_Modern_OLAP.html
+```
+
+---
+
+# 2) Prompt review cho Antigravity
+
+```text
+Use project rules from .claude.
+
+Review ./Week20_Modern_OLAP.html as a senior Modern OLAP / Data Engineering Architect and learning-product reviewer.
+
+Your job is NOT to rewrite the file immediately.
+Your job is to audit:
+- technical depth
+- OLAP architecture accuracy
+- teaching quality
+- production realism
+- portfolio value
+- consistency with Week00 family
+- HTML learning product quality
+
+Review deeply across these areas:
+
+A. CONTENT QUALITY
+- clarity
+- correctness
+- beginner friendliness
+- progression of difficulty
+- practical usefulness
+- depth vs simplicity balance
+- examples quality
+- anti-pattern coverage
+- trade-off thinking
+
+B. DATA ENGINEERING RELEVANCE
+Ensure Week20 teaches real OLAP serving architecture, not generic database marketing.
+Check relevance of:
+- OLTP vs OLAP
+- columnar analytics
+- event analytics
+- product analytics
+- dashboard serving
+- query latency
+- concurrency
+- data freshness
+- cost/performance trade-offs
+- workload fit
+
+C. PRODUCTION REALISM
+Check whether the file covers:
+- PostgreSQL misuse for analytics dashboards
+- wrong partition/order key choices
+- materialized view overuse
+- pre-aggregation trade-offs
+- approximate aggregation trade-offs
+- real-time OLAP operational cost
+- ingestion freshness vs correctness
+- schema design impact
+- realistic dashboard workloads
+
+D. ARCHITECTURE / TOOL DECISIONS
+Review whether comparisons are strong enough:
+- DuckDB vs ClickHouse
+- ClickHouse vs warehouse
+- Druid/Pinot vs ClickHouse
+- Modern OLAP vs Data Warehouse
+- local analytics vs serving analytics
+- batch dashboard vs real-time dashboard
+- open-source ops burden vs managed services
+
+E. HTML LEARNING PRODUCT QUALITY
+- module order
+- learner flow
+- practice quality
+- quiz quality
+- summary quality
+- consistency with Week00 style
+- portfolio feel
+- whether W20.08 artifact looks serious and useful
+
+F. WHAT IS MISSING
+Actively search for high-value missing topics such as:
+- MergeTree order key intuition
+- small files / ingestion batching
+- cardinality and compression
+- query shape analysis
+- rollup design
+- dashboard concurrency
+- retention and TTL
+- data freshness SLAs
+Only recommend additions if they materially improve quality.
+
+Also check:
+- whether every module supports the required 6-section learning structure
+- whether quiz/practice/final test are strong enough
+- whether the artifact module feels recruiter-grade and realistic
+
+OUTPUT FORMAT (STRICT):
+
+# Week20 Review Report
+
+## 1. Executive Summary
+- score /10
+- strongest parts
+- biggest weaknesses
+- priority level
+
+## 2. What Already Strong
+
+## 3. Critical Gaps
+
+## 4. Module-by-Module Improvements
+
+## 5. Production Upgrades Recommended
+
+## 6. Teaching Upgrades Recommended
+
+## 7. Portfolio Value Assessment
+
+## 8. Top 10 Immediate Patches
+
+## 9. Final Verdict
+- keep as is
+- patch lightly
+- patch strongly
+- rebuild parts
+
+IMPORTANT RULES:
+- Be critical, useful, and specific
+- Avoid generic praise
+- Focus on high-ROI improvements
+- Respect existing strengths
+- Output in Vietnamese
+```
+
+---
+
+# 3) Prompt patch cho Claude Code sau review
+
+```text
+Use project rules from .claude.
+
+Current task:
+Upgrade ./Week20_Modern_OLAP.html based on the latest review.
+
+Goal:
+Keep the current strong foundation, preserve good UI and strong explanations, and patch weak areas so Week20 becomes a high-value, portfolio-grade Modern OLAP tutorial for Data Engineers.
+
+Allowed sources only:
+- ./Week20_Modern_OLAP.html
+- ./data-engineer-handbook/
+- ./DE_Roadmap_Expert_NHC.md
+- ./PROMPT_Build_DE_Tutorial_HTML.md
+- ./Week00_Setup.html
+- ./.claude/
+
+Do not use any other files.
+
+IMPORTANT STRATEGY:
+- Do NOT rewrite from scratch
+- Do NOT blindly overwrite strong content
+- Preserve strong explanations, examples, comparisons, and teaching flow
+- Replace only weak, shallow, duplicated, outdated, or missing parts
+- Final result must feel like one polished tutorial
+- Keep Week00 family design and interaction quality
+- Keep the file standalone HTML
+- Keep Vietnamese explanations
+
+PATCH OBJECTIVES:
+Improve the file across:
+- OLAP architecture depth
+- teaching clarity
+- production realism
+- performance reasoning
+- workload decision-making
+- portfolio value
+- artifact realism
+
+PATCH PRIORITIES:
+[PASTE ANTIGRAVITY REVIEW HERE]
+
+MANDATORY EDITING RULES:
+1. First identify which current sections should be preserved
+2. Then identify which weak/missing areas must be upgraded
+3. Merge improvements intelligently
+4. Keep all HTML/CSS/JS interactions working
+5. Preserve 6-section structure in every module
+6. Preserve quizzes, practice, and mini test
+7. Upgrade examples, workloads, and decision frameworks where needed
+8. Avoid duplication
+9. Keep tone mentor-like, practical, and production-oriented
+
+COMMON HIGH-VALUE UPGRADE AREAS TO PRIORITIZE WHEN REVIEW REQUESTS THEM:
+- strengthen why Modern OLAP exists framing
+- improve OLTP vs OLAP vs warehouse distinction
+- improve DuckDB use-case boundaries
+- improve ClickHouse schema/order-key realism
+- improve Druid/Pinot real-time OLAP explanation
+- improve materialized view / pre-aggregation trade-offs
+- improve dashboard concurrency and latency reasoning
+- improve engine decision framework
+- strengthen W20.08 artifact so it feels portfolio-ready
+- update quiz and final test when new concepts are added
+
+EXPECTED RESULT:
+Update only:
+./Week20_Modern_OLAP.html
+```
+
+---
+
+# 4) Prompt final review ngắn cho Antigravity
+
+```text
+Review the patched ./Week20_Modern_OLAP.html.
+
+Focus only on:
+1. Did the patch solve the previous critical gaps?
+2. Any new issues introduced?
+3. Any remaining high-ROI improvements?
+4. Final score /10
+5. Ship now or one more patch?
+
+Output in Vietnamese.
+Be concise, critical, and decisive.
+```
+
+---
+
+# 5) Prompt QA cuối cho Claude Code
+
+```text
+Use project rules from .claude.
+
+Current task:
+Perform final QA on ./Week20_Modern_OLAP.html
+
+Check carefully:
+- broken HTML structure
+- broken CSS layout
+- broken JS interactions
+- sidebar navigation
+- showModule / goNext / goPrev
+- collapsible sections
+- quiz logic
+- solution toggle
+- final test grading/reset
+- duplicated content
+- unfinished wording
+- weak transitions between modules
+- consistency with Week00 family
+- every module still has the required 6-section structure
+- every module still has exactly 10 review quiz questions
+- final mini test still works
+- OLAP examples still feel coherent and realistic
+- SQL snippets still look believable
+- overall polish, readability, and portfolio feel
+
+Fix only final QA issues.
+Do not rewrite strong content unless needed.
+Return the final polished content for:
+./Week20_Modern_OLAP.html only.
+```
+
+---
+
+# 6) Mẹo riêng cho Week20
+
+```text
+Do not turn Week20 into a generic database comparison page.
+Teach Modern OLAP as practical analytics-serving architecture for fast dashboards, event analytics, query latency, concurrency, pre-aggregation, cost control, and real workload-driven engine selection.
+```
