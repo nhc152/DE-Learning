@@ -1,0 +1,4 @@
+order_id,customer_id,order_status,order_timestamp,updated_at,coupon_code
+O1007,C002,paid,2026-05-04T02:20:00Z,2026-05-04T02:25:00Z,SUMMER26
+O1008,C003,completed,2026-05-04T03:10:00Z,2026-05-04T03:15:00Z,
+

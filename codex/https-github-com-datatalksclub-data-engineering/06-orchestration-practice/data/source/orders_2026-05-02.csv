@@ -1,0 +1,5 @@
+order_id,customer_id,order_status,order_date,amount
+O1004,C001,paid,2026-05-02,120.00
+O1005,C004,completed,2026-05-02,95.00
+O1006,C005,refunded,2026-05-02,-40.00
+

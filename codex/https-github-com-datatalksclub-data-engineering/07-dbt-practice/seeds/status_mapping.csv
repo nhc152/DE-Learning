@@ -1,0 +1,9 @@
+raw_status,normalized_status
+PAID,paid
+Shipped,shipped
+completed,completed
+COMPLETED ,completed
+cancelled,cancelled
+canceled,cancelled
+refunded,refunded
+

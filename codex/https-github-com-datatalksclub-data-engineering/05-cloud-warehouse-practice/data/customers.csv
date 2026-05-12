@@ -1,0 +1,7 @@
+customer_id,customer_name,email,country,customer_tier,updated_at
+C001,Alice Nguyen,alice@example.com,VN,silver,2026-05-01T01:00:00Z
+C002,Bob Tran,bob@example.com,VN,gold,2026-05-01T01:00:00Z
+C003,Carla Smith,carla@example.com,US,bronze,2026-05-01T01:00:00Z
+C004,Duy Le,duy@example.com,VN,silver,2026-05-01T01:00:00Z
+C005,Emily Park,emily@example.com,KR,gold,2026-05-01T01:00:00Z
+

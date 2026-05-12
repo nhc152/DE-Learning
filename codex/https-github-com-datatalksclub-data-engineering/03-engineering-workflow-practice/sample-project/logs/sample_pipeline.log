@@ -1,0 +1,13 @@
+2026-05-01T01:00:00Z INFO run_id=run_20260501 step=extract source=orders status=started
+2026-05-01T01:00:03Z INFO run_id=run_20260501 step=extract rows=5 status=success
+2026-05-01T01:00:04Z INFO run_id=run_20260501 step=load target=stg_orders status=started
+2026-05-01T01:00:08Z INFO run_id=run_20260501 step=load rows=5 status=success
+2026-05-01T01:00:09Z INFO run_id=run_20260501 step=transform model=fct_orders status=started
+2026-05-01T01:00:12Z WARN run_id=run_20260501 step=quality check=accepted_values invalid_status_count=0
+2026-05-01T01:00:14Z INFO run_id=run_20260501 step=transform rows=5 status=success
+2026-05-02T01:00:00Z INFO run_id=run_20260502 step=extract source=orders status=started
+2026-05-02T01:00:04Z ERROR run_id=run_20260502 step=extract error="Timeout calling upstream orders API"
+2026-05-02T01:00:05Z INFO run_id=run_20260502 step=extract retry_attempt=1 status=started
+2026-05-02T01:00:09Z ERROR run_id=run_20260502 step=extract error="Timeout calling upstream orders API"
+2026-05-02T01:00:10Z ERROR run_id=run_20260502 step=pipeline status=failed reason="extract failed after retries"
+
