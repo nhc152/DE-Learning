@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 20 · Modern OLAP</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 42px 24px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .hero p { color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 170px); }
+
+  .sidebar {
+    width: 350px;
+    min-width: 350px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 6px; color: var(--accent2); }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 56px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 1020px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 6px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '□'; color: var(--accent5); font-size: 1.1rem; flex-shrink: 0; margin-top: -1px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); display: none; }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  .tab-group { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 8px 18px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Data Engineering Handbook Tutorial</h1>
+  <p>Tuần 20 · Modern OLAP cho Data Engineer (Analytics-serving mindset)</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Module 402 · Modern OLAP</span>
+    <span class="badge badge-orange">Practical + Production-oriented</span>
+    <span class="badge badge-blue">Portfolio-ready Artifact</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương trình Tuần 20</div>
+    <div class="level-label">TUẦN 20 · MODERN OLAP</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W20.01</span>Tổng Quan: Modern OLAP là gì?</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W20.02</span>OLTP vs OLAP vs Warehouse vs Modern OLAP</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W20.03</span>DuckDB: Local Analytics & Parquet</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W20.04</span>ClickHouse: Columnar OLAP Serving</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W20.05</span>Real-time OLAP: Druid / Pinot Concepts</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W20.06</span>Performance Patterns</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W20.07</span>Architecture Decision Framework</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W20.08</span>Artifact: week20_modern_olap/</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">W20.09</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="m0">
+      <div class="module-header">
+        <div class="module-tag">W20.01 · Tổng Quan</div>
+        <div class="module-title">Modern OLAP là gì và vì sao cần?</div>
+        <div class="module-subtitle">Tập trung vào analytics-serving architecture: serve nhanh, đúng workload, đúng cost.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Khối</th><th>Nội dung chính</th><th>Giá trị cho DE</th></tr>
+          <tr><td>Vấn đề gốc</td><td>Traditional DB chậm với scan + aggregation lớn</td><td>Biết tại sao cần engine khác OLTP</td></tr>
+          <tr><td>Workload thật</td><td>Event analytics, logs, product analytics, operational dashboard</td><td>Map đúng bài toán vào engine</td></tr>
+          <tr><td>Boundary</td><td>Khi nào Modern OLAP hữu ích / khi nào overkill</td><td>Tránh over-engineering</td></tr>
+          <tr><td>Outcome tuần</td><td>Ra quyết định kiến trúc + tạo artifact tuyển dụng</td><td>Tăng năng lực thiết kế hệ thống</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Hiểu rõ Modern OLAP không phải “DB nhanh”, mà là lớp <strong>analytics serving</strong>.</li>
+          <li>Phân biệt mục tiêu <strong>store data</strong> và <strong>serve analytics fast</strong>.</li>
+          <li>Nắm checklist kết quả tuần 20 để tự đánh giá readiness kiến trúc.</li>
+        </ul>
+        <div class="info-box tip">Tip: Khi dashboard bị chậm, đừng hỏi "engine nào hot" trước; hỏi "query shape + concurrency + freshness yêu cầu gì" trước.</div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Tại sao traditional databases thường hụt hơi với analytics?</h3>
+        <p>OLTP database tối ưu cho transaction nhỏ và point lookup. Dashboard analytics lại cần scan nhiều bản ghi, aggregate nhiều chiều, phục vụ nhiều user cùng lúc. Khi nhét workload này vào OLTP, bạn gặp CPU spike, lock pressure, query tail latency cao.</p>
+        <h3>Dashboard cần gì hơn việc "lưu dữ liệu"?</h3>
+        <ul>
+          <li><strong>Latency:</strong> trả kết quả ở mức giây hoặc sub-second cho chart/filter.</li>
+          <li><strong>Freshness:</strong> dữ liệu đủ mới cho quyết định vận hành.</li>
+          <li><strong>Concurrency:</strong> nhiều người mở cùng dashboard không nghẽn.</li>
+          <li><strong>Cost control:</strong> query lặp lại phải tối ưu bằng pre-aggregation/materialization.</li>
+        </ul>
+        <p><strong>Định nghĩa SLA thực hành:</strong> theo dõi cả p50/p95/p99 (không chỉ average). Ví dụ p95 = 95% query trả về dưới ngưỡng X giây; đây là chỉ số rất quan trọng cho dashboard production.</p>
+        <h3>Workload tiêu biểu cần Modern OLAP</h3>
+        <table>
+          <tr><th>Workload</th><th>Ví dụ nghiệp vụ</th><th>Đặc điểm query</th></tr>
+          <tr><td>Event analytics</td><td>Product team theo dõi funnel hằng giờ</td><td>GROUP BY theo time + segment</td></tr>
+          <tr><td>Logs analytics</td><td>SRE xem error rate theo service</td><td>Filter thời gian + aggregate lớn</td></tr>
+          <tr><td>Operational dashboard</td><td>Ops theo dõi đơn hàng theo vùng theo phút</td><td>Read-heavy, concurrent</td></tr>
+          <tr><td>Time-series metrics</td><td>Theo dõi SLA latency/p95</td><td>Window + rollup theo interval</td></tr>
+        </table>
+        <div class="info-box warn">Warn: Nếu chỉ có 1-2 analyst, query ad-hoc nhẹ, refresh theo ngày, Modern OLAP có thể là overkill so với warehouse chuẩn.</div>
+        <h3>Week outcomes checklist</h3>
+        <ul class="checklist">
+          <li>Giải thích được vì sao OLTP không nên gánh dashboard nặng.</li>
+          <li>Map được 5 workload phổ biến vào engine phù hợp.</li>
+          <li>Thiết kế được basic serving architecture có latency/freshness target.</li>
+          <li>Tạo được artifact tuần 20 có benchmark + decision matrix.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m0"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="summary-grid">
+          <div class="summary-item"><strong>Core idea</strong>Modern OLAP là lớp phục vụ analytics nhanh, không chỉ nơi lưu dữ liệu.</div>
+          <div class="summary-item"><strong>Business value</strong>Giảm latency dashboard, tăng tốc quyết định vận hành/sản phẩm.</div>
+          <div class="summary-item"><strong>Anti-pattern</strong>Ép OLTP làm dashboard lớn và kỳ vọng ổn định.</div>
+          <div class="summary-item"><strong>Decision rule</strong>Chọn theo workload và SLO, không chọn theo độ nổi tiếng.</div>
+        </div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · Engine selection task</div><div class="practice-task-body">
+          <p>Scenario: Dashboard product có 150M events/ngày, 120 PM mở cùng lúc, filter 7 ngày gần nhất, target p95 &lt; 1.5s. Hãy chọn lớp serving phù hợp và lý do.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Ưu tiên ClickHouse hoặc Druid/Pinot style serving. Lý do: read-heavy, high concurrency, aggregate theo thời gian; OLTP không phù hợp. Nếu yêu cầu near real-time cao, cân nhắc Druid/Pinot; nếu batch/stream hybrid và team SQL mạnh, ClickHouse thường thực dụng hơn.</p></div>
+        </div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Dashboard workload analysis</div><div class="practice-task-body">
+          <p>Liệt kê 3 tín hiệu cho thấy hệ hiện tại đang "store tốt nhưng serve kém".</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul><li>Query latency tăng mạnh khi số dashboard user tăng.</li><li>CPU DB transaction tăng theo giờ họp dashboard.</li><li>Nhiều query aggregate phải chạy lại từ raw table, không có pre-aggregation.</li></ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn" disabled>◀ Module trước</button>
+        <button class="nav-btn primary" onclick="goNext(0)">Module tiếp theo ▶</button>
+      </div>
+    </div>
+
+    <div class="module" id="m1">
+      <div class="module-header">
+        <div class="module-tag">W20.02 · Kiến trúc nền</div>
+        <div class="module-title">OLTP vs OLAP vs Data Warehouse vs Modern OLAP</div>
+        <div class="module-subtitle">So sánh theo mục đích, query shape, concurrency, và khả năng vận hành thực tế.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Layer</th><th>Tối ưu cho</th><th>Không tối ưu cho</th></tr>
+          <tr><td>OLTP</td><td>Transaction nhỏ, update/delete, point lookup</td><td>Large scans + aggregate concurrent</td></tr>
+          <tr><td>OLAP</td><td>Column scan, aggregation, many rows few columns</td><td>Row-by-row transaction</td></tr>
+          <tr><td>Warehouse</td><td>Governed analytics + transformation + marts</td><td>Sub-second dashboard serving ở load cao</td></tr>
+          <tr><td>Modern OLAP</td><td>Low-latency serving, event-heavy dashboard</td><td>General-purpose transaction</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Phân biệt rõ boundary của từng lớp dữ liệu trong stack hiện đại.</li>
+          <li>Tránh anti-pattern dùng PostgreSQL làm dashboard engine quy mô lớn.</li>
+          <li>Xây năng lực tranh luận kiến trúc dựa trên workload, không dựa cảm tính.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>OLTP mindset</h3>
+        <p>Row-oriented storage giúp lấy/cập nhật một vài dòng rất nhanh. Đó là lý do tốt cho checkout, payment, user profile, nhưng không lý tưởng cho query kiểu "đếm theo segment trong 90 ngày".</p>
+        <h3>OLAP mindset</h3>
+        <p>Columnar storage + vectorized execution giúp engine đọc đúng cột cần dùng và xử lý theo batch vector CPU-friendly. Kết quả là throughput query analytics cao hơn đáng kể.</p>
+        <h3>Data Warehouse vs Modern OLAP</h3>
+        <table>
+          <tr><th>Tiêu chí</th><th>Warehouse (BigQuery/Snowflake)</th><th>Modern OLAP (ClickHouse/Druid/Pinot)</th></tr>
+          <tr><td>Vai trò chính</td><td>Nền tảng governed analytics toàn công ty</td><td>Serving layer cho dashboard latency thấp</td></tr>
+          <tr><td>Freshness</td><td>Batch hoặc micro-batch</td><td>Có thể near real-time</td></tr>
+          <tr><td>Concurrency dashboard</td><td>Ổn ở mức vừa</td><td>Tối ưu cao cho query lặp lại</td></tr>
+          <tr><td>Ops burden</td><td>Managed cao</td><td>Thường đòi hỏi tuning/table design nhiều hơn</td></tr>
+        </table>
+        <h3>Bảng so sánh nhanh PostgreSQL vs DuckDB vs ClickHouse vs BigQuery/Snowflake</h3>
+        <table>
+          <tr><th>Engine</th><th>Điểm mạnh</th><th>Giới hạn chính</th><th>Use case fit</th></tr>
+          <tr><td>PostgreSQL</td><td>OLTP mạnh, transaction tốt</td><td>Scan aggregate lớn dễ nghẽn</td><td>Operational app DB</td></tr>
+          <tr><td>DuckDB</td><td>Local analytics cực tiện, Parquet-native</td><td>Không phải distributed serving engine</td><td>Exploration, CI checks</td></tr>
+          <tr><td>ClickHouse</td><td>Aggregate nhanh, compression cao</td><td>Schema/order key sai sẽ trả giá</td><td>Event/log dashboards</td></tr>
+          <tr><td>BigQuery/Snowflake</td><td>Managed warehouse, governance tốt</td><td>Latency dashboard real-time không luôn tối ưu</td><td>Enterprise analytics platform</td></tr>
+        </table>
+        <h3>Minh họa trực quan: cùng câu hỏi, khác engine</h3>
+        <div id="w20-oltp-olap-tabs" class="cmd-block">
+          <div class="tab-group" style="padding:0 12px; background: var(--surface2);">
+            <div class="tab active" onclick="switchTab('w20-oltp-olap-tabs','w20-tab-postgres')">PostgreSQL (OLTP)</div>
+            <div class="tab" onclick="switchTab('w20-oltp-olap-tabs','w20-tab-clickhouse')">ClickHouse (OLAP)</div>
+          </div>
+          <div class="cmd-body tab-content active" id="w20-tab-postgres"><pre>-- Dashboard query chạy mỗi 15 giây
+SELECT date_trunc('hour', o.created_at) AS hour_bucket,
+       p.category,
+       count(*) AS orders
+FROM orders o
+JOIN order_items oi ON o.id = oi.order_id
+JOIN products p ON oi.product_id = p.id
+WHERE o.created_at >= now() - interval '30 days'
+GROUP BY 1, 2
+ORDER BY 1, 3 DESC;</pre>
+            <p>Trên OLTP schema normalize, join fanout lớn + scan dài ngày dễ làm p95 latency tăng mạnh khi concurrency cao.</p>
+          </div>
+          <div class="cmd-body tab-content" id="w20-tab-clickhouse"><pre>-- Bảng denormalized cho serving
+SELECT event_hour,
+       category,
+       count() AS orders
+FROM orders_analytics
+WHERE event_date >= today() - 30
+GROUP BY event_hour, category
+ORDER BY event_hour, orders DESC;</pre>
+            <p>Trên OLAP serving table, query shape gọn hơn, scan cột cần thiết và tận dụng partition/order key để giảm latency.</p>
+          </div>
+        </div>
+        <div class="info-box warn">Anti-pattern: Dùng normalized OLTP schema để nuôi dashboard high-volume rồi đổ lỗi "SQL chậm".</div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m1"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>OLTP</strong>Giỏi transaction và point lookup.</div>
+        <div class="summary-item"><strong>OLAP</strong>Giỏi scan + aggregate lớn.</div>
+        <div class="summary-item"><strong>Warehouse</strong>Nền tảng phân tích có governance.</div>
+        <div class="summary-item"><strong>Modern OLAP</strong>Lớp phục vụ dashboard latency thấp.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · Query pattern critique</div><div class="practice-task-body">
+          <p>Đánh giá truy vấn: join 7 bảng OLTP normalized + group by theo giờ 30 ngày để render dashboard mỗi 10 giây. Hãy chỉ ra 3 vấn đề kiến trúc.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul><li>Join fanout lớn trên schema không tối ưu analytics.</li><li>Không có pre-aggregation/materialized layer cho query lặp lại.</li><li>Polling 10 giây trên OLTP gây nhiễu workload transaction.</li></ul></div>
+        </div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Engine selection task</div><div class="practice-task-body">
+          <p>Team BI chạy report theo ngày, không yêu cầu real-time, governance quan trọng. Chọn lớp chính và giải thích.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Warehouse managed là lớp chính (BigQuery/Snowflake). Lý do: governance, lineage, transformation/marts mạnh; Modern OLAP chỉ bổ sung nếu xuất hiện yêu cầu latency thấp và concurrency dashboard cao.</p></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(1)">◀ Module trước</button><button class="nav-btn primary" onclick="goNext(1)">Module tiếp theo ▶</button></div>
+    </div>
+
+    <div class="module" id="m2">
+      <div class="module-header">
+        <div class="module-tag">W20.03 · DuckDB</div>
+        <div class="module-title">Local Analytics & Parquet-Native Workflow</div>
+        <div class="module-subtitle">Dùng DuckDB để prototype analytics nhanh, đáng tin, và tiết kiệm chu kỳ phát triển.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Chủ đề</th><th>Ý chính</th><th>Mục tiêu</th></tr>
+          <tr><td>Engine mindset</td><td>Embedded analytical database</td><td>Hiểu đúng vai trò của DuckDB</td></tr>
+          <tr><td>SQL over files</td><td>Query trực tiếp CSV/Parquet</td><td>Tăng tốc exploration</td></tr>
+          <tr><td>Use cases</td><td>Local exploration, CI data checks, notebook</td><td>Ứng dụng thực tế hàng ngày</td></tr>
+          <tr><td>Limitations</td><td>Không thay distributed serving/warehouse</td><td>Tránh lạm dụng công cụ</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Thiết lập tư duy dùng DuckDB như <strong>local analytics accelerator</strong>.</li>
+        <li>Thực hành workflow Parquet-native để giảm dependency vào warehouse cho tác vụ nhỏ.</li>
+        <li>Nhận diện anti-pattern: biến DuckDB thành "one-size-fits-all".</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>DuckDB basics cho DE</h3>
+        <p>DuckDB chạy embedded, phù hợp trên laptop/CI job/notebook. Bạn có thể query trực tiếp file dữ liệu mà không cần dựng server DB trước.</p>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>DuckDB SQL over Parquet</span></div><div class="cmd-body"><pre>SELECT event_date,
+       event_type,
+       count(*) AS events,
+       count(DISTINCT user_id) AS users
+FROM read_parquet('data/events/*.parquet')
+WHERE event_date >= current_date - INTERVAL 7 DAY
+GROUP BY event_date, event_type
+ORDER BY event_date, events DESC;</pre></div></div>
+        <h3>Vì sao phù hợp cho prototyping?</h3>
+        <ul>
+          <li>Không chờ provisioning warehouse chỉ để thử một query idea.</li>
+          <li>Dễ tái lập trong CI để check row count, null spike, schema drift cơ bản.</li>
+          <li>Kết hợp tốt với Parquet làm artifact trung gian trong pipeline.</li>
+        </ul>
+        <h3>Limitations cần nhớ</h3>
+        <ul>
+          <li>Không phải distributed serving engine cho dashboard nhiều user đồng thời.</li>
+          <li>Không thay warehouse đa team với governance và workload isolation.</li>
+          <li>Không nên gánh workload update/delete transactional kiểu OLTP.</li>
+          <li>Với dataset lớn hơn RAM máy local, các query join/aggregate phức tạp có thể gây áp lực memory và tăng spill-to-disk time.</li>
+        </ul>
+        <div class="info-box note">Note: Khi chạy DuckDB trên laptop RAM yếu, hãy đặt memory limit hợp lý, tách query theo stage, và ưu tiên scan cột cần thiết để giảm nguy cơ OOM.</div>
+        <div class="info-box warn">Anti-pattern: Dùng DuckDB để thay toàn bộ hạ tầng warehouse production nhiều team.</div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m2"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Strength</strong>SQL analytics local nhanh, đặc biệt trên Parquet.</div>
+        <div class="summary-item"><strong>Fit</strong>Exploration, CI checks, notebook analysis.</div>
+        <div class="summary-item"><strong>Limit</strong>Không dành cho distributed high-concurrency serving.</div>
+        <div class="summary-item"><strong>Mindset</strong>Dùng đúng chỗ để tăng tốc vòng lặp phân tích.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · Query pattern task</div><div class="practice-task-body">
+          <p>Viết query DuckDB tính DAU theo platform từ thư mục Parquet theo ngày 14 ngày gần nhất.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><div class="cmd-block"><div class="cmd-header">SQL mẫu</div><div class="cmd-body"><pre>SELECT event_date,
+       platform,
+       count(DISTINCT user_id) AS dau
+FROM read_parquet('data/events/*.parquet')
+WHERE event_date >= current_date - INTERVAL 14 DAY
+GROUP BY event_date, platform
+ORDER BY event_date, platform;</pre></div></div></div>
+        </div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Performance reasoning</div><div class="practice-task-body">
+          <p>Nêu 2 lý do tại sao chuyển CSV sang Parquet thường giúp query DuckDB nhanh hơn.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul><li>Parquet columnar nên chỉ đọc cột cần thiết (I/O thấp hơn).</li><li>Compression + metadata statistics hỗ trợ skip data block tốt hơn.</li></ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(2)">◀ Module trước</button><button class="nav-btn primary" onclick="goNext(2)">Module tiếp theo ▶</button></div>
+    </div>
+
+    <div class="module" id="m3">
+      <div class="module-header">
+        <div class="module-tag">W20.04 · ClickHouse</div>
+        <div class="module-title">Columnar OLAP cho Event / Time-series Analytics</div>
+        <div class="module-subtitle">Tập trung vào table design: MergeTree, order key, partition, compression, ingestion.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Chủ đề</th><th>Điểm cần nắm</th><th>Ảnh hưởng</th></tr>
+          <tr><td>Columnar + vectorized</td><td>Scan aggregate nhanh</td><td>Latency dashboard thấp</td></tr>
+          <tr><td>MergeTree</td><td>Order key / partition key quyết định hiệu năng</td><td>Query pruning tốt/xấu</td></tr>
+          <tr><td>Ingestion</td><td>Batch insert + Kafka ingestion options</td><td>Freshness và vận hành</td></tr>
+          <tr><td>Trade-off</td><td>Update/delete không giống OLTP</td><td>Cần mô hình dữ liệu phù hợp</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Hiểu vì sao ClickHouse mạnh cho event/time-series workloads.</li>
+        <li>Biết thiết kế bảng theo query pattern thay vì theo ERD OLTP.</li>
+        <li>Nhận diện sai lầm phổ biến khi dùng ClickHouse.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>MergeTree mindset</h3>
+        <p>ClickHouse không tự cứu thiết kế bảng tệ. Bạn cần chọn partition theo time (thường month/day) và order key theo filter/group-by phổ biến.</p>
+        <p><strong>Nguyên tắc vàng ORDER BY:</strong> đưa cột filter thường xuyên nhất lên trước, ưu tiên cột cardinality thấp-trung bình trước cột cardinality rất cao để tăng hiệu quả data skipping.</p>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>Schema mẫu event analytics</span></div><div class="cmd-body"><pre>CREATE TABLE events_olap
+(
+  event_time DateTime,
+  event_date Date MATERIALIZED toDate(event_time),
+  user_id UInt64,
+  session_id String,
+  event_type LowCardinality(String),
+  platform LowCardinality(String),
+  country LowCardinality(String),
+  revenue Float64
+)
+ENGINE = MergeTree
+PARTITION BY toYYYYMM(event_date)
+ORDER BY (event_date, event_type, platform, user_id)
+TTL event_date + INTERVAL 6 MONTH;
+</pre></div></div>
+        <div class="info-box note">Note: <code>LowCardinality(String)</code> thường phù hợp cho cột có distinct values thấp (ví dụ thường dưới ~10k). Không nên áp dụng cho cột như user_id.</div>
+        <div class="cmd-block"><div class="cmd-header">Pruning intuition</div><div class="cmd-body"><pre>Query filter: event_date=2026-05-01 AND event_type='purchase'
+-> Engine đọc metadata min/max theo granule
+-> Skip phần lớn granules không thỏa điều kiện
+-> Chỉ scan vùng dữ liệu liên quan thay vì toàn bộ partition</pre></div></div>
+        <h3>Query mẫu dashboard</h3>
+        <div class="cmd-block"><div class="cmd-header">Aggregation query</div><div class="cmd-body"><pre>SELECT event_date,
+       event_type,
+       count(*) AS events,
+       uniqExact(user_id) AS users,
+       sum(revenue) AS gross_revenue
+FROM events_olap
+WHERE event_date >= today() - 14
+  AND platform IN ('ios','android')
+GROUP BY event_date, event_type
+ORDER BY event_date, events DESC;</pre></div></div>
+        <h3>Điểm mạnh và giới hạn</h3>
+        <ul>
+          <li><strong>Strength:</strong> tốc độ aggregate cao, compression tốt, phù hợp dashboard concurrency cao.</li>
+          <li><strong>Weakness:</strong> update/delete không theo kiểu OLTP; mutation lớn có cost đáng kể.</li>
+          <li><strong>Operational:</strong> schema/table design có tác động trực tiếp đến hiệu năng và chi phí.</li>
+        </ul>
+        <div class="info-box warn">Warn: Ingest lắt nhắt (single-row/few-row inserts liên tục) dễ gây "Too many parts" và merge pressure. Hãy batch insert (ví dụ mỗi 1-5 giây hoặc theo ngưỡng số dòng) để giữ cụm MergeTree ổn định.</div>
+        <div class="info-box warn">Anti-pattern: Thiết kế ClickHouse như normalized OLTP schema với quá nhiều join runtime.</div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m3"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Design first</strong>Order key/partition đúng quan trọng hơn tuning muộn.</div>
+        <div class="summary-item"><strong>Workload fit</strong>Event/log/time-series dashboard.</div>
+        <div class="summary-item"><strong>Performance lever</strong>Columnar + compression + query pruning.</div>
+        <div class="summary-item"><strong>Anti-pattern</strong>Model ClickHouse như OLTP normalized DB.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · Table design task</div><div class="practice-task-body">
+          <p>Với workload filter phổ biến theo <code>event_date, country, event_type</code>, hãy đề xuất order key hợp lý cho bảng ClickHouse.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Order key gợi ý: <code>(event_date, country, event_type, user_id)</code>. Đặt điều kiện filter hay dùng ở đầu để tăng hiệu quả pruning và giảm scan thừa.</p></div>
+        </div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Ingestion reasoning</div><div class="practice-task-body">
+          <p>Khi nào nên dùng batch insert trước Kafka ingestion cho ClickHouse?</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Nếu freshness yêu cầu ở mức phút, batch insert đơn giản và ổn định hơn về vận hành. Kafka ingestion phù hợp khi cần near real-time và team đủ năng lực stream ops.</p></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(3)">◀ Module trước</button><button class="nav-btn primary" onclick="goNext(3)">Module tiếp theo ▶</button></div>
+    </div>
+
+    <div class="module" id="m4">
+      <div class="module-header">
+        <div class="module-tag">W20.05 · Real-time OLAP</div>
+        <div class="module-title">Druid / Pinot style concepts</div>
+        <div class="module-subtitle">Hiểu các thành phần ingestion, segment, index, rollup, và trade-off freshness vs correctness.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Khái niệm</th><th>Ý nghĩa</th><th>Giá trị</th></tr>
+        <tr><td>Kafka ingestion</td><td>Nhận event stream liên tục</td><td>Freshness cao</td></tr>
+        <tr><td>Segments</td><td>Đơn vị lưu trữ/truy vấn theo time chunk</td><td>Scale query tốt</td></tr>
+        <tr><td>Indexing</td><td>Tăng tốc filter/aggregate</td><td>Latency thấp</td></tr>
+        <tr><td>Rollups</td><td>Tiền tổng hợp ở granularity cố định</td><td>Giảm cost + tăng tốc</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Nắm blueprint tư duy của Real-time OLAP, không chỉ tên công cụ.</li>
+        <li>Biết khi nào thật sự cần real-time layer.</li>
+        <li>Phân tích trade-off freshness và correctness để tránh over-promising.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Real-time OLAP architecture (conceptual)</h3>
+        <div class="cmd-block"><div class="cmd-header">Luồng dữ liệu</div><div class="cmd-body"><pre>Event producers -> Kafka -> Real-time ingestion nodes
+-> Segment build + indexing + optional rollup
+-> Query broker/router -> Dashboard/API</pre></div></div>
+        <h3>Freshness vs correctness</h3>
+        <p>Freshness càng cao thì áp lực xử lý late event, dedup và reprocessing càng lớn. Bạn cần quyết định mức "chấp nhận sai số tạm thời" cho dashboard vận hành.</p>
+        <table>
+          <tr><th>Tình huống</th><th>Ưu tiên</th><th>Gợi ý</th></tr>
+          <tr><td>Fraud monitoring theo phút</td><td>Freshness</td><td>Near real-time + correction window hậu kỳ</td></tr>
+          <tr><td>Finance closing</td><td>Correctness</td><td>Batch + reconciliation kỹ</td></tr>
+          <tr><td>Product live metrics</td><td>Cân bằng</td><td>Real-time for trend, warehouse for truth set</td></tr>
+        </table>
+        <h3>Data Retention cho real-time OLAP</h3>
+        <p>Realtime analytics không chỉ là ingest nhanh, mà còn là quản lý vòng đời dữ liệu. Bạn cần policy retention rõ: giữ raw segment bao lâu, rollup segment bao lâu, và khi nào archive/delete để kiểm soát cost.</p>
+        <ul>
+          <li><strong>Hot segment:</strong> giữ dữ liệu chi tiết gần hiện tại để query realtime.</li>
+          <li><strong>Warm/history:</strong> dữ liệu cũ hơn có thể giữ mức rollup thấp hơn.</li>
+          <li><strong>Retention policy:</strong> xóa/archival định kỳ để tránh storage phình to theo thời gian.</li>
+        </ul>
+        <div class="info-box warn">Anti-pattern: Dựng Real-time OLAP chỉ vì "nghe hiện đại" trong khi business chấp nhận report theo giờ/ngày.</div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m4"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Core components</strong>Kafka ingestion, segments, indexing, rollup.</div>
+        <div class="summary-item"><strong>Main trade-off</strong>Freshness cao đi kèm complexity correctness.</div>
+        <div class="summary-item"><strong>When justified</strong>Use case real-time thật sự có giá trị kinh doanh.</div>
+        <div class="summary-item"><strong>When overkill</strong>Report batch đủ dùng nhưng vẫn cố stream hóa.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · Real-time justification task</div><div class="practice-task-body">
+          <p>Case: CEO dashboard update mỗi 30 phút, không có cảnh báo real-time. Có cần Druid/Pinot ngay không? Giải thích.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Chưa cần. Warehouse + materialized aggregates có thể đủ. Chỉ đầu tư real-time OLAP khi SLA latency/freshness chặt và impact business rõ.</p></div>
+        </div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Event-time reasoning</div><div class="practice-task-body">
+          <p>Nêu chiến lược xử lý late events trong real-time pipeline để dashboard vẫn dùng được.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul><li>Dùng watermark + allowed lateness window.</li><li>Cho phép correction batch định kỳ để reconcile số liệu.</li><li>Hiển thị trạng thái “provisional” cho dữ liệu rất mới.</li></ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(4)">◀ Module trước</button><button class="nav-btn primary" onclick="goNext(4)">Module tiếp theo ▶</button></div>
+    </div>
+
+    <div class="module" id="m5">
+      <div class="module-header">
+        <div class="module-tag">W20.06 · Performance patterns</div>
+        <div class="module-title">Partitioning, Pre-aggregation, Materialized Views</div>
+        <div class="module-subtitle">Tập trung vào query-shape-first optimization thay vì tuning cảm tính.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Pattern</th><th>Mục tiêu</th><th>Lưu ý</th></tr>
+        <tr><td>Partitioning</td><td>Giảm vùng scan</td><td>Match theo time/query filter</td></tr>
+        <tr><td>Order key / sorting</td><td>Pruning + đọc tuần tự hiệu quả</td><td>Thiết kế theo filter phổ biến</td></tr>
+        <tr><td>Pre-aggregation / MV</td><td>Tăng tốc query lặp lại</td><td>Chỉ tạo khi biết workload</td></tr>
+        <tr><td>Approx aggregations</td><td>Giảm cost cho cardinality cao</td><td>Chấp nhận sai số kiểm soát</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Biến tư duy tối ưu từ "query chạy chậm" sang "workload pattern nào đang lặp lại".</li>
+        <li>Biết dùng MV/rollup đúng ngữ cảnh, tránh tạo bừa gây nợ vận hành.</li>
+        <li>Hiểu vai trò approximate metrics với high-cardinality dashboard.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Query shape matters</h3>
+        <p>Cùng một engine, query tốt và query tệ có thể chênh 10-100x. Tránh <code>SELECT *</code> trong dashboard, chỉ lấy cột cần thiết và filter time window rõ ràng.</p>
+        <h3>Materialized view pattern</h3>
+        <div class="cmd-block"><div class="cmd-header">MV ý tưởng</div><div class="cmd-body"><pre>CREATE MATERIALIZED VIEW mv_daily_events
+ENGINE = SummingMergeTree
+PARTITION BY toYYYYMM(event_date)
+ORDER BY (event_date, event_type, platform)
+AS
+SELECT event_date,
+       event_type,
+       platform,
+       count() AS events,
+       uniqCombined64(user_id) AS users_approx
+FROM events_olap
+GROUP BY event_date, event_type, platform;</pre></div></div>
+        <h3>Approximate aggregations</h3>
+        <p>Với distinct user cardinality cao, dùng hàm approximate (ví dụ uniqCombined/approx_count_distinct tùy engine) giảm tài nguyên và latency đáng kể.</p>
+        <h3>Anti-pattern phổ biến</h3>
+        <ul>
+          <li>Tạo quá nhiều materialized views nhưng không có owner và usage metric.</li>
+          <li>Partition theo cột hiếm dùng để filter khiến pruning kém.</li>
+          <li>Không review dashboard query sau khi business đổi logic.</li>
+        </ul>
+        <div class="info-box note">Note: Tối ưu bền vững = theo dõi query heatmap + chi phí + tần suất sử dụng, không chỉ benchmark 1 lần.</div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m5"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>First lever</strong>Tối ưu query shape và scan range.</div>
+        <div class="summary-item"><strong>Second lever</strong>Partition/order key đúng theo workload.</div>
+        <div class="summary-item"><strong>Third lever</strong>Pre-aggregation/MV cho query lặp lại.</div>
+        <div class="summary-item"><strong>Caution</strong>Approximate metrics cần align với business tolerance.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · Materialized view decision</div><div class="practice-task-body">
+          <p>Bạn có dashboard top 20 query chạy lặp lại mỗi phút. Hãy mô tả tiêu chí chọn 3 query đầu để materialize trước.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul><li>Tần suất cao và chi phí CPU/I/O lớn.</li><li>Logic ổn định ít đổi theo sprint.</li><li>Ảnh hưởng trực tiếp đến dashboard critical (ops/executive).</li></ul></div>
+        </div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Query critique</div><div class="practice-task-body">
+          <p>Phân tích câu query dùng <code>SELECT *</code> + không filter date trên bảng 2TB cho dashboard hằng ngày.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Đây là anti-pattern nghiêm trọng: scan toàn bảng, bandwidth lãng phí, tail latency cao. Cần giới hạn cột + partition pruning theo thời gian + cân nhắc pre-aggregation.</p></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">◀ Module trước</button><button class="nav-btn primary" onclick="goNext(5)">Module tiếp theo ▶</button></div>
+    </div>
+
+    <div class="module" id="m6">
+      <div class="module-header">
+        <div class="module-tag">W20.07 · Architecture Decisions</div>
+        <div class="module-title">Chọn Engine theo Workload</div>
+        <div class="module-subtitle">Decision framework đa tiêu chí: latency, freshness, cost, ops burden, team maturity.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table>
+        <tr><th>Tiêu chí</th><th>Câu hỏi chính</th><th>Tác động chọn engine</th></tr>
+        <tr><td>Data volume</td><td>TB/day? growth rate?</td><td>Khả năng scale lưu trữ + scan</td></tr>
+        <tr><td>Latency SLO</td><td>p95/p99 cần dưới ngưỡng bao nhiêu giây?</td><td>Cần serving layer chuyên dụng hay không</td></tr>
+        <tr><td>Freshness</td><td>Near real-time hay batch?</td><td>Kafka/stream ingestion có cần không</td></tr>
+        <tr><td>Concurrency</td><td>Bao nhiêu dashboard users đồng thời?</td><td>Tối ưu read concurrency</td></tr>
+        <tr><td>Update/delete</td><td>Có mutation thường xuyên không?</td><td>OLTP/warehouse có thể phù hợp hơn</td></tr>
+      </table></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Trang bị decision matrix để thảo luận kiến trúc có cơ sở.</li>
+        <li>Biết cân bằng build vs buy, open-source vs managed theo đội ngũ.</li>
+        <li>Loại bỏ anti-pattern chọn tool vì hype.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Decision matrix thực dụng</h3>
+        <table>
+          <tr><th>Workload</th><th>Engine gợi ý</th><th>Lý do</th></tr>
+          <tr><td>Local data exploration</td><td>DuckDB</td><td>Nhanh, nhẹ, SQL over Parquet</td></tr>
+          <tr><td>Executive BI theo ngày</td><td>Warehouse</td><td>Governance + managed ops</td></tr>
+          <tr><td>Product event analytics</td><td>ClickHouse</td><td>Aggregate nhanh, concurrency cao</td></tr>
+          <tr><td>Real-time fraud dashboard</td><td>Druid/Pinot style</td><td>Freshness cao, serving low-latency</td></tr>
+          <tr><td>Logs observability analytics</td><td>ClickHouse hoặc Druid</td><td>Time-series + filter/aggregate lớn</td></tr>
+        </table>
+        <h3>Build vs Buy</h3>
+        <ul>
+          <li><strong>Build/open-source:</strong> linh hoạt cao, tối ưu cost dài hạn nếu đội mạnh ops.</li>
+          <li><strong>Buy/managed:</strong> time-to-value nhanh, giảm burden hạ tầng, đổi lại chi phí dịch vụ.</li>
+        </ul>
+        <h3>Self-hosted vs Cloud/Managed burden</h3>
+        <p>Nếu self-hosted ClickHouse/Druid, team phải tự gánh monitoring cluster, backup/restore, upgrade version, tuning merge/index, và xử lý incident hạ tầng. Với team mỏng, lựa chọn managed thường thực tế hơn trong giai đoạn đầu.</p>
+        <ul>
+          <li><strong>Self-hosted:</strong> kiểm soát sâu, nhưng cần năng lực SRE/Platform ổn định.</li>
+          <li><strong>Managed cloud:</strong> giảm khối lượng vận hành nền, phù hợp khi ưu tiên tốc độ delivery.</li>
+        </ul>
+        <h3>Team maturity là biến số thật</h3>
+        <p>Nếu team chưa có monitoring/query governance/chủ ownership rõ, chọn engine quá phức tạp sẽ tăng nợ vận hành nhanh hơn lợi ích hiệu năng.</p>
+        <div class="info-box warn">Anti-pattern: Chọn engine chỉ vì "công ty lớn dùng" mà không kiểm tra fit với workload và năng lực team hiện tại.</div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m6"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Decision core</strong>Workload-first, không tool-first.</div>
+        <div class="summary-item"><strong>Trade-off</strong>Latency/freshness/concurrency luôn đổi lấy ops/cost.</div>
+        <div class="summary-item"><strong>Realism</strong>Team maturity quyết định khả năng vận hành dài hạn.</div>
+        <div class="summary-item"><strong>Recommendation</strong>Tạo matrix định kỳ theo nhu cầu business thật.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · Engine selection matrix</div><div class="practice-task-body">
+          <p>Chấm điểm (1-5) cho DuckDB, ClickHouse, Warehouse, Druid/Pinot theo tiêu chí: latency, freshness, ops burden, cost cho use case product events 500M/day.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Gợi ý: ClickHouse điểm cao ở latency/cost-performance; Warehouse cao ở governance/ops managed; Druid/Pinot cao ở freshness; DuckDB cao ở local dev nhưng thấp ở serving production.</p></div>
+        </div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Build vs buy reasoning</div><div class="practice-task-body">
+          <p>Team 3 DE, chưa có on-call stream infra. Nên ưu tiên hướng nào cho dashboard near real-time?</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Ưu tiên managed hoặc bắt đầu ClickHouse batch/micro-batch trước, tránh nhảy vào stack stream phức tạp nếu chưa có năng lực vận hành tương ứng.</p></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">◀ Module trước</button><button class="nav-btn primary" onclick="goNext(6)">Module tiếp theo ▶</button></div>
+    </div>
+
+    <div class="module" id="m7">
+      <div class="module-header">
+        <div class="module-tag">W20.08 · Portfolio Artifact</div>
+        <div class="module-title">Xây thư mục week20_modern_olap/ recruiter-grade</div>
+        <div class="module-subtitle">Biến kiến thức kiến trúc thành output tuyển dụng có benchmark, quyết định, và bài học kỹ thuật.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-header">Cấu trúc artifact bắt buộc</div><div class="cmd-body"><pre>week20_modern_olap/
+├── docker-compose.yml
+├── fake_data_generator.py
+├── duckdb_demo/
+│   ├── query_parquet.sql
+│   └── README.md
+├── clickhouse_demo/
+│   ├── schema.sql
+│   ├── ingestion_example.sql
+│   ├── dashboard_queries.sql
+│   └── README.md
+├── real_time_olap_design.md
+├── benchmark_notes.md
+├── engine_decision_matrix.md
+└── README.md</pre></div></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Thể hiện cùng một analytical question chạy trên nhiều engine.</li>
+        <li>Chứng minh bằng benchmark vì sao ClickHouse nhanh hơn trong event aggregation.</li>
+        <li>Trình bày rõ nơi DuckDB hữu ích và khi nào cần real-time OLAP.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Analytical question gợi ý dùng xuyên suốt artifact</h3>
+        <p><strong>Question:</strong> "Trong 14 ngày gần nhất, event nào ảnh hưởng lớn nhất đến conversion theo platform và country?"</p>
+        <h3>README artifact cần mô tả</h3>
+        <ul>
+          <li>Workload scenario và business decision cần hỗ trợ.</li>
+          <li>Data model và cardinality assumptions.</li>
+          <li>Query patterns chính (dashboard + ad-hoc).</li>
+          <li>Engine đã chọn và lý do.</li>
+          <li>Trade-off latency, concurrency, freshness, cost.</li>
+          <li>Lessons learned + anti-pattern đã tránh.</li>
+          <li>Cách chạy reproducible demo: <code>docker compose up</code> + script sinh dữ liệu mẫu.</li>
+        </ul>
+        <h3>Vì sao cần docker-compose.yml và fake_data_generator.py?</h3>
+        <p>Đây là tín hiệu mạnh cho recruiter rằng bạn không chỉ nói kiến trúc, mà còn biết tạo môi trường benchmark tái lập. Người review có thể chạy local và xác thực claim hiệu năng thay vì đọc mô tả lý thuyết.</p>
+        <h3>Benchmark notes nên có gì?</h3>
+        <table>
+          <tr><th>Mục</th><th>Mô tả</th></tr>
+          <tr><td>Dataset shape</td><td>Số dòng, số cột, phân phối theo ngày</td></tr>
+          <tr><td>Query set</td><td>3-5 query đại diện dashboard</td></tr>
+          <tr><td>Cold/Warm runs</td><td>Đo cả lần đầu và lần lặp</td></tr>
+          <tr><td>Kết quả</td><td>Latency p50/p95 + resource notes</td></tr>
+          <tr><td>Kết luận</td><td>Khi nào engine A hợp hơn B</td></tr>
+        </table>
+        <div class="info-box tip">Tip: Recruiter/tech lead đánh giá cao năng lực giải thích trade-off hơn một biểu đồ benchmark đẹp nhưng thiếu bối cảnh.</div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m7"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Artifact value</strong>Chứng minh được tư duy kiến trúc + benchmark thực tế.</div>
+        <div class="summary-item"><strong>Hiring signal</strong>Biết chọn tool theo workload, không chỉ biết dùng tool.</div>
+        <div class="summary-item"><strong>Must-have</strong>README rõ bối cảnh, trade-off và lessons learned.</div>
+        <div class="summary-item"><strong>Common fail</strong>So sánh tool nông, thiếu dữ liệu benchmark.</div>
+      </div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · Portfolio writing task</div><div class="practice-task-body">
+          <p>Viết 1 đoạn README (8-10 dòng) mô tả tại sao bạn chọn ClickHouse làm serving layer cho product analytics.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><p>Đoạn mẫu nên có: data volume, query latency target, concurrency, benchmark so với lựa chọn khác, giới hạn biết trước (mutation/update) và kế hoạch giảm rủi ro vận hành.</p></div>
+        </div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Benchmark design task</div><div class="practice-task-body">
+          <p>Thiết kế bảng benchmark gồm 5 cột bắt buộc để so sánh PostgreSQL vs DuckDB vs ClickHouse công bằng hơn.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box"><ul><li>Engine + version</li><li>Dataset shape</li><li>Query ID và query type</li><li>Latency p50/p95</li><li>Resource/cost notes</li></ul></div>
+        </div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">◀ Module trước</button><button class="nav-btn primary" onclick="goNext(7)">Module tiếp theo ▶</button></div>
+    </div>
+
+    <div class="module" id="m8">
+      <div class="module-header">
+        <div class="module-tag">W20.09 · Final Assessment</div>
+        <div class="module-title">Mini Test Tổng Kết (20 câu)</div>
+        <div class="module-subtitle">Đánh giá mức hiểu tổng thể: OLTP/OLAP, DuckDB, ClickHouse, Druid/Pinot, performance patterns, decision framework.</div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul>
+          <li>Phần A: 10 câu review nhanh để ôn trước khi test cuối.</li>
+          <li>Phần B: 20 câu mini test có chấm điểm tự động.</li>
+          <li>Phần C: Guidance theo band điểm để quyết định học tiếp hay ôn lại.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul>
+        <li>Kiểm tra khả năng phân tích trade-off thay vì học thuộc tool name.</li>
+        <li>Xác định vùng còn yếu trước khi qua Week21.</li>
+        <li>Tạo điểm tựa cho portfolio discussion trong phỏng vấn.</li>
+      </ul></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Hướng dẫn làm mini test</h3>
+        <ol>
+          <li>Làm 10 câu ôn tập nhanh bên dưới để warm up.</li>
+          <li>Trả lời đủ 20 câu mini test cuối module.</li>
+          <li>Đọc guidance theo band điểm và quay lại module yếu.</li>
+        </ol>
+        <div class="info-box note">Note: Mục tiêu không phải điểm tuyệt đối ngay lần đầu, mà là nói rõ được tại sao chọn engine/kiến trúc đó cho workload cụ thể.</div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content"><div id="quiz-m8"></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid">
+        <div class="summary-item"><strong>Đạt tốt</strong>Biết map workload sang engine với trade-off rõ.</div>
+        <div class="summary-item"><strong>Cần luyện thêm</strong>Confuse giữa warehouse và serving OLAP layer.</div>
+        <div class="summary-item"><strong>Checklist trước Week21</strong>Hoàn thiện artifact README + decision matrix.</div>
+        <div class="summary-item"><strong>Mục tiêu dài hạn</strong>Tư duy architecture-first cho analytics platform.</div>
+      </div></div></div>
+
+      <div class="section" id="final-test"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành · Mini Test Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div id="final-test-questions"></div>
+        <div class="test-actions">
+          <button class="nav-btn primary" onclick="gradeFinalTest()">Chấm điểm Mini Test</button>
+          <button class="nav-btn" onclick="resetFinalTest()">Làm lại từ đầu</button>
+        </div>
+        <div id="final-test-result" class="test-result"></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(8)">◀ Module trước</button><button class="nav-btn" disabled>Kết thúc tuần ▶</button></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.dataset.correct === 'true') o.classList.add('correct');
+    });
+  }
+  explain.textContent = (correct ? 'Chính xác. ' : 'Chưa đúng. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function switchTab(groupId, tabId) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  const tabs = group.querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  const clickedTab = group.querySelector(`[onclick*="${tabId}"]`);
+  if (clickedTab) clickedTab.classList.add('active');
+  const contents = group.querySelectorAll('.tab-content');
+  contents.forEach(c => c.classList.remove('active'));
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add('active');
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0;
+  let answeredCount = 0;
+  const wrongAnswers = [];
+  const unanswered = [];
+
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) {
+      q.classList.add('unanswered');
+      unanswered.push(qNum);
+      return;
+    }
+    answeredCount++;
+    if (selected.value === correct) {
+      q.classList.add('correct');
+      correctCount++;
+    } else {
+      q.classList.add('wrong');
+      wrongAnswers.push({ q: qNum, selected: selected.value, correct });
+    }
+  });
+
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '';
+  let chipClass = 'warn';
+  let guidance = '';
+
+  if (percent >= 90) {
+    levelText = 'Recruiter-ready';
+    chipClass = 'good';
+    guidance = 'Bạn đã sẵn sàng mô tả kiến trúc Modern OLAP ở mức thuyết phục cho phỏng vấn.';
+  } else if (percent >= 80) {
+    levelText = 'Vững nền';
+    chipClass = 'good';
+    guidance = 'Bạn nắm khá chắc. Nên bổ sung benchmark notes trong artifact để tăng độ thuyết phục.';
+  } else if (percent >= 65) {
+    levelText = 'Đạt tối thiểu';
+    chipClass = 'warn';
+    guidance = 'Ôn lại W20.04-W20.07, tập trung table design và decision matrix.';
+  } else {
+    levelText = 'Cần ôn thêm';
+    chipClass = 'bad';
+    guidance = 'Hãy quay lại W20.01-W20.06 và làm lại practice tasks trước khi qua Week21.';
+  }
+
+  const unansweredHtml = unanswered.length
+    ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>`
+    : '';
+
+  const wrongHtml = wrongAnswers.length
+    ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đáp án đúng <strong>${i.correct}</strong></li>`).join('')}</ul>`
+    : '<p><strong>Tất cả câu đã trả lời đều đúng.</strong></p>';
+
+  result.innerHTML = `
+    <div class="score-row">
+      <span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span>
+      <span class="score-chip">Tỷ lệ: ${percent}%</span>
+      <span class="score-chip ${chipClass}">Mức: ${levelText}</span>
+      <span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span>
+    </div>
+    <p>${guidance}</p>
+    ${unansweredHtml}
+    ${wrongHtml}
+  `;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+
+function renderQuiz(containerId, questions) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const labels = ['A', 'B', 'C', 'D'];
+  container.innerHTML = questions.map((q, i) => {
+    const optionsHtml = q.options.map((opt, idx) => {
+      const correct = idx === q.correct;
+      return `<div class="quiz-opt" data-correct="${correct}" onclick="answerQuiz(this,${correct},'${opt.explain.replace(/'/g, '&#39;')}')">${labels[idx]}. ${opt.text}</div>`;
+    }).join('');
+    return `<div class="quiz-item"><div class="quiz-q">${i + 1}. ${q.question}</div><div class="quiz-options">${optionsHtml}</div><div class="quiz-explain"></div></div>`;
+  }).join('');
+}
+
+function renderFinalTest(questions) {
+  const wrap = document.getElementById('final-test-questions');
+  if (!wrap) return;
+  const labels = ['A', 'B', 'C', 'D'];
+  wrap.innerHTML = questions.map((q, idx) => {
+    const qNum = idx + 1;
+    const opts = q.options.map((opt, i) => `
+      <label class="test-option"><input type="radio" name="q${qNum}" value="${labels[i]}"> ${labels[i]}. ${opt}</label>
+    `).join('');
+    return `<div class="test-question" data-q="${qNum}" data-correct="${q.correct}"><div class="test-question-title">Q${qNum}. ${q.question}</div><div class="test-options">${opts}</div></div>`;
+  }).join('');
+}
+
+const reviewQuestionBank = {
+  m0: [
+    { question: 'Mục tiêu cốt lõi của Modern OLAP là gì?', correct: 0, options: [
+      { text: 'Serve analytics nhanh cho dashboard/workload read-heavy', explain: 'Đúng vì Modern OLAP tập trung analytics serving với latency thấp.' },
+      { text: 'Thay thế toàn bộ OLTP transaction system', explain: 'Sai vì Modern OLAP không tối ưu transaction OLTP.' },
+      { text: 'Lưu file backup chi phí thấp', explain: 'Sai vì backup không phải mục tiêu chính.' },
+      { text: 'Tăng tốc CI/CD cho ứng dụng web', explain: 'Sai vì CI/CD không phải use case chính của OLAP engine.' }
+    ]},
+    { question: 'Vì sao dashboard analytics thường làm traditional OLTP DB chậm?', correct: 1, options: [
+      { text: 'Vì dashboard luôn dùng syntax SQL sai', explain: 'Sai vì vấn đề chính là workload mismatch, không chỉ syntax.' },
+      { text: 'Vì scan lớn + aggregate concurrent không hợp OLTP design', explain: 'Đúng vì OLTP tối ưu transaction nhỏ và point lookup.' },
+      { text: 'Vì OLTP không hỗ trợ index', explain: 'Sai vì OLTP vẫn có index, nhưng không đủ cho workload này.' },
+      { text: 'Vì OLTP không lưu được dữ liệu thời gian', explain: 'Sai vì OLTP vẫn lưu được time data.' }
+    ]},
+    { question: 'Workload nào thường cần Modern OLAP?', correct: 2, options: [
+      { text: 'User profile lookup theo id', explain: 'Sai vì đây là OLTP workload.' },
+      { text: 'Cập nhật trạng thái đơn hàng từng bản ghi', explain: 'Sai vì transaction update thuộc OLTP.' },
+      { text: 'Event analytics với nhiều aggregate theo thời gian', explain: 'Đúng vì đây là dạng read-heavy scan lớn.' },
+      { text: 'Reset password flow', explain: 'Sai vì đây là workflow ứng dụng OLTP.' }
+    ]},
+    { question: 'Khác biệt giữa “store data” và “serve analytics fast” là gì?', correct: 3, options: [
+      { text: 'Không khác biệt, engine nào cũng như nhau', explain: 'Sai vì mục tiêu thiết kế engine rất khác nhau.' },
+      { text: 'Store data luôn đắt hơn serve', explain: 'Sai vì chi phí phụ thuộc workload/architecture.' },
+      { text: 'Serve fast chỉ cần thêm index', explain: 'Sai vì thường cần kiến trúc và data layout phù hợp.' },
+      { text: 'Store là bền vững dữ liệu, serve là tối ưu truy vấn/latency', explain: 'Đúng, hai mục tiêu khác nhau và cần design khác nhau.' }
+    ]},
+    { question: 'Khi nào Modern OLAP có thể overkill?', correct: 0, options: [
+      { text: 'Khi data nhỏ, ít user, report theo ngày là đủ', explain: 'Đúng vì nhu cầu chưa cần low-latency serving layer.' },
+      { text: 'Khi team muốn học công nghệ mới', explain: 'Sai vì mục tiêu học không phải nhu cầu hệ thống.' },
+      { text: 'Khi có Kafka trong hạ tầng', explain: 'Sai vì có Kafka không đồng nghĩa cần OLAP real-time.' },
+      { text: 'Khi dùng cloud', explain: 'Sai vì cloud không quyết định trực tiếp việc cần Modern OLAP.' }
+    ]},
+    { question: 'Latency dashboard phản ánh điều gì?', correct: 1, options: [
+      { text: 'Chỉ tốc độ internet của người dùng', explain: 'Sai vì backend query là thành phần quan trọng.' },
+      { text: 'Hiệu quả của lớp analytics-serving', explain: 'Đúng vì serving layer quyết định tốc độ trả số liệu.' },
+      { text: 'Độ nén dữ liệu backup', explain: 'Sai vì backup không liên quan trực tiếp request dashboard.' },
+      { text: 'Số lượng developer trong team', explain: 'Sai vì không có quan hệ trực tiếp.' }
+    ]},
+    { question: 'Concurrency cao trong dashboard nghĩa là gì?', correct: 2, options: [
+      { text: 'Nhiều job ETL chạy song song', explain: 'Sai vì đó là concurrency batch pipeline.' },
+      { text: 'Nhiều transaction insert cùng lúc', explain: 'Sai vì đó là OLTP write concurrency.' },
+      { text: 'Nhiều người dùng truy vấn dashboard cùng lúc', explain: 'Đúng vì dashboard concurrency là read concurrency.' },
+      { text: 'Nhiều bảng trong schema', explain: 'Sai vì số bảng không định nghĩa concurrency.' }
+    ]},
+    { question: 'Mục tiêu học tuần 20 nào đúng?', correct: 3, options: [
+      { text: 'Thuộc lòng benchmark của mọi vendor', explain: 'Sai vì trọng tâm là tư duy kiến trúc.' },
+      { text: 'Tập trung UI dashboard trước', explain: 'Sai vì tuần này tập trung serving architecture.' },
+      { text: 'Viết app web fullstack', explain: 'Sai vì scope không nằm ở web app.' },
+      { text: 'Biết chọn engine theo workload + trade-off', explain: 'Đúng đây là năng lực cốt lõi tuần 20.' }
+    ]},
+    { question: 'Business value chính của Modern OLAP là gì?', correct: 1, options: [
+      { text: 'Giảm số lượng bảng trong data warehouse', explain: 'Sai vì không phải mục tiêu trực tiếp.' },
+      { text: 'Rút ngắn thời gian ra quyết định nhờ dashboard nhanh', explain: 'Đúng vì tốc độ insight ảnh hưởng business.' },
+      { text: 'Thay thế hoàn toàn hệ thống monitoring', explain: 'Sai vì monitoring là domain rộng hơn.' },
+      { text: 'Bỏ qua bước modeling dữ liệu', explain: 'Sai vì modeling vẫn rất quan trọng.' }
+    ]},
+    { question: 'Câu nào mô tả đúng mindset Week20?', correct: 0, options: [
+      { text: 'Workload-first, trade-off-first, architecture-first', explain: 'Đúng đây là mindset Data Engineer thực chiến.' },
+      { text: 'Tool-first, benchmark-first, trend-first', explain: 'Sai vì dễ dẫn đến quyết định cảm tính.' },
+      { text: 'Chọn engine theo chi phí rẻ nhất bất kể workload', explain: 'Sai vì cost phải đi cùng SLO/freshness.' },
+      { text: 'Dùng một engine cho mọi bài toán', explain: 'Sai vì mỗi engine có workload fit khác nhau.' }
+    ]}
+  ],
+  m1: [
+    { question: 'OLTP tối ưu chủ yếu cho workload nào?', correct: 2, options: [
+      { text: 'Scan toàn bảng 6 tháng dữ liệu', explain: 'Sai vì scan lớn không phải điểm mạnh OLTP.' },
+      { text: 'Dashboard aggregate đa chiều liên tục', explain: 'Sai vì đây là OLAP serving workload.' },
+      { text: 'Point lookup và transaction nhỏ', explain: 'Đúng vì OLTP thiết kế cho thao tác bản ghi nhỏ.' },
+      { text: 'Batch summarize hàng tỷ events', explain: 'Sai vì workload này hợp OLAP/warehouse hơn.' }
+    ]},
+    { question: 'OLAP thường phù hợp với mô hình đọc nào?', correct: 1, options: [
+      { text: 'Nhiều writes nhỏ mỗi mili-giây', explain: 'Sai vì đây thiên về OLTP/stream ingestion.' },
+      { text: 'Many rows, few columns, aggregation', explain: 'Đúng vì đây là pattern cốt lõi OLAP.' },
+      { text: 'Single-row update có transaction nghiêm ngặt', explain: 'Sai vì đó là OLTP pattern.' },
+      { text: 'OTP verification query', explain: 'Sai vì đó là app query đơn giản.' }
+    ]},
+    { question: 'Warehouse khác Modern OLAP ở điểm nào nổi bật?', correct: 3, options: [
+      { text: 'Warehouse không dùng SQL', explain: 'Sai vì warehouse dùng SQL rất nhiều.' },
+      { text: 'Modern OLAP không lưu dữ liệu', explain: 'Sai vì Modern OLAP vẫn lưu dữ liệu.' },
+      { text: 'Warehouse không có governance', explain: 'Sai vì governance là điểm mạnh warehouse.' },
+      { text: 'Modern OLAP tập trung serving latency thấp cho dashboard', explain: 'Đúng đây là khác biệt thực tế quan trọng.' }
+    ]},
+    { question: 'DuckDB thường nằm ở vai trò nào?', correct: 0, options: [
+      { text: 'Local analytics/prototyping', explain: 'Đúng vì DuckDB mạnh ở local analytics nhanh.' },
+      { text: 'Core OLTP transaction DB', explain: 'Sai vì không phải vai trò chính.' },
+      { text: 'Global distributed serving cho hàng ngàn dashboard users', explain: 'Sai vì không phải distributed serving layer mặc định.' },
+      { text: 'Identity auth server', explain: 'Sai vì ngoài phạm vi use case.' }
+    ]},
+    { question: 'Anti-pattern phổ biến với PostgreSQL trong analytics là gì?', correct: 2, options: [
+      { text: 'Dùng PostgreSQL cho transactional API', explain: 'Sai vì đó là use case phù hợp.' },
+      { text: 'Dùng PostgreSQL cho metadata service', explain: 'Sai vì vẫn hợp nhiều trường hợp.' },
+      { text: 'Ép PostgreSQL gánh dashboard high-volume aggregate', explain: 'Đúng vì dễ gây nghẽn và tail latency cao.' },
+      { text: 'Bật connection pooling', explain: 'Sai vì pooling là practice tốt.' }
+    ]},
+    { question: 'ClickHouse nổi bật nhất ở điểm nào?', correct: 1, options: [
+      { text: 'OLTP transaction isolation cao', explain: 'Sai vì không phải điểm mạnh chính.' },
+      { text: 'Columnar aggregation speed + compression', explain: 'Đúng là lợi thế cốt lõi.' },
+      { text: 'Schema-less mọi tình huống', explain: 'Sai vì schema design rất quan trọng.' },
+      { text: 'UI dashboard built-in thay BI tool', explain: 'Sai vì thường kết hợp BI/tool khác.' }
+    ]},
+    { question: 'BigQuery/Snowflake thường mạnh ở đâu?', correct: 0, options: [
+      { text: 'Managed warehouse + governance', explain: 'Đúng, đây là lợi thế lớn.' },
+      { text: 'Sub-second real-time dashboard mọi workload', explain: 'Sai vì không phải luôn tối ưu kiểu này.' },
+      { text: 'Thay toàn bộ stream system', explain: 'Sai vì stream ingestion xử lý khác.' },
+      { text: 'Point lookup user profile', explain: 'Sai vì không phải mục tiêu chính.' }
+    ]},
+    { question: 'Cặp nào mô tả đúng?', correct: 3, options: [
+      { text: 'OLTP = columnar analytics engine', explain: 'Sai vì OLTP chủ yếu row-oriented.' },
+      { text: 'OLAP = transaction-first engine', explain: 'Sai vì OLAP aggregate-first.' },
+      { text: 'Warehouse = không cần transformation', explain: 'Sai vì transformation/marts là core.' },
+      { text: 'Modern OLAP = low-latency analytical serving', explain: 'Đúng với định nghĩa tuần này.' }
+    ]},
+    { question: 'Nếu business cần executive report theo ngày, lựa chọn khởi đầu hợp lý là?', correct: 2, options: [
+      { text: 'Druid cluster phức tạp ngay lập tức', explain: 'Sai vì có thể overkill.' },
+      { text: 'OLTP DB chính của ứng dụng', explain: 'Sai vì không tối ưu cho report nặng.' },
+      { text: 'Warehouse với marts/governance', explain: 'Đúng vì phù hợp report ổn định theo ngày.' },
+      { text: 'DuckDB server multi-tenant', explain: 'Sai vì không phải mục tiêu mặc định.' }
+    ]},
+    { question: 'Nguyên tắc chọn kiến trúc đúng là gì?', correct: 1, options: [
+      { text: 'Chọn theo tool đang trend', explain: 'Sai vì trend không thay workload reality.' },
+      { text: 'Chọn theo workload + SLO + team capability', explain: 'Đúng vì phản ánh quyết định thực tế.' },
+      { text: 'Chọn theo ngôn ngữ lập trình team thích', explain: 'Sai vì chỉ là yếu tố phụ.' },
+      { text: 'Chọn engine có benchmark marketing đẹp nhất', explain: 'Sai vì thiếu context workload.' }
+    ]}
+  ],
+  m2: [
+    { question: 'DuckDB phù hợp nhất cho kịch bản nào?', correct: 0, options: [
+      { text: 'Local exploration trên Parquet', explain: 'Đúng vì đó là lợi thế rõ ràng của DuckDB.' },
+      { text: 'Core distributed serving cho 500 users dashboard', explain: 'Sai vì không phải mục tiêu chính.' },
+      { text: 'OLTP transaction banking', explain: 'Sai vì ngoài use case của DuckDB.' },
+      { text: 'Message queue streaming', explain: 'Sai vì không phải hệ stream.' }
+    ]},
+    { question: 'Điểm mạnh của SQL over files là gì?', correct: 2, options: [
+      { text: 'Bắt buộc phải dựng cluster trước', explain: 'Sai vì SQL over files giảm nhu cầu này.' },
+      { text: 'Không cần biết schema dữ liệu', explain: 'Sai vì vẫn phải hiểu schema để query đúng.' },
+      { text: 'Prototype nhanh không cần ingestion pipeline nặng', explain: 'Đúng vì giảm vòng lặp thử nghiệm.' },
+      { text: 'Thay toàn bộ data contracts', explain: 'Sai vì contracts vẫn cần ở production.' }
+    ]},
+    { question: 'DuckDB có thể hỗ trợ CI data checks ở mức nào?', correct: 1, options: [
+      { text: 'Chỉ kiểm tra UI dashboard', explain: 'Sai vì DuckDB không phải UI test tool.' },
+      { text: 'Row count/null/schema sanity checks trên file batch', explain: 'Đúng đây là use case practical.' },
+      { text: 'Thay cho chaos testing hạ tầng', explain: 'Sai vì khác domain.' },
+      { text: 'Thay observability stack production', explain: 'Sai vì không phải mục tiêu.' }
+    ]},
+    { question: 'Rủi ro nào cần lưu ý khi dùng DuckDB trên laptop với dataset rất lớn?', correct: 2, options: [
+      { text: 'Không thể đọc Parquet', explain: 'Sai vì DuckDB đọc Parquet rất tốt.' },
+      { text: 'Không thể chạy SQL', explain: 'Sai vì SQL là giao diện chính.' },
+      { text: 'Query join/aggregate nặng có thể áp lực memory và spill-to-disk', explain: 'Đúng, đây là rủi ro OOM/chậm cần kiểm soát bằng query shape và memory limit.' },
+      { text: 'DuckDB tự mở rộng distributed cluster mặc định', explain: 'Sai vì DuckDB không tự thành distributed serving engine.' }
+    ]},
+    { question: 'Parquet-native workflow mang lại lợi ích gì?', correct: 0, options: [
+      { text: 'Column pruning + compression tốt hơn CSV', explain: 'Đúng nên query analytics thường nhanh hơn.' },
+      { text: 'Bắt buộc mất schema hoàn toàn', explain: 'Sai vì Parquet vẫn chứa metadata schema.' },
+      { text: 'Làm OLTP transaction nhanh hơn', explain: 'Sai vì Parquet không dành cho OLTP transaction.' },
+      { text: 'Không cần data model', explain: 'Sai vì model vẫn quan trọng.' }
+    ]},
+    { question: 'Anti-pattern với DuckDB là gì?', correct: 1, options: [
+      { text: 'Dùng để kiểm tra dữ liệu nhanh trong notebook', explain: 'Sai vì đây là use case phù hợp.' },
+      { text: 'Xem DuckDB là warehouse/serving replacement cho mọi tình huống', explain: 'Đúng vì vượt quá scope công cụ.' },
+      { text: 'Dùng để validate file Parquet trước load', explain: 'Sai vì hợp lý.' },
+      { text: 'Dùng SQL để khám phá dữ liệu', explain: 'Sai vì rất phù hợp.' }
+    ]},
+    { question: 'Use case nào dưới đây KHÔNG phù hợp với DuckDB?', correct: 2, options: [
+      { text: 'Ad-hoc phân tích local dataset', explain: 'Sai vì phù hợp.' },
+      { text: 'Soạn query prototype trước khi deploy warehouse', explain: 'Sai vì phù hợp.' },
+      { text: 'Dashboard production high concurrency multi-tenant', explain: 'Đúng vì đây không phải fit chính.' },
+      { text: 'Quick data sanity check trong CI', explain: 'Sai vì phù hợp.' }
+    ]},
+    { question: 'Vì sao DuckDB được gọi là embedded engine?', correct: 3, options: [
+      { text: 'Vì bắt buộc chạy trên cloud cluster', explain: 'Sai vì không bắt buộc.' },
+      { text: 'Vì chỉ chạy trong browser', explain: 'Sai vì không đúng.' },
+      { text: 'Vì chỉ hỗ trợ Python', explain: 'Sai vì có nhiều interface.' },
+      { text: 'Vì có thể chạy trong process ứng dụng/local environment', explain: 'Đúng với bản chất embedded.' }
+    ]},
+    { question: 'Khi nào nên chuyển từ DuckDB prototype sang engine serving khác?', correct: 0, options: [
+      { text: 'Khi yêu cầu concurrency/latency production vượt khả năng local', explain: 'Đúng vì đó là điểm chuyển tự nhiên.' },
+      { text: 'Khi query chạy tốt trên máy local', explain: 'Sai vì đó chưa phải lý do chuyển.' },
+      { text: 'Khi team muốn học công nghệ mới', explain: 'Sai vì không phải tiêu chí chính.' },
+      { text: 'Khi dataset dưới 1GB', explain: 'Sai vì kích thước nhỏ chưa cần chuyển.' }
+    ]},
+    { question: 'Mindset đúng khi dùng DuckDB trong Week20 là gì?', correct: 2, options: [
+      { text: 'Dùng thay mọi warehouse để tiết kiệm chi phí', explain: 'Sai vì nguy cơ kỹ thuật lớn.' },
+      { text: 'Dùng thay clickstream serving layer', explain: 'Sai vì không phù hợp mục tiêu.' },
+      { text: 'Dùng như local accelerator cho analytics workflow', explain: 'Đúng là cách dùng thực dụng.' },
+      { text: 'Dùng như message broker', explain: 'Sai vì không đúng bản chất.' }
+    ]}
+  ],
+  m3: [
+    { question: 'Vì sao ClickHouse mạnh cho event analytics?', correct: 1, options: [
+      { text: 'Vì là OLTP engine', explain: 'Sai vì ClickHouse không phải OLTP-first.' },
+      { text: 'Columnar + vectorized execution + compression', explain: 'Đúng là lợi thế kỹ thuật chính.' },
+      { text: 'Vì không cần schema design', explain: 'Sai vì schema design rất quan trọng.' },
+      { text: 'Vì update/delete luôn rẻ', explain: 'Sai vì mutation có cost.' }
+    ]},
+    { question: 'Vai trò của ORDER BY key trong MergeTree là gì?', correct: 2, options: [
+      { text: 'Tăng độ đẹp của dữ liệu', explain: 'Sai vì không phải mục tiêu.' },
+      { text: 'Bắt buộc giống primary key OLTP', explain: 'Sai vì mindset khác.' },
+      { text: 'Ảnh hưởng trực tiếp đến pruning và tốc độ query', explain: 'Đúng vì truy vấn dựa mạnh vào data order.' },
+      { text: 'Không ảnh hưởng nếu có partition', explain: 'Sai vì order key vẫn rất quan trọng.' }
+    ]},
+    { question: 'Partition theo date thường giúp gì?', correct: 0, options: [
+      { text: 'Giảm scan khi query theo time range', explain: 'Đúng vì partition pruning hoạt động tốt hơn.' },
+      { text: 'Tăng tốc update từng row', explain: 'Sai vì update row không phải điểm mạnh.' },
+      { text: 'Xóa nhu cầu aggregate', explain: 'Sai vì aggregate vẫn cần thiết.' },
+      { text: 'Tránh mọi loại skew', explain: 'Sai vì skew vẫn có thể tồn tại.' }
+    ]},
+    { question: 'Ingestion pattern nào phổ biến cho ClickHouse?', correct: 3, options: [
+      { text: 'Chỉ streaming, không thể batch', explain: 'Sai vì batch insert rất phổ biến.' },
+      { text: 'Chỉ file CSV thủ công', explain: 'Sai vì có nhiều cách ingestion.' },
+      { text: 'Chỉ update từng dòng realtime', explain: 'Sai vì không phù hợp điểm mạnh.' },
+      { text: 'Batch insert và có thể tích hợp Kafka ingestion', explain: 'Đúng là pattern thực tế.' }
+    ]},
+    { question: 'Rủi ro lớn khi ingest quá nhiều small inserts vào ClickHouse là gì?', correct: 2, options: [
+      { text: 'Tự động giảm storage về 0', explain: 'Sai vì không có cơ chế này.' },
+      { text: 'Làm ClickHouse biến thành OLTP engine', explain: 'Sai vì không đúng bản chất hệ.' },
+      { text: 'Too many parts và merge pressure tăng mạnh', explain: 'Đúng, đây là lỗi vận hành rất phổ biến nếu không batch insert hợp lý.' },
+      { text: 'Mọi query đều chuyển sang column-store cache', explain: 'Sai vì không đúng cơ chế.' }
+    ]},
+    { question: 'Anti-pattern trong modeling ClickHouse là gì?', correct: 2, options: [
+      { text: 'Thiết kế theo query pattern', explain: 'Sai vì đây là best practice.' },
+      { text: 'Dùng low-cardinality cho dimension phù hợp', explain: 'Sai vì thường tốt.' },
+      { text: 'Thiết kế như OLTP normalized schema nhiều join runtime', explain: 'Đúng vì dễ làm query chậm.' },
+      { text: 'Partition theo thời gian', explain: 'Sai vì thường hợp lý.' }
+    ]},
+    { question: 'Khi query dashboard lặp lại nhiều, chiến lược phù hợp là?', correct: 0, options: [
+      { text: 'Cân nhắc materialized views/pre-aggregation', explain: 'Đúng giúp giảm latency và cost query.' },
+      { text: 'Luôn SELECT * để dễ phát triển', explain: 'Sai vì tăng scan không cần thiết.' },
+      { text: 'Tách bảng thành nhiều bảng nhỏ ngẫu nhiên', explain: 'Sai vì không dựa workload.' },
+      { text: 'Bỏ filter thời gian', explain: 'Sai vì sẽ tăng scan rất lớn.' }
+    ]},
+    { question: 'Use case phù hợp cho ClickHouse nhất?', correct: 3, options: [
+      { text: 'Password reset transaction', explain: 'Sai vì đó là OLTP flow.' },
+      { text: 'Single-row account update', explain: 'Sai vì OLTP use case.' },
+      { text: 'Session management app backend', explain: 'Sai vì không phải thế mạnh.' },
+      { text: 'Product events dashboard với concurrency cao', explain: 'Đúng vì rất phù hợp.' }
+    ]},
+    { question: 'Compression cao trong ClickHouse có lợi gì?', correct: 1, options: [
+      { text: 'Tăng số transaction/second cho OLTP', explain: 'Sai vì không phải mục tiêu trực tiếp.' },
+      { text: 'Giảm I/O và storage cost cho analytics', explain: 'Đúng giúp query lớn hiệu quả hơn.' },
+      { text: 'Thay thế backup strategy', explain: 'Sai vì backup là bài toán khác.' },
+      { text: 'Loại bỏ nhu cầu partition', explain: 'Sai vì partition vẫn quan trọng.' }
+    ]},
+    { question: 'Lưu ý đúng khi dùng LowCardinality(String) trong ClickHouse là gì?', correct: 1, options: [
+      { text: 'Dùng tốt nhất cho user_id vì distinct cực cao', explain: 'Sai vì cardinality quá cao thường phản tác dụng.' },
+      { text: 'Phù hợp hơn cho cột dimension có distinct thấp-trung bình', explain: 'Đúng, ví dụ event_type/platform/country thường hợp hơn.' },
+      { text: 'Bắt buộc phải dùng cho mọi cột String', explain: 'Sai vì không phải cột nào cũng hưởng lợi.' },
+      { text: 'Không ảnh hưởng gì đến storage hay query', explain: 'Sai vì có ảnh hưởng rõ về encoding và scan.' }
+    ]}
+  ],
+  m4: [
+    { question: 'Real-time OLAP tập trung giải quyết bài toán gì?', correct: 2, options: [
+      { text: 'OLTP writes tốc độ cao', explain: 'Sai vì không phải mục tiêu chính.' },
+      { text: 'Data archival dài hạn', explain: 'Sai vì không phải trọng tâm.' },
+      { text: 'Low-latency analytics từ dữ liệu stream', explain: 'Đúng là core objective.' },
+      { text: 'Model training GPU', explain: 'Sai vì ngoài phạm vi.' }
+    ]},
+    { question: 'Kafka thường đóng vai trò gì trong Druid/Pinot style?', correct: 1, options: [
+      { text: 'Lưu dashboard screenshot', explain: 'Sai vì không liên quan.' },
+      { text: 'Nguồn ingest stream events', explain: 'Đúng là vai trò phổ biến.' },
+      { text: 'Thay query engine', explain: 'Sai vì Kafka không phải query OLAP engine.' },
+      { text: 'Thay data warehouse', explain: 'Sai vì chức năng khác.' }
+    ]},
+    { question: 'Segment trong real-time OLAP thường là gì?', correct: 0, options: [
+      { text: 'Đơn vị dữ liệu theo time chunk để lưu/truy vấn', explain: 'Đúng, là đơn vị tổ chức dữ liệu quan trọng.' },
+      { text: 'User segment marketing trong CRM', explain: 'Sai vì nghĩa khác.' },
+      { text: 'Bảng temporary của OLTP', explain: 'Sai vì không đúng.' },
+      { text: 'Container chạy ETL', explain: 'Sai vì không phải compute unit kiểu đó.' }
+    ]},
+    { question: 'Rollup có tác dụng chính nào?', correct: 3, options: [
+      { text: 'Tăng độ chi tiết từng event', explain: 'Sai vì rollup thường giảm chi tiết.' },
+      { text: 'Xóa hoàn toàn nhu cầu raw data', explain: 'Sai vì raw vẫn có giá trị.' },
+      { text: 'Thay late event handling', explain: 'Sai vì không thay thế hoàn toàn.' },
+      { text: 'Tiền tổng hợp để giảm chi phí và latency truy vấn', explain: 'Đúng là mục tiêu chính.' }
+    ]},
+    { question: 'Trade-off chính freshness vs correctness là gì?', correct: 1, options: [
+      { text: 'Freshness cao luôn đảm bảo correctness tuyệt đối', explain: 'Sai vì late data/dedup có thể ảnh hưởng.' },
+      { text: 'Càng realtime càng cần chiến lược xử lý sai số/tái tính', explain: 'Đúng vì dữ liệu streaming có độ trễ và nhiễu.' },
+      { text: 'Correctness chỉ quan trọng cho BI hàng quý', explain: 'Sai vì nhiều context cần correctness cao.' },
+      { text: 'Hai yếu tố này không liên quan nhau', explain: 'Sai vì liên quan trực tiếp.' }
+    ]},
+    { question: 'Khi nào real-time OLAP thường được justified?', correct: 2, options: [
+      { text: 'Khi chỉ có report theo ngày', explain: 'Sai vì thường overkill.' },
+      { text: 'Khi team chưa rõ business need', explain: 'Sai vì thiếu justification.' },
+      { text: 'Khi quyết định vận hành phụ thuộc dữ liệu phút/giây', explain: 'Đúng vì tác động business rõ.' },
+      { text: 'Khi muốn dùng công nghệ mới', explain: 'Sai vì không phải tiêu chí kỹ thuật.' }
+    ]},
+    { question: 'Khi nào ClickHouse/warehouse có thể đủ thay vì Druid/Pinot?', correct: 0, options: [
+      { text: 'Khi freshness không quá gắt và query pattern ổn định', explain: 'Đúng có thể đơn giản hóa kiến trúc.' },
+      { text: 'Khi cần alert theo giây cho fraud', explain: 'Sai vì thường cần real-time mạnh hơn.' },
+      { text: 'Khi data chỉ từ Kafka bắt buộc', explain: 'Sai vì Kafka không bắt buộc dùng Druid/Pinot.' },
+      { text: 'Khi muốn chạy OLTP transactions', explain: 'Sai vì không liên quan.' }
+    ]},
+    { question: 'Anti-pattern nổi bật với real-time OLAP là gì?', correct: 3, options: [
+      { text: 'Đo freshness SLA rõ ràng', explain: 'Sai vì đây là practice tốt.' },
+      { text: 'Thiết kế correction flow cho late events', explain: 'Sai vì đây là practice tốt.' },
+      { text: 'Đánh giá business impact trước đầu tư', explain: 'Sai vì đây là cần thiết.' },
+      { text: 'Dựng realtime stack khi business không cần realtime', explain: 'Đúng là anti-pattern điển hình.' }
+    ]},
+    { question: 'Event-time ingestion quan trọng vì?', correct: 2, options: [
+      { text: 'Chỉ để hiển thị timestamp đẹp', explain: 'Sai vì lý do sâu hơn là correctness timeline.' },
+      { text: 'Để giảm số cột bảng', explain: 'Sai vì không phải mục tiêu.' },
+      { text: 'Giữ logic phân tích đúng theo thời điểm sự kiện xảy ra', explain: 'Đúng, đặc biệt khi event đến trễ.' },
+      { text: 'Để bỏ qua watermark', explain: 'Sai vì watermark thường vẫn cần.' }
+    ]},
+    { question: 'Trong real-time OLAP, vì sao cần retention policy cho segments?', correct: 2, options: [
+      { text: 'Để loại bỏ hoàn toàn nhu cầu observability', explain: 'Sai vì observability vẫn bắt buộc.' },
+      { text: 'Để giữ toàn bộ dữ liệu chi tiết vĩnh viễn', explain: 'Sai vì dễ làm storage cost phình to.' },
+      { text: 'Để kiểm soát cost bằng vòng đời hot/warm/history dữ liệu', explain: 'Đúng, retention là phần cốt lõi của vận hành bền vững.' },
+      { text: 'Để tăng tốc OLTP transactions', explain: 'Sai vì không phải mục tiêu của OLAP segment retention.' }
+    ]}
+  ],
+  m5: [
+    { question: 'Partitioning tốt giúp điều gì?', correct: 0, options: [
+      { text: 'Giảm phạm vi scan theo filter phổ biến', explain: 'Đúng nhờ partition pruning.' },
+      { text: 'Loại bỏ mọi nhu cầu index/order key', explain: 'Sai vì order key vẫn quan trọng.' },
+      { text: 'Biến OLAP thành OLTP', explain: 'Sai vì bản chất workload không đổi.' },
+      { text: 'Tự động đúng cho mọi query', explain: 'Sai vì phải theo workload cụ thể.' }
+    ]},
+    { question: 'Vì sao tránh SELECT * trong dashboard query?', correct: 2, options: [
+      { text: 'Vì SQL không cho phép', explain: 'Sai vì SQL cho phép.' },
+      { text: 'Vì chỉ dùng được trong DuckDB', explain: 'Sai vì không đúng.' },
+      { text: 'Vì tăng scan cột không cần thiết, tốn I/O', explain: 'Đúng là lý do hiệu năng cốt lõi.' },
+      { text: 'Vì không chạy được trên warehouse', explain: 'Sai vì vẫn chạy được.' }
+    ]},
+    { question: 'Materialized view phù hợp khi nào?', correct: 1, options: [
+      { text: 'Khi query không bao giờ lặp lại', explain: 'Sai vì MV phù hợp query lặp.' },
+      { text: 'Khi có query aggregate lặp lại tần suất cao', explain: 'Đúng giúp giảm latency/cost.' },
+      { text: 'Khi chưa biết workload sẽ hỏi gì', explain: 'Sai vì tạo mù dễ nợ vận hành.' },
+      { text: 'Khi cần update row-level liên tục', explain: 'Sai vì không phải mục tiêu chính của MV.' }
+    ]},
+    { question: 'Approximate count distinct dùng để?', correct: 3, options: [
+      { text: 'Tăng độ chính xác tuyệt đối', explain: 'Sai vì đây là cách đổi độ chính xác lấy tốc độ/cost.' },
+      { text: 'Thay toàn bộ KPI tài chính chuẩn xác', explain: 'Sai vì finance thường cần exact.' },
+      { text: 'Bỏ qua mọi kiểm định dữ liệu', explain: 'Sai vì kiểm định vẫn cần.' },
+      { text: 'Giảm cost/latency với cardinality cao', explain: 'Đúng là mục tiêu thực dụng.' }
+    ]},
+    { question: 'Query shape matters nghĩa là gì?', correct: 0, options: [
+      { text: 'Cấu trúc truy vấn ảnh hưởng lớn đến performance', explain: 'Đúng, cùng engine nhưng query khác có thể chênh rất lớn.' },
+      { text: 'Chỉ cần phần cứng mạnh là đủ', explain: 'Sai vì query shape tệ vẫn đắt.' },
+      { text: 'Chỉ cần đổi tên cột', explain: 'Sai vì không giải quyết bản chất.' },
+      { text: 'Chỉ đúng với warehouse', explain: 'Sai vì đúng với hầu hết OLAP engines.' }
+    ]},
+    { question: 'Anti-pattern với materialized views là?', correct: 2, options: [
+      { text: 'Theo dõi usage và owner rõ', explain: 'Sai vì đây là practice tốt.' },
+      { text: 'Review MV theo thay đổi query workload', explain: 'Sai vì đây là practice tốt.' },
+      { text: 'Tạo hàng loạt MV mà không biết query thật', explain: 'Đúng là anti-pattern phổ biến.' },
+      { text: 'Ưu tiên MV cho dashboard critical', explain: 'Sai vì phù hợp.' }
+    ]},
+    { question: 'Order key/clustering sai thường dẫn đến?', correct: 1, options: [
+      { text: 'Tự động tăng độ chính xác', explain: 'Sai vì không liên quan.' },
+      { text: 'Pruning kém, scan nhiều, latency cao', explain: 'Đúng là hậu quả trực tiếp.' },
+      { text: 'Không thể chạy SQL', explain: 'Sai vì SQL vẫn chạy.' },
+      { text: 'Không thể partition', explain: 'Sai vì partition vẫn có thể dùng.' }
+    ]},
+    { question: 'Cost/performance mindset đúng là gì?', correct: 3, options: [
+      { text: 'Chỉ tối ưu latency bất kể chi phí', explain: 'Sai vì cần cân bằng kinh doanh.' },
+      { text: 'Chỉ giảm cost dù query không usable', explain: 'Sai vì trải nghiệm người dùng quan trọng.' },
+      { text: 'Không đo gì cả, dựa cảm giác', explain: 'Sai vì thiếu căn cứ.' },
+      { text: 'Đo latency, concurrency, cost rồi tối ưu theo mục tiêu business', explain: 'Đúng là mindset production.' }
+    ]},
+    { question: 'Kỹ thuật nào hỗ trợ dashboard query lặp lại hiệu quả?', correct: 0, options: [
+      { text: 'Pre-aggregation theo dimension thường dùng', explain: 'Đúng làm giảm tính toán runtime.' },
+      { text: 'Join thêm bảng không cần thiết', explain: 'Sai vì làm query nặng hơn.' },
+      { text: 'Tăng SELECT *', explain: 'Sai vì scan thừa.' },
+      { text: 'Bỏ mọi filter thời gian', explain: 'Sai vì tăng scan vô ích.' }
+    ]},
+    { question: 'Một optimization bền vững cần thêm gì ngoài kỹ thuật?', correct: 2, options: [
+      { text: 'Một lần benchmark duy nhất', explain: 'Sai vì workload thay đổi theo thời gian.' },
+      { text: 'Chỉ ý kiến của một kỹ sư', explain: 'Sai vì cần số liệu vận hành.' },
+      { text: 'Theo dõi query usage và review định kỳ', explain: 'Đúng để tránh nợ tối ưu lỗi thời.' },
+      { text: 'Không cần owner cho dashboard', explain: 'Sai vì ownership rất quan trọng.' }
+    ]}
+  ],
+  m6: [
+    { question: 'Tiêu chí nào KHÔNG nên bỏ qua khi chọn OLAP engine?', correct: 3, options: [
+      { text: 'Latency target', explain: 'Sai vì latency rất quan trọng.' },
+      { text: 'Freshness requirement', explain: 'Sai vì ảnh hưởng lớn đến kiến trúc.' },
+      { text: 'Concurrency profile', explain: 'Sai vì quyết định khả năng serving.' },
+      { text: 'Độ viral của tool trên mạng xã hội', explain: 'Đúng đây là tiêu chí không nên dùng.' }
+    ]},
+    { question: 'Use case local exploration thường nên bắt đầu bằng?', correct: 0, options: [
+      { text: 'DuckDB', explain: 'Đúng vì nhanh và nhẹ cho local analytics.' },
+      { text: 'Druid cluster full', explain: 'Sai vì quá nặng cho nhu cầu local.' },
+      { text: 'PostgreSQL OLTP với 20 indexes', explain: 'Sai vì không tối ưu mục tiêu exploration.' },
+      { text: 'Kafka + stream processing đầy đủ', explain: 'Sai vì không cần thiết.' }
+    ]},
+    { question: 'Executive BI theo ngày thường phù hợp lớp nào?', correct: 2, options: [
+      { text: 'Real-time OLAP bắt buộc', explain: 'Sai vì có thể overkill.' },
+      { text: 'OLTP app DB', explain: 'Sai vì không tối ưu report nặng.' },
+      { text: 'Managed warehouse', explain: 'Đúng vì governance và độ ổn định.' },
+      { text: 'Embedded local DB', explain: 'Sai vì không phù hợp multi-user enterprise.' }
+    ]},
+    { question: 'Workload fraud dashboard cần cảnh báo theo phút, lựa chọn nào đáng cân nhắc?', correct: 1, options: [
+      { text: 'DuckDB local files', explain: 'Sai vì không phù hợp realtime serving.' },
+      { text: 'Druid/Pinot style realtime OLAP', explain: 'Đúng vì freshness cao là trọng tâm.' },
+      { text: 'OLTP normalized queries', explain: 'Sai vì dễ nghẽn và latency cao.' },
+      { text: 'Static CSV export mỗi ngày', explain: 'Sai vì freshness quá thấp.' }
+    ]},
+    { question: 'Team maturity ảnh hưởng quyết định kiến trúc như thế nào?', correct: 0, options: [
+      { text: 'Quyết định khả năng vận hành stack phức tạp bền vững', explain: 'Đúng vì ops burden là chi phí thật.' },
+      { text: 'Không ảnh hưởng, chỉ tool quyết định', explain: 'Sai vì con người vận hành hệ thống.' },
+      { text: 'Chỉ ảnh hưởng UI dashboard', explain: 'Sai vì ảnh hưởng toàn lifecycle.' },
+      { text: 'Chỉ ảnh hưởng naming convention', explain: 'Sai vì quá hẹp.' }
+    ]},
+    { question: 'Phát biểu nào đúng về self-hosted vs managed trong OLAP serving?', correct: 1, options: [
+      { text: 'Self-hosted luôn ít việc vận hành hơn managed', explain: 'Sai vì self-hosted thường tăng burden vận hành.' },
+      { text: 'Managed thường giảm ops burden cho team mỏng', explain: 'Đúng, đổi lại thường có trade-off chi phí/lock-in.' },
+      { text: 'Managed bắt buộc cho mọi công ty', explain: 'Sai vì còn tùy team maturity và yêu cầu kiểm soát.' },
+      { text: 'Self-hosted không cần monitoring/backup', explain: 'Sai vì đây là trách nhiệm cốt lõi của self-hosted.' }
+    ]},
+    { question: 'Nếu workload cần update/delete transaction nhiều, lựa chọn nào thường phù hợp hơn?', correct: 2, options: [
+      { text: 'Druid rollup-first', explain: 'Sai vì không tối ưu transaction update.' },
+      { text: 'ClickHouse cho mọi loại row mutation', explain: 'Sai vì mutation không phải điểm mạnh nhất.' },
+      { text: 'OLTP DB hoặc kiến trúc hybrid với OLTP layer', explain: 'Đúng vì transaction là thế mạnh OLTP.' },
+      { text: 'DuckDB single-user local', explain: 'Sai vì không phù hợp production transaction.' }
+    ]},
+    { question: 'Mục tiêu của decision matrix là?', correct: 1, options: [
+      { text: 'Trang trí tài liệu dự án', explain: 'Sai vì mục tiêu là hỗ trợ quyết định.' },
+      { text: 'So sánh engine có cấu trúc theo tiêu chí workload', explain: 'Đúng giúp tránh quyết định cảm tính.' },
+      { text: 'Loại bỏ toàn bộ tranh luận kiến trúc', explain: 'Sai vì matrix hỗ trợ tranh luận có cơ sở, không loại bỏ.' },
+      { text: 'Bảo vệ lựa chọn tool cố định', explain: 'Sai vì matrix nên linh hoạt theo bối cảnh.' }
+    ]},
+    { question: 'Anti-pattern lựa chọn engine là gì?', correct: 0, options: [
+      { text: 'Chọn theo popularity thay vì workload fit', explain: 'Đúng là sai lầm rất phổ biến.' },
+      { text: 'Đo workload trước khi chọn', explain: 'Sai vì đây là practice tốt.' },
+      { text: 'Đánh giá ops burden', explain: 'Sai vì cần thiết.' },
+      { text: 'Review lại sau 6 tháng', explain: 'Sai vì tốt cho governance kiến trúc.' }
+    ]},
+    { question: 'Khi trình bày lựa chọn engine cho recruiter/lead, điều nào quan trọng nhất?', correct: 2, options: [
+      { text: 'Danh sách tính năng marketing', explain: 'Sai vì chưa phản ánh năng lực kiến trúc.' },
+      { text: 'Tên khách hàng nổi tiếng dùng tool', explain: 'Sai vì không nói lên fit của bạn.' },
+      { text: 'Lý do gắn workload, SLO, cost và trade-off', explain: 'Đúng đây là tín hiệu kỹ thuật mạnh nhất.' },
+      { text: 'Số sao GitHub của dự án', explain: 'Sai vì chỉ là tín hiệu phụ.' }
+    ]}
+  ],
+  m7: [
+    { question: 'Artifact week20_modern_olap cần chứng minh điều gì?', correct: 1, options: [
+      { text: 'Bạn biết copy benchmark từ internet', explain: 'Sai vì cần kết quả gắn bối cảnh thực tế.' },
+      { text: 'Bạn hiểu workload fit và trade-off engine', explain: 'Đúng là hiring signal chính.' },
+      { text: 'Bạn dùng được mọi BI tool', explain: 'Sai vì không phải mục tiêu trọng tâm tuần này.' },
+      { text: 'Bạn có nhiều file markdown', explain: 'Sai vì số file không phản ánh chất lượng.' }
+    ]},
+    { question: 'Trong artifact, cùng analytical question chạy nhiều engine để làm gì?', correct: 2, options: [
+      { text: 'Để tăng số lượng file', explain: 'Sai vì không tạo giá trị kỹ thuật.' },
+      { text: 'Để tránh viết README', explain: 'Sai vì README rất quan trọng.' },
+      { text: 'So sánh công bằng performance và workload fit', explain: 'Đúng đây là mục tiêu benchmark.' },
+      { text: 'Để chứng minh mọi engine giống nhau', explain: 'Sai vì khác biệt mới là điểm cần học.' }
+    ]},
+    { question: 'README artifact bắt buộc nên có mục nào?', correct: 0, options: [
+      { text: 'Workload scenario + query patterns + trade-offs', explain: 'Đúng là phần cốt lõi cần có.' },
+      { text: 'Danh sách sticker công nghệ', explain: 'Sai vì không tạo giá trị kỹ thuật.' },
+      { text: 'Ảnh nền dashboard', explain: 'Sai vì phụ trợ, không cốt lõi.' },
+      { text: 'Kể chuyện cá nhân dài dòng', explain: 'Sai vì thiếu trọng tâm kỹ thuật.' }
+    ]},
+    { question: 'Benchmark notes đáng tin cần thêm yếu tố nào?', correct: 3, options: [
+      { text: 'Một lần chạy duy nhất', explain: 'Sai vì dễ lệch do cold cache/noise.' },
+      { text: 'Chỉ p50 không cần p95', explain: 'Sai vì p95 quan trọng cho tail latency.' },
+      { text: 'Chỉ môi trường không ghi rõ dataset', explain: 'Sai vì thiếu reproducibility.' },
+      { text: 'Dataset shape + query set + cold/warm runs', explain: 'Đúng để benchmark có ý nghĩa.' }
+    ]},
+    { question: 'File nào giúp artifact trở nên reproducible cho reviewer?', correct: 3, options: [
+      { text: 'logo.png', explain: 'Sai vì không giúp chạy lại hệ thống.' },
+      { text: 'notes_random.txt', explain: 'Sai vì không đủ để tái lập demo.' },
+      { text: 'todo.md chỉ ghi việc chưa làm', explain: 'Sai vì không phải runbook kỹ thuật.' },
+      { text: 'docker-compose.yml + fake_data_generator.py', explain: 'Đúng vì cho phép dựng local stack và tạo dữ liệu benchmark nhanh.' }
+    ]},
+    { question: 'Tại sao nên có clickhouse_demo/dashboard_queries.sql?', correct: 2, options: [
+      { text: 'Để thay schema.sql', explain: 'Sai vì vai trò khác nhau.' },
+      { text: 'Để không cần benchmark', explain: 'Sai vì benchmark vẫn cần.' },
+      { text: 'Để minh họa query serving thực tế cho dashboard', explain: 'Đúng đây là use-case evidence quan trọng.' },
+      { text: 'Để lưu migration OLTP', explain: 'Sai vì không đúng scope.' }
+    ]},
+    { question: 'Phần nào giúp chứng minh “khi nào real-time OLAP justified”?', correct: 0, options: [
+      { text: 'real_time_olap_design.md với business triggers rõ', explain: 'Đúng cần gắn điều kiện kinh doanh cụ thể.' },
+      { text: 'Chỉ ghi “realtime tốt hơn batch”', explain: 'Sai vì quá chung chung.' },
+      { text: 'Xóa mọi trade-off khó', explain: 'Sai vì mất tính thực tế.' },
+      { text: 'Không đề cập freshness', explain: 'Sai vì freshness là cốt lõi realtime.' }
+    ]},
+    { question: 'Artifact recruiter-grade khác artifact học thử ở điểm nào?', correct: 3, options: [
+      { text: 'Nhiều hiệu ứng CSS hơn', explain: 'Sai vì focus không nằm ở giao diện.' },
+      { text: 'Nhiều thuật ngữ khó hơn', explain: 'Sai vì clarity quan trọng hơn jargon.' },
+      { text: 'Chỉ có kết luận không có dữ liệu', explain: 'Sai vì thiếu bằng chứng.' },
+      { text: 'Có quyết định kiến trúc + bằng chứng benchmark + lessons learned', explain: 'Đúng đây là tiêu chuẩn portfolio mạnh.' }
+    ]},
+    { question: 'Nếu benchmark cho thấy ClickHouse nhanh hơn nhưng cost vận hành cao hơn, nên làm gì?', correct: 1, options: [
+      { text: 'Bỏ qua cost vì speed quan trọng nhất', explain: 'Sai vì business phải cân bằng.' },
+      { text: 'Ghi rõ trade-off và điều kiện áp dụng trong README', explain: 'Đúng thể hiện tư duy production.' },
+      { text: 'Xóa kết quả bất lợi khỏi báo cáo', explain: 'Sai vì thiếu trung thực kỹ thuật.' },
+      { text: 'Kết luận mọi công ty nên dùng ClickHouse', explain: 'Sai vì workload khác nhau.' }
+    ]},
+    { question: 'Mục tiêu của tuần 20 artifact trong phỏng vấn là?', correct: 2, options: [
+      { text: 'Chứng minh bạn thuộc tài liệu', explain: 'Sai vì trọng tâm là tư duy áp dụng.' },
+      { text: 'Đạt số lượng file tối đa', explain: 'Sai vì số lượng không bằng chất lượng.' },
+      { text: 'Chứng minh khả năng reasoning kiến trúc analytics-serving', explain: 'Đúng đây là điểm khác biệt mạnh.' },
+      { text: 'Thay CV truyền thống', explain: 'Sai vì artifact bổ trợ CV.' }
+    ]}
+  ],
+  m8: [
+    { question: 'Mục tiêu phần ôn tập trong W20.09 là gì?', correct: 0, options: [
+      { text: 'Warm up trước mini test 20 câu', explain: 'Đúng giúp kiểm tra nhanh mức sẵn sàng.' },
+      { text: 'Thay thế hoàn toàn mini test', explain: 'Sai vì mini test vẫn bắt buộc.' },
+      { text: 'Đánh giá coding style HTML', explain: 'Sai vì không phải mục tiêu nội dung.' },
+      { text: 'Kiểm tra tốc độ gõ', explain: 'Sai vì không liên quan.' }
+    ]},
+    { question: 'Mini test tuần 20 nên tập trung năng lực nào?', correct: 2, options: [
+      { text: 'Thuộc lòng syntax hiếm gặp', explain: 'Sai vì không phản ánh năng lực chính.' },
+      { text: 'Ghi nhớ tên mọi engine OLAP', explain: 'Sai vì chỉ biết tên chưa đủ.' },
+      { text: 'Phân tích trade-off và chọn engine theo workload', explain: 'Đúng đây là năng lực mục tiêu.' },
+      { text: 'Thiết kế giao diện dashboard', explain: 'Sai vì khác scope.' }
+    ]},
+    { question: 'Nếu điểm mini test thấp, bước hợp lý nhất là?', correct: 1, options: [
+      { text: 'Bỏ qua và sang tuần mới', explain: 'Sai vì dễ tạo lỗ hổng kiến thức.' },
+      { text: 'Quay lại module yếu và làm lại practice', explain: 'Đúng cách học production-minded.' },
+      { text: 'Đổi công cụ học ngay', explain: 'Sai vì không xử lý gốc vấn đề.' },
+      { text: 'Chỉ đọc đáp án đúng', explain: 'Sai vì cần hiểu lý do/anti-pattern.' }
+    ]},
+    { question: 'Band điểm cao trong week20 phản ánh điều gì?', correct: 3, options: [
+      { text: 'Bạn có thể bỏ qua modeling dữ liệu', explain: 'Sai vì modeling vẫn quan trọng.' },
+      { text: 'Bạn giỏi frontend hơn backend', explain: 'Sai vì không liên quan trực tiếp.' },
+      { text: 'Bạn có thể dùng một engine cho mọi workload', explain: 'Sai vì đi ngược mindset.' },
+      { text: 'Bạn sẵn sàng thảo luận quyết định Modern OLAP có lý do', explain: 'Đúng với mục tiêu module.' }
+    ]},
+    { question: 'Tại sao guidance sau khi chấm điểm quan trọng?', correct: 0, options: [
+      { text: 'Vì nó định hướng ôn tập theo vùng yếu cụ thể', explain: 'Đúng giúp cải thiện có trọng tâm.' },
+      { text: 'Vì thay cho việc học module', explain: 'Sai vì guidance chỉ bổ trợ.' },
+      { text: 'Vì điểm số luôn chính xác tuyệt đối', explain: 'Sai vì điểm chỉ là tín hiệu.' },
+      { text: 'Vì không cần làm practice nữa', explain: 'Sai vì practice vẫn quan trọng.' }
+    ]},
+    { question: 'Mini test nên cover nhóm chủ đề nào?', correct: 1, options: [
+      { text: 'Chỉ ClickHouse syntax', explain: 'Sai vì quá hẹp.' },
+      { text: 'OLTP/OLAP, DuckDB, ClickHouse, Druid/Pinot, decision framework', explain: 'Đúng đúng theo yêu cầu tuần 20.' },
+      { text: 'Chỉ dashboard design', explain: 'Sai vì thiếu kiến trúc dữ liệu.' },
+      { text: 'Chỉ cloud security', explain: 'Sai vì ngoài phạm vi chính.' }
+    ]},
+    { question: 'Trong week20, điểm số tốt nhất khi đi kèm điều gì?', correct: 2, options: [
+      { text: 'Không cần artifact', explain: 'Sai vì artifact là output quan trọng.' },
+      { text: 'Không cần benchmark', explain: 'Sai vì benchmark là evidence mạnh.' },
+      { text: 'Artifact có benchmark + decision matrix rõ', explain: 'Đúng mới thể hiện năng lực toàn diện.' },
+      { text: 'Chỉ có slide trình bày', explain: 'Sai vì thiếu thực chứng kỹ thuật.' }
+    ]},
+    { question: 'Khi reset mini test, mục tiêu nên là gì?', correct: 3, options: [
+      { text: 'Chọn đáp án ngẫu nhiên nhanh hơn', explain: 'Sai vì không học được gì.' },
+      { text: 'Nhớ vị trí đáp án đúng', explain: 'Sai vì học thuộc vị trí không bền.' },
+      { text: 'Bỏ qua câu khó', explain: 'Sai vì câu khó là điểm cần học.' },
+      { text: 'Cải thiện reasoning ở câu sai trước đó', explain: 'Đúng đây là cách học hiệu quả.' }
+    ]},
+    { question: 'Phát biểu nào đúng về đánh giá tuần 20?', correct: 1, options: [
+      { text: 'Chỉ cần điểm, không cần hiểu sai ở đâu', explain: 'Sai vì hiểu sai mới giúp tiến bộ.' },
+      { text: 'Điểm + phân tích câu sai mới tạo giá trị học tập', explain: 'Đúng vì kết hợp kết quả và phản tư.' },
+      { text: 'Điểm thấp nghĩa là không nên học DE', explain: 'Sai vì điểm là trạng thái tạm thời.' },
+      { text: 'Điểm cao nghĩa là không cần học tiếp', explain: 'Sai vì kiến thức còn mở rộng.' }
+    ]},
+    { question: 'Mốc hoàn thành tuần 20 mạnh nhất là?', correct: 0, options: [
+      { text: 'Pass mini test và có artifact portfolio-ready', explain: 'Đúng đây là kết quả học thực chiến.' },
+      { text: 'Chỉ đọc xong module', explain: 'Sai vì thiếu output thực hành.' },
+      { text: 'Chỉ nghe podcast về OLAP', explain: 'Sai vì thiếu thực chứng.' },
+      { text: 'Chỉ so sánh giá cloud', explain: 'Sai vì không đủ năng lực kiến trúc.' }
+    ]}
+  ]
+};
+
+const finalTestQuestions = [
+  { question: 'OLTP khác OLAP ở điểm nền tảng nào?', options: ['OLTP cho aggregate lớn, OLAP cho transactions', 'OLTP cho transaction nhỏ, OLAP cho scan/aggregate lớn', 'Hai loại giống nhau chỉ khác tên', 'OLAP không dùng SQL'], correct: 'B' },
+  { question: 'Workload nào hợp với Modern OLAP nhất?', options: ['Password reset', 'Inventory row update', 'Product event dashboard high concurrency', 'User profile CRUD'], correct: 'C' },
+  { question: 'DuckDB phù hợp nhất cho?', options: ['Distributed serving 1000 users', 'Local analytics trên Parquet', 'OLTP banking core', 'Real-time alert engine'], correct: 'B' },
+  { question: 'ClickHouse thường mạnh ở?', options: ['Row-level transaction', 'Columnar aggregation speed', 'No schema needed', 'Identity management'], correct: 'B' },
+  { question: 'Druid/Pinot concepts thường gắn với?', options: ['Stream ingestion + low-latency serving', 'OLTP replication', 'Backup archive', 'Source control'], correct: 'A' },
+  { question: 'Partitioning đúng giúp?', options: ['Giảm vùng scan theo time filter', 'Tăng UI responsiveness frontend', 'Bỏ qua data quality', 'Thay mọi indexing'], correct: 'A' },
+  { question: 'Materialized view nên tạo khi?', options: ['Chưa biết query workload', 'Query lặp lại thường xuyên và tốn tài nguyên', 'Muốn tăng số object trong DB', 'Thay hoàn toàn raw data'], correct: 'B' },
+  { question: 'Approx distinct phù hợp khi?', options: ['Bắt buộc chính xác tuyệt đối tài chính', 'Cardinality cao, chấp nhận sai số nhỏ', 'Không có dữ liệu lớn', 'Không cần latency'], correct: 'B' },
+  { question: 'Anti-pattern lớn với PostgreSQL analytics là?', options: ['Dùng cho transaction app', 'Ép serve dashboard aggregate high-volume', 'Dùng index hợp lý', 'Dùng connection pooling'], correct: 'B' },
+  { question: 'Freshness vs correctness nghĩa là?', options: ['Realtime luôn đúng tuyệt đối', 'Không liên quan nhau', 'Càng realtime càng cần chiến lược correction', 'Chỉ cần cho BI hàng quý'], correct: 'C' },
+  { question: 'Khi nào real-time OLAP thường overkill?', options: ['Business cần minute-level action', 'Report theo ngày là đủ', 'Fraud detection realtime', 'SRE alerting theo giây'], correct: 'B' },
+  { question: 'Decision framework tốt cần tiêu chí nào?', options: ['Tool popularity', 'Màu logo vendor', 'Latency/freshness/concurrency/cost/team', 'Số like trên mạng'], correct: 'C' },
+  { question: 'Build vs Buy trade-off đúng?', options: ['Build luôn dễ hơn', 'Buy luôn rẻ hơn', 'Build linh hoạt hơn, Buy nhanh time-to-value', 'Không khác biệt'], correct: 'C' },
+  { question: 'Artifact recruiter-grade cần?', options: ['Nhiều từ buzzword', 'Benchmark + decision rationale + lessons learned', 'Chỉ ảnh screenshot', 'Chỉ markdown rời rạc'], correct: 'B' },
+  { question: 'ClickHouse table design nên bắt đầu từ?', options: ['ERD normalized giống OLTP', 'Query pattern và filter phổ biến', 'Tên bảng ngắn', 'Số lượng cột ít nhất'], correct: 'B' },
+  { question: 'Dashboard query thực hành tốt là?', options: ['SELECT * không filter date', 'Chỉ lấy cột cần và filter time rõ', 'Join tối đa để đầy đủ dữ liệu', 'Không cần pre-aggregation'], correct: 'B' },
+  { question: 'DuckDB không nên dùng để?', options: ['Prototype local', 'CI sanity checks', 'Distributed multi-user serving chính', 'Ad-hoc SQL trên Parquet'], correct: 'C' },
+  { question: 'Rủi ro nào hay gặp nếu ingest ClickHouse bằng nhiều small inserts?', options: ['Tự động tăng tốc mọi query', 'Too many parts và merge pressure cao', 'Tự động giảm storage về 0', 'Không ảnh hưởng gì vì MergeTree tự xử lý hết'], correct: 'B' },
+  { question: 'TTL trong bảng ClickHouse phục vụ mục tiêu nào?', options: ['Tăng tốc UI frontend', 'Quản lý retention để kiểm soát storage cost', 'Thay thế mọi backup policy', 'Biến OLAP thành OLTP'], correct: 'B' },
+  { question: 'Phát biểu đúng nhất cho Week20 là?', options: ['Học tên tool là đủ', 'Workload-first và trade-off-first', 'Chọn engine theo cảm tính', 'Không cần artifact'], correct: 'B' }
+];
+
+renderQuiz('quiz-m0', reviewQuestionBank.m0);
+renderQuiz('quiz-m1', reviewQuestionBank.m1);
+renderQuiz('quiz-m2', reviewQuestionBank.m2);
+renderQuiz('quiz-m3', reviewQuestionBank.m3);
+renderQuiz('quiz-m4', reviewQuestionBank.m4);
+renderQuiz('quiz-m5', reviewQuestionBank.m5);
+renderQuiz('quiz-m6', reviewQuestionBank.m6);
+renderQuiz('quiz-m7', reviewQuestionBank.m7);
+renderQuiz('quiz-m8', reviewQuestionBank.m8);
+renderFinalTest(finalTestQuestions);
+</script>
+
+</body>
+</html>

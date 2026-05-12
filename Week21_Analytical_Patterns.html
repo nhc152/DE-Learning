@@ -1,0 +1,2650 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 21 · Analytical Patterns</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 40px 24px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .hero p {
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-size: 0.95rem;
+  }
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+
+  .container { display: flex; min-height: calc(100vh - 160px); }
+
+  .sidebar {
+    width: 330px;
+    min-width: 330px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding: 0 16px 12px;
+  }
+  .level-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 16px 4px;
+    color: var(--text-muted);
+  }
+  .level-label.l4 { color: var(--accent2); }
+
+  .nav-item {
+    display: block;
+    padding: 7px 16px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: var(--highlight);
+    font-weight: 600;
+  }
+  .nav-number {
+    display: inline-block;
+    width: 58px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: monospace;
+  }
+
+  .main { flex: 1; padding: 32px 40px; max-width: 1040px; }
+  .module { display: none; }
+  .module.active { display: block; }
+
+  .module-header {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    background: var(--surface);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .module-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent);
+  }
+  .module-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .module-title { font-size: 1.55rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header {
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: 'Courier New', monospace;
+  }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--text);
+  }
+  code {
+    font-family: 'Courier New', monospace;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--accent4);
+  }
+
+  .quiz-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before {
+    content: 'Q';
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    background: var(--accent);
+    color: #000;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-align: center;
+    line-height: 22px;
+    margin-right: 8px;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.84rem;
+    transition: all 0.15s;
+    background: var(--bg);
+  }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 8px;
+    display: none;
+  }
+  .quiz-explain.show { display: block; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header {
+    padding: 12px 16px;
+    background: #d2940015;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--accent5);
+  }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--accent2);
+    margin-top: 10px;
+    transition: all 0.15s;
+  }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+
+  .info-box {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    font-size: 0.84rem;
+    border: 1px solid;
+    display: flex;
+    gap: 10px;
+  }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #ffffff05; }
+
+  .tab-group { display: flex; gap: 0; margin-bottom: 0; border-bottom: 1px solid var(--border); }
+  .tab {
+    padding: 8px 18px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Data Engineering Handbook Tutorial</h1>
+  <p>Tuần 21 · Analytical Patterns cho Product, Growth, Finance và Operations Analytics</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 4 · Applied Analytics</span>
+    <span class="badge badge-orange">Reusable Business Logic</span>
+    <span class="badge badge-blue">Portfolio-grade SQL Artifacts</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">CHƯƠNG TRÌNH HỌC</div>
+    <div class="level-label l4">TUẦN 21 · ANALYTICAL PATTERNS</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">W21.01</span>Tổng Quan: Analytical Patterns là gì?</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">W21.02</span>State Change Tracking & Status History</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">W21.03</span>Funnel Analysis</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">W21.04</span>Cohort Retention Analysis</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">W21.05</span>Rolling Metrics, Streaks & Consecutive Activity</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">W21.06</span>Multi-dimensional Aggregation & Attribution</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">W21.07</span>Artifact: week21_analytical_patterns/</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">W21.08</span>Mini Test Tổng Kết</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="m0">
+      <div class="module-header">
+        <div class="module-tag">Tuần 21 · W21.01</div>
+        <div class="module-title">Tổng Quan: Analytical Patterns là gì?</div>
+        <div class="module-subtitle">Từ business question đến metric logic và SQL pattern có thể tái sử dụng lâu dài</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:12.5%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-purpose">1</div>
+          1. Menu Tổng Thể
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <p><strong>Scope roadmap đang dùng:</strong> Module 403 · Analytical Patterns nâng cao (Tuần 21), tập trung state tracking, funnel, cohort, rolling/streak, multi-dim aggregation, attribution.</p>
+          <p><strong>Format rules kế thừa:</strong> Week00 family + PROMPT_Build_DE_Tutorial_HTML: dark UI, sidebar fixed, 6 sections/module, quiz tương tác, practice có lời giải ẩn, mini test cuối tuần.</p>
+          <p><strong>Dataset assumptions:</strong> sản phẩm dạng app/subscription có các bảng <code>events</code>, <code>user_status_history</code>, <code>orders</code>, <code>sessions</code>, <code>marketing_touches</code>, timezone chuẩn UTC, mọi metric có cut-off time rõ ràng.</p>
+
+          <table>
+            <tr><th>Chuỗi tư duy</th><th>Ý nghĩa</th><th>Output của DE</th></tr>
+            <tr><td>Business Question</td><td>Câu hỏi quyết định hành động kinh doanh</td><td>Ví dụ: "Tỷ lệ trial→paid tuần này giảm vì bước nào?"</td></tr>
+            <tr><td>Metric Logic</td><td>Định nghĩa metric + denominator + time window</td><td>Tài liệu metric definitions + governance notes</td></tr>
+            <tr><td>SQL Pattern</td><td>Mẫu truy vấn tái sử dụng nhiều domain</td><td>Template SQL chuẩn hóa để dùng trong mart/dashboard</td></tr>
+            <tr><td>Analytical Artifact</td><td>Gói truy vết & kiểm chứng recruiter-grade</td><td>README + assumptions + validation checks</td></tr>
+          </table>
+
+          <div class="info-box tip">✅ <span>Một pattern tốt phải trả lời được câu hỏi "có thể lặp lại tuần sau mà không đổi nghĩa metric không?"</span></div>
+          <div class="info-box warn">⚠️ <span>Ad-hoc query có thể đúng một lần, nhưng thường thất bại khi dashboard scale nhiều team.</span></div>
+          <div class="info-box note">📌 <span>Vai trò DE ở đây là bảo toàn tính nhất quán metric giữa data mart và BI tool, không chỉ viết câu SQL chạy được.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-purpose">2</div>
+          2. Mục Đích Module
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <ul>
+            <li>Hiểu vì sao analytics production cần <strong>reusable analytical patterns</strong> thay vì query rời rạc.</li>
+            <li>Nắm chuỗi chuyển đổi: <strong>business question → metric logic → SQL pattern</strong>.</li>
+            <li>Phân biệt rõ <strong>ad-hoc analysis</strong> và <strong>governed analytical logic</strong>.</li>
+            <li>Thấy được ứng dụng pattern ở product, growth, finance, operations, marketing.</li>
+            <li>Liên kết pattern với fact tables, marts và độ tin cậy dashboard.</li>
+            <li>Có checklist đầu ra để bảo đảm Week21 tạo được artifact tuyển dụng.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">3</div>
+          3. Giải Thích Chi Tiết
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <h3>Vì sao analytics cần pattern tái sử dụng?</h3>
+          <p>Khi công ty có nhiều dashboard, metric lệch nghĩa là chuyện rất thường gặp: mỗi analyst có thể tự chọn mẫu số khác nhau, thời gian khác nhau, hoặc định nghĩa user active khác nhau. Pattern giúp khóa logic chung để mọi team nhìn cùng một sự thật dữ liệu.</p>
+
+          <h3>Ad-hoc query vs Reusable analytical logic</h3>
+          <table>
+            <tr><th>Tiêu chí</th><th>Ad-hoc Query</th><th>Reusable Pattern</th></tr>
+            <tr><td>Mục tiêu</td><td>Trả lời nhanh một câu hỏi tức thời</td><td>Dùng lại nhiều lần cho monitoring/BI</td></tr>
+            <tr><td>Định nghĩa metric</td><td>Ít ghi lại assumptions</td><td>Rõ denominator, window, exclusions</td></tr>
+            <tr><td>Khả năng audit</td><td>Khó truy vết khi sai</td><td>Có README + validation checks</td></tr>
+            <tr><td>Khả năng scale</td><td>Giảm độ tin cậy theo thời gian</td><td>Ổn định qua sprint/quý</td></tr>
+          </table>
+
+          <h3>Framework dịch từ business sang SQL</h3>
+          <ol>
+            <li><strong>Business question:</strong> "Tỷ lệ thanh toán thành công theo nguồn traffic có giảm không?"</li>
+            <li><strong>Metric logic:</strong> Numerator = user hoàn tất payment, Denominator = user đến checkout, cùng time window 7 ngày.</li>
+            <li><strong>Pattern chọn:</strong> Funnel có order step + time constraint + first occurrence per user.</li>
+            <li><strong>Artifact:</strong> query + assumptions + quality checks + dashboard mapping.</li>
+          </ol>
+
+          <div class="cmd-block">
+            <div class="cmd-header">
+              <div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>
+              <span>analytical_workflow.md</span>
+            </div>
+            <div class="cmd-body"><pre>1) Define business decision
+2) Write metric contract (definition, denominator, exclusions)
+3) Pick SQL pattern (state/funnel/cohort/rolling/streak/attribution)
+4) Validate with edge cases
+5) Publish in mart + dashboard with governance notes</pre></div>
+          </div>
+
+          <h3>Pattern map theo domain</h3>
+          <table>
+            <tr><th>Domain</th><th>Câu hỏi thường gặp</th><th>Pattern mạnh nhất</th></tr>
+            <tr><td>Product</td><td>User onboard rớt ở bước nào?</td><td>Funnel + first occurrence + order check</td></tr>
+            <tr><td>Growth</td><td>Kênh nào giữ user lâu hơn?</td><td>Cohort retention + attribution basics</td></tr>
+            <tr><td>Finance</td><td>MRR bị ảnh hưởng bởi trạng thái subscription ra sao?</td><td>State change tracking + effective range</td></tr>
+            <tr><td>Operations</td><td>SLA giao hàng theo ngày/tuần có ổn định?</td><td>Rolling metrics + multi-dimensional aggregate</td></tr>
+            <tr><td>Marketing</td><td>First-touch vs last-touch khác gì về revenue?</td><td>Attribution assumptions + caveats</td></tr>
+          </table>
+
+          <h3>DE cần hiểu analytical patterns để làm gì?</h3>
+          <ul>
+            <li>Thiết kế fact tables không làm mất lịch sử quan trọng cho phân tích.</li>
+            <li>Build marts có grain đúng, phục vụ cả BI và ad-hoc mà không mâu thuẫn metric.</li>
+            <li>Tạo trust giữa data platform và business stakeholders qua metric governance.</li>
+            <li>Giảm xung đột giữa team khi cùng đọc một dashboard nhưng hiểu khác nhau.</li>
+          </ul>
+
+          <div class="info-box note">📌 <span>Dashboard đáng tin không đến từ visualization đẹp; nó đến từ pattern logic nhất quán ở lớp dữ liệu.</span></div>
+
+          <h3>Week outcomes checklist (đầu ra bắt buộc sau Week21)</h3>
+          <ul>
+            <li>[ ] Viết được state tracking với logic current vs historical state.</li>
+            <li>[ ] Xây funnel có order + time window đúng và tránh false conversion.</li>
+            <li>[ ] Dựng cohort retention với denominator nhất quán (D0/D1/D7/D30).</li>
+            <li>[ ] Tính rolling metrics + streak bằng window + gap-and-island.</li>
+            <li>[ ] Dùng GROUPING SETS/ROLLUP/CUBE cho phân tích đa chiều.</li>
+            <li>[ ] Trình bày first-touch/last-touch có assumptions rõ, không “tuyệt đối hóa” attribution.</li>
+            <li>[ ] Hoàn thiện artifact folder recruiter-grade có README và validation checks.</li>
+          </ul>
+
+          <h3>Ví dụ SQL chuẩn hóa một metric contract (PostgreSQL/Oracle SQL khác cú pháp)</h3>
+          <div id="w2101-tabs" class="tab-group">
+            <div class="tab active" onclick="switchTab('w2101-tabs','w2101-pg')">PostgreSQL</div>
+            <div class="tab" onclick="switchTab('w2101-tabs','w2101-oracle')">Oracle SQL</div>
+          </div>
+          <div id="w2101-pg" class="tab-content active">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · metric_contract_example.sql</span></div>
+              <div class="cmd-body"><pre>WITH checkout_users AS (
+  SELECT user_id, MIN(event_time) AS first_checkout_at
+  FROM events
+  WHERE event_name = 'checkout_started'
+    AND event_time >= DATE_TRUNC('day', CURRENT_DATE) - INTERVAL '7 days'
+  GROUP BY user_id
+),
+paid_users AS (
+  SELECT user_id, MIN(event_time) AS first_paid_at
+  FROM events
+  WHERE event_name = 'payment_success'
+    AND event_time >= DATE_TRUNC('day', CURRENT_DATE) - INTERVAL '7 days'
+  GROUP BY user_id
+)
+SELECT
+  COUNT(DISTINCT p.user_id)::numeric / NULLIF(COUNT(DISTINCT c.user_id), 0) AS checkout_to_paid_rate
+FROM checkout_users c
+LEFT JOIN paid_users p
+  ON c.user_id = p.user_id
+ AND p.first_paid_at >= c.first_checkout_at
+ AND p.first_paid_at <= c.first_checkout_at + INTERVAL '48 hours';</pre></div>
+            </div>
+          </div>
+          <div id="w2101-oracle" class="tab-content">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · metric_contract_example.sql</span></div>
+              <div class="cmd-body"><pre>WITH checkout_users AS (
+  SELECT user_id, MIN(event_time) AS first_checkout_at
+  FROM events
+  WHERE event_name = 'checkout_started'
+    AND event_time >= TRUNC(SYSDATE) - 7
+  GROUP BY user_id
+),
+paid_users AS (
+  SELECT user_id, MIN(event_time) AS first_paid_at
+  FROM events
+  WHERE event_name = 'payment_success'
+    AND event_time >= TRUNC(SYSDATE) - 7
+  GROUP BY user_id
+)
+SELECT
+  COUNT(DISTINCT p.user_id) / NULLIF(COUNT(DISTINCT c.user_id), 0) AS checkout_to_paid_rate
+FROM checkout_users c
+LEFT JOIN paid_users p
+  ON c.user_id = p.user_id
+ AND p.first_paid_at >= c.first_checkout_at
+ AND p.first_paid_at <= c.first_checkout_at + NUMTODSINTERVAL(48, 'HOUR');</pre></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-quiz">4</div>
+          4. Câu Hỏi Ôn Tập
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+
+          <div class="quiz-item">
+            <div class="quiz-q">Vì sao analytics production không nên chỉ dựa vào ad-hoc query?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Ad-hoc query có thể nhanh nhưng thường thiếu governance và khó tái sử dụng.')">A. Vì ad-hoc query chạy chậm hơn mọi trường hợp</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: ad-hoc query thiếu chuẩn denominator/window nên dễ lệch metric giữa các team.')">B. Vì ad-hoc query khó đảm bảo nhất quán metric khi scale dashboard</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không đúng: ad-hoc vẫn hữu ích cho khám phá ban đầu.')">C. Vì ad-hoc query luôn sai về cú pháp</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không đúng: BI tool vẫn cần logic nền tảng từ SQL pattern.')">D. Vì BI tool tự sửa được metric logic</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Chuỗi chuyển đổi đúng trong analytical thinking là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Bắt đầu từ chart sẽ làm sai mục tiêu business.')">A. Dashboard chart → SQL → business question</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: luôn neo vào câu hỏi kinh doanh trước khi chọn pattern SQL.')">B. Business question → metric logic → SQL pattern</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai thứ tự: metric không thể định nghĩa tốt nếu chưa rõ business question.')">C. SQL syntax → metric logic → business question</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: domain không thay thế được metric contract.')">D. Domain name → table name → visualization</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Điểm khác biệt quan trọng giữa reusable pattern và query một lần là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tên cột không phải yếu tố cốt lõi.')">A. Có dùng alias đẹp hay không</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Nhiều CTE chưa chắc reusable.')">B. Số lượng CTE nhiều hơn 3</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: reusable pattern có assumptions, denominator, time window rõ và có thể audit.')">C. Có metric contract + assumptions + validation checks</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'View chỉ là hình thức lưu, chưa đảm bảo logic chuẩn.')">D. Được lưu dưới dạng view</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Trong domain growth, pattern nào thường dùng để đo khả năng giữ user theo nhóm bắt đầu?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'State tracking không trực tiếp đo retention theo cohort.')">A. State change tracking</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: cohort retention phân tích hành vi quay lại theo cohort acquisition/first-event.')">B. Cohort retention analysis</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'ROLLUP dùng cho tổng hợp đa chiều, không phải retention chính.')">C. ROLLUP only</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Attribution đo credit marketing, không thay thế cohort retention.')">D. Last-touch attribution</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Nếu dashboard finance và product cho ra conversion khác nhau, DE nên xử lý bước nào trước?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đổi màu chart không giải quyết lệch nghĩa metric.')">A. Chuẩn hóa UI dashboard</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: khóa metric contract trước (denominator/time window/exclusions).')">B. So sánh và thống nhất metric logic contract</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tăng tài nguyên DB không giải quyết sai logic.')">C. Scale warehouse compute</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Bỏ qua khác biệt sẽ làm mất trust dữ liệu.')">D. Chấp nhận vì khác domain</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Fact table và mart liên quan thế nào đến analytical patterns?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Pattern vẫn cần data modeling đúng.')">A. Không liên quan, chỉ cần SQL giỏi</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'UI không thay thế lớp dữ liệu.')">B. Chỉ cần BI dashboard đẹp</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: fact/mart quyết định grain và khả năng giữ lịch sử cho pattern.')">C. Là nền dữ liệu giúp pattern giữ đúng grain và lịch sử</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tăng partition không tự sửa nghĩa metric.')">D. Chỉ giúp tăng tốc query</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Khi nào nên chuyển từ ad-hoc query sang artifact chính thức?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Lặp 1 lần chưa đủ tín hiệu cần chuẩn hóa.')">A. Khi vừa trả lời xong câu hỏi đầu tiên</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: khi metric được dùng lặp lại trong decision hoặc dashboard.')">B. Khi metric được dùng lặp lại bởi nhiều team/tuần</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không nên đợi tới khi sai mới chuẩn hóa.')">C. Chỉ khi có incident dữ liệu lớn</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan trực tiếp đến nhu cầu nghiệp vụ.')">D. Khi warehouse đổi engine</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Phát biểu nào thể hiện đúng tư duy metric governance?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, '"Chuẩn" không chỉ là chạy được mà còn phải diễn giải nhất quán.')">A. Metric chỉ cần query chạy không lỗi</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: metric cần assumptions rõ để stakeholder hiểu giới hạn diễn giải.')">B. Metric cần contract + assumptions + phạm vi áp dụng</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Kinh nghiệm cá nhân không thay thế tài liệu hóa.')">C. Không cần tài liệu nếu analyst senior</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Raw table thường không đủ sạch cho metric ổn định.')">D. Luôn đọc trực tiếp raw events để chính xác nhất</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Trong week outcomes, mục tiêu nào phản ánh đúng chất lượng tuyển dụng (recruiter-grade)?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Số lượng query không phản ánh chất lượng logic.')">A. Có nhiều query nhất có thể</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Visualization đơn lẻ chưa đủ chiều sâu analytical.')">B. Chỉ nộp screenshot dashboard</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: recruiter-grade cần business context, assumptions, metric definitions và validation.')">C. Có artifact đầy đủ SQL + README + validation checks</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Copy template không chứng minh hiểu logic.')">D. Copy bài mẫu và đổi tên bảng</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Anti-pattern phổ biến nhất ở giai đoạn đầu làm analytics là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tối ưu sau khi đúng logic; đây không phải anti-pattern chính ở đầu bài.')">A. Viết SQL chưa tối ưu hiệu năng</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: trả lời nhanh bằng query rời rạc nhưng không chuẩn hóa metric khiến dashboard mất trust.')">B. Trả lời business bằng query rời rạc, không chuẩn hóa metric logic</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đặt tên bảng là vấn đề nhỏ hơn governance.')">C. Đặt tên bảng không theo chuẩn</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Join nhiều bảng không mặc định là sai.')">D. Dùng nhiều join trong cùng query</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-summary">5</div>
+          5. Tổng Kết
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>Core mindset</strong>Analytics tốt bắt đầu từ quyết định business, không bắt đầu từ chart.</div>
+            <div class="summary-item"><strong>Translation chain</strong>Business question → metric logic → SQL pattern → governed artifact.</div>
+            <div class="summary-item"><strong>Why DE matters</strong>DE giữ grain đúng và lịch sử đủ để phân tích đáng tin.</div>
+            <div class="summary-item"><strong>Reusable > ad-hoc</strong>Pattern tái sử dụng giúp giảm metric conflict giữa team.</div>
+            <div class="summary-item"><strong>Governance</strong>Định nghĩa denominator/window/exclusions là bắt buộc.</div>
+            <div class="summary-item"><strong>Week success criteria</strong>Tạo được artifact có assumptions + validation checks + BI trust.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-practice">6</div>
+          6. Bài Tập Thực Hành
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 1 · Business question interpretation</div>
+            <div class="practice-task-body">
+              <p>Cho câu hỏi: <strong>"Trial conversion giảm trong 2 tuần gần đây, team cần biết lỗi ở đâu trong journey"</strong>. Hãy viết lại thành metric contract gồm: numerator, denominator, grain, time window, exclusions.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <p><strong>Gợi ý lời giải:</strong></p>
+                <ul>
+                  <li>Numerator: user trial có event <code>payment_success</code> trong 14 ngày kể từ <code>trial_started</code>.</li>
+                  <li>Denominator: user có <code>trial_started</code> trong cùng kỳ.</li>
+                  <li>Grain: user_id (không dùng event-level để tránh đếm trùng).</li>
+                  <li>Exclusions: test user/internal account, duplicate payment event.</li>
+                  <li>Time window: cohort trial bắt đầu trong 2 tuần gần nhất.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 2 · SQL pattern selection</div>
+            <div class="practice-task-body">
+              <p>Match tình huống với pattern đúng:</p>
+              <ul>
+                <li>a) "Muốn biết user quay lại sau ngày đầu tiên"</li>
+                <li>b) "Muốn biết user rớt ở bước nào trong onboarding"</li>
+                <li>c) "Muốn biết trạng thái subscription đổi thế nào theo thời gian"</li>
+              </ul>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <ul>
+                  <li>a) <strong>Cohort Retention</strong></li>
+                  <li>b) <strong>Funnel Analysis</strong></li>
+                  <li>c) <strong>State Change Tracking</strong></li>
+                </ul>
+                <p>Lý do: mỗi pattern giải quyết một loại câu hỏi hành vi khác nhau; chọn sai pattern sẽ sai metric dù SQL đúng cú pháp.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 3 · BI trust checklist</div>
+            <div class="practice-task-body">
+              <p>Thiết kế checklist 6 mục để review trước khi publish metric lên dashboard cho stakeholder.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <ol>
+                  <li>Định nghĩa numerator/denominator rõ.</li>
+                  <li>Time window có timezone chuẩn.</li>
+                  <li>Grain phù hợp (user/session/order...).</li>
+                  <li>Exclusion rules (internal/test/bot) rõ.</li>
+                  <li>Validation check với sample known cases.</li>
+                  <li>Tài liệu assumptions để tránh over-interpretation.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(0)">← Module trước</button>
+        <button class="nav-btn primary" onclick="goNext(0)">Module tiếp theo →</button>
+      </div>
+    </div>
+
+    <div class="module" id="m1">
+      <div class="module-header">
+        <div class="module-tag">Tuần 21 · W21.02</div>
+        <div class="module-title">State Change Tracking & Status History</div>
+        <div class="module-subtitle">Theo dõi vòng đời trạng thái theo thời gian để không đánh mất ngữ cảnh business</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-purpose">1</div>
+          1. Menu Tổng Thể
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <table>
+            <tr><th>Bước</th><th>Pattern logic</th><th>Mục tiêu phân tích</th></tr>
+            <tr><td>1. Thiết kế lịch sử trạng thái</td><td>Lưu <code>effective_from/effective_to</code> hoặc event transition log</td><td>Không mất lịch sử khi trạng thái đổi</td></tr>
+            <tr><td>2. Tách current vs historical</td><td><code>effective_to IS NULL</code> là trạng thái hiện tại</td><td>Hỗ trợ dashboard realtime + audit lịch sử</td></tr>
+            <tr><td>3. Detect transition</td><td>Dùng <code>LAG/LEAD</code> theo <code>entity_id, event_time</code></td><td>Bắt sự kiện active→inactive, trial→paid</td></tr>
+            <tr><td>4. Khử duplicate</td><td><code>ROW_NUMBER()</code> trên key business</td><td>Tránh đếm chuyển trạng thái ảo</td></tr>
+            <tr><td>5. Chuẩn hóa metric</td><td>Định nghĩa rõ “chuyển trạng thái hợp lệ”</td><td>Bảo toàn trust giữa data mart và BI</td></tr>
+          </table>
+
+          <div class="info-box warn">⚠️ <span>Anti-pattern nguy hiểm: chỉ lưu trạng thái hiện tại trong dimension table, khiến team không thể trả lời “khi nào user bị churn?”.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-purpose">2</div>
+          2. Mục Đích Module
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <ul>
+            <li>Hiểu state change tracking như một analytical pattern cốt lõi, không chỉ là kỹ thuật SQL.</li>
+            <li>Phân biệt dữ liệu trạng thái hiện tại và lịch sử trạng thái.</li>
+            <li>Thiết kế logic <code>effective_from/effective_to</code> cho status history table.</li>
+            <li>Dùng <code>LAG/LEAD</code> để bắt transition quan trọng theo business.</li>
+            <li>Xử lý dữ liệu duplicate/out-of-order trước khi tính metric transition.</li>
+            <li>Tránh sai lệch dashboard khi status events bị ghi trùng.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">3</div>
+          3. Giải Thích Chi Tiết
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <h3>State history table: nền tảng để phân tích vòng đời entity</h3>
+          <p>Mọi entity có lifecycle (user account, order, subscription, ticket) đều cần lưu vết trạng thái. Nếu chỉ cập nhật "trạng thái mới nhất", bạn mất khả năng phân tích churn, reactivation, SLA breach, retry sequence.</p>
+
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>status_history_model.txt</span></div>
+            <div class="cmd-body"><pre>entity_id
+status
+status_event_time
+effective_from
+effective_to
+source_event_id
+ingested_at
+
+Rule:
+- effective_to IS NULL  => current status
+- effective_to NOT NULL => historical status interval</pre></div>
+          </div>
+
+          <h3>Current state vs historical state</h3>
+          <table>
+            <tr><th>Loại truy vấn</th><th>Dùng cột nào</th><th>Ví dụ câu hỏi</th></tr>
+            <tr><td>Current snapshot</td><td><code>effective_to IS NULL</code></td><td>Hiện tại có bao nhiêu subscription active?</td></tr>
+            <tr><td>Historical timeline</td><td><code>effective_from/effective_to</code></td><td>Trong tháng trước có bao nhiêu user trial→paid?</td></tr>
+            <tr><td>Transition event</td><td><code>LAG/LEAD</code> trên status log</td><td>Tuần này pending→completed mất bao lâu?</td></tr>
+          </table>
+
+          <h3>Transition detection bằng LAG (event-sourced)</h3>
+          <div id="w2102-tabs-1" class="tab-group">
+            <div class="tab active" onclick="switchTab('w2102-tabs-1','w2102-pg-1')">PostgreSQL</div>
+            <div class="tab" onclick="switchTab('w2102-tabs-1','w2102-oracle-1')">Oracle SQL</div>
+          </div>
+          <div id="w2102-pg-1" class="tab-content active">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · state_transition_lag.sql</span></div>
+              <div class="cmd-body"><pre>WITH ordered AS (
+  SELECT
+    user_id,
+    status,
+    event_time,
+    LAG(status) OVER (
+      PARTITION BY user_id
+      ORDER BY event_time
+    ) AS prev_status
+  FROM user_status_events
+)
+SELECT
+  user_id,
+  prev_status,
+  status AS new_status,
+  event_time AS transition_at
+FROM ordered
+WHERE prev_status IS NOT NULL
+  AND prev_status <> status
+  AND (prev_status, status) IN (
+    ('active','inactive'),
+    ('pending','completed'),
+    ('trial','paid')
+  );</pre></div>
+            </div>
+          </div>
+          <div id="w2102-oracle-1" class="tab-content">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · state_transition_lag.sql</span></div>
+              <div class="cmd-body"><pre>WITH ordered AS (
+  SELECT
+    user_id,
+    status,
+    event_time,
+    LAG(status) OVER (
+      PARTITION BY user_id
+      ORDER BY event_time
+    ) AS prev_status
+  FROM user_status_events
+)
+SELECT
+  user_id,
+  prev_status,
+  status AS new_status,
+  event_time AS transition_at
+FROM ordered
+WHERE prev_status IS NOT NULL
+  AND prev_status <> status
+  AND (prev_status = 'active' AND status = 'inactive'
+       OR prev_status = 'pending' AND status = 'completed'
+       OR prev_status = 'trial' AND status = 'paid');</pre></div>
+            </div>
+          </div>
+
+          <h3>Dựng effective range từ stream event</h3>
+          <p>Khi cần model kiểu SCD2 nhẹ cho phân tích, bạn có thể dùng <code>LEAD(event_time)</code> làm <code>effective_to</code> để có interval chính xác.</p>
+
+          <div id="w2102-tabs-2" class="tab-group">
+            <div class="tab active" onclick="switchTab('w2102-tabs-2','w2102-pg-2')">PostgreSQL</div>
+            <div class="tab" onclick="switchTab('w2102-tabs-2','w2102-oracle-2')">Oracle SQL</div>
+          </div>
+          <div id="w2102-pg-2" class="tab-content active">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · effective_interval.sql</span></div>
+              <div class="cmd-body"><pre>SELECT
+  user_id,
+  status,
+  event_time AS effective_from,
+  LEAD(event_time) OVER (
+    PARTITION BY user_id
+    ORDER BY event_time
+  ) AS effective_to
+FROM user_status_events
+ORDER BY user_id, effective_from;</pre></div>
+            </div>
+          </div>
+          <div id="w2102-oracle-2" class="tab-content">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · effective_interval.sql</span></div>
+              <div class="cmd-body"><pre>SELECT
+  user_id,
+  status,
+  event_time AS effective_from,
+  LEAD(event_time) OVER (
+    PARTITION BY user_id
+    ORDER BY event_time
+  ) AS effective_to
+FROM user_status_events
+ORDER BY user_id, effective_from;</pre></div>
+            </div>
+          </div>
+
+          <h3>Xử lý duplicate status events</h3>
+          <p>Nhiều hệ thống gửi lại cùng một event do retry network. Nếu không deduplicate, bạn sẽ đếm thừa số lần transition.</p>
+
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>deduplicate_status_events.sql</span></div>
+            <div class="cmd-body"><pre>WITH ranked AS (
+  SELECT
+    user_id,
+    status,
+    event_time,
+    source_event_id,
+    ROW_NUMBER() OVER (
+      PARTITION BY source_event_id
+      ORDER BY ingested_at
+    ) AS rn
+  FROM user_status_events_raw
+)
+SELECT user_id, status, event_time, source_event_id
+FROM ranked
+WHERE rn = 1;</pre></div>
+          </div>
+
+          <div class="info-box tip">✅ <span>Rule production: luôn xác định khóa duplicate trước (source_event_id hoặc business key + event_time) rồi mới chạy LAG/LEAD.</span></div>
+          <div class="info-box note">📌 <span>Nếu không có event_id, dùng fallback key: <code>(entity_id, status, date_trunc('second', event_time))</code> và đánh dấu mức độ tin cậy.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-quiz">4</div>
+          4. Câu Hỏi Ôn Tập
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+
+          <div class="quiz-item">
+            <div class="quiz-q">Mục tiêu chính của state change tracking là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tăng tốc query có thể là hệ quả, không phải mục tiêu cốt lõi.')">A. Chỉ để query chạy nhanh hơn</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: giữ lịch sử để phân tích transition và vòng đời entity theo thời gian.')">B. Bảo toàn lịch sử trạng thái để phân tích lifecycle</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Visualization không thay thế logic dữ liệu nền.')">C. Chỉ để vẽ dashboard đẹp hơn</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Xóa trạng thái cũ là anti-pattern.')">D. Xóa trạng thái cũ để giảm dung lượng</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Dấu hiệu phổ biến của anti-pattern trong status modeling là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: chỉ lưu current status sẽ không trả lời được transition theo thời gian.')">A. Chỉ lưu current status, không lưu lịch sử</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là thực hành tốt cho dedup.')">B. Lưu source_event_id</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'effective interval giúp truy vấn lịch sử.')">C. Dùng effective_from/effective_to</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'LAG là kỹ thuật phù hợp để detect transition.')">D. Dùng LAG để tìm trạng thái trước đó</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Trong bảng history, điều kiện nào thường biểu diễn trạng thái hiện tại?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là trạng thái đã đóng interval.')">A. effective_to IS NOT NULL</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: interval mở (effective_to null) đại diện current state.')">B. effective_to IS NULL</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không đủ thông tin để xác định current state.')">C. event_time = created_at</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Ordering không phải điều kiện current state.')">D. event_time là timestamp lớn nhất toàn bảng</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Vì sao cần xử lý duplicate trước khi tính transition?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'LAG vẫn chạy được nhưng kết quả có thể sai.')">A. Vì nếu không thì SQL sẽ luôn lỗi</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: duplicate có thể tạo transition giả và làm sai conversion/churn metrics.')">B. Vì duplicate tạo đếm thừa số lần chuyển trạng thái</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Index không tự xử lý duplicate semantics.')">C. Vì index không hoạt động với window function</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Partition không giải quyết duplicate business event.')">D. Vì partition by user_id là không hợp lệ</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Pattern SQL nào phù hợp nhất để lấy trạng thái trước đó của mỗi event?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'GROUP BY không truy cập trực tiếp hàng trước đó.')">A. GROUP BY status</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: LAG(status) trên partition entity và order thời gian.')">B. LAG(status) OVER (PARTITION BY entity ORDER BY event_time)</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'COUNT không cho biết trạng thái liền trước.')">C. COUNT(*) OVER ()</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'MAX(status) không có nghĩa transition timeline.')">D. MAX(status)</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Câu hỏi nào là câu hỏi transition điển hình?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là snapshot question, không phải transition.')">A. Hiện tại có bao nhiêu user active?</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: trial→paid là chuyển trạng thái theo timeline.')">B. Bao nhiêu user chuyển từ trial sang paid trong 30 ngày?</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là câu hỏi volume tổng hợp.')">C. Có bao nhiêu event trong bảng?</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là metadata question.')">D. Cột status có bao nhiêu distinct value?</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Khi nào dùng LEAD(event_time) trong state tracking?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan đến đếm null.')">A. Để đếm số bản ghi null</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: LEAD giúp tạo effective_to cho mỗi trạng thái.')">B. Để dựng interval kết thúc của trạng thái hiện tại</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'JOIN thứ tự không thay thế window logic này.')">C. Để thay thế toàn bộ join</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không dùng để convert timezone.')">D. Để đổi timezone UTC sang local</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Đâu là cặp transition quan trọng cần theo dõi trong subscription analytics?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'paid→trial thường không phải lifecycle chuẩn.')">A. paid → trial</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: trial→paid là chuyển đổi giá trị và active→inactive là churn signal.')">B. trial → paid và active → inactive</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'created→created không có ý nghĩa transition.')">C. created → created</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'anonymous→anonymous không phải lifecycle milestone.')">D. anonymous → anonymous</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Nếu event đến trễ (late arriving), nên xử lý thế nào?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Bỏ qua có thể làm mất transition thực.')">A. Bỏ qua hoàn toàn event đến trễ</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: cần reorder theo event_time và có incremental recompute cho cửa sổ bị ảnh hưởng.')">B. Re-order theo event_time và recompute window liên quan</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Gán thành current status luôn sẽ sai lịch sử.')">C. Luôn gán vào trạng thái hiện tại</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tăng RAM không sửa logic thời gian.')">D. Chỉ tăng memory cho warehouse</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Phát biểu nào đúng về metric trust trong state transition dashboard?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Khoá metric cần nhiều hơn một câu query.')">A. Chỉ cần query chạy được là đủ</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: cần định nghĩa transition hợp lệ, dedup rule và data freshness rõ.')">B. Cần definition rõ + dedup rule + cửa sổ dữ liệu</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đặt tên dashboard không quyết định trust.')">C. Chỉ cần đặt tên chart rõ</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không thể bỏ qua dữ liệu lịch sử.')">D. Không cần historical table</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-summary">5</div>
+          5. Tổng Kết
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>State history first</strong>Đừng chỉ giữ current status, luôn thiết kế khả năng truy vết timeline.</div>
+            <div class="summary-item"><strong>Transition logic</strong>LAG/LEAD là lõi để nhận diện đổi trạng thái đúng thứ tự thời gian.</div>
+            <div class="summary-item"><strong>Effective range</strong><code>effective_from/effective_to</code> giúp trả lời cả snapshot và lịch sử.</div>
+            <div class="summary-item"><strong>Dedup discipline</strong>Khử trùng event là bắt buộc trước khi tính metric transition.</div>
+            <div class="summary-item"><strong>Business relevance</strong>Focus vào transitions có ý nghĩa: trial→paid, active→inactive, pending→completed.</div>
+            <div class="summary-item"><strong>BI trust</strong>Metric transition cần định nghĩa hợp lệ + data window + assumptions rõ ràng.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-practice">6</div>
+          6. Bài Tập Thực Hành
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 1 · Business question interpretation</div>
+            <div class="practice-task-body">
+              <p>Câu hỏi business: <strong>"Tỷ lệ user active rơi sang inactive tuần này tăng bất thường"</strong>. Hãy định nghĩa metric contract (numerator, denominator, grain, window, exclusions).</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <ul>
+                  <li><strong>Numerator:</strong> số user có transition <code>active → inactive</code> trong tuần T.</li>
+                  <li><strong>Denominator:</strong> số user ở trạng thái active tại đầu tuần T.</li>
+                  <li><strong>Grain:</strong> user_id (mỗi user tính tối đa 1 lần/tuần).</li>
+                  <li><strong>Window:</strong> tuần lịch chuẩn UTC.</li>
+                  <li><strong>Exclusions:</strong> test/internal users, duplicate source_event_id.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 2 · SQL pattern selection</div>
+            <div class="practice-task-body">
+              <p>Chọn pattern đúng cho từng yêu cầu:</p>
+              <ul>
+                <li>a) Truy vấn trạng thái hiện tại của toàn bộ account</li>
+                <li>b) Truy vấn thời gian mỗi account ở trạng thái trial</li>
+                <li>c) Đếm số account chuyển pending→completed theo ngày</li>
+              </ul>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <ul>
+                  <li>a) Filter <code>effective_to IS NULL</code> từ history table.</li>
+                  <li>b) Dùng interval <code>effective_from/effective_to</code> rồi tính duration.</li>
+                  <li>c) Dùng <code>LAG(status)</code> detect transition + group by date(transition_at).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 3 · Duplicate handling task</div>
+            <div class="practice-task-body">
+              <p>Bảng raw có retry event làm trùng <code>source_event_id</code>. Viết logic deduplicate trước khi tính transition và nêu lý do tại sao bước này bảo vệ BI trust.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <div class="cmd-block">
+                  <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>dedup_before_transition.sql</span></div>
+                  <div class="cmd-body"><pre>WITH ranked AS (
+  SELECT *,
+         ROW_NUMBER() OVER (
+           PARTITION BY source_event_id
+           ORDER BY ingested_at
+         ) AS rn
+  FROM user_status_events_raw
+)
+SELECT *
+FROM ranked
+WHERE rn = 1;</pre></div>
+                </div>
+                <p>Lý do: nếu không dedup, một retry event có thể bị tính thành nhiều lần active→inactive, làm team hiểu sai mức độ churn.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(1)">← Module trước</button>
+        <button class="nav-btn primary" onclick="goNext(1)">Module tiếp theo →</button>
+      </div>
+    </div>
+
+    <div class="module" id="m2">
+      <div class="module-header">
+        <div class="module-tag">Tuần 21 · W21.03</div>
+        <div class="module-title">Funnel Analysis</div>
+        <div class="module-subtitle">Đo conversion/drop-off theo chuỗi bước có thứ tự và ràng buộc thời gian</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:37.5%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-purpose">1</div>
+          1. Menu Tổng Thể
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <table>
+            <tr><th>Bước</th><th>Logic pattern</th><th>Mục tiêu</th></tr>
+            <tr><td>1. Định nghĩa step funnel</td><td>Signup flow với thứ tự cố định</td><td>Khóa nghĩa conversion</td></tr>
+            <tr><td>2. Lấy first occurrence</td><td>MIN(event_time) theo user/step</td><td>Tránh đếm trùng do retry/re-open</td></tr>
+            <tr><td>3. Enforce step order</td><td>step2_time &gt;= step1_time, step3_time &gt;= step2_time</td><td>Không tính conversion out-of-order</td></tr>
+            <tr><td>4. Time window constraint</td><td>Ví dụ hoàn tất funnel trong 24h/7d</td><td>Bám đúng hành vi mong muốn</td></tr>
+            <tr><td>5. Tính conversion/drop-off</td><td>Step_n / Step_1 và chênh lệch giữa các step</td><td>Ưu tiên điểm nghẽn cần tối ưu</td></tr>
+          </table>
+
+          <div class="info-box warn">⚠️ <span>Anti-pattern: đếm user làm step bất kỳ thời điểm nào là "converted" dù làm sai thứ tự.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-purpose">2</div>
+          2. Mục Đích Module
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <ul>
+            <li>Hiểu funnel như mô hình hành vi theo <strong>ordered steps</strong>, không phải đếm event rời rạc.</li>
+            <li>Định nghĩa đúng conversion rate và drop-off rate theo từng step.</li>
+            <li>Dùng first occurrence per step để tránh inflate metrics.</li>
+            <li>Áp ràng buộc order + time window để đảm bảo tính đúng nghĩa business.</li>
+            <li>Phân biệt funnel theo user-level và session-level.</li>
+            <li>Tránh lỗi phổ biến khi làm signup funnel cho product analytics.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">3</div>
+          3. Giải Thích Chi Tiết
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <h3>Funnel concept: từ event log đến hành vi có ý nghĩa</h3>
+          <p>Funnel phân tích tỷ lệ user đi qua một chuỗi bước có thứ tự. Giá trị của funnel không nằm ở số event, mà ở khả năng trả lời: user rơi ở đâu, rơi vì step friction nào, và thay đổi sản phẩm tác động step nào.</p>
+
+          <h3>Signup funnel ví dụ thực tế</h3>
+          <table>
+            <tr><th>Step</th><th>Event Name</th><th>Ý nghĩa business</th></tr>
+            <tr><td>Step 1</td><td>signup_started</td><td>User bắt đầu tạo account</td></tr>
+            <tr><td>Step 2</td><td>email_verified</td><td>User vượt qua xác minh danh tính</td></tr>
+            <tr><td>Step 3</td><td>profile_completed</td><td>User hoàn thiện profile onboarding</td></tr>
+            <tr><td>Step 4</td><td>first_project_created</td><td>User đạt activation milestone</td></tr>
+          </table>
+
+          <h3>First occurrence per step</h3>
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>funnel_step_first_occurrence.sql</span></div>
+            <div class="cmd-body"><pre>WITH step_events AS (
+  SELECT
+    user_id,
+    event_name,
+    MIN(event_time) AS first_time
+  FROM events
+  WHERE event_name IN (
+    'signup_started',
+    'email_verified',
+    'profile_completed',
+    'first_project_created'
+  )
+  GROUP BY user_id, event_name
+)
+SELECT *
+FROM step_events;</pre></div>
+          </div>
+
+          <h3>Enforce step order + time window</h3>
+          <p>Đây là phần phân biệt giữa "query có vẻ đúng" và "analytical logic đúng". Step sau chỉ hợp lệ khi xảy ra sau step trước trong khoảng thời gian định nghĩa.</p>
+
+          <div id="w2103-tabs-1" class="tab-group">
+            <div class="tab active" onclick="switchTab('w2103-tabs-1','w2103-pg-1')">PostgreSQL</div>
+            <div class="tab" onclick="switchTab('w2103-tabs-1','w2103-oracle-1')">Oracle SQL</div>
+          </div>
+
+          <div id="w2103-pg-1" class="tab-content active">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · signup_funnel_ordered.sql</span></div>
+              <div class="cmd-body"><pre>WITH s1 AS (
+  SELECT user_id, MIN(event_time) AS t1
+  FROM events
+  WHERE event_name = 'signup_started'
+  GROUP BY user_id
+),
+s2 AS (
+  SELECT user_id, MIN(event_time) AS t2
+  FROM events
+  WHERE event_name = 'email_verified'
+  GROUP BY user_id
+),
+s3 AS (
+  SELECT user_id, MIN(event_time) AS t3
+  FROM events
+  WHERE event_name = 'profile_completed'
+  GROUP BY user_id
+),
+s4 AS (
+  SELECT user_id, MIN(event_time) AS t4
+  FROM events
+  WHERE event_name = 'first_project_created'
+  GROUP BY user_id
+),
+joined AS (
+  SELECT
+    s1.user_id,
+    s1.t1,
+    s2.t2,
+    s3.t3,
+    s4.t4
+  FROM s1
+  LEFT JOIN s2 ON s1.user_id = s2.user_id
+    AND s2.t2 >= s1.t1
+    AND s2.t2 <= s1.t1 + INTERVAL '24 hours'
+  LEFT JOIN s3 ON s1.user_id = s3.user_id
+    AND s3.t3 >= s2.t2
+    AND s3.t3 <= s1.t1 + INTERVAL '24 hours'
+  LEFT JOIN s4 ON s1.user_id = s4.user_id
+    AND s4.t4 >= s3.t3
+    AND s4.t4 <= s1.t1 + INTERVAL '24 hours'
+)
+SELECT
+  COUNT(*) AS step1_users,
+  COUNT(t2) AS step2_users,
+  COUNT(t3) AS step3_users,
+  COUNT(t4) AS step4_users,
+  ROUND(COUNT(t4)::numeric / NULLIF(COUNT(*), 0), 4) AS step1_to_step4_conversion
+FROM joined;</pre></div>
+            </div>
+          </div>
+
+          <div id="w2103-oracle-1" class="tab-content">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · signup_funnel_ordered.sql</span></div>
+              <div class="cmd-body"><pre>WITH s1 AS (
+  SELECT user_id, MIN(event_time) AS t1
+  FROM events
+  WHERE event_name = 'signup_started'
+  GROUP BY user_id
+),
+s2 AS (
+  SELECT user_id, MIN(event_time) AS t2
+  FROM events
+  WHERE event_name = 'email_verified'
+  GROUP BY user_id
+),
+s3 AS (
+  SELECT user_id, MIN(event_time) AS t3
+  FROM events
+  WHERE event_name = 'profile_completed'
+  GROUP BY user_id
+),
+s4 AS (
+  SELECT user_id, MIN(event_time) AS t4
+  FROM events
+  WHERE event_name = 'first_project_created'
+  GROUP BY user_id
+),
+joined AS (
+  SELECT
+    s1.user_id,
+    s1.t1,
+    s2.t2,
+    s3.t3,
+    s4.t4
+  FROM s1
+  LEFT JOIN s2 ON s1.user_id = s2.user_id
+    AND s2.t2 >= s1.t1
+    AND s2.t2 <= s1.t1 + NUMTODSINTERVAL(24, 'HOUR')
+  LEFT JOIN s3 ON s1.user_id = s3.user_id
+    AND s3.t3 >= s2.t2
+    AND s3.t3 <= s1.t1 + NUMTODSINTERVAL(24, 'HOUR')
+  LEFT JOIN s4 ON s1.user_id = s4.user_id
+    AND s4.t4 >= s3.t3
+    AND s4.t4 <= s1.t1 + NUMTODSINTERVAL(24, 'HOUR')
+)
+SELECT
+  COUNT(*) AS step1_users,
+  COUNT(t2) AS step2_users,
+  COUNT(t3) AS step3_users,
+  COUNT(t4) AS step4_users,
+  ROUND(COUNT(t4) / NULLIF(COUNT(*), 0), 4) AS step1_to_step4_conversion
+FROM joined;</pre></div>
+            </div>
+          </div>
+
+          <h3>Conversion rate và drop-off rate</h3>
+          <ul>
+            <li><strong>Step conversion:</strong> Step_n / Step_1 (toàn funnel) hoặc Step_n / Step_{n-1} (local conversion).</li>
+            <li><strong>Drop-off:</strong> 1 - local conversion.</li>
+            <li><strong>Diễn giải:</strong> local drop-off cao ở step nào thì ưu tiên tối ưu UX/business rule ở step đó.</li>
+          </ul>
+
+          <h3>User-level vs Session-level funnel</h3>
+          <table>
+            <tr><th>Loại funnel</th><th>Dùng khi nào</th><th>Rủi ro nếu dùng sai</th></tr>
+            <tr><td>User-level</td><td>Onboarding, subscription, activation dài hơn 1 session</td><td>Nếu dùng session-level có thể undercount conversion</td></tr>
+            <tr><td>Session-level</td><td>Checkout flow trong 1 phiên ngắn</td><td>Nếu dùng user-level có thể over-credit multi-session noise</td></tr>
+          </table>
+
+          <div class="info-box note">📌 <span>Funnel đáng tin phải ghi rõ unit of analysis (user/session/account) ngay trong metric definition.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-quiz">4</div>
+          4. Câu Hỏi Ôn Tập
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+
+          <div class="quiz-item">
+            <div class="quiz-q">Funnel analysis dùng để trả lời câu hỏi nào tốt nhất?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là câu hỏi volume tổng quát, chưa phải chuỗi hành vi.')">A. Tổng số event trong ngày là bao nhiêu?</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: funnel tập trung vào tỷ lệ qua từng bước và điểm rơi.')">B. User rơi ở bước nào trong hành trình signup?</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là câu hỏi attribution nhiều hơn funnel.')">C. Kênh marketing nào đóng góp revenue nhất?</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là câu hỏi trạng thái snapshot.')">D. Có bao nhiêu account active hiện tại?</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Vì sao cần lấy first occurrence cho mỗi step?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải để làm query ngắn hơn.')">A. Để query có ít dòng hơn</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: tránh đếm trùng khi user trigger cùng step nhiều lần.')">B. Để tránh inflate conversion do duplicate/retry events</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'First occurrence không liên quan trực tiếp đến index.')">C. Để index hoạt động tốt hơn</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải để đổi timezone.')">D. Để convert UTC sang local time</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Phát biểu đúng về step order là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: làm step3 trước step2 không nên được xem converted đầy đủ.')">A. User làm step3 trước step2 vẫn tính converted</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: step order là điều kiện cốt lõi để conversion có nghĩa business.')">B. Step sau phải xảy ra sau step trước trong cùng rule window</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: chỉ đếm distinct user không đảm bảo thứ tự.')">C. Chỉ cần distinct user là đủ</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: thứ tự event chính là bản chất funnel.')">D. Không cần quan tâm thứ tự event</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Drop-off rate giữa Step2 và Step3 được tính gần đúng như thế nào?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là conversion global step3/step1.')">A. Step3 / Step1</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: local drop-off = 1 - (Step3 / Step2).')">B. 1 - (Step3 / Step2)</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phản ánh tỷ lệ giữa hai step liền kề.')">C. Step2 - Step3</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai đơn vị, không phải tỷ lệ drop-off.')">D. Step1 / Step2</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Time window trong funnel có vai trò gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không đúng: query vẫn chạy được dù không có window.')">A. Chỉ để SQL chạy không lỗi</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: giúp conversion phản ánh hành vi trong khoảng thời gian business chấp nhận.')">B. Giới hạn conversion vào hành vi còn ý nghĩa theo business</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Window không thay thế cho dedup.')">C. Dùng để thay deduplicate event</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan trực tiếp đến UI dashboard.')">D. Chỉ để dashboard load nhanh hơn</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Anti-pattern lớn nhất khi làm funnel là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây không phải lỗi logic cốt lõi.')">A. Dùng nhiều CTE</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: đếm out-of-order như converted làm metric sai bản chất hành trình.')">B. Tính converted cho user làm step sai thứ tự</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đặt alias dài không phải anti-pattern chính.')">C. Đặt alias cột dài</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Joins không sai nếu logic đúng.')">D. Join nhiều bảng</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Khi nào nên dùng session-level funnel thay vì user-level funnel?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Onboarding thường kéo dài nhiều phiên, phù hợp user-level hơn.')">A. Khi phân tích activation dài 14 ngày</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: checkout flow ngắn trong một phiên thường hợp session-level.')">B. Khi đo flow ngắn diễn ra trong một session</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan trực tiếp tới session granularity.')">C. Khi cần retention D30</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Attribution bài toán khác funnel unit.')">D. Khi tính last-touch attribution</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Nếu Step1 = 10,000 user và Step4 = 2,000 user, conversion end-to-end là?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: 2,000 / 10,000 = 20%.')">A. 20%</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: 80% là drop-off, không phải conversion.')">B. 80%</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai phép tính.')">C. 5%</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: 50% không khớp dữ liệu.')">D. 50%</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Trong signup funnel, metric nào giúp xác định step cần ưu tiên tối ưu nhất?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Global conversion hữu ích nhưng chưa chỉ rõ điểm nghẽn cụ thể.')">A. Chỉ xem conversion Step1→Step4</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: local drop-off giữa hai step liền kề chỉ ra đúng điểm nghẽn.')">B. So sánh local drop-off giữa từng cặp step liên tiếp</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Distinct user toàn hệ thống không chỉ ra step nào lỗi.')">C. Đếm distinct user toàn bộ hệ thống</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tổng event không phải conversion behavior.')">D. Tổng số events theo ngày</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Metric definition nào bắt buộc phải ghi trong README funnel artifact?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Số CTE không phải phần định nghĩa metric.')">A. Query có bao nhiêu CTE</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: phải có step order, unit of analysis, time window, exclusions.')">B. Step order + unit + time window + exclusions</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Màu chart không phải metric contract.')">C. Màu chart trên BI dashboard</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tên owner hữu ích nhưng không thay thế metric definition.')">D. Tên người viết query</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-summary">5</div>
+          5. Tổng Kết
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>Ordered logic</strong>Funnel chỉ đúng khi step sau xảy ra sau step trước.</div>
+            <div class="summary-item"><strong>First occurrence</strong>Dùng lần đầu mỗi step để tránh đếm trùng hành vi.</div>
+            <div class="summary-item"><strong>Time constraint</strong>Window giữ conversion bám đúng ngữ cảnh business.</div>
+            <div class="summary-item"><strong>Drop-off insight</strong>Local drop-off giúp tìm chính xác điểm nghẽn product.</div>
+            <div class="summary-item"><strong>Unit clarity</strong>Phải ghi rõ user-level hay session-level.</div>
+            <div class="summary-item"><strong>Anti-pattern guard</strong>Không bao giờ tính converted cho step out-of-order.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-practice">6</div>
+          6. Bài Tập Thực Hành
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 1 · Funnel logic task</div>
+            <div class="practice-task-body">
+              <p>Business hỏi: <strong>"Tỷ lệ user đến được first_project_created trong 24h từ khi signup_started là bao nhiêu?"</strong>. Hãy xác định numerator, denominator, step order và time window.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <ul>
+                  <li><strong>Denominator:</strong> user có step1 = signup_started.</li>
+                  <li><strong>Numerator:</strong> user đạt step4 = first_project_created.</li>
+                  <li><strong>Order:</strong> t2 ≥ t1, t3 ≥ t2, t4 ≥ t3.</li>
+                  <li><strong>Window:</strong> t4 ≤ t1 + 24h.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 2 · SQL pattern selection</div>
+            <div class="practice-task-body">
+              <p>Chọn pattern đúng:</p>
+              <ul>
+                <li>a) User verify email nhiều lần, chỉ muốn tính lần đầu.</li>
+                <li>b) User làm step3 trước step2, có tính converted không?</li>
+                <li>c) Product chỉ chấp nhận funnel hoàn tất trong 48h.</li>
+              </ul>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <ul>
+                  <li>a) Dùng <code>MIN(event_time)</code> theo user + step.</li>
+                  <li>b) Không; phải enforce order.</li>
+                  <li>c) Thêm time constraint vào điều kiện join step sau.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 3 · Cohort denominator awareness trong funnel</div>
+            <div class="practice-task-body">
+              <p>Có 2 dashboard funnel khác nhau vì một dashboard dùng denominator = step1 của tuần hiện tại, dashboard kia dùng step1 của tháng. Hãy nêu rủi ro và cách chuẩn hóa.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <p>Rủi ro: conversion không so sánh được giữa dashboard do mẫu số khác cohort/time window.</p>
+                <p>Chuẩn hóa: viết metric contract cố định denominator (ví dụ step1 users theo tuần UTC), version hóa định nghĩa và áp dụng chung cho BI layer.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(2)">← Module trước</button>
+        <button class="nav-btn primary" onclick="goNext(2)">Module tiếp theo →</button>
+      </div>
+    </div>
+
+    <div class="module" id="m3">
+      <div class="module-header">
+        <div class="module-tag">Tuần 21 · W21.04</div>
+        <div class="module-title">Cohort Retention Analysis</div>
+        <div class="module-subtitle">Đo khả năng quay lại theo cohort với denominator nhất quán D0/D1/D7/D30</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-purpose">1</div>
+          1. Menu Tổng Thể
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <table>
+            <tr><th>Bước</th><th>Pattern logic</th><th>Giá trị business</th></tr>
+            <tr><td>1. Định nghĩa cohort</td><td>Acquisition cohort hoặc first-event cohort</td><td>Nhóm user theo thời điểm bắt đầu</td></tr>
+            <tr><td>2. Fix denominator</td><td>Mẫu số = kích thước cohort ban đầu</td><td>So sánh retention qua ngày/tuần/tháng không méo</td></tr>
+            <tr><td>3. Tính offset</td><td>D0/D1/D7/D30 hoặc week/month offset</td><td>Đo tốc độ rơi và khả năng quay lại</td></tr>
+            <tr><td>4. Cohort matrix</td><td>cohort_date × period_offset</td><td>Đọc xu hướng retention theo thời gian</td></tr>
+            <tr><td>5. Diễn giải survival</td><td>Returning-user và survival concept</td><td>Hiểu chất lượng sản phẩm dài hạn</td></tr>
+          </table>
+          <div class="info-box warn">⚠️ <span>Anti-pattern: đổi denominator theo từng period (chỉ chia cho users còn sống), làm retention nhìn “đẹp giả”.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-purpose">2</div>
+          2. Mục Đích Module
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <ul>
+            <li>Hiểu cohort là nhóm user bắt đầu cùng thời điểm (acquisition hoặc first action).</li>
+            <li>Phân biệt retention theo day/week/month và khi nào dùng mỗi loại.</li>
+            <li>Xây cohort matrix đúng logic để nhìn rõ D0/D1/D7/D30.</li>
+            <li>Giữ denominator nhất quán để retention đáng so sánh.</li>
+            <li>Hiểu returning-user/survival concept để tránh diễn giải sai.</li>
+            <li>Biết anti-pattern khiến dashboard retention mất trust.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-detail">3</div>
+          3. Giải Thích Chi Tiết
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <h3>Cohort là gì?</h3>
+          <p><strong>Cohort</strong> là nhóm users có cùng mốc khởi đầu. Hai cách phổ biến:</p>
+          <ul>
+            <li><strong>Acquisition cohort:</strong> nhóm theo ngày/tuần user đăng ký.</li>
+            <li><strong>First-event cohort:</strong> nhóm theo ngày user thực hiện event đầu tiên có ý nghĩa (ví dụ first_purchase).</li>
+          </ul>
+
+          <h3>Denominator consistency là luật sống còn</h3>
+          <p>Retention period nào cũng phải chia cho <strong>cohort_size tại period 0</strong>. Nếu đổi mẫu số theo từng kỳ, metric sẽ mất khả năng so sánh và dễ bị “làm đẹp”.</p>
+
+          <table>
+            <tr><th>Metric</th><th>Cách đúng</th><th>Cách sai</th></tr>
+            <tr><td>D7 retention</td><td>users_active_day7 / cohort_size_day0</td><td>users_active_day7 / users_active_day6</td></tr>
+            <tr><td>W4 retention</td><td>active_week4 / cohort_size_week0</td><td>active_week4 / active_week3</td></tr>
+            <tr><td>M3 retention</td><td>active_month3 / cohort_size_month0</td><td>active_month3 / active_month2</td></tr>
+          </table>
+
+          <h3>Dựng cohort base và period offset</h3>
+          <div id="w2104-tabs-1" class="tab-group">
+            <div class="tab active" onclick="switchTab('w2104-tabs-1','w2104-pg-1')">PostgreSQL</div>
+            <div class="tab" onclick="switchTab('w2104-tabs-1','w2104-oracle-1')">Oracle SQL</div>
+          </div>
+
+          <div id="w2104-pg-1" class="tab-content active">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · cohort_retention_d0_d30.sql</span></div>
+              <div class="cmd-body"><pre>WITH cohort_base AS (
+  SELECT
+    user_id,
+    DATE(MIN(event_time)) AS cohort_date
+  FROM events
+  WHERE event_name = 'signup_started'
+  GROUP BY user_id
+),
+activity AS (
+  SELECT DISTINCT
+    e.user_id,
+    DATE(e.event_time) AS activity_date
+  FROM events e
+  WHERE e.event_name IN ('app_opened','project_viewed','task_completed')
+),
+retention AS (
+  SELECT
+    c.cohort_date,
+    (a.activity_date - c.cohort_date) AS day_offset,
+    COUNT(DISTINCT a.user_id) AS retained_users
+  FROM cohort_base c
+  JOIN activity a
+    ON c.user_id = a.user_id
+   AND a.activity_date >= c.cohort_date
+   AND a.activity_date <= c.cohort_date + INTERVAL '30 day'
+  GROUP BY c.cohort_date, day_offset
+),
+cohort_size AS (
+  SELECT cohort_date, COUNT(*) AS cohort_users
+  FROM cohort_base
+  GROUP BY cohort_date
+)
+SELECT
+  r.cohort_date,
+  r.day_offset,
+  r.retained_users,
+  cs.cohort_users,
+  ROUND(r.retained_users::numeric / NULLIF(cs.cohort_users,0), 4) AS retention_rate
+FROM retention r
+JOIN cohort_size cs ON r.cohort_date = cs.cohort_date
+WHERE r.day_offset IN (0,1,7,30)
+ORDER BY r.cohort_date, r.day_offset;</pre></div>
+            </div>
+          </div>
+
+          <div id="w2104-oracle-1" class="tab-content">
+            <div class="cmd-block">
+              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · cohort_retention_d0_d30.sql</span></div>
+              <div class="cmd-body"><pre>WITH cohort_base AS (
+  SELECT
+    user_id,
+    TRUNC(MIN(event_time)) AS cohort_date
+  FROM events
+  WHERE event_name = 'signup_started'
+  GROUP BY user_id
+),
+activity AS (
+  SELECT DISTINCT
+    e.user_id,
+    TRUNC(e.event_time) AS activity_date
+  FROM events e
+  WHERE e.event_name IN ('app_opened','project_viewed','task_completed')
+),
+retention AS (
+  SELECT
+    c.cohort_date,
+    (a.activity_date - c.cohort_date) AS day_offset,
+    COUNT(DISTINCT a.user_id) AS retained_users
+  FROM cohort_base c
+  JOIN activity a
+    ON c.user_id = a.user_id
+   AND a.activity_date >= c.cohort_date
+   AND a.activity_date <= c.cohort_date + 30
+  GROUP BY c.cohort_date, (a.activity_date - c.cohort_date)
+),
+cohort_size AS (
+  SELECT cohort_date, COUNT(*) AS cohort_users
+  FROM cohort_base
+  GROUP BY cohort_date
+)
+SELECT
+  r.cohort_date,
+  r.day_offset,
+  r.retained_users,
+  cs.cohort_users,
+  ROUND(r.retained_users / NULLIF(cs.cohort_users,0), 4) AS retention_rate
+FROM retention r
+JOIN cohort_size cs ON r.cohort_date = cs.cohort_date
+WHERE r.day_offset IN (0,1,7,30)
+ORDER BY r.cohort_date, r.day_offset;</pre></div>
+            </div>
+          </div>
+
+          <h3>Cohort matrix logic</h3>
+          <p>Cohort matrix là bảng 2 chiều: hàng là cohort_date, cột là day/week/month offset. Mỗi ô là retention_rate của cohort đó tại period đó. Mục tiêu là quan sát xu hướng giữa các cohort theo thời gian.</p>
+
+          <div class="cmd-block">
+            <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>retention_matrix_idea.txt</span></div>
+            <div class="cmd-body"><pre>Cohort 2026-04-01: D0 100% | D1 42% | D7 21% | D30 8%
+Cohort 2026-04-08: D0 100% | D1 47% | D7 24% | D30 10%
+Cohort 2026-04-15: D0 100% | D1 50% | D7 27% | D30 pending
+
+Interpretation:
+- D1 tăng dần => onboarding tốt hơn
+- D7 tăng nhẹ => activation cải thiện
+- D30 cần theo dõi thêm do cohort mới chưa đủ tuổi</pre></div>
+          </div>
+
+          <h3>Survival/Returning-user concept</h3>
+          <ul>
+            <li><strong>Returning-user retention:</strong> user có ít nhất 1 activity ở period offset.</li>
+            <li><strong>Survival view:</strong> tỷ lệ user còn “sống” tới mỗi mốc thời gian.</li>
+            <li>Hai cách nhìn có thể cùng tồn tại, nhưng định nghĩa phải ghi rõ trong metric governance.</li>
+          </ul>
+
+          <div class="info-box tip">✅ <span>Trong portfolio artifact, luôn ghi rõ retention là "strict day-N return" hay "rolling window return" để tránh hiểu nhầm.</span></div>
+          <div class="info-box note">📌 <span>Cohort mới chưa đủ tuổi không nên so trực tiếp D30 với cohort cũ đã đủ dữ liệu.</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-quiz">4</div>
+          4. Câu Hỏi Ôn Tập
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+
+          <div class="quiz-item">
+            <div class="quiz-q">Cohort trong retention analysis là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải nhóm theo quốc gia trừ khi bài toán định nghĩa như vậy.')">A. Nhóm user theo quốc gia</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: cohort là nhóm users có cùng thời điểm bắt đầu (signup/first event).')">B. Nhóm user có cùng mốc bắt đầu hành vi</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Retention không định nghĩa theo amount spend mặc định.')">C. Nhóm user có cùng mức chi tiêu</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là session grouping, không phải cohort nền retention.')">D. Nhóm user đăng nhập cùng session</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Denominator chuẩn cho D7 retention là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: phải chia cho cohort_size tại D0 để so sánh công bằng.')">A. Số user của cohort tại D0</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: đổi denominator theo D6 sẽ làm retention bị méo.')">B. Số user active ở D6</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: chỉ lấy user còn active hiện tại không phản ánh cohort gốc.')">C. Số user active hiện tại</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: tổng user toàn hệ thống không phải denominator cohort.')">D. Tổng user trong bảng users</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Anti-pattern lớn nhất khi tính retention là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải anti-pattern chính của retention logic.')">A. Dùng nhiều CTE</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: đổi denominator từng period khiến retention không so sánh được.')">B. Thay đổi denominator theo từng period</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Timezone cần chuẩn nhưng không phải anti-pattern cốt lõi ở đây.')">C. Dùng UTC cho event_time</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Cohort matrix là output phổ biến, không phải lỗi.')">D. Xuất kết quả dạng matrix</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">D0/D1/D7/D30 thường biểu diễn điều gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: đây là retention tại các offset ngày quan trọng.')">A. Retention ở các mốc offset kể từ cohort start</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải revenue buckets.')">B. Các nhóm doanh thu</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải phân nhóm theo device mặc định.')">C. Các nhóm thiết bị</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải số lượng query chạy mỗi ngày.')">D. Tần suất ETL chạy</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Khi nào dùng acquisition cohort hợp lý nhất?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: khi cần theo dõi retention theo ngày/tuần user được thu hút vào sản phẩm.')">A. Khi muốn đo retention theo thời điểm user đăng ký</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: đây giống segmentation theo status, không phải cohort start.')">B. Khi muốn so active vs inactive hiện tại</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: không liên quan trực tiếp funnel step order.')">C. Khi cần đếm user làm step3 trước step2</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: attribution là bài toán khác.')">D. Khi cần gán credit marketing</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Cohort matrix giúp team nhìn thấy điều gì rõ nhất?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Đây là xu hướng hạ tầng, không phải retention matrix.')">A. CPU usage của warehouse</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: matrix cho thấy retention khác nhau giữa cohorts theo thời gian.')">B. Sự thay đổi retention giữa các cohort qua các period</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không liên quan trực tiếp đến version control.')">C. Lịch sử commit của SQL scripts</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải mục tiêu chính của matrix.')">D. Tỷ lệ lỗi ETL theo dag</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Phát biểu nào đúng về cohort chưa đủ tuổi dữ liệu?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: cohort mới có thể chưa có D30.')">A. Luôn có thể so D30 của mọi cohort hiện tại</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: cohort mới cần đánh dấu chưa đủ data cho các mốc xa.')">B. Cần đánh dấu period chưa đủ dữ liệu để tránh diễn giải sai</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: điền 0 sẽ làm hiểu nhầm là retention bằng 0 thật.')">C. Điền 0 cho mọi period chưa đủ tuổi</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai: bỏ cohort mới làm mất tín hiệu gần đây.')">D. Loại cohort mới khỏi toàn bộ báo cáo</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Returning-user retention thường định nghĩa như thế nào?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: user có ít nhất một hoạt động tại period offset.')">A. User có ít nhất 1 activity ở mốc offset</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không phải bắt buộc làm tất cả event.')">B. User phải làm mọi event trong catalog</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không chỉ xét login nếu bài toán định nghĩa broader activity.')">C. User phải đăng nhập mỗi giờ</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không yêu cầu transaction nếu sản phẩm không commerce-first.')">D. User phải thanh toán mới tính retained</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Nếu cohort size = 1,000 và retained D7 = 230, D7 retention là?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai phép tính.')">A. 7.0%</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: 230 / 1,000 = 23.0%.')">B. 23.0%</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, '77% là drop-off xấp xỉ, không phải retention.')">C. 77.0%</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Sai đơn vị.')">D. 2.3%</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+          <div class="quiz-item">
+            <div class="quiz-q">Để retention dashboard giữ trust lâu dài, bắt buộc cần gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Tên chart đẹp không thay thế metric governance.')">A. Đặt tên chart dễ nhìn</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, true, 'Đúng: cần metric definition rõ cohort type, denominator, period logic, exclusions.')">B. Metric contract rõ + denominator cố định + assumptions</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Chỉ tối ưu tốc độ không đảm bảo đúng nghĩa metric.')">C. Chỉ optimize query speed</div>
+              <div class="quiz-opt" onclick="answerQuiz(this, false, 'Không thể bỏ data validation.')">D. Không cần validation nếu query chạy đúng</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-summary">5</div>
+          5. Tổng Kết
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>Cohort foundation</strong>Cohort gom users theo mốc bắt đầu để phân tích chất lượng giữ chân.</div>
+            <div class="summary-item"><strong>Denominator rule</strong>Retention chuẩn luôn chia cho cohort size tại period 0.</div>
+            <div class="summary-item"><strong>Key milestones</strong>D0/D1/D7/D30 giúp đọc nhanh curve rơi user.</div>
+            <div class="summary-item"><strong>Matrix view</strong>Cohort matrix cho thấy retention thay đổi giữa các lứa users.</div>
+            <div class="summary-item"><strong>Survival logic</strong>Returning-user/survival phải định nghĩa rõ trong README.</div>
+            <div class="summary-item"><strong>Anti-pattern guard</strong>Không đổi denominator theo period nếu muốn metric đáng tin.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-icon icon-practice">6</div>
+          6. Bài Tập Thực Hành
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-content">
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 1 · Business question interpretation</div>
+            <div class="practice-task-body">
+              <p>Business hỏi: <strong>"Onboarding tháng này cải thiện chưa?"</strong>. Hãy chuyển thành câu hỏi retention cụ thể bằng D1 và D7 theo acquisition cohort.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <p>Metric contract gợi ý:</p>
+                <ul>
+                  <li>Cohort: users signup theo tuần trong tháng hiện tại.</li>
+                  <li>D1 retention: active_day1 / cohort_size_day0.</li>
+                  <li>D7 retention: active_day7 / cohort_size_day0.</li>
+                  <li>So sánh với 4 tuần trước để đánh giá uplift.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 2 · Cohort denominator task</div>
+            <div class="practice-task-body">
+              <p>Bạn thấy 2 dashboard D7 retention khác nhau:</p>
+              <ul>
+                <li>Dashboard A: retained_d7 / cohort_size_d0</li>
+                <li>Dashboard B: retained_d7 / retained_d6</li>
+              </ul>
+              <p>Hãy xác định dashboard nào đúng cho retention chuẩn và giải thích vì sao dashboard còn lại nguy hiểm.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <p><strong>Đúng:</strong> Dashboard A.</p>
+                <p><strong>Lý do:</strong> cohort retention cần denominator cố định tại D0 để so sánh qua period. Dashboard B biến retention thành conditional survival giữa 2 ngày liên tiếp, không còn là retention chuẩn D7.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="practice-task">
+            <div class="practice-task-header">Bài 3 · SQL pattern selection task</div>
+            <div class="practice-task-body">
+              <p>Chọn pattern phù hợp cho mỗi yêu cầu:</p>
+              <ul>
+                <li>a) Theo dõi retention theo tuần trong 12 tuần</li>
+                <li>b) So D30 retention giữa kênh acquisition organic vs ads</li>
+                <li>c) Đánh dấu cohort chưa đủ tuổi để tránh kết luận sai</li>
+              </ul>
+              <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+              <div class="solution-box">
+                <ul>
+                  <li>a) Cohort by signup_week + week_offset (0..12).</li>
+                  <li>b) Cohort matrix theo channel dimension, denominator giữ cố định theo từng cohort-channel.</li>
+                  <li>c) Thêm cột <code>is_mature_period</code> (ví dụ cohort_date + 30 ngày &lt;= data_cutoff_date).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(3)">← Module trước</button>
+        <button class="nav-btn primary" onclick="goNext(3)">Module tiếp theo →</button>
+      </div>
+    </div>
+
+    <div class="module" id="m4">
+      <div class="module-header">
+        <div class="module-tag">Tuần 21 · W21.05</div>
+        <div class="module-title">Rolling Metrics, Streaks & Consecutive Activity</div>
+        <div class="module-subtitle">Biến event rời rạc thành chỉ số theo thời gian: active users, moving average, streak và gap-and-island.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:62.5%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table>
+          <tr><th>Pattern</th><th>Câu hỏi business</th><th>Output dùng cho BI</th></tr>
+          <tr><td>Rolling active users</td><td>7 ngày gần nhất có bao nhiêu user active?</td><td>DAU, WAU-like rolling, MAU-like rolling</td></tr>
+          <tr><td>Moving average</td><td>Doanh thu đang tăng thật hay chỉ spike một ngày?</td><td>Đường trend mượt hơn cho dashboard</td></tr>
+          <tr><td>Streak</td><td>User duy trì thói quen bao nhiêu ngày liên tiếp?</td><td>Engagement quality, habit formation</td></tr>
+          <tr><td>Gap-and-island</td><td>Các chuỗi hoạt động liên tục bắt đầu và kết thúc khi nào?</td><td>Longest streak, current streak, churn risk</td></tr>
+        </table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul class="checklist">
+          <li class="done">Hiểu rolling metrics khác gì với daily snapshot thông thường.</li>
+          <li class="done">Viết rolling 7-day và 30-day metrics bằng window functions.</li>
+          <li class="done">Nhận diện streak bằng gap-and-island pattern.</li>
+          <li class="done">Biết cách tránh recompute full history mỗi ngày trên bảng events lớn.</li>
+          <li class="done">Định nghĩa metric đủ rõ để dashboard không bị hiểu sai.</li>
+        </ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Rolling metrics là logic nhìn lại một khoảng thời gian</h3>
+        <p>Metric dạng rolling trả lời câu hỏi theo cửa sổ thời gian trượt. Ví dụ: tại ngày 2026-05-12, rolling 7-day active users đếm user có ít nhất một sự kiện từ 2026-05-06 đến 2026-05-12. Ngày hôm sau, cửa sổ dịch sang 2026-05-07 đến 2026-05-13.</p>
+        <div class="info-box note">📌 <span>Điểm quan trọng không nằm ở hàm SQL, mà nằm ở metric contract: cửa sổ có inclusive hay exclusive, timezone nào, event nào được tính là active, và dữ liệu hôm nay đã đủ chưa.</span></div>
+
+        <h3>Rolling 7-day active users</h3>
+        <p>Với distinct users, nhiều database không hỗ trợ <code>COUNT(DISTINCT user_id)</code> trực tiếp trong window frame một cách tối ưu. Pattern an toàn là tạo calendar date, join vào activity trong range, rồi group lại theo ngày báo cáo.</p>
+        <div class="tab-wrap">
+          <div class="tab-group">
+            <button class="tab active" onclick="switchTab(this, 'w2105_pg_rolling')">PostgreSQL</button>
+            <button class="tab" onclick="switchTab(this, 'w2105_oracle_rolling')">Oracle SQL</button>
+          </div>
+          <div class="tab-content active" id="w2105_pg_rolling">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>rolling_metrics.sql · PostgreSQL</span></div><div class="cmd-body"><pre>WITH calendar AS (
+  SELECT generate_series(DATE '2026-04-01', DATE '2026-04-30', INTERVAL '1 day')::date AS report_date
+),
+daily_activity AS (
+  SELECT DISTINCT
+    user_id,
+    occurred_at::date AS activity_date
+  FROM fact_product_events
+  WHERE event_name IN ('app_opened', 'lesson_started', 'purchase_completed')
+)
+SELECT
+  c.report_date,
+  COUNT(DISTINCT da.user_id) AS rolling_7d_active_users
+FROM calendar c
+LEFT JOIN daily_activity da
+  ON da.activity_date BETWEEN c.report_date - INTERVAL '6 days' AND c.report_date
+GROUP BY c.report_date
+ORDER BY c.report_date;</pre></div></div>
+          </div>
+          <div class="tab-content" id="w2105_oracle_rolling">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>rolling_metrics.sql · Oracle SQL</span></div><div class="cmd-body"><pre>WITH calendar AS (
+  SELECT DATE '2026-04-01' + LEVEL - 1 AS report_date
+  FROM dual
+  CONNECT BY DATE '2026-04-01' + LEVEL - 1 &lt;= DATE '2026-04-30'
+),
+daily_activity AS (
+  SELECT DISTINCT
+    user_id,
+    TRUNC(occurred_at) AS activity_date
+  FROM fact_product_events
+  WHERE event_name IN ('app_opened', 'lesson_started', 'purchase_completed')
+)
+SELECT
+  c.report_date,
+  COUNT(DISTINCT da.user_id) AS rolling_7d_active_users
+FROM calendar c
+LEFT JOIN daily_activity da
+  ON da.activity_date BETWEEN c.report_date - 6 AND c.report_date
+GROUP BY c.report_date
+ORDER BY c.report_date</pre></div></div>
+          </div>
+        </div>
+
+        <h3>Moving average cho revenue hoặc orders</h3>
+        <p>Nếu metric là additive theo ngày, window function đơn giản hơn. Revenue daily có thể dùng <code>AVG(revenue) OVER</code> hoặc <code>SUM(revenue) OVER</code> theo frame.</p>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>moving_average.sql</span></div><div class="cmd-body"><pre>WITH daily_revenue AS (
+  SELECT
+    order_date,
+    SUM(net_revenue) AS revenue
+  FROM fct_orders
+  GROUP BY order_date
+)
+SELECT
+  order_date,
+  revenue,
+  AVG(revenue) OVER (
+    ORDER BY order_date
+    ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+  ) AS revenue_7d_moving_avg
+FROM daily_revenue
+ORDER BY order_date;</pre></div></div>
+
+        <h3>Streak và gap-and-island</h3>
+        <p>Streak là chuỗi ngày liên tiếp. Pattern phổ biến: lấy ngày active duy nhất theo user, đánh số bằng <code>ROW_NUMBER()</code>, rồi tạo khóa đảo bằng <code>activity_date - row_number</code>. Các ngày liên tiếp sẽ có cùng island key.</p>
+        <div class="tab-wrap">
+          <div class="tab-group">
+            <button class="tab active" onclick="switchTab(this, 'w2105_pg_streak')">PostgreSQL</button>
+            <button class="tab" onclick="switchTab(this, 'w2105_oracle_streak')">Oracle SQL</button>
+          </div>
+          <div class="tab-content active" id="w2105_pg_streak">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>streak_analysis.sql · PostgreSQL</span></div><div class="cmd-body"><pre>WITH active_days AS (
+  SELECT DISTINCT user_id, occurred_at::date AS activity_date
+  FROM fact_product_events
+  WHERE event_name IN ('app_opened', 'lesson_completed')
+),
+numbered AS (
+  SELECT
+    user_id,
+    activity_date,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY activity_date) AS rn
+  FROM active_days
+),
+islands AS (
+  SELECT
+    user_id,
+    activity_date,
+    activity_date - (rn::int * INTERVAL '1 day') AS island_key
+  FROM numbered
+)
+SELECT
+  user_id,
+  MIN(activity_date) AS streak_start,
+  MAX(activity_date) AS streak_end,
+  COUNT(*) AS streak_days
+FROM islands
+GROUP BY user_id, island_key
+ORDER BY streak_days DESC, user_id;</pre></div></div>
+          </div>
+          <div class="tab-content" id="w2105_oracle_streak">
+            <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>streak_analysis.sql · Oracle SQL</span></div><div class="cmd-body"><pre>WITH active_days AS (
+  SELECT DISTINCT user_id, TRUNC(occurred_at) AS activity_date
+  FROM fact_product_events
+  WHERE event_name IN ('app_opened', 'lesson_completed')
+),
+numbered AS (
+  SELECT
+    user_id,
+    activity_date,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY activity_date) AS rn
+  FROM active_days
+),
+islands AS (
+  SELECT
+    user_id,
+    activity_date,
+    activity_date - rn AS island_key
+  FROM numbered
+)
+SELECT
+  user_id,
+  MIN(activity_date) AS streak_start,
+  MAX(activity_date) AS streak_end,
+  COUNT(*) AS streak_days
+FROM islands
+GROUP BY user_id, island_key
+ORDER BY streak_days DESC, user_id</pre></div></div>
+          </div>
+        </div>
+
+        <div class="info-box warn">⚠️ <span>Anti-pattern: mỗi ngày recompute toàn bộ events từ ngày đầu tiên để tính rolling/streak. Với dữ liệu lớn, hãy duy trì bảng daily_user_activity đã dedup, partition theo activity_date, rồi chỉ backfill khoảng thời gian bị ảnh hưởng.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Rolling 7-day active users tại ngày D nên đếm user active trong khoảng nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì chỉ đếm đúng ngày D, đó là DAU chứ không phải rolling 7-day.')">A. Chỉ ngày D</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu inclusive, cửa sổ 7 ngày là D-6 đến D.')">B. Từ D-6 đến D</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì D-7 đến D có 8 ngày nếu tính inclusive.')">C. Từ D-7 đến D</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai vì tháng calendar không phải rolling window.')">D. Từ đầu tháng đến D</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Vì sao rolling distinct users thường cần calendar join?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Window function vẫn hữu ích nhưng distinct trong frame có giới hạn và tốn chi phí.')">A. Vì window function không dùng được trong SQL</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Calendar join giúp định nghĩa rõ report_date và range activity cho COUNT DISTINCT.')">B. Vì cần một report_date cho từng cửa sổ và join activity trong range</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Calendar join không thay thế data quality check.')">C. Vì calendar join tự sửa dữ liệu trùng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Index vẫn cần cho performance.')">D. Vì calendar join làm query không cần index</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Metric nào phù hợp nhất với moving average?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. User distinct cần xử lý khác vì không additive qua ngày.')">A. Distinct users cộng dồn trực tiếp qua ngày</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Daily revenue là additive và có thể AVG theo window frame.')">B. Daily revenue</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Current status không phải chuỗi số theo ngày nếu chưa snapshot.')">C. Current account status</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Email của user không phải metric thời gian.')">D. User email</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Trong streak analysis, vì sao cần dedup user-date trước?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Streak theo ngày chỉ cần biết user có active hay không, nhiều event cùng ngày không được làm dài streak.')">A. Để nhiều event trong cùng ngày không làm sai chuỗi liên tiếp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dedup không dùng để xóa user inactive khỏi toàn bộ lịch sử.')">B. Để xóa user không active</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dedup không thay thế timezone policy.')">C. Để bỏ qua timezone</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dedup không tự tạo calendar.')">D. Để tạo đủ ngày thiếu</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Gap-and-island pattern dùng để làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đó là aggregation đơn giản.')">A. Tính tổng revenue theo tháng</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Pattern này gom các dòng liên tiếp thành từng island.')">B. Nhóm các khoảng hoạt động liên tục</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Attribution cần logic touchpoint riêng.')">C. Gán nguồn marketing</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Schema validation là vấn đề data quality.')">D. Kiểm tra kiểu dữ liệu</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern lớn nhất khi tính rolling metric trên bảng events rất lớn là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Partition là practice tốt nếu dùng đúng.')">A. Partition theo event_date</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Recompute full history mỗi ngày gây tốn chi phí và chậm SLA.')">B. Recompute toàn bộ lịch sử mỗi ngày dù chỉ cần cập nhật vài ngày mới</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Daily aggregate giúp giảm scan.')">C. Tạo daily_user_activity</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Data cutoff giúp tránh dữ liệu chưa hoàn chỉnh.')">D. Dùng data cutoff</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Nếu dashboard rolling 30-day active users tăng, DE nên kiểm tra gì trước khi kết luận growth tốt?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần kiểm tra event definition, bot traffic, duplicate events, tracking change và data freshness.')">A. Tracking, duplicate, bot traffic, freshness và định nghĩa active</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Màu chart không chứng minh metric đúng.')">B. Màu sắc chart</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Một con số không đủ để biết nguyên nhân.')">C. Chỉ nhìn số cuối cùng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Xóa historical data phá khả năng audit.')">D. Xóa dữ liệu cũ</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Current streak khác longest streak như thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Hai metric này không giống nhau.')">A. Không khác nhau</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Current streak phải nối đến ngày gần nhất theo policy, longest streak là chuỗi dài nhất trong lịch sử.')">B. Current streak là chuỗi đang còn tiếp diễn, longest streak là chuỗi dài nhất từng có</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Current không luôn lớn hơn longest.')">C. Current streak luôn lớn hơn longest streak</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Longest streak cũng cần dữ liệu event.')">D. Longest streak không cần event data</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Để dashboard rolling metric đáng tin, bảng trung gian nào thường nên có?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Raw event không tối ưu cho mọi dashboard.')">A. Chỉ raw events</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bảng daily_user_activity dedup theo user-date giúp metric ổn định và rẻ hơn.')">B. daily_user_activity đã dedup theo user_id và activity_date</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Bảng email không phục vụ rolling activity.')">C. dim_user_email_only</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Backup không phải mart analytics.')">D. File backup zip</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Timezone ảnh hưởng rolling metrics như thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Ngày active phụ thuộc timezone, nên cùng event timestamp có thể rơi vào ngày khác nhau.')">A. Nó quyết định cách chuyển timestamp thành activity_date</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Timestamp vẫn phải chuẩn hóa timezone.')">B. Không ảnh hưởng nếu có timestamp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên tùy ý đổi timezone theo từng dashboard.')">C. Có thể đổi tùy dashboard mà không ghi chú</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Timezone không thay thế primary key.')">D. Chỉ ảnh hưởng primary key</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="summary-grid">
+          <div class="summary-item"><strong>Rolling</strong>Metric theo cửa sổ trượt, phù hợp theo dõi trend gần nhất.</div>
+          <div class="summary-item"><strong>Distinct users</strong>Cần cẩn thận vì không additive qua ngày.</div>
+          <div class="summary-item"><strong>Moving average</strong>Tốt cho metric additive như revenue, orders, sessions.</div>
+          <div class="summary-item"><strong>Streak</strong>Đo thói quen và mức độ liên tục của user.</div>
+          <div class="summary-item"><strong>Gap-and-island</strong>Pattern chuẩn để gom chuỗi ngày liên tiếp.</div>
+          <div class="summary-item"><strong>Production</strong>Dùng daily aggregate, partition và incremental để giữ SLA.</div>
+        </div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · Rolling metric task</div><div class="practice-task-body"><p>Business hỏi: "Engagement tuần này có tốt hơn tuần trước không?" Hãy chọn 2 metric rolling và nêu grain bảng đầu vào.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><p>Dùng rolling_7d_active_users và lesson_completed_7d_moving_avg. Grain đầu vào nên là daily_user_activity(user_id, activity_date) cho active users và daily_learning_metrics(metric_date, lessons_completed) cho moving average.</p></div></div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Streak task</div><div class="practice-task-body"><p>Thiết kế logic tìm longest active streak cho từng user từ bảng fact_product_events.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><p>Dedup theo user_id và activity_date, dùng ROW_NUMBER theo user, tạo island_key bằng activity_date trừ rn ngày, group theo user_id và island_key, lấy COUNT(*) lớn nhất.</p></div></div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 3 · Performance task</div><div class="practice-task-body"><p>Nếu events có 3 tỷ dòng và dashboard rolling chạy mỗi sáng, bạn sẽ thiết kế incremental như thế nào?</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><p>Tạo daily_user_activity partition theo activity_date. Mỗi ngày chỉ build lại partition mới và một vùng lookback nhỏ để xử lý late events. Rolling 30-day chỉ scan daily_user_activity trong 30 ngày cho mỗi report_date cần cập nhật.</p></div></div></div>
+      </div></div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="goPrev(4)">← Module trước</button>
+        <button class="nav-btn primary" onclick="goNext(4)">Module tiếp theo →</button>
+      </div>
+    </div>
+
+    <div class="module" id="m5">
+      <div class="module-header">
+        <div class="module-tag">Tuần 21 · W21.06</div>
+        <div class="module-title">Multi-dimensional Aggregation & Attribution Basics</div>
+        <div class="module-subtitle">Tổng hợp nhiều chiều bằng GROUPING SETS, ROLLUP, CUBE và gán credit marketing có giả định rõ ràng.</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+      </div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">
+        <table><tr><th>Chủ đề</th><th>Khi dùng</th><th>Cẩn thận</th></tr><tr><td>GROUPING SETS</td><td>Nhiều aggregation level cụ thể</td><td>Gắn aggregation_level rõ</td></tr><tr><td>ROLLUP</td><td>Subtotal theo hierarchy</td><td>Thứ tự cột quyết định subtotal</td></tr><tr><td>CUBE</td><td>Mọi tổ hợp dimension</td><td>Dễ tạo quá nhiều dòng</td></tr><tr><td>Attribution</td><td>Gán conversion/revenue cho source</td><td>Luôn ghi assumptions</td></tr></table>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">
+        <ul class="checklist"><li class="done">Dùng GROUPING SETS, ROLLUP, CUBE cho mart phân tích đa chiều.</li><li class="done">Dùng GROUPING để phân biệt detail row và subtotal row.</li><li class="done">Xây first-touch và last-touch attribution cơ bản.</li><li class="done">Nêu được caveat khi phân bổ revenue theo marketing source.</li><li class="done">Kết nối metric governance với dashboard trust.</li></ul>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>Multi-dimensional aggregation</h3>
+        <p>Khi dashboard cần xem revenue theo channel, country, device và cả tổng phụ, nhiều query riêng dễ lệch filter. <code>GROUPING SETS</code> giúp định nghĩa các level cần tính trong một logic.</p>
+        <div class="tab-wrap"><div class="tab-group"><button class="tab active" onclick="switchTab(this, 'w2106_pg_grouping')">PostgreSQL</button><button class="tab" onclick="switchTab(this, 'w2106_oracle_grouping')">Oracle SQL</button></div>
+          <div class="tab-content active" id="w2106_pg_grouping"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>multidimensional_aggregation.sql · PostgreSQL</span></div><div class="cmd-body"><pre>SELECT
+  CASE
+    WHEN GROUPING(channel) = 0 AND GROUPING(country) = 0 AND GROUPING(device_type) = 0 THEN 'channel_country_device'
+    WHEN GROUPING(channel) = 0 AND GROUPING(country) = 0 THEN 'channel_country'
+    WHEN GROUPING(channel) = 0 THEN 'channel'
+    ELSE 'overall'
+  END AS aggregation_level,
+  COALESCE(channel, '(all)') AS channel,
+  COALESCE(country, '(all)') AS country,
+  COALESCE(device_type, '(all)') AS device_type,
+  COUNT(DISTINCT user_id) AS buyers,
+  SUM(net_revenue) AS net_revenue
+FROM fct_orders
+WHERE order_date BETWEEN DATE '2026-04-01' AND DATE '2026-04-30'
+GROUP BY GROUPING SETS ((channel, country, device_type), (channel, country), (channel), ())
+ORDER BY aggregation_level, net_revenue DESC;</pre></div></div></div>
+          <div class="tab-content" id="w2106_oracle_grouping"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>multidimensional_aggregation.sql · Oracle SQL</span></div><div class="cmd-body"><pre>SELECT
+  CASE
+    WHEN GROUPING(channel) = 0 AND GROUPING(country) = 0 AND GROUPING(device_type) = 0 THEN 'channel_country_device'
+    WHEN GROUPING(channel) = 0 AND GROUPING(country) = 0 THEN 'channel_country'
+    WHEN GROUPING(channel) = 0 THEN 'channel'
+    ELSE 'overall'
+  END AS aggregation_level,
+  COALESCE(channel, '(all)') AS channel,
+  COALESCE(country, '(all)') AS country,
+  COALESCE(device_type, '(all)') AS device_type,
+  COUNT(DISTINCT user_id) AS buyers,
+  SUM(net_revenue) AS net_revenue
+FROM fct_orders
+WHERE order_date BETWEEN DATE '2026-04-01' AND DATE '2026-04-30'
+GROUP BY GROUPING SETS ((channel, country, device_type), (channel, country), (channel), ())
+ORDER BY aggregation_level, net_revenue DESC</pre></div></div></div>
+        </div>
+        <h3>Attribution basics</h3>
+        <p>First-touch gán credit cho nguồn đầu tiên trong attribution window. Last-touch gán credit cho nguồn gần conversion nhất. Multi-touch chia credit theo rule đã thống nhất. Đây là mô hình mô tả, không phải bằng chứng causal.</p>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>attribution_basic.sql</span></div><div class="cmd-body"><pre>WITH eligible_touches AS (
+  SELECT
+    o.order_id,
+    o.net_revenue,
+    t.marketing_source,
+    ROW_NUMBER() OVER (PARTITION BY o.order_id ORDER BY t.touch_time) AS first_touch_rank,
+    ROW_NUMBER() OVER (PARTITION BY o.order_id ORDER BY t.touch_time DESC) AS last_touch_rank
+  FROM fct_orders o
+  JOIN fact_marketing_touches t
+    ON t.user_id = o.user_id
+   AND t.touch_time &lt;= o.order_time
+   AND t.touch_time &gt;= o.order_time - INTERVAL '30 days'
+)
+SELECT
+  marketing_source,
+  SUM(CASE WHEN first_touch_rank = 1 THEN net_revenue ELSE 0 END) AS first_touch_revenue,
+  SUM(CASE WHEN last_touch_rank = 1 THEN net_revenue ELSE 0 END) AS last_touch_revenue
+FROM eligible_touches
+GROUP BY marketing_source
+ORDER BY last_touch_revenue DESC;</pre></div></div>
+        <div class="info-box warn">⚠️ <span>Anti-pattern: nói "source A tạo revenue" mà không ghi first-touch, last-touch, attribution window, identity rule và caveat.</span></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">GROUPING SETS hữu ích nhất khi nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nó tính nhiều aggregation level được định nghĩa rõ trong một query.')">A. Khi cần nhiều level tổng hợp trong cùng logic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó không dùng để encrypt dữ liệu.')">B. Khi cần mã hóa dữ liệu</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó không thay thế primary key.')">C. Khi cần tạo primary key</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó không sửa lỗi null tự động.')">D. Khi cần sửa mọi null</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Vì sao nên có aggregation_level trong output GROUPING SETS?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó không chỉ để trang trí.')">A. Để nhìn đẹp hơn</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. BI cần phân biệt row chi tiết, subtotal và overall.')">B. Để phân biệt detail row, subtotal và overall</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó không đảm bảo query nhanh hơn.')">C. Để query luôn nhanh gấp đôi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó không bắt buộc là partition key.')">D. Để làm partition key duy nhất</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">ROLLUP phù hợp nhất với loại dimension nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ROLLUP đi theo thứ tự hierarchy đã khai báo.')">A. Dimension có hierarchy rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Random dimension tạo subtotal khó hiểu.')">B. Dimension ngẫu nhiên</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. ROLLUP dùng được cho nhiều cột.')">C. Chỉ một cột duy nhất</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Free text thường không phù hợp subtotal.')">D. Text mô tả dài</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">CUBE có rủi ro gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. CUBE tạo mọi tổ hợp dimension nên số dòng có thể tăng mạnh.')">A. Tạo quá nhiều tổ hợp aggregation</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. CUBE không xóa dữ liệu gốc.')">B. Xóa bảng nguồn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. CUBE không làm mất SQL syntax.')">C. Làm SQL không chạy được</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Null vẫn cần xử lý rõ.')">D. Tự sửa mọi null</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">First-touch attribution gán credit cho touchpoint nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. First-touch gán credit cho touchpoint đầu tiên trong window hợp lệ.')">A. Touchpoint đầu tiên</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đó là last-touch.')">B. Touchpoint cuối cùng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đó là linear multi-touch nếu chia đều.')">C. Tất cả touchpoint chia đều</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải lúc nào cũng organic.')">D. Luôn là organic</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Last-touch attribution thường được dùng vì sao?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó không chứng minh causal impact.')">A. Vì chứng minh chắc chắn nguồn gây purchase</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nó đơn giản và gắn conversion với touchpoint gần nhất trước conversion.')">B. Vì đơn giản và gần thời điểm conversion</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó vẫn cần data touchpoint.')">C. Vì không cần dữ liệu marketing</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó vẫn có bias.')">D. Vì không có bias</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Attribution window 30 ngày nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Chỉ touchpoint trong 30 ngày trước conversion được xét credit.')">A. Chỉ xét touchpoint trong 30 ngày trước conversion</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải chỉ đếm 30 orders.')">B. Chỉ xét 30 đơn hàng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Campaign không luôn dài đúng 30 ngày.')">C. Campaign luôn dài 30 ngày</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không xóa dữ liệu sau 30 ngày.')">D. Xóa touchpoint cũ khỏi warehouse</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Metric governance trong attribution cần gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần owner, definition, assumption, window, tie-breaker và caveat.')">A. Definition, assumption, owner, window và caveat</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Tên chart không đủ governance.')">B. Chỉ tên chart</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Màu sắc không phải metric contract.')">C. Chỉ màu dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên bỏ caveat.')">D. Bỏ phần giả định</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi nào attribution trở nên ambiguous?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhiều touchpoint, cross-device, direct traffic và missing UTM đều làm attribution mơ hồ.')">A. Khi user có nhiều touchpoint hoặc thiếu tracking</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Một touchpoint rõ ít ambiguous hơn.')">B. Khi chỉ có một touchpoint rõ</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. order_id không giải quyết mọi identity.')">C. Khi order_id là số nguyên</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dashboard đẹp không làm logic rõ hơn.')">D. Khi chart có legend</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Anti-pattern attribution cần tránh là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Document assumptions là practice tốt.')">A. Ghi rõ assumptions</div><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Attribution là model, không nên trình bày như chân lý tuyệt đối.')">B. Trình bày attribution như sự thật tuyệt đối</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Window rõ ràng là cần thiết.')">C. Định nghĩa attribution window</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Tie-breaker giúp deterministic.')">D. Có tie-breaker</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>GROUPING SETS</strong>Tính các level cụ thể.</div><div class="summary-item"><strong>ROLLUP</strong>Subtotal theo hierarchy.</div><div class="summary-item"><strong>CUBE</strong>Mọi tổ hợp dimension, cần giới hạn.</div><div class="summary-item"><strong>First-touch</strong>Credit cho nguồn đầu tiên.</div><div class="summary-item"><strong>Last-touch</strong>Credit cho nguồn gần conversion nhất.</div><div class="summary-item"><strong>Governance</strong>Attribution phải đi kèm giả định.</div></div></div></div>
+
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="practice-task"><div class="practice-task-header">Bài 1 · GROUPING SETS task</div><div class="practice-task-body"><p>Dashboard cần revenue theo channel-country-device, channel-country, channel và overall. Chọn SQL pattern và nêu cột bắt buộc để tránh nhầm subtotal.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><p>Dùng GROUPING SETS và thêm aggregation_level. Dimension null trong subtotal nên hiển thị '(all)' để BI không nhầm với null thật.</p></div></div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 2 · Attribution assumption task</div><div class="practice-task-body"><p>Marketing muốn report "revenue by source". Hãy viết 4 giả định phải đưa vào README.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><ul><li>Attribution model: first-touch, last-touch hoặc linear.</li><li>Window: ví dụ 30 ngày trước order.</li><li>Identity: join theo user_id sau login.</li><li>Tie-breaker: nếu nhiều touch cùng timestamp, ưu tiên touch_id.</li></ul></div></div></div>
+        <div class="practice-task"><div class="practice-task-header">Bài 3 · Revenue caveat task</div><div class="practice-task-body"><p>CEO hỏi "kênh nào tạo revenue nhiều nhất?". Bạn sẽ trả lời thế nào để không overclaim?</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><p>"Theo last-touch 30 ngày, paid_search được gán revenue cao nhất. Đây là attributed revenue, không phải causal lift. Muốn kết luận tác động thật cần experiment hoặc incrementality analysis."</p></div></div></div>
+      </div></div>
+
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(5)">← Module trước</button><button class="nav-btn primary" onclick="goNext(5)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m6">
+      <div class="module-header"><div class="module-tag">Tuần 21 · W21.07</div><div class="module-title">Artifact: week21_analytical_patterns/</div><div class="module-subtitle">Đóng gói analytical SQL thành portfolio artifact có README, assumptions, validation checks và metric definitions.</div><div class="progress-bar"><div class="progress-fill" style="width:87.5%"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>portfolio folder</span></div><div class="cmd-body"><pre>week21_analytical_patterns/
+├── state_change_tracking.sql
+├── funnel_analysis.sql
+├── cohort_retention.sql
+├── rolling_metrics.sql
+├── streak_analysis.sql
+├── attribution_basic.sql
+├── metric_definitions.md
+└── README.md</pre></div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul class="checklist"><li class="done">Biết cấu trúc portfolio artifact analytical SQL.</li><li class="done">Viết README giải thích business questions, input tables, assumptions và validation.</li><li class="done">Tách SQL theo pattern để recruiter dễ đọc.</li><li class="done">Tạo metric_definitions.md như metric contract nhỏ.</li><li class="done">Tránh artifact chỉ là folder query không có narrative.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">
+        <h3>README portfolio-ready</h3>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>README.md</span></div><div class="cmd-body"><pre># Week 21 Analytical Patterns
+
+## Business questions answered
+- Which users changed status from trial to paid, active to inactive, or pending to completed?
+- Where do users drop in the signup funnel?
+- What is D1, D7, and D30 retention by acquisition cohort?
+- How are rolling active users and moving revenue trend changing?
+- Which users have the longest consecutive active-day streak?
+- How much revenue is attributed to marketing sources under first-touch and last-touch models?
+
+## Input tables
+- fact_product_events(user_id, session_id, event_name, occurred_at, event_id, device_type, country)
+- user_status_events(user_id, status, status_changed_at, event_id)
+- dim_users(user_id, signup_at, acquisition_channel, country)
+- fct_orders(order_id, user_id, order_time, net_revenue, channel, country, device_type)
+- fact_marketing_touches(user_id, touch_time, marketing_source, campaign_id, touch_id)
+
+## Assumptions
+- Reporting timezone is Asia/Ho_Chi_Minh unless noted otherwise.
+- Active user means at least one qualifying event: app_opened, lesson_started, lesson_completed, purchase_completed.
+- Funnel conversion requires ordered steps within 7 days from signup_started.
+- Cohort denominator is fixed at cohort size on D0.
+- Attribution window is 30 days before order_time.
+- Attribution is descriptive, not causal proof.
+
+## Validation checks
+- State history has no overlapping effective windows per user.
+- Funnel step counts are monotonic decreasing after order enforcement.
+- Cohort retention never uses a changing denominator.
+- Rolling active users use a complete data cutoff.
+- Streak input has one row per user_id and activity_date.
+- Attributed revenue reconciles against eligible order revenue.</pre></div></div>
+        <h3>metric_definitions.md</h3>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>metric_definitions.md</span></div><div class="cmd-body"><pre># Metric Definitions
+
+## d7_retention_rate
+- Numerator: cohort users active exactly 7 days after cohort_date.
+- Denominator: cohort_size at D0.
+- Cohort: signup date unless query states first activity cohort.
+- Caveat: immature cohorts are flagged.
+
+## rolling_7d_active_users
+- Numerator: distinct users active from report_date - 6 through report_date.
+- Grain: report_date.
+- Caveat: report_date must pass freshness cutoff.
+
+## attributed_revenue_last_touch_30d
+- Revenue assigned to latest eligible touch before order.
+- Eligibility: touch_time between order_time - 30 days and order_time.
+- Caveat: descriptive model, not incrementality.</pre></div></div>
+        <div class="info-box tip">✅ <span>Recruiter-grade artifact đọc như một mini case study: business question, input, logic, SQL, validation, caveat.</span></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">README của analytical artifact cần bắt đầu từ đâu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Business questions cho người đọc biết artifact giải quyết vấn đề gì.')">A. Business questions answered</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Tối ưu query không phải mở đầu tốt nhất.')">B. Danh sách index</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Color palette không liên quan SQL artifact.')">C. Màu dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Screenshot không thay metric contract.')">D. Screenshot trước tiên</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">metric_definitions.md nên ghi gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Metric cần numerator, denominator, grain, window và caveat.')">A. Numerator, denominator, grain, window và caveat</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ tên metric quá mơ hồ.')">B. Chỉ tên metric</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Font không giúp metric đúng.')">C. Font dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Bỏ giả định làm metric khó audit.')">D. Không ghi assumptions</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Validation nào phù hợp cho funnel?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Sau khi enforce order, số user qua từng step không nên tăng.')">A. Step counts monotonic decreasing sau khi enforce order</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Funnel không bắt buộc revenue bằng 0.')">B. Revenue luôn bằng 0</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Email không phải validation funnel chính.')">C. Email viết hoa</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên bỏ qua thứ tự step.')">D. Không cần order</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Validation nào phù hợp cho state history?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Một user không được có hai trạng thái hiệu lực overlap cùng thời điểm.')">A. Không có overlapping effective windows per user</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Một user có thể đổi nhiều status.')">B. Mỗi user chỉ có một dòng lịch sử</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Status không nhất thiết là số.')">C. Status phải là số nguyên</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Current state không đủ audit.')">D. Chỉ lưu current status</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Tại sao artifact nên tách SQL theo pattern?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Tách file giúp reviewer thấy rõ từng analytical pattern.')">A. Để người đọc review từng pattern rõ ràng</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nhằm tăng số file.')">B. Để tăng số file</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Một file lớn thường khó đọc hơn.')">C. Để giấu logic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. README vẫn cần.')">D. Để không cần README</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Artifact portfolio-ready khác query ad-hoc ở điểm nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nó có context, assumptions, validation và metric definition.')">A. Có context, assumptions, validation và metric definition</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Dài hơn không đồng nghĩa tốt hơn.')">B. Chỉ dài hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Query chậm không phải tốt.')">C. Chạy chậm hơn</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không cần syntax lạ.')">D. Dùng syntax khó hiểu</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Assumption nào nên ghi cho rolling active users?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Các yếu tố này quyết định metric.')">A. Qualifying events, timezone, inclusive window và freshness cutoff</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Logo không ảnh hưởng active user.')">B. Logo công ty</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Số developer không định nghĩa metric.')">C. Số developer trong team</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Tên laptop không liên quan.')">D. Tên máy chạy query</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Reconcile attributed revenue nghĩa là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. So tổng revenue được gán với eligible order revenue.')">A. So tổng attributed revenue với eligible order revenue</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải đổi tiền tệ đơn thuần.')">B. Đổi USD sang VND</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không phải rename source.')">C. Đổi tên campaign</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên xóa mọi unattributed order.')">D. Xóa mọi order unattributed</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi cohort chưa đủ tuổi D30, artifact nên làm gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Flag immature cohort để tránh kết luận sai.')">A. Flag immature cohort</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Điền 0 làm retention giảm giả.')">B. Điền D30 bằng 0</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên giả định bằng D7.')">C. Copy D7 sang D30</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Xóa cohort mất thông tin.')">D. Xóa toàn bộ cohort</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Điều gì làm README đáng tin hơn với recruiter?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Trade-off và validation cho thấy tư duy production.')">A. Nêu trade-off, validation và lessons learned</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Buzzword không thay logic.')">B. Thêm buzzword</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Xóa caveat làm kém tin cậy.')">C. Xóa mọi caveat</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không cần che SQL.')">D. Che hết SQL</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Artifact</strong>Là case study nhỏ.</div><div class="summary-item"><strong>README</strong>Giải thích business question, input, assumptions, validation.</div><div class="summary-item"><strong>Metric contract</strong>Làm rõ numerator, denominator, grain và caveat.</div><div class="summary-item"><strong>SQL files</strong>Tách theo pattern để dễ review.</div><div class="summary-item"><strong>Validation</strong>Chứng minh bạn nghĩ về trust.</div><div class="summary-item"><strong>Portfolio</strong>Trình bày quyết định thiết kế.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content"><div class="practice-task"><div class="practice-task-header">Bài 1 · README outline</div><div class="practice-task-body"><p>Viết outline README cho artifact Week21 với các heading chính.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><p>Business questions answered, Input tables, Assumptions, Metric definitions, SQL patterns used, Validation checks, Lessons learned.</p></div></div></div><div class="practice-task"><div class="practice-task-header">Bài 2 · Metric definition task</div><div class="practice-task-body"><p>Định nghĩa d7_retention_rate đủ rõ để BI team dùng.</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><p>D7 retention = users trong cohort có qualifying activity đúng ngày cohort_date + 7 chia cho cohort_size D0. Cohort là signup_date theo timezone đã chọn. Cohort chưa đủ 7 ngày được flag immature.</p></div></div></div></div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(6)">← Module trước</button><button class="nav-btn primary" onclick="goNext(6)">Module tiếp theo →</button></div>
+    </div>
+
+    <div class="module" id="m7">
+      <div class="module-header"><div class="module-tag">Tuần 21 · W21.08</div><div class="module-title">Mini Test Tổng Kết</div><div class="module-subtitle">Kiểm tra khả năng chọn pattern, bảo vệ giả định metric và phát hiện anti-pattern trong analytics SQL.</div><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content"><table><tr><th>Phần</th><th>Nội dung</th><th>Mục tiêu</th></tr><tr><td>Review nhanh</td><td>10 câu ôn tập scenario-based</td><td>Củng cố pattern selection</td></tr><tr><td>Mini test</td><td>20 câu chấm điểm</td><td>Đánh giá readiness cuối tuần</td></tr><tr><td>Guidance</td><td>Gợi ý theo điểm</td><td>Biết cần ôn lại phần nào</td></tr></table></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul class="checklist"><li class="done">Kiểm tra state tracking, funnel, cohort, rolling, streak và attribution.</li><li class="done">Phân biệt SQL trick với reusable analytical logic.</li><li class="done">Nhận diện metric assumptions có thể làm dashboard sai.</li><li class="done">Chuẩn bị tư duy trình bày artifact cho portfolio.</li></ul></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content"><p>Mini test không chỉ hỏi syntax. Mục tiêu là kiểm tra bạn có thể đọc một câu hỏi business, chọn pattern phù hợp, giữ metric denominator đúng, và nói rõ caveat trước khi đưa số lên dashboard.</p><div class="info-box note">📌 <span>Nếu sai câu về denominator, order enforcement hoặc attribution assumption, hãy ôn lại trước khi đưa artifact vào portfolio.</span></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
+        <div class="quiz-item"><div class="quiz-q">Pattern nào phù hợp nhất để xây status history?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. LAG/LEAD giúp phát hiện transition và tạo effective window.')">A. LAG/LEAD với effective_from/effective_to</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. COUNT đơn thuần không tạo history.')">B. COUNT(*) theo user</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Attribution không dùng cho status history.')">C. Last-touch attribution</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. CUBE không tạo state transition.')">D. CUBE</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Funnel conversion đúng cần điều kiện gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Phải enforce ordered steps và time window.')">A. Ordered steps và time window</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đếm bất kỳ thứ tự làm conversion phồng.')">B. Chỉ cần user từng làm mọi event</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không thể bỏ timestamp.')">C. Không cần timestamp</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Revenue không bắt buộc trong mọi funnel.')">D. Chỉ cần revenue</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Cohort retention sai phổ biến nhất là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Changing denominator làm retention period không còn so sánh được.')">A. Thay đổi denominator qua từng period</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Cố định denominator là đúng.')">B. Cố định cohort size D0</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Flag immature cohort là tốt.')">C. Flag cohort chưa đủ tuổi</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Cohort_date là cần thiết.')">D. Có cohort_date</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Rolling active users khác moving average ở đâu?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Rolling active users thường là distinct trong cửa sổ, moving average lấy trung bình metric additive.')">A. Rolling active users là distinct users trong window, moving average là trung bình metric theo ngày</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Hai metric không giống nhau.')">B. Không khác nhau</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Moving average không chỉ cho user_id.')">C. Moving average chỉ dùng cho user_id</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Rolling không luôn là SUM revenue.')">D. Rolling luôn là SUM revenue</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Streak analysis cần input grain nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Một row user-date giúp gap-and-island chính xác.')">A. Một row per user_id và activity_date sau dedup</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Raw event nhiều dòng cùng ngày làm sai streak.')">B. Raw events chưa dedup</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Current profile không đủ activity date.')">C. Current dim_users</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Monthly revenue không đủ streak.')">D. Monthly revenue only</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Attribution model phải ghi gì trên dashboard?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Model, window và caveat giúp hiểu số là attributed, không phải causal.')">A. Model, window và caveat</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ source name không đủ.')">B. Chỉ source name</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên bỏ caveat.')">C. Không cần giả định</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chart type không định nghĩa model.')">D. Chỉ chart type</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">GROUPING SETS giúp dashboard trust như thế nào?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nhiều subtotal được tính từ cùng filter và cùng logic.')">A. Các level tổng hợp dùng cùng filter và logic</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó không kiểm tra causal impact.')">B. Chứng minh causal impact</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Nó không thay đổi tracking.')">C. Tự sửa tracking</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không liên quan animation.')">D. Tạo animation</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Một analytical SQL artifact tốt phải có gì ngoài SQL?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. README, metric definitions, assumptions và validation làm artifact đáng tin.')">A. README, metric definitions, assumptions và validation checks</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Chỉ SQL thiếu context.')">B. Chỉ SQL</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Logo không đủ.')">C. Logo project</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. File rỗng không có giá trị.')">D. File rỗng</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Khi business hỏi mơ hồ, bước đầu tiên của DE là gì?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Phải chuyển business question thành metric definition trước khi viết SQL.')">A. Làm rõ metric definition và assumptions</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Viết query ngay dễ tạo số sai.')">B. Viết query ngay</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Không nên tự đoán denominator.')">C. Tự đoán denominator</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. Đổi màu không giải quyết ambiguity.')">D. Đổi màu dashboard</div></div><div class="quiz-explain"></div></div>
+        <div class="quiz-item"><div class="quiz-q">Tại sao Week21 quan trọng với Data Engineer?</div><div class="quiz-options"><div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. DE xây fact, mart và metric logic mà BI phụ thuộc vào.')">A. Vì DE cần xây logic analytics đáng tin cho marts và dashboard</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. DE không chỉ copy query.')">B. Vì DE chỉ copy SQL từ analyst</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. UI không phải trọng tâm duy nhất.')">C. Vì DE chỉ làm UI</div><div class="quiz-opt" onclick="answerQuiz(this,false,'Sai. DE cần hiểu business logic.')">D. Vì không cần hiểu business</div></div><div class="quiz-explain"></div></div>
+      </div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content"><div class="summary-grid"><div class="summary-item"><strong>Mindset</strong>Business question → metric logic → SQL pattern.</div><div class="summary-item"><strong>Trust</strong>Dashboard đáng tin nhờ denominator, order, window và caveat.</div><div class="summary-item"><strong>Patterns</strong>State, funnel, cohort, rolling, streak, attribution, aggregation.</div><div class="summary-item"><strong>Anti-pattern</strong>Đếm đúng syntax nhưng sai business logic.</div><div class="summary-item"><strong>Artifact</strong>README và validation quan trọng như SQL.</div><div class="summary-item"><strong>Portfolio</strong>Trình bày quyết định thiết kế, không chỉ kết quả.</div></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">
+        <div id="final-test">
+          <div class="test-question" data-q="1" data-correct="B"><div class="test-question-title">Q1. Muốn biết user chuyển từ trial sang paid khi nào, pattern phù hợp nhất là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q1" value="A"> A. CUBE</label><label class="test-option"><input type="radio" name="q1" value="B"> B. State change tracking bằng LAG/LEAD</label><label class="test-option"><input type="radio" name="q1" value="C"> C. Moving average</label><label class="test-option"><input type="radio" name="q1" value="D"> D. Attribution</label></div></div>
+          <div class="test-question" data-q="2" data-correct="C"><div class="test-question-title">Q2. Funnel conversion phải tránh điều gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q2" value="A"> A. First occurrence per step</label><label class="test-option"><input type="radio" name="q2" value="B"> B. Time window</label><label class="test-option"><input type="radio" name="q2" value="C"> C. Đếm user làm step out of order như converted</label><label class="test-option"><input type="radio" name="q2" value="D"> D. Step order</label></div></div>
+          <div class="test-question" data-q="3" data-correct="A"><div class="test-question-title">Q3. D7 retention chuẩn dùng denominator nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q3" value="A"> A. Cohort size tại D0</label><label class="test-option"><input type="radio" name="q3" value="B"> B. Users active tại D6</label><label class="test-option"><input type="radio" name="q3" value="C"> C. Users active tại D7</label><label class="test-option"><input type="radio" name="q3" value="D"> D. Tổng events D7</label></div></div>
+          <div class="test-question" data-q="4" data-correct="D"><div class="test-question-title">Q4. Rolling 7-day active users tại ngày D đếm khoảng nào nếu inclusive?</div><div class="test-options"><label class="test-option"><input type="radio" name="q4" value="A"> A. D-7 đến D</label><label class="test-option"><input type="radio" name="q4" value="B"> B. D only</label><label class="test-option"><input type="radio" name="q4" value="C"> C. Đầu tháng đến D</label><label class="test-option"><input type="radio" name="q4" value="D"> D. D-6 đến D</label></div></div>
+          <div class="test-question" data-q="5" data-correct="B"><div class="test-question-title">Q5. Streak analysis cần dedup theo grain nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q5" value="A"> A. user_id, event_id</label><label class="test-option"><input type="radio" name="q5" value="B"> B. user_id, activity_date</label><label class="test-option"><input type="radio" name="q5" value="C"> C. campaign_id, order_id</label><label class="test-option"><input type="radio" name="q5" value="D"> D. country, device_type</label></div></div>
+          <div class="test-question" data-q="6" data-correct="A"><div class="test-question-title">Q6. GROUPING SETS phù hợp khi nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q6" value="A"> A. Cần nhiều aggregation level trong một logic</label><label class="test-option"><input type="radio" name="q6" value="B"> B. Cần xóa duplicate event</label><label class="test-option"><input type="radio" name="q6" value="C"> C. Cần parse JSON</label><label class="test-option"><input type="radio" name="q6" value="D"> D. Cần reset password</label></div></div>
+          <div class="test-question" data-q="7" data-correct="C"><div class="test-question-title">Q7. Last-touch attribution gán credit cho touchpoint nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q7" value="A"> A. Touchpoint đầu tiên</label><label class="test-option"><input type="radio" name="q7" value="B"> B. Touchpoint đắt nhất</label><label class="test-option"><input type="radio" name="q7" value="C"> C. Touchpoint gần conversion nhất trong window</label><label class="test-option"><input type="radio" name="q7" value="D"> D. Touchpoint organic bất kể thời gian</label></div></div>
+          <div class="test-question" data-q="8" data-correct="D"><div class="test-question-title">Q8. Vì sao chỉ lưu current_status là anti-pattern?</div><div class="test-options"><label class="test-option"><input type="radio" name="q8" value="A"> A. Vì current_status luôn null</label><label class="test-option"><input type="radio" name="q8" value="B"> B. Vì không thể query current state</label><label class="test-option"><input type="radio" name="q8" value="C"> C. Vì SQL không hỗ trợ status</label><label class="test-option"><input type="radio" name="q8" value="D"> D. Vì mất lịch sử chuyển trạng thái</label></div></div>
+          <div class="test-question" data-q="9" data-correct="A"><div class="test-question-title">Q9. Cohort chưa đủ tuổi D30 nên xử lý thế nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q9" value="A"> A. Flag immature cohort</label><label class="test-option"><input type="radio" name="q9" value="B"> B. Gán D30 bằng 0</label><label class="test-option"><input type="radio" name="q9" value="C"> C. Copy D7 sang D30</label><label class="test-option"><input type="radio" name="q9" value="D"> D. Bỏ cohort_date</label></div></div>
+          <div class="test-question" data-q="10" data-correct="B"><div class="test-question-title">Q10. Attribution revenue nên được trình bày như thế nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q10" value="A"> A. Chân lý causal tuyệt đối</label><label class="test-option"><input type="radio" name="q10" value="B"> B. Kết quả theo model và assumptions rõ ràng</label><label class="test-option"><input type="radio" name="q10" value="C"> C. Không cần window</label><label class="test-option"><input type="radio" name="q10" value="D"> D. Không cần identity rule</label></div></div>
+          <div class="test-question" data-q="11" data-correct="C"><div class="test-question-title">Q11. Validation funnel nào hợp lý?</div><div class="test-options"><label class="test-option"><input type="radio" name="q11" value="A"> A. Step 3 luôn lớn hơn step 1</label><label class="test-option"><input type="radio" name="q11" value="B"> B. Không cần timestamp</label><label class="test-option"><input type="radio" name="q11" value="C"> C. Step counts giảm dần sau khi enforce order</label><label class="test-option"><input type="radio" name="q11" value="D"> D. Mọi user đều converted</label></div></div>
+          <div class="test-question" data-q="12" data-correct="D"><div class="test-question-title">Q12. Gap-and-island pattern giải quyết gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q12" value="A"> A. Marketing source parsing</label><label class="test-option"><input type="radio" name="q12" value="B"> B. Revenue attribution</label><label class="test-option"><input type="radio" name="q12" value="C"> C. Dimension conformed</label><label class="test-option"><input type="radio" name="q12" value="D"> D. Nhóm các chuỗi hoạt động liên tiếp</label></div></div>
+          <div class="test-question" data-q="13" data-correct="A"><div class="test-question-title">Q13. Metric contract tốt cần có gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q13" value="A"> A. Numerator, denominator, grain, window, caveat</label><label class="test-option"><input type="radio" name="q13" value="B"> B. Chỉ tên metric</label><label class="test-option"><input type="radio" name="q13" value="C"> C. Chỉ chart title</label><label class="test-option"><input type="radio" name="q13" value="D"> D. Chỉ màu sắc</label></div></div>
+          <div class="test-question" data-q="14" data-correct="B"><div class="test-question-title">Q14. Recompute full history mỗi ngày là vấn đề gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q14" value="A"> A. Luôn chính xác hơn incremental</label><label class="test-option"><input type="radio" name="q14" value="B"> B. Tốn chi phí, chậm SLA, không scale</label><label class="test-option"><input type="radio" name="q14" value="C"> C. Không liên quan performance</label><label class="test-option"><input type="radio" name="q14" value="D"> D. Là yêu cầu bắt buộc của rolling metric</label></div></div>
+          <div class="test-question" data-q="15" data-correct="C"><div class="test-question-title">Q15. First occurrence per funnel step dùng để làm gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q15" value="A"> A. Tăng số event</label><label class="test-option"><input type="radio" name="q15" value="B"> B. Xóa user chưa converted</label><label class="test-option"><input type="radio" name="q15" value="C"> C. Đại diện thời điểm user lần đầu đạt step đó</label><label class="test-option"><input type="radio" name="q15" value="D"> D. Thay thế order table</label></div></div>
+          <div class="test-question" data-q="16" data-correct="D"><div class="test-question-title">Q16. CUBE nên dùng cẩn thận vì sao?</div><div class="test-options"><label class="test-option"><input type="radio" name="q16" value="A"> A. Không tạo subtotal</label><label class="test-option"><input type="radio" name="q16" value="B"> B. Không hỗ trợ dimension</label><label class="test-option"><input type="radio" name="q16" value="C"> C. Luôn sai logic</label><label class="test-option"><input type="radio" name="q16" value="D"> D. Có thể tạo rất nhiều tổ hợp aggregation</label></div></div>
+          <div class="test-question" data-q="17" data-correct="A"><div class="test-question-title">Q17. Bảng daily_user_activity giúp gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q17" value="A"> A. Giảm scan raw events và ổn định rolling/streak logic</label><label class="test-option"><input type="radio" name="q17" value="B"> B. Thay thế mọi bảng dimension</label><label class="test-option"><input type="radio" name="q17" value="C"> C. Tự chứng minh causal impact</label><label class="test-option"><input type="radio" name="q17" value="D"> D. Xóa nhu cầu timezone</label></div></div>
+          <div class="test-question" data-q="18" data-correct="B"><div class="test-question-title">Q18. Current state vs historical state khác nhau thế nào?</div><div class="test-options"><label class="test-option"><input type="radio" name="q18" value="A"> A. Không khác</label><label class="test-option"><input type="radio" name="q18" value="B"> B. Current là trạng thái hiện tại, historical cho biết trạng thái từng hiệu lực khi nào</label><label class="test-option"><input type="radio" name="q18" value="C"> C. Historical chỉ dùng cho UI</label><label class="test-option"><input type="radio" name="q18" value="D"> D. Current luôn đủ cho audit</label></div></div>
+          <div class="test-question" data-q="19" data-correct="C"><div class="test-question-title">Q19. Khi business hỏi "onboarding cải thiện chưa", câu trả lời tốt cần gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q19" value="A"> A. Một query bất kỳ</label><label class="test-option"><input type="radio" name="q19" value="B"> B. Chỉ số tổng events</label><label class="test-option"><input type="radio" name="q19" value="C"> C. D1/D7 retention theo acquisition cohort và so với baseline</label><label class="test-option"><input type="radio" name="q19" value="D"> D. Chỉ screenshot</label></div></div>
+          <div class="test-question" data-q="20" data-correct="D"><div class="test-question-title">Q20. Mục tiêu cuối của Week21 là gì?</div><div class="test-options"><label class="test-option"><input type="radio" name="q20" value="A"> A. Thuộc lòng syntax</label><label class="test-option"><input type="radio" name="q20" value="B"> B. Viết query ngắn nhất</label><label class="test-option"><input type="radio" name="q20" value="C"> C. Bỏ qua assumptions</label><label class="test-option"><input type="radio" name="q20" value="D"> D. Xây reusable analytical logic đáng tin cho business analytics</label></div></div>
+          <div class="test-actions"><button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button><button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button></div><div class="test-result" id="final-test-result" style="display:none"></div>
+        </div>
+      </div></div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="goPrev(7)">← Module trước</button><button class="nav-btn primary" onclick="showModule(0, document.querySelectorAll('.nav-item')[0])">Ôn lại từ đầu</button></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function showModule(idx, el) {
+  document.querySelectorAll('.module').forEach(function(module) {
+    module.classList.remove('active');
+  });
+  var target = document.getElementById('m' + idx);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(item) {
+    item.classList.remove('active');
+  });
+  if (el) {
+    el.classList.add('active');
+  } else {
+    var nav = document.querySelectorAll('.nav-item')[idx];
+    if (nav) nav.classList.add('active');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goNext(idx) {
+  var maxIdx = document.querySelectorAll('.module').length - 1;
+  var next = Math.min(idx + 1, maxIdx);
+  showModule(next, document.querySelectorAll('.nav-item')[next]);
+}
+
+function goPrev(idx) {
+  var prev = Math.max(idx - 1, 0);
+  showModule(prev, document.querySelectorAll('.nav-item')[prev]);
+}
+
+function toggleSection(header) {
+  var content = header.nextElementSibling;
+  var toggle = header.querySelector('.section-toggle');
+  if (!content) return;
+  var isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  if (toggle) toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  var item = el.closest('.quiz-item');
+  if (!item) return;
+  item.querySelectorAll('.quiz-opt').forEach(function(opt) {
+    opt.classList.remove('correct', 'wrong');
+  });
+  el.classList.add(correct ? 'correct' : 'wrong');
+  var explain = item.querySelector('.quiz-explain');
+  if (explain) {
+    explain.textContent = explanation;
+    explain.classList.add('show');
+  }
+}
+
+function toggleSolution(btn) {
+  var box = btn.parentElement.querySelector('.solution-box');
+  if (!box) return;
+  box.classList.toggle('show');
+  btn.textContent = box.classList.contains('show') ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function switchTab(btn, targetId) {
+  var wrap = btn.closest('.tab-wrap');
+  if (!wrap) return;
+  wrap.querySelectorAll('.tab').forEach(function(tab) {
+    tab.classList.remove('active');
+  });
+  wrap.querySelectorAll('.tab-content').forEach(function(content) {
+    content.classList.remove('active');
+  });
+  btn.classList.add('active');
+  var target = document.getElementById(targetId);
+  if (target) target.classList.add('active');
+}
+
+function gradeFinalTest() {
+  var questions = document.querySelectorAll('#final-test .test-question');
+  var correctCount = 0;
+  var unanswered = 0;
+  var mistakes = [];
+  questions.forEach(function(q) {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    var qNum = q.getAttribute('data-q');
+    var correct = q.getAttribute('data-correct');
+    var selected = q.querySelector('input[type="radio"]:checked');
+    if (!selected) {
+      unanswered += 1;
+      q.classList.add('unanswered');
+      mistakes.push('Q' + qNum + ': chưa trả lời, đáp án đúng là ' + correct);
+    } else if (selected.value === correct) {
+      correctCount += 1;
+      q.classList.add('correct');
+    } else {
+      q.classList.add('wrong');
+      mistakes.push('Q' + qNum + ': chọn ' + selected.value + ', đáp án đúng là ' + correct);
+    }
+  });
+  var total = questions.length;
+  var pct = total === 0 ? 0 : Math.round((correctCount / total) * 100);
+  var level = pct >= 85 ? 'good' : (pct >= 65 ? 'warn' : 'bad');
+  var guidance = pct >= 85
+    ? 'Bạn đã sẵn sàng đóng gói artifact Week21. Hãy kiểm tra lại README, assumptions và validation trước khi commit.'
+    : pct >= 65
+      ? 'Bạn nắm được phần lớn pattern. Nên ôn lại các câu sai, đặc biệt denominator, order enforcement và attribution caveat.'
+      : 'Bạn nên ôn lại W21.02 đến W21.06 trước khi đưa SQL vào portfolio. Tập trung vào business logic trước syntax.';
+  var result = document.getElementById('final-test-result');
+  if (!result) return;
+  result.style.display = 'block';
+  result.innerHTML =
+    '<div class="score-row">' +
+    '<span class="score-chip ' + level + '">Điểm: ' + correctCount + '/' + total + '</span>' +
+    '<span class="score-chip">Tỷ lệ đúng: ' + pct + '%</span>' +
+    '<span class="score-chip warn">Chưa trả lời: ' + unanswered + '</span>' +
+    '</div>' +
+    '<p>' + guidance + '</p>' +
+    (mistakes.length ? '<ol class="mistake-list"><li>' + mistakes.join('</li><li>') + '</li></ol>' : '<p>Không có câu sai.</p>');
+}
+
+function resetFinalTest() {
+  document.querySelectorAll('#final-test input[type="radio"]').forEach(function(input) {
+    input.checked = false;
+  });
+  document.querySelectorAll('#final-test .test-question').forEach(function(q) {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+  });
+  var result = document.getElementById('final-test-result');
+  if (result) {
+    result.style.display = 'none';
+    result.innerHTML = '';
+  }
+}
+</script>
+
+</body>
+</html>
