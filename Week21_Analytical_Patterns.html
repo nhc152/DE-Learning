@@ -541,14 +541,15 @@
           </ul>
 
           <h3>Ví dụ SQL chuẩn hóa một metric contract (PostgreSQL/Oracle SQL khác cú pháp)</h3>
-          <div id="w2101-tabs" class="tab-group">
-            <div class="tab active" onclick="switchTab('w2101-tabs','w2101-pg')">PostgreSQL</div>
-            <div class="tab" onclick="switchTab('w2101-tabs','w2101-oracle')">Oracle SQL</div>
-          </div>
-          <div id="w2101-pg" class="tab-content active">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · metric_contract_example.sql</span></div>
-              <div class="cmd-body"><pre>WITH checkout_users AS (
+          <div class="tab-wrap">
+            <div id="w2101-tabs" class="tab-group">
+              <button class="tab active" onclick="switchTab(this, 'w2101-pg')">PostgreSQL</button>
+              <button class="tab" onclick="switchTab(this, 'w2101-oracle')">Oracle SQL</button>
+            </div>
+            <div id="w2101-pg" class="tab-content active">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · metric_contract_example.sql</span></div>
+                <div class="cmd-body"><pre>WITH checkout_users AS (
   SELECT user_id, MIN(event_time) AS first_checkout_at
   FROM events
   WHERE event_name = 'checkout_started'
@@ -569,12 +570,12 @@ LEFT JOIN paid_users p
   ON c.user_id = p.user_id
  AND p.first_paid_at >= c.first_checkout_at
  AND p.first_paid_at <= c.first_checkout_at + INTERVAL '48 hours';</pre></div>
+              </div>
             </div>
-          </div>
-          <div id="w2101-oracle" class="tab-content">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · metric_contract_example.sql</span></div>
-              <div class="cmd-body"><pre>WITH checkout_users AS (
+            <div id="w2101-oracle" class="tab-content">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · metric_contract_example.sql</span></div>
+                <div class="cmd-body"><pre>WITH checkout_users AS (
   SELECT user_id, MIN(event_time) AS first_checkout_at
   FROM events
   WHERE event_name = 'checkout_started'
@@ -595,6 +596,7 @@ LEFT JOIN paid_users p
   ON c.user_id = p.user_id
  AND p.first_paid_at >= c.first_checkout_at
  AND p.first_paid_at <= c.first_checkout_at + NUMTODSINTERVAL(48, 'HOUR');</pre></div>
+              </div>
             </div>
           </div>
         </div>
@@ -893,14 +895,15 @@ Rule:
           </table>
 
           <h3>Transition detection bằng LAG (event-sourced)</h3>
-          <div id="w2102-tabs-1" class="tab-group">
-            <div class="tab active" onclick="switchTab('w2102-tabs-1','w2102-pg-1')">PostgreSQL</div>
-            <div class="tab" onclick="switchTab('w2102-tabs-1','w2102-oracle-1')">Oracle SQL</div>
-          </div>
-          <div id="w2102-pg-1" class="tab-content active">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · state_transition_lag.sql</span></div>
-              <div class="cmd-body"><pre>WITH ordered AS (
+          <div class="tab-wrap">
+            <div id="w2102-tabs-1" class="tab-group">
+              <button class="tab active" onclick="switchTab(this, 'w2102-pg-1')">PostgreSQL</button>
+              <button class="tab" onclick="switchTab(this, 'w2102-oracle-1')">Oracle SQL</button>
+            </div>
+            <div id="w2102-pg-1" class="tab-content active">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · state_transition_lag.sql</span></div>
+                <div class="cmd-body"><pre>WITH ordered AS (
   SELECT
     user_id,
     status,
@@ -924,12 +927,12 @@ WHERE prev_status IS NOT NULL
     ('pending','completed'),
     ('trial','paid')
   );</pre></div>
+              </div>
             </div>
-          </div>
-          <div id="w2102-oracle-1" class="tab-content">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · state_transition_lag.sql</span></div>
-              <div class="cmd-body"><pre>WITH ordered AS (
+            <div id="w2102-oracle-1" class="tab-content">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · state_transition_lag.sql</span></div>
+                <div class="cmd-body"><pre>WITH ordered AS (
   SELECT
     user_id,
     status,
@@ -951,35 +954,22 @@ WHERE prev_status IS NOT NULL
   AND (prev_status = 'active' AND status = 'inactive'
        OR prev_status = 'pending' AND status = 'completed'
        OR prev_status = 'trial' AND status = 'paid');</pre></div>
+              </div>
             </div>
           </div>
 
           <h3>Dựng effective range từ stream event</h3>
           <p>Khi cần model kiểu SCD2 nhẹ cho phân tích, bạn có thể dùng <code>LEAD(event_time)</code> làm <code>effective_to</code> để có interval chính xác.</p>
 
-          <div id="w2102-tabs-2" class="tab-group">
-            <div class="tab active" onclick="switchTab('w2102-tabs-2','w2102-pg-2')">PostgreSQL</div>
-            <div class="tab" onclick="switchTab('w2102-tabs-2','w2102-oracle-2')">Oracle SQL</div>
-          </div>
-          <div id="w2102-pg-2" class="tab-content active">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · effective_interval.sql</span></div>
-              <div class="cmd-body"><pre>SELECT
-  user_id,
-  status,
-  event_time AS effective_from,
-  LEAD(event_time) OVER (
-    PARTITION BY user_id
-    ORDER BY event_time
-  ) AS effective_to
-FROM user_status_events
-ORDER BY user_id, effective_from;</pre></div>
+          <div class="tab-wrap">
+            <div id="w2102-tabs-2" class="tab-group">
+              <button class="tab active" onclick="switchTab(this, 'w2102-pg-2')">PostgreSQL</button>
+              <button class="tab" onclick="switchTab(this, 'w2102-oracle-2')">Oracle SQL</button>
             </div>
-          </div>
-          <div id="w2102-oracle-2" class="tab-content">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · effective_interval.sql</span></div>
-              <div class="cmd-body"><pre>SELECT
+            <div id="w2102-pg-2" class="tab-content active">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · effective_interval.sql</span></div>
+                <div class="cmd-body"><pre>SELECT
   user_id,
   status,
   event_time AS effective_from,
@@ -989,11 +979,28 @@ ORDER BY user_id, effective_from;</pre></div>
   ) AS effective_to
 FROM user_status_events
 ORDER BY user_id, effective_from;</pre></div>
+              </div>
+            </div>
+            <div id="w2102-oracle-2" class="tab-content">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · effective_interval.sql</span></div>
+                <div class="cmd-body"><pre>SELECT
+  user_id,
+  status,
+  event_time AS effective_from,
+  LEAD(event_time) OVER (
+    PARTITION BY user_id
+    ORDER BY event_time
+  ) AS effective_to
+FROM user_status_events
+ORDER BY user_id, effective_from;</pre></div>
+              </div>
             </div>
           </div>
 
           <h3>Xử lý duplicate status events</h3>
           <p>Nhiều hệ thống gửi lại cùng một event do retry network. Nếu không deduplicate, bạn sẽ đếm thừa số lần transition.</p>
+          <p>Rule production quan trọng: <code>event_time</code> dùng để sắp thứ tự lifecycle (nghĩa business), còn <code>ingested_at</code> dùng để chọn bản ghi canonical khi deduplicate (nghĩa pipeline). Không nên hoán đổi hai vai trò này.</p>
 
           <div class="cmd-block">
             <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>deduplicate_status_events.sql</span></div>
@@ -1015,6 +1022,7 @@ WHERE rn = 1;</pre></div>
           </div>
 
           <div class="info-box tip">✅ <span>Rule production: luôn xác định khóa duplicate trước (source_event_id hoặc business key + event_time) rồi mới chạy LAG/LEAD.</span></div>
+          <div class="info-box warn">⚠️ <span>Khi có late-arriving events, cần recompute lại phần interval bị ảnh hưởng (ví dụ lookback 3-7 ngày hoặc theo watermark), không chỉ append ngày mới; nếu không timeline transition sẽ lệch.</span></div>
           <div class="info-box note">📌 <span>Nếu không có event_id, dùng fallback key: <code>(entity_id, status, date_trunc('second', event_time))</code> và đánh dấu mức độ tin cậy.</span></div>
         </div>
       </div>
@@ -1302,6 +1310,8 @@ WHERE rn = 1;</pre></div>
             <tr><td>Step 4</td><td>first_project_created</td><td>User đạt activation milestone</td></tr>
           </table>
 
+          <div class="info-box warn">⚠️ <span>Identity stitching là bước bắt buộc trong production funnel: step đầu có thể chỉ có <code>session_id</code>/<code>device_id</code>, còn step sau mới có <code>user_id</code>. Hãy map định danh ẩn danh → định danh đăng nhập (qua bảng lookup) trước khi tính conversion để tránh drop-off giả.</span></div>
+
           <h3>First occurrence per step</h3>
           <div class="cmd-block">
             <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>funnel_step_first_occurrence.sql</span></div>
@@ -1326,15 +1336,16 @@ FROM step_events;</pre></div>
           <h3>Enforce step order + time window</h3>
           <p>Đây là phần phân biệt giữa "query có vẻ đúng" và "analytical logic đúng". Step sau chỉ hợp lệ khi xảy ra sau step trước trong khoảng thời gian định nghĩa.</p>
 
-          <div id="w2103-tabs-1" class="tab-group">
-            <div class="tab active" onclick="switchTab('w2103-tabs-1','w2103-pg-1')">PostgreSQL</div>
-            <div class="tab" onclick="switchTab('w2103-tabs-1','w2103-oracle-1')">Oracle SQL</div>
-          </div>
+          <div class="tab-wrap">
+            <div id="w2103-tabs-1" class="tab-group">
+              <button class="tab active" onclick="switchTab(this, 'w2103-pg-1')">PostgreSQL</button>
+              <button class="tab" onclick="switchTab(this, 'w2103-oracle-1')">Oracle SQL</button>
+            </div>
 
-          <div id="w2103-pg-1" class="tab-content active">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · signup_funnel_ordered.sql</span></div>
-              <div class="cmd-body"><pre>WITH s1 AS (
+            <div id="w2103-pg-1" class="tab-content active">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · signup_funnel_ordered.sql</span></div>
+                <div class="cmd-body"><pre>WITH s1 AS (
   SELECT user_id, MIN(event_time) AS t1
   FROM events
   WHERE event_name = 'signup_started'
@@ -1383,13 +1394,13 @@ SELECT
   COUNT(t4) AS step4_users,
   ROUND(COUNT(t4)::numeric / NULLIF(COUNT(*), 0), 4) AS step1_to_step4_conversion
 FROM joined;</pre></div>
+              </div>
             </div>
-          </div>
 
-          <div id="w2103-oracle-1" class="tab-content">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · signup_funnel_ordered.sql</span></div>
-              <div class="cmd-body"><pre>WITH s1 AS (
+            <div id="w2103-oracle-1" class="tab-content">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · signup_funnel_ordered.sql</span></div>
+                <div class="cmd-body"><pre>WITH s1 AS (
   SELECT user_id, MIN(event_time) AS t1
   FROM events
   WHERE event_name = 'signup_started'
@@ -1438,6 +1449,7 @@ SELECT
   COUNT(t4) AS step4_users,
   ROUND(COUNT(t4) / NULLIF(COUNT(*), 0), 4) AS step1_to_step4_conversion
 FROM joined;</pre></div>
+              </div>
             </div>
           </div>
 
@@ -1733,18 +1745,19 @@ FROM joined;</pre></div>
           </table>
 
           <h3>Dựng cohort base và period offset</h3>
-          <div id="w2104-tabs-1" class="tab-group">
-            <div class="tab active" onclick="switchTab('w2104-tabs-1','w2104-pg-1')">PostgreSQL</div>
-            <div class="tab" onclick="switchTab('w2104-tabs-1','w2104-oracle-1')">Oracle SQL</div>
-          </div>
+          <div class="tab-wrap">
+            <div id="w2104-tabs-1" class="tab-group">
+              <button class="tab active" onclick="switchTab(this, 'w2104-pg-1')">PostgreSQL</button>
+              <button class="tab" onclick="switchTab(this, 'w2104-oracle-1')">Oracle SQL</button>
+            </div>
 
-          <div id="w2104-pg-1" class="tab-content active">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · cohort_retention_d0_d30.sql</span></div>
-              <div class="cmd-body"><pre>WITH cohort_base AS (
+            <div id="w2104-pg-1" class="tab-content active">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>postgresql · cohort_retention_d0_d30.sql</span></div>
+                <div class="cmd-body"><pre>WITH cohort_base AS (
   SELECT
     user_id,
-    DATE(MIN(event_time)) AS cohort_date
+    DATE(MIN(event_time AT TIME ZONE 'Asia/Ho_Chi_Minh')) AS cohort_date
   FROM events
   WHERE event_name = 'signup_started'
   GROUP BY user_id
@@ -1752,7 +1765,7 @@ FROM joined;</pre></div>
 activity AS (
   SELECT DISTINCT
     e.user_id,
-    DATE(e.event_time) AS activity_date
+    DATE(e.event_time AT TIME ZONE 'Asia/Ho_Chi_Minh') AS activity_date
   FROM events e
   WHERE e.event_name IN ('app_opened','project_viewed','task_completed')
 ),
@@ -1772,27 +1785,36 @@ cohort_size AS (
   SELECT cohort_date, COUNT(*) AS cohort_users
   FROM cohort_base
   GROUP BY cohort_date
+),
+data_cutoff AS (
+  SELECT MAX(activity_date) AS data_cutoff_date
+  FROM activity
 )
 SELECT
   r.cohort_date,
   r.day_offset,
   r.retained_users,
   cs.cohort_users,
-  ROUND(r.retained_users::numeric / NULLIF(cs.cohort_users,0), 4) AS retention_rate
+  ROUND(r.retained_users::numeric / NULLIF(cs.cohort_users,0), 4) AS retention_rate,
+  CASE
+    WHEN r.day_offset = 30 AND r.cohort_date + INTERVAL '30 day' > d.data_cutoff_date THEN 0
+    ELSE 1
+  END AS is_mature_period
 FROM retention r
 JOIN cohort_size cs ON r.cohort_date = cs.cohort_date
+CROSS JOIN data_cutoff d
 WHERE r.day_offset IN (0,1,7,30)
 ORDER BY r.cohort_date, r.day_offset;</pre></div>
+              </div>
             </div>
-          </div>
 
-          <div id="w2104-oracle-1" class="tab-content">
-            <div class="cmd-block">
-              <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · cohort_retention_d0_d30.sql</span></div>
-              <div class="cmd-body"><pre>WITH cohort_base AS (
+            <div id="w2104-oracle-1" class="tab-content">
+              <div class="cmd-block">
+                <div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>oracle · cohort_retention_d0_d30.sql</span></div>
+                <div class="cmd-body"><pre>WITH cohort_base AS (
   SELECT
     user_id,
-    TRUNC(MIN(event_time)) AS cohort_date
+    TRUNC(MIN(CAST((FROM_TZ(CAST(event_time AS TIMESTAMP), 'UTC') AT TIME ZONE 'Asia/Ho_Chi_Minh') AS DATE))) AS cohort_date
   FROM events
   WHERE event_name = 'signup_started'
   GROUP BY user_id
@@ -1800,7 +1822,7 @@ ORDER BY r.cohort_date, r.day_offset;</pre></div>
 activity AS (
   SELECT DISTINCT
     e.user_id,
-    TRUNC(e.event_time) AS activity_date
+    TRUNC(CAST((FROM_TZ(CAST(e.event_time AS TIMESTAMP), 'UTC') AT TIME ZONE 'Asia/Ho_Chi_Minh') AS DATE)) AS activity_date
   FROM events e
   WHERE e.event_name IN ('app_opened','project_viewed','task_completed')
 ),
@@ -1820,17 +1842,27 @@ cohort_size AS (
   SELECT cohort_date, COUNT(*) AS cohort_users
   FROM cohort_base
   GROUP BY cohort_date
+),
+data_cutoff AS (
+  SELECT MAX(activity_date) AS data_cutoff_date
+  FROM activity
 )
 SELECT
   r.cohort_date,
   r.day_offset,
   r.retained_users,
   cs.cohort_users,
-  ROUND(r.retained_users / NULLIF(cs.cohort_users,0), 4) AS retention_rate
+  ROUND(r.retained_users / NULLIF(cs.cohort_users,0), 4) AS retention_rate,
+  CASE
+    WHEN r.day_offset = 30 AND r.cohort_date + 30 > d.data_cutoff_date THEN 0
+    ELSE 1
+  END AS is_mature_period
 FROM retention r
 JOIN cohort_size cs ON r.cohort_date = cs.cohort_date
+CROSS JOIN data_cutoff d
 WHERE r.day_offset IN (0,1,7,30)
 ORDER BY r.cohort_date, r.day_offset;</pre></div>
+              </div>
             </div>
           </div>
 
@@ -2118,7 +2150,7 @@ Interpretation:
 daily_activity AS (
   SELECT DISTINCT
     user_id,
-    occurred_at::date AS activity_date
+    DATE(occurred_at AT TIME ZONE 'Asia/Ho_Chi_Minh') AS activity_date
   FROM fact_product_events
   WHERE event_name IN ('app_opened', 'lesson_started', 'purchase_completed')
 )
@@ -2140,7 +2172,7 @@ ORDER BY c.report_date;</pre></div></div>
 daily_activity AS (
   SELECT DISTINCT
     user_id,
-    TRUNC(occurred_at) AS activity_date
+    TRUNC(CAST((FROM_TZ(CAST(occurred_at AS TIMESTAMP), 'UTC') AT TIME ZONE 'Asia/Ho_Chi_Minh') AS DATE)) AS activity_date
   FROM fact_product_events
   WHERE event_name IN ('app_opened', 'lesson_started', 'purchase_completed')
 )
@@ -2176,6 +2208,17 @@ ORDER BY order_date;</pre></div></div>
 
         <h3>Streak và gap-and-island</h3>
         <p>Streak là chuỗi ngày liên tiếp. Pattern phổ biến: lấy ngày active duy nhất theo user, đánh số bằng <code>ROW_NUMBER()</code>, rồi tạo khóa đảo bằng <code>activity_date - row_number</code>. Các ngày liên tiếp sẽ có cùng island key.</p>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>gap_and_island_trace.txt</span></div><div class="cmd-body"><pre>user_id | activity_date | rn | island_key
+u_101   | 2026-04-01    | 1  | 2026-03-31
+u_101   | 2026-04-02    | 2  | 2026-03-31
+u_101   | 2026-04-03    | 3  | 2026-03-31
+u_101   | 2026-04-06    | 4  | 2026-04-02
+u_101   | 2026-04-07    | 5  | 2026-04-02
+
+Giải thích:
+- 2026-04-01 → 2026-04-03 có cùng island_key => cùng một streak.
+- 2026-04-04 và 2026-04-05 không active => tạo gap.
+- 2026-04-06 bắt đầu island mới => streak mới.</pre></div></div>
         <div class="tab-wrap">
           <div class="tab-group">
             <button class="tab active" onclick="switchTab(this, 'w2105_pg_streak')">PostgreSQL</button>
@@ -2347,6 +2390,8 @@ ORDER BY aggregation_level, net_revenue DESC</pre></div></div></div>
     ON t.user_id = o.user_id
    AND t.touch_time &lt;= o.order_time
    AND t.touch_time &gt;= o.order_time - INTERVAL '30 days'
+  WHERE o.user_id NOT IN (SELECT user_id FROM internal_accounts)
+    AND LOWER(COALESCE(t.user_agent, '')) NOT LIKE '%bot%'
 )
 SELECT
   marketing_source,
@@ -2391,6 +2436,7 @@ ORDER BY last_touch_revenue DESC;</pre></div></div>
 ├── rolling_metrics.sql
 ├── streak_analysis.sql
 ├── attribution_basic.sql
+├── validation_queries.sql
 ├── metric_definitions.md
 └── README.md</pre></div></div></div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content"><ul class="checklist"><li class="done">Biết cấu trúc portfolio artifact analytical SQL.</li><li class="done">Viết README giải thích business questions, input tables, assumptions và validation.</li><li class="done">Tách SQL theo pattern để recruiter dễ đọc.</li><li class="done">Tạo metric_definitions.md như metric contract nhỏ.</li><li class="done">Tránh artifact chỉ là folder query không có narrative.</li></ul></div></div>
@@ -2446,6 +2492,41 @@ ORDER BY last_touch_revenue DESC;</pre></div></div>
 - Revenue assigned to latest eligible touch before order.
 - Eligibility: touch_time between order_time - 30 days and order_time.
 - Caveat: descriptive model, not incrementality.</pre></div></div>
+        <h3>validation_queries.sql</h3>
+        <div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>validation_queries.sql</span></div><div class="cmd-body"><pre>-- 1) State history: không overlap hiệu lực
+SELECT user_id, COUNT(*) AS overlap_rows
+FROM (
+  SELECT
+    user_id,
+    effective_from,
+    effective_to,
+    LAG(effective_to) OVER (
+      PARTITION BY user_id
+      ORDER BY effective_from
+    ) AS prev_effective_to
+  FROM user_status_history
+) x
+WHERE prev_effective_to IS NOT NULL
+  AND effective_from &lt; prev_effective_to
+GROUP BY user_id
+HAVING COUNT(*) &gt; 0;
+
+-- 2) Funnel: step count phải giảm dần sau order enforcement
+WITH funnel_counts AS (
+  SELECT
+    COUNT(*) AS step1_users,
+    COUNT(t2) AS step2_users,
+    COUNT(t3) AS step3_users,
+    COUNT(t4) AS step4_users
+  FROM funnel_joined_ordered
+)
+SELECT *
+FROM funnel_counts
+WHERE NOT (
+  step1_users &gt;= step2_users
+  AND step2_users &gt;= step3_users
+  AND step3_users &gt;= step4_users
+);</pre></div></div>
         <div class="info-box tip">✅ <span>Recruiter-grade artifact đọc như một mini case study: business question, input, logic, SQL, validation, caveat.</span></div>
       </div></div>
       <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">
