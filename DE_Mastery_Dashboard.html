@@ -151,38 +151,81 @@
         // --- DATA ---
         const roadmapData = [
             {
-                stage: "GIAI ĐOẠN 0",
-                title: "Setup Môi Trường",
-                week: "Tuần 0",
+                stage: "GIAI ĐOẠN 1",
+                title: "Nền tảng & Công cụ",
+                week: "Tuần 1–4",
                 modules: [
                     {
-                        name: "Cơ sở hạ tầng",
-                        tasks: ["Cài đặt Docker", "Python Environment", "Postgres Container", "Git Setup"],
-                        artifact: "Week00_Setup.html",
-                        artifactName: "Setup Guide"
+                        name: "Setup & SQL",
+                        tasks: ["Môi trường DE (Python, Docker)", "Advanced SQL (Window func, CTE)", "PostgreSQL Deep-dive"],
+                        artifact: "Week01_SQL_Advanced.html",
+                        artifactName: "SQL/Setup"
+                    },
+                    {
+                        name: "Hạ tầng cơ bản (Zoomcamp)",
+                        tasks: ["Docker & Terraform", "Kestra Orchestration", "BigQuery DWH"],
+                        artifact: "Module01_Docker_Terraform.html",
+                        artifactName: "Infra Zoomcamp"
                     }
                 ]
             },
             {
-                stage: "GIAI ĐOẠN 1",
-                title: "Foundation",
-                week: "Tuần 1–4",
+                stage: "GIAI ĐOẠN 2",
+                title: "Data Modeling & Analytics",
+                week: "Tuần 5–8",
                 modules: [
                     {
-                        name: "SQL Nâng Cao",
-                        tasks: ["Window functions", "Grouping Sets", "Recursive CTE"],
-                        artifact: "Week01_SQL_Advanced.html",
-                        artifactName: "SQL Advanced"
+                        name: "Mô hình hoá dữ liệu",
+                        tasks: ["Dimensional Modeling (Kimball)", "Fact Modeling", "Pipeline Design"],
+                        artifact: "Week05_Dimensional_Modeling.html",
+                        artifactName: "Modeling"
                     },
                     {
-                        name: "Python cho DE",
-                        tasks: ["Pandas", "SQLAlchemy", "Requests API"],
-                        artifact: "Week02_Python_DE.html",
-                        artifactName: "Python ETL"
+                        name: "Analytics Engineering",
+                        tasks: ["Cài đặt dbt", "Chạy mô hình dbt trên BigQuery", "Data Quality & Cleaning"],
+                        artifact: "Module04_Analytics_Engineering.html",
+                        artifactName: "dbt Zoomcamp"
+                    }
+                ]
+            },
+            {
+                stage: "GIAI ĐOẠN 3",
+                title: "Big Data & Real-time",
+                week: "Tuần 9–12",
+                modules: [
+                    {
+                        name: "Xử lý Batch (Spark)",
+                        tasks: ["Distributed Processing", "Spark Internals", "Spark trên Cloud"],
+                        artifact: "Week16_Spark.html",
+                        artifactName: "Spark"
+                    },
+                    {
+                        name: "Xử lý Streaming",
+                        tasks: ["Apache Kafka", "Apache Flink", "Streaming Architecture"],
+                        artifact: "Week18_Flink_Kafka.html",
+                        artifactName: "Streaming"
+                    }
+                ]
+            },
+            {
+                stage: "GIAI ĐOẠN 4",
+                title: "Kiến trúc Senior & Portfolio",
+                week: "Tuần 13–16",
+                modules: [
+                    {
+                        name: "Kiến trúc nâng cao",
+                        tasks: ["Modern OLAP (ClickHouse)", "Analytical Patterns", "Cloud AWS Architecture"],
+                        artifact: "Week20_Modern_OLAP.html",
+                        artifactName: "Arch"
+                    },
+                    {
+                        name: "Capstone & Phỏng vấn",
+                        tasks: ["Làm Cohorts Project", "Giải Interview Checklist", "System Design Practice"],
+                        artifact: "Module08_Cohorts_Projects_Assets.html",
+                        artifactName: "Project"
                     }
                 ]
             }
-            // ... (Tiếp tục các tuần khác tương tự)
         ];
 
         // --- INITIALIZATION ---

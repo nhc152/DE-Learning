@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 23 · Pipeline Maintenance</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  .hero { background: linear-gradient(135deg, #0d1117 0%, #141a24 46%, #1b2738 100%); border-bottom: 2px solid var(--accent); padding: 42px 24px 32px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { position: relative; font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: 0; }
+  .hero p { position: relative; color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { position: relative; display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+  .container { display: flex; min-height: calc(100vh - 160px); }
+  .sidebar { width: 330px; min-width: 330px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--accent2); }
+  .nav-item { display: block; padding: 8px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 58px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+  .main { flex: 1; padding: 32px 40px; max-width: 1060px; }
+  .module { display: none; }
+  .module.active { display: block; }
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.55rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #ffffff05; }
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', 'Consolas', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; align-items: center; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: #79b8ff; }
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 20px; padding: 18px; border: 1px solid var(--accent); border-radius: 10px; background: linear-gradient(180deg, #1f6feb18, #161b22); box-shadow: 0 0 0 1px #58a6ff12 inset; }
+  .test-result p { margin: 8px 0; }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .mistake-list { margin-top: 8px; padding-left: 18px; }
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.55rem; }
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .test-options { grid-template-columns: 1fr; }
+    .nav-buttons { flex-direction: column; align-items: stretch; }
+    .nav-btn { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>Data Pipeline Maintenance & Production Mindset</h1>
+  <p>Tuần 23 · Học cách sở hữu pipeline production như một Data Engineer thực thụ</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 5 · Production Mindset</span>
+    <span class="badge badge-orange">Ownership · On-call · Incident Response</span>
+    <span class="badge badge-blue">Artifact: week23_maintenance/</span>
+  </div>
+</div>
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương trình học</div>
+    <div class="level-label">TUẦN 23 · MAINTENANCE</div>
+    <div id="nav"></div>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+<script>
+const moduleNames = [
+  ['W23.01', 'Tổng Quan: Maintenance là gì?'],
+  ['W23.02', 'Ownership, On-call & Responsibility'],
+  ['W23.03', 'SLA, SLO, SLI & Alerting'],
+  ['W23.04', 'Runbook, Incident & Post-mortem'],
+  ['W23.05', 'Lineage, Impact & Change'],
+  ['W23.06', 'Risk Register & Reliability Debt'],
+  ['W23.07', 'Artifact: week23_maintenance/'],
+  ['W23.08', 'Mini Test Tổng Kết']
+];
+
+const sharedScenario = 'Pipeline daily_sales chạy lúc 06:00 mỗi ngày: order_db và payment_api đổ vào raw, dbt build staging/marts, Airflow orchestrate, dashboard doanh thu mở lúc 08:00 cho Finance và Growth.';
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function codeBlock(title, body) {
+  return `<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>${esc(title)}</span></div><div class="cmd-body"><pre>${esc(body)}</pre></div></div>`;
+}
+
+function info(type, text) {
+  const icon = type === 'tip' ? '✓' : type === 'warn' ? '!' : 'i';
+  return `<div class="info-box ${type}"><strong>${icon}</strong><span>${text}</span></div>`;
+}
+
+const modulesData = [
+  {
+    tag: 'Tuần 23 · W23.01',
+    title: 'Tổng Quan: Maintenance là gì trong Data Engineering?',
+    subtitle: 'Chuyển từ tư duy build xong là xong sang vận hành pipeline có trách nhiệm với business trust.',
+    menu: [
+      ['Production pipeline', 'Pipeline đã có user, SLA, dữ liệu downstream và kỳ vọng business rõ ràng.'],
+      ['Build vs Operate', 'Build tạo chức năng; operate giữ chức năng đó đúng, kịp, đáng tin sau nhiều tháng.'],
+      ['Failure sources', 'Schema change, late files, credential expiry, data quality failure, cost spike, stale dashboard.'],
+      ['Outcome tuần', 'Biết tạo ownership matrix, runbook, SLO/SLI, risk register và post-mortem template.']
+    ],
+    goals: [
+      'Hiểu vì sao pipeline thường fail sau khi đã được đánh dấu done.',
+      'Phân biệt feature speed với reliability và biết trade-off khi có áp lực deadline.',
+      'Nhìn maintenance như engineering discipline, không phải việc dọn dẹp phụ.',
+      'Biết checklist đầu ra của Week23 để biến vận hành thành portfolio artifact.'
+    ],
+    detail: `
+      <h3>Maintenance không phải là “monitor cho có”</h3>
+      <p>Trong Data Engineering, pipeline chỉ thật sự bắt đầu sống khi có người dùng phụ thuộc vào nó. Một job chạy pass hôm nay có thể fail tuần sau vì upstream thêm cột, đổi timezone, đổi semantics của field, credential hết hạn, hoặc dashboard không còn phản ánh metric hiện tại. Maintenance là năng lực giữ pipeline đúng, kịp, tiết kiệm và có thể giải thích được khi có sự cố.</p>
+      <p><strong>Build mindset</strong> hỏi: “Làm sao ship pipeline?” <strong>Operate mindset</strong> hỏi thêm: “Ai chịu trách nhiệm, lỗi nào cần đánh thức người trực, rerun có an toàn không, stakeholder được báo thế nào, và làm sao lỗi này không lặp lại?”</p>
+      ${info('note', sharedScenario)}
+      <h3>Những nguồn lỗi production hay gặp</h3>
+      <table><tr><th>Nguồn lỗi</th><th>Dấu hiệu</th><th>Rủi ro business</th><th>Cách nghĩ đúng</th></tr>
+      <tr><td>Upstream schema change</td><td>dbt model fail vì thiếu field <code>discount_amount</code></td><td>Revenue mart không build được</td><td>Cần contract, impact analysis và owner upstream</td></tr>
+      <tr><td>Late files</td><td>S3 partition <code>dt=2026-05-15</code> đến sau SLA</td><td>Dashboard 08:00 thiếu đơn hàng</td><td>Freshness SLI và policy “wait/rerun/backfill”</td></tr>
+      <tr><td>Credential expiry</td><td>API trả 401 lúc 06:10</td><td>Pipeline fail dù code không đổi</td><td>Secret rotation calendar và alert trước ngày hết hạn</td></tr>
+      <tr><td>Data quality failure</td><td>Row count giảm 45%, null payment_status tăng</td><td>Metric sai nhưng job vẫn xanh</td><td>SLI phải đo chất lượng dữ liệu, không chỉ job status</td></tr>
+      <tr><td>Warehouse cost spike</td><td>Query scan tăng 10x sau thay đổi model</td><td>Chi phí vượt budget</td><td>Maintenance bao gồm cost reliability</td></tr>
+      <tr><td>Stale dashboard</td><td>Dashboard vẫn hiển thị số hôm qua</td><td>Stakeholder mất niềm tin</td><td>Cần freshness visible cho dashboard consumer</td></tr></table>
+      <h3>Infra Incident vs Data Incident</h3>
+      <p>Một điểm rất quan trọng trong production là phân biệt lỗi hạ tầng và lỗi dữ liệu. <strong>Infra Incident</strong> là Airflow scheduler, worker, node, pod, network hoặc warehouse service gặp sự cố; Platform/SRE thường lead xử lý. <strong>Data Incident</strong> là dữ liệu sai, thiếu, trễ, stale hoặc mất trust dù hạ tầng vẫn chạy; Data Engineer sở hữu triage vì cần hiểu business logic, lineage và data quality.</p>
+      <table><tr><th>Loại incident</th><th>Dấu hiệu</th><th>Owner lead</th><th>Ví dụ</th></tr>
+      <tr><td>Infra Incident</td><td>Airflow worker down, Kubernetes pod crash, warehouse unavailable.</td><td>Platform/SRE, Data Engineer phối hợp.</td><td>DAG không start vì scheduler mất heartbeat.</td></tr>
+      <tr><td>Data Incident</td><td>Job xanh nhưng revenue giảm 50%, dashboard stale, schema đổi nghĩa.</td><td>Data Engineer primary owner.</td><td><code>mart_sales_daily</code> pass nhưng thiếu payment records.</td></tr></table>
+      <h3>Trade-off: reliability vs feature speed</h3>
+      <p>Reliability không có nghĩa là chặn mọi thay đổi. Nó nghĩa là thay đổi có kiểm soát: có owner, test, rollback, runbook và impact analysis. Khi team ship quá nhanh mà không trả reliability debt, pipeline thành hệ thống dễ vỡ. Khi team chỉ tối ưu reliability mà không ship, business không nhận được giá trị. Data Engineer production phải biết nói rõ: “Thay đổi này có thể ship hôm nay nếu chấp nhận rủi ro P2, hoặc ship ngày mai với test/backfill đầy đủ.”</p>
+      ${codeBlock('week outcomes checklist', `Week23 output:
+- ownership_matrix.md: ai sở hữu pipeline nào, primary/secondary/stakeholder/upstream/downstream
+- sla_slo_sli.md: định nghĩa freshness, success rate, runtime, row-count anomaly
+- runbook_daily_sales.md: detect, triage, mitigate, recover, communicate, prevent
+- incident_postmortem_template.md: timeline, root cause, action items, owner, due date
+- lineage_diagram.md: source -> raw -> staging -> marts -> dashboard
+- risk_register.md: probability, impact, mitigation, owner, next review
+- README.md: bối cảnh, chính sách alert, cách dùng runbook, lessons learned`)}
+      ${info('warn', 'Anti-pattern cốt lõi: coi pipeline “done” khi DAG xanh lần đầu. Production ownership bắt đầu sau lần deploy đầu tiên.')}
+    `,
+    quiz: [
+      ['Vì sao pipeline có thể fail sau khi đã chạy ổn nhiều ngày?', ['Vì production luôn có thay đổi upstream, volume, credential và business rule', 'Vì Airflow tự tạo lỗi ngẫu nhiên', 'Vì dashboard luôn sai khi có nhiều user', 'Vì SQL không phù hợp với Data Engineering'], 'A', ['Đúng. Production thay đổi liên tục, nên maintenance là bắt buộc.', 'Sai. Scheduler không phải nguyên nhân gốc mặc định.', 'Sai. Dashboard có thể stale, nhưng không phải luôn sai.', 'Sai. SQL vẫn là công cụ trung tâm của DE.']],
+      ['Build mindset khác operate mindset ở điểm nào?', ['Build chỉ quan tâm màu dashboard', 'Operate hỏi ai chịu trách nhiệm, rerun thế nào, báo ai và ngăn lỗi lặp lại ra sao', 'Operate nghĩa là không ship feature mới', 'Build mindset luôn tốt hơn operate mindset'], 'B', ['Sai. UI không phải trọng tâm pipeline ownership.', 'Đúng. Operate thêm trách nhiệm vận hành sau khi ship.', 'Sai. Operate vẫn ship, nhưng ship có kiểm soát.', 'Sai. Hai mindset cần bổ sung cho nhau.']],
+      ['Nguồn lỗi nào là ví dụ upstream schema change?', ['API trả 401', 'Field order_total bị đổi thành gross_amount', 'Warehouse query scan tăng 10x', 'Dashboard không ai xem'], 'B', ['Sai. Đây là credential/auth issue.', 'Đúng. Field thay đổi phá downstream model.', 'Sai. Đây là cost/performance risk.', 'Sai. Đây là adoption hoặc stale reporting issue.']],
+      ['Maintenance là engineering discipline vì sao?', ['Nó cần owner, metric, process, artifact và cải tiến liên tục', 'Nó chỉ cần trực Slack', 'Nó chỉ là việc của platform team', 'Nó không liên quan business'], 'A', ['Đúng. Maintenance có thiết kế, measurement và feedback loop.', 'Sai. Trực Slack không đủ để vận hành hệ thống.', 'Sai. Data team vẫn sở hữu pipeline và data semantics.', 'Sai. Mục tiêu cuối là business trust.']],
+      ['Ví dụ nào thể hiện reliability vs feature speed trade-off?', ['Bỏ toàn bộ test để deploy nhanh và không ghi lại rủi ro', 'Delay một ngày để thêm freshness check trước khi đổi model revenue quan trọng', 'Không bao giờ thay đổi pipeline', 'Chỉ hỏi stakeholder sau khi sự cố xảy ra'], 'B', ['Sai. Đây là risk-taking mù.', 'Đúng. Đây là trade-off có lý do và giảm rủi ro.', 'Sai. Reliability không phải đóng băng hệ thống.', 'Sai. Communication phải chủ động.']],
+      ['Stale dashboard nguy hiểm vì sao?', ['Nó làm CPU máy user nóng hơn', 'Nó có thể khiến business ra quyết định trên dữ liệu cũ dù pipeline không đỏ rõ ràng', 'Nó chỉ là lỗi giao diện', 'Nó luôn do BI tool'], 'B', ['Sai. Không liên quan.', 'Đúng. Dữ liệu cũ nhưng nhìn có vẻ hợp lệ là rủi ro lớn.', 'Sai. Đây là vấn đề data freshness.', 'Sai. Gốc có thể ở pipeline hoặc dependency.']],
+      ['Credential expiry nên được quản lý thế nào?', ['Chờ đến khi fail rồi đổi', 'Có lịch rotation, cảnh báo trước hạn và owner rõ ràng', 'Commit secret vào README', 'Tắt alert auth failure'], 'B', ['Sai. Đây là reactive và gây incident.', 'Đúng. Đây là vận hành có kiểm soát.', 'Sai. Commit secret là lỗi bảo mật.', 'Sai. Auth failure là alert quan trọng.']],
+      ['Week23 artifact nên chứng minh điều gì với recruiter?', ['Bạn biết đổi theme HTML', 'Bạn biết sở hữu pipeline production, viết runbook và quản lý rủi ro', 'Bạn chỉ biết lý thuyết incident', 'Bạn tránh mọi thay đổi production'], 'B', ['Sai. UI không phải năng lực maintenance chính.', 'Đúng. Artifact vận hành là bằng chứng production mindset.', 'Sai. Cần artifact thực tế.', 'Sai. DE phải thay đổi có kiểm soát.']],
+      ['Anti-pattern “done là xong” thường dẫn tới gì?', ['Không ai biết cách xử lý khi pipeline fail', 'Pipeline tự tối ưu tốt hơn', 'SLO tự được tạo', 'Stakeholder không cần data nữa'], 'A', ['Đúng. Thiếu owner/runbook làm incident kéo dài.', 'Sai. Không có tự tối ưu như vậy.', 'Sai. SLO cần định nghĩa.', 'Sai. Stakeholder càng cần dữ liệu đáng tin.']],
+      ['Metric nào cho thấy data quality failure dù job thành công?', ['Airflow task màu xanh nhưng row_count giảm 45%', 'CPU laptop thấp', 'Sidebar hiển thị đúng', 'Tên DAG ngắn'], 'A', ['Đúng. Job success không đồng nghĩa data đúng.', 'Sai. CPU laptop không đo quality.', 'Sai. UI không đo quality.', 'Sai. Tên DAG không đủ.']]
+    ],
+    summary: [
+      ['Production ownership', 'Pipeline có user cần owner, SLA/SLO/SLI và cách xử lý lỗi rõ ràng.'],
+      ['Done chưa phải hết', 'Sau deploy mới bắt đầu chu kỳ vận hành thật.'],
+      ['Failure đa dạng', 'Schema, late files, credential, quality, cost và dashboard stale đều là production risks.'],
+      ['Reliability trade-off', 'Ship nhanh cần đi kèm nhận diện rủi ro và rollback path.'],
+      ['Business trust', 'Mục tiêu maintenance là giữ niềm tin vào dữ liệu.'],
+      ['Portfolio artifact', 'Runbook, SLO, lineage và risk register chứng minh production mindset.']
+    ],
+    practices: [
+      ['Checklist ownership ban đầu', 'Viết checklist 8 dòng cho pipeline `daily_sales` trước khi gọi nó là production-ready.', 'Expected: có owner, secondary, SLA, freshness SLI, data quality checks, runbook, alert route, rollback/backfill policy.', `Production-ready checklist:
+1. Primary owner: DE A; secondary owner: DE B.
+2. Stakeholder: Finance Lead; downstream consumer: Revenue dashboard.
+3. SLA dashboard ready: 08:00 ICT business days.
+4. Freshness SLI: max(updated_at) của mart_sales_daily >= D-1 23:59.
+5. Quality checks: row count within +/-20%, revenue >= 0, payment_status accepted values.
+6. Runbook: link runbook_daily_sales.md trong alert.
+7. Alert route: P1 -> on-call DE + Slack #data-incidents.
+8. Recovery policy: rerun same partition nếu source complete; backfill nếu late file đến sau cutoff.`],
+      ['Phân loại failure source', 'Cho 6 lỗi: missing file, 401 API, row count drop, field renamed, query scan 10x, dashboard stale. Gán mỗi lỗi vào nhóm risk và nêu SLI phát hiện.', 'Expected: mỗi lỗi có nhóm risk và SLI/action tương ứng.', `missing file -> freshness/completeness risk -> file arrival SLI.
+401 API -> credential risk -> auth failure alert + secret expiry calendar.
+row count drop -> data quality risk -> row-count anomaly SLI.
+field renamed -> schema contract risk -> schema validation + lineage impact review.
+query scan 10x -> cost/performance risk -> runtime/cost SLI.
+dashboard stale -> consumer trust risk -> dashboard freshness badge + mart freshness SLI.`]
+    ]
+  },
+  {
+    tag: 'Tuần 23 · W23.02',
+    title: 'Ownership, On-call & Operational Responsibility',
+    subtitle: 'Thiết kế mô hình trách nhiệm để “everyone owns it” không biến thành “nobody owns it”.',
+    menu: [
+      ['Ownership model', 'Primary owner, secondary owner, stakeholder, upstream owner, downstream consumer.'],
+      ['On-call basics', 'Ai nhận alert, giờ nào, escalation path ra sao, khi nào gọi backup.'],
+      ['Handover', 'Ghi rõ thay đổi, incident đang mở, backfill pending và risk trong ca trực.'],
+      ['Fairness', 'Rotation công bằng, tính ngày nghỉ, tránh burnout và single point of failure.']
+    ],
+    goals: [
+      'Biết tạo ownership matrix cho nhiều pipeline business-critical.',
+      'Hiểu on-call không phải chỉ là “online Slack” mà là trách nhiệm xử lý có quy trình.',
+      'Thiết kế escalation path và handover notes rõ ràng.',
+      'Nhận diện burnout risk và bus factor trong team data.'
+    ],
+    detail: `
+      <h3>Ai sở hữu pipeline?</h3>
+      <p>Ownership tốt không bắt đầu bằng tool. Nó bắt đầu bằng câu hỏi: nếu <code>daily_sales</code> fail lúc 06:30, ai nhìn alert đầu tiên, ai có quyền quyết định rerun/backfill, ai báo Finance, ai biết upstream order service vừa deploy thay đổi?</p>
+      <table><tr><th>Vai trò</th><th>Trách nhiệm</th><th>Không nên hiểu nhầm</th></tr>
+      <tr><td>Primary owner</td><td>Chịu trách nhiệm design, SLO, runbook, incident follow-up.</td><td>Không có nghĩa là phải tự xử lý mọi thứ một mình.</td></tr>
+      <tr><td>Secondary owner</td><td>Backup kỹ thuật, review changes, nhận escalation khi primary vắng.</td><td>Không phải tên cho có trong tài liệu.</td></tr>
+      <tr><td>Stakeholder</td><td>Định nghĩa business impact và ưu tiên khi có trade-off.</td><td>Không phải người debug SQL.</td></tr>
+      <tr><td>Upstream owner</td><td>Thông báo schema/contract change, hỗ trợ khi source lỗi.</td><td>Không thể bị bỏ qua trong incident.</td></tr>
+      <tr><td>Downstream consumer</td><td>Người dùng dashboard/model và nhận status update.</td><td>Không nên là người phát hiện lỗi đầu tiên mỗi lần.</td></tr></table>
+      <h3>On-call mindset</h3>
+      <p>On-call trong data không phải luôn nghiêm trọng như site reliability, nhưng với dashboard investor hoặc experiment metrics, dữ liệu sai có thể gây quyết định sai. Người trực cần biết severity, runbook, escalation path và giới hạn quyền quyết định.</p>
+      ${codeBlock('ownership_matrix.md', `| Pipeline | Primary | Secondary | Stakeholder | Upstream owner | Downstream consumer |
+|---|---|---|---|---|---|
+| daily_sales | An | Binh | Finance Lead | Order Platform | Revenue Dashboard |
+| growth_daily | Chi | Dung | Growth Lead | Event Platform | Experiment Analysis |
+| investor_profit | Binh | An | CFO | Payment Platform | Board Pack |
+
+Escalation:
+P0: PagerDuty/OpsGenie page -> on-call DE -> primary owner -> data manager -> business owner within 15 min
+P1: PagerDuty/OpsGenie page -> on-call DE -> primary/secondary owner within 30 min
+P2: owner triage during business hours
+P3: backlog with due date`)}
+      <h3>Handover notes</h3>
+      <p>Ca trực tốt luôn có handover: thay đổi vừa deploy, incidents chưa đóng, backfill pending, nguồn dữ liệu đang trễ, cảnh báo noisy đã mute tạm thời và thời điểm review lại. Handover thiếu là cách nhanh nhất để lặp lỗi.</p>
+      ${info('note', 'Trong môi trường production thật, Slack nên là kênh thảo luận, còn PagerDuty hoặc OpsGenie nên quản lý lịch trực, acknowledge, escalation policy và audit trail cho P0/P1.')}
+      ${codeBlock('on_call_schedule.md', `Week 1: An primary, Binh backup
+Week 2: Chi primary, Dung backup
+Week 3: Binh primary, An backup
+Week 4: Dung primary, Chi backup
+
+Fairness rules:
+- Không trực 2 tuần liên tiếp nếu không tự nguyện.
+- Ngày nghỉ lễ cần đổi ca trước ít nhất 3 ngày.
+- Người vừa xử lý P0 qua đêm được giảm workload maintenance ngày kế tiếp.
+- Mỗi pipeline critical phải có ít nhất 2 người đọc được runbook.`)}
+      ${info('warn', 'Anti-pattern: “team data cùng sở hữu hết”. Khi không có primary/secondary, alert bị bỏ qua hoặc mọi người tưởng người khác đang xử lý.')}
+    `,
+    quiz: [
+      ['Câu “everyone owns this pipeline” nguy hiểm vì sao?', ['Không có người chịu trách nhiệm cuối cùng khi incident xảy ra', 'Nó làm pipeline chạy nhanh hơn', 'Nó tự động tăng team morale', 'Nó thay thế runbook'], 'A', ['Đúng. Shared ownership không rõ ràng thường thành nobody owns it.', 'Sai. Ownership không thay đổi runtime.', 'Sai. Mơ hồ trách nhiệm thường gây căng thẳng.', 'Sai. Runbook vẫn cần.']],
+      ['Primary owner nên chịu trách nhiệm gì?', ['Chỉ đổi màu dashboard', 'SLO, runbook, follow-up incident và design reliability', 'Chỉ nhận mọi ticket support nhỏ', 'Không cần biết downstream'], 'B', ['Sai. Không liên quan trọng tâm.', 'Đúng. Primary owner giữ sức khỏe production của pipeline.', 'Sai. Support cần phân loại severity.', 'Sai. Downstream impact rất quan trọng.']],
+      ['Secondary owner tốt cần làm gì?', ['Không bao giờ đọc code', 'Có khả năng backup, review change và nhận escalation', 'Chỉ ký tên trong matrix', 'Chỉ phụ trách stakeholder meeting'], 'B', ['Sai. Secondary phải đủ context kỹ thuật.', 'Đúng. Secondary giảm bus factor.', 'Sai. Tên cho có là anti-pattern.', 'Sai. Meeting không đủ.']],
+      ['Stakeholder trong ownership matrix là ai?', ['Người định nghĩa business impact và ưu tiên', 'Người luôn trực đêm', 'Người viết Airflow DAG', 'Người tạo secret'], 'A', ['Đúng. Stakeholder giúp quyết định impact và priority.', 'Sai. On-call là vai trò vận hành.', 'Sai. Có thể là DE owner.', 'Sai. Secret thuộc platform/security process.']],
+      ['On-call handover nên có thông tin nào?', ['Incident mở, change vừa deploy, backfill pending và alert noisy', 'Chỉ câu chúc ngủ ngon', 'Danh sách framework học tuần sau', 'Không cần gì nếu Slack còn lịch sử'], 'A', ['Đúng. Đây là context giúp ca sau xử lý nhanh.', 'Sai. Không đủ operational context.', 'Sai. Không liên quan trực tiếp.', 'Sai. Slack history không thay thế handover rõ ràng.']],
+      ['Escalation path dùng để làm gì?', ['Biết khi nào gọi ai khi severity vượt quyền hoặc cần quyết định business', 'Tăng số lượng alert', 'Ẩn incident khỏi stakeholder', 'Thay thế data test'], 'A', ['Đúng. Escalation giảm thời gian mơ hồ.', 'Sai. Nó không tăng alert.', 'Sai. Communication phải minh bạch.', 'Sai. Test vẫn cần.']],
+      ['Support rotation fairness giúp tránh gì?', ['Burnout và single point of failure', 'Tất cả data quality issue', 'Schema change upstream', 'Chi phí warehouse'], 'A', ['Đúng. Rotation công bằng bảo vệ con người và hệ thống.', 'Sai. Quality vẫn cần controls.', 'Sai. Upstream change cần contract.', 'Sai. Cost cần SLI riêng.']],
+      ['Nếu primary owner nghỉ phép, điều gì phải có?', ['Secondary owner đủ context và handover rõ ràng', 'Tắt pipeline', 'Đợi primary quay lại mới xử lý P0', 'Gửi toàn bộ alert cho stakeholder'], 'A', ['Đúng. Đây là continuity cơ bản.', 'Sai. Tắt pipeline gây business impact.', 'Sai. P0 không thể đợi.', 'Sai. Stakeholder không debug pipeline.']],
+      ['Upstream owner nên được ghi trong matrix vì sao?', ['Để liên hệ nhanh khi source thay đổi hoặc thiếu dữ liệu', 'Để họ chịu mọi lỗi downstream', 'Để bỏ qua impact analysis', 'Để thay thế DE owner'], 'A', ['Đúng. Incident thường cần upstream context.', 'Sai. Downstream vẫn có owner riêng.', 'Sai. Impact analysis vẫn cần.', 'Sai. DE owner vẫn chịu trách nhiệm pipeline.']],
+      ['Dấu hiệu burnout risk trong on-call là gì?', ['Một người luôn xử lý incident ngoài giờ và không có backup', 'Có runbook rõ ràng', 'Rotation cân bằng', 'P3 được xử lý trong backlog'], 'A', ['Đúng. Đây là rủi ro con người và vận hành.', 'Sai. Runbook giảm burnout.', 'Sai. Rotation cân bằng là tốt.', 'Sai. P3 backlog là bình thường.']]
+    ],
+    summary: [
+      ['Primary/Secondary', 'Mỗi pipeline critical cần ít nhất hai người hiểu cách vận hành.'],
+      ['Stakeholder', 'Người giúp định nghĩa impact, priority và communication expectation.'],
+      ['On-call', 'Không chỉ online, mà là triage và decision theo severity.'],
+      ['Escalation', 'Giảm thời gian lúng túng khi lỗi vượt quyền xử lý.'],
+      ['Handover', 'Chuyển giao context giúp ca sau không bắt đầu từ số không.'],
+      ['Fairness', 'Rotation tốt bảo vệ team khỏi burnout và bus factor.']
+    ],
+    practices: [
+      ['Ownership matrix 5 pipelines', 'Tạo ownership matrix cho Profit, Growth, Engagement như homework handbook: primary, secondary, stakeholder, upstream owner, downstream consumer.', 'Expected: không pipeline nào thiếu primary/secondary; investor metrics có stakeholder rõ.', `| Pipeline | Primary | Secondary | Stakeholder | Upstream | Downstream |
+|---|---|---|---|---|---|
+| unit_profit_experiments | An | Binh | Experiment Lead | Payment Platform | Experiment notebooks |
+| investor_profit | Binh | An | CFO | Payment Platform | Investor board pack |
+| investor_growth | Chi | Dung | Growth VP | Event Platform | Investor board pack |
+| daily_growth_experiments | Dung | Chi | Growth Lead | Event Platform | Experiment dashboard |
+| investor_engagement | An | Chi | Product VP | App Analytics | Investor board pack |`],
+      ['On-call fairness', 'Thiết kế rotation 4 người trong 1 tháng, có backup và rule cho ngày nghỉ.', 'Expected: mỗi người primary 1 tuần, backup không trùng primary, có rule đổi ca.', `Week 1: An primary, Binh backup
+Week 2: Chi primary, Dung backup
+Week 3: Binh primary, An backup
+Week 4: Dung primary, Chi backup
+Holiday rule: người nghỉ lễ đổi ca trước 3 ngày; backup nhận quyền primary tạm thời; mọi đổi ca cập nhật trong on_call_schedule.md.`]
+    ]
+  },
+  {
+    tag: 'Tuần 23 · W23.03',
+    title: 'SLA, SLO, SLI & Alerting Strategy',
+    subtitle: 'Đo đúng thứ cần đo, alert đúng người cần hành động, tránh alert fatigue.',
+    menu: [
+      ['SLA', 'Cam kết với business hoặc external stakeholder.'],
+      ['SLO', 'Mục tiêu nội bộ để đáp ứng SLA với buffer an toàn.'],
+      ['SLI', 'Chỉ số đo được: freshness, success rate, runtime, row-count anomaly.'],
+      ['Alert strategy', 'Severity P0/P1/P2/P3, actionable, route đúng owner, kèm runbook.']
+    ],
+    goals: [
+      'Phân biệt SLA, SLO, SLI bằng ví dụ data pipeline.',
+      'Thiết kế SLI cho freshness, success rate, runtime và row-count anomaly.',
+      'Phân loại alert severity P0/P1/P2/P3 theo business impact.',
+      'Nhận diện alert fatigue và anti-pattern alerting on everything without runbook.'
+    ],
+    detail: `
+      <h3>SLA, SLO, SLI nói đơn giản</h3>
+      <p><strong>SLA</strong> là lời hứa với business: “Revenue dashboard sẵn sàng trước 08:00.” <strong>SLO</strong> là mục tiêu vận hành nội bộ: “Mart build xong trước 07:30 trong 99% ngày làm việc.” <strong>SLI</strong> là số đo cụ thể: freshness timestamp, success rate, runtime, row-count anomaly.</p>
+      <table><tr><th>Loại</th><th>Ví dụ cho daily_sales</th><th>Ai quan tâm?</th></tr>
+      <tr><td>SLA</td><td>Dashboard doanh thu D-1 available trước 08:00 ICT mỗi business day.</td><td>Finance, leadership.</td></tr>
+      <tr><td>SLO</td><td>Pipeline hoàn tất trước 07:30 trong 99% business days.</td><td>Data team.</td></tr>
+      <tr><td>SLI freshness</td><td><code>max(order_date)</code> trong mart = yesterday.</td><td>Data owner và dashboard consumer.</td></tr>
+      <tr><td>SLI success rate</td><td>30-day successful runs / scheduled runs >= 99%.</td><td>Data manager và owner.</td></tr>
+      <tr><td>SLI runtime</td><td>p95 runtime <= 35 phút.</td><td>Owner, platform.</td></tr>
+      <tr><td>SLI anomaly</td><td>Row count D-1 lệch không quá 20% so với median 14 ngày cùng weekday.</td><td>Owner, analyst.</td></tr></table>
+      <h3>Alert severity</h3>
+      <table><tr><th>Severity</th><th>Khi nào dùng</th><th>Response expectation</th><th>Ví dụ</th></tr>
+      <tr><td>P0</td><td>Data sai/thiếu ảnh hưởng quyết định cấp công ty hoặc external reporting ngay.</td><td>Ack trong 15 phút, status update mỗi 15 phút.</td><td>Investor profit mart sai trước board pack.</td></tr>
+      <tr><td>P1</td><td>Pipeline critical trễ SLA hoặc dashboard core stale.</td><td>Ack trong 30 phút, update mỗi 30 phút.</td><td>daily_sales chưa ready lúc 07:45.</td></tr>
+      <tr><td>P2</td><td>Ảnh hưởng một nhóm người dùng, có workaround.</td><td>Ack trong giờ hành chính, xử lý trong business day.</td><td>Experiment mart trễ nhưng không có launch hôm nay.</td></tr>
+      <tr><td>P3</td><td>Debt, warning, noise, improvement.</td><td>Backlog với owner/due date, không page ngoài giờ.</td><td>Runtime tăng dần nhưng chưa miss SLO.</td></tr></table>
+      <h3>Data Observability: từ manual tests sang phát hiện bất thường tự động</h3>
+      <p>Manual data tests vẫn rất cần cho rule đã biết, ví dụ <code>revenue >= 0</code> hoặc <code>payment_status</code> thuộc accepted values. Nhưng production hiện đại còn dùng <strong>Data Observability</strong> để tự động theo dõi freshness, volume, schema, distribution và lineage. Các platform như Monte Carlo, Metaplane hoặc Datafold thường học baseline lịch sử rồi cảnh báo anomaly mà bạn chưa viết rule thủ công.</p>
+      <table><tr><th>Cách tiếp cận</th><th>Mạnh ở đâu</th><th>Giới hạn</th></tr>
+      <tr><td>Manual tests</td><td>Business rules rõ, dễ review trong CI/CD.</td><td>Không bắt được anomaly chưa biết trước.</td></tr>
+      <tr><td>Data Observability</td><td>Phát hiện freshness/volume/schema drift và bất thường distribution.</td><td>Cần tuning để tránh noise và vẫn cần runbook/owner.</td></tr></table>
+      ${codeBlock('sla_slo_sli.md', `# daily_sales reliability policy
+SLA: Revenue dashboard available by 08:00 ICT every business day.
+SLO:
+- 99% of scheduled daily runs finish by 07:30 ICT over rolling 30 business days.
+- 99.5% task success rate over rolling 30 days.
+SLI:
+- freshness_minutes = now - max(updated_at in mart_sales_daily)
+- success_rate_30d = successful_runs / scheduled_runs
+- runtime_p95_30d <= 35 minutes
+- row_count_deviation = abs(today_count - median_14d_same_weekday) / median_14d_same_weekday
+Alert routing:
+- P0/P1 -> PagerDuty/OpsGenie -> on-call DE, primary owner, #data-incidents
+- P2 -> pipeline owner during business hours
+- P3 -> reliability backlog`)}
+      <h3>Actionable alerts</h3>
+      <p>Một alert tốt phải trả lời được: cái gì hỏng, impact là gì, owner là ai, severity là gì, dashboard/runbook ở đâu, bước kiểm tra đầu tiên là gì. Nếu alert chỉ nói “DAG failed” mà không có context, nó tạo alert fatigue.</p>
+      ${info('warn', 'Anti-pattern: alert mọi metric nhỏ nhưng không có runbook. Team sẽ học cách bỏ qua alert, và alert quan trọng cũng bị chìm.')}
+    `,
+    quiz: [
+      ['SLA là gì trong bối cảnh data pipeline?', ['Cam kết service với business/stakeholder', 'Một câu SQL', 'Tên DAG', 'Số lượng CPU'], 'A', ['Đúng. SLA là cam kết bên ngoài hoặc với stakeholder.', 'Sai. SQL không phải SLA.', 'Sai. DAG name không phải cam kết.', 'Sai. CPU không phải cam kết service.']],
+      ['SLO khác SLA thế nào?', ['SLO là mục tiêu nội bộ hỗ trợ đạt SLA', 'SLO luôn nghiêm trọng hơn SLA pháp lý', 'SLO là log file', 'Không khác gì'], 'A', ['Đúng. SLO thường có buffer để bảo vệ SLA.', 'Sai. Không nhất thiết liên quan pháp lý.', 'Sai. Log không phải SLO.', 'Sai. Hai khái niệm khác nhau.']],
+      ['SLI nào đo freshness?', ['max(updated_at) của mart so với kỳ vọng', 'Số người trong team', 'Màu của task Airflow', 'Tên Slack channel'], 'A', ['Đúng. Freshness cần timestamp dữ liệu mới nhất.', 'Sai. Team size không đo freshness.', 'Sai. Task xanh chưa chắc data mới.', 'Sai. Channel không đo dữ liệu.']],
+      ['Row-count anomaly SLI giúp phát hiện gì?', ['Volume bất thường dù job có thể pass', 'Credential hết hạn trực tiếp', 'Ai đang on-call', 'Format README'], 'A', ['Đúng. Job pass nhưng volume drop/spike vẫn đáng nghi.', 'Sai. Credential thường tạo auth error.', 'Sai. On-call thuộc ownership.', 'Sai. README format không liên quan.']],
+      ['Alert P0 nên dùng khi nào?', ['Data sai ảnh hưởng external/investor reporting ngay', 'Một warning nhỏ trong backlog', 'Tên cột viết hoa', 'Một job dev fail'], 'A', ['Đúng. P0 là impact nghiêm trọng và cần phản ứng ngay.', 'Sai. Warning nhỏ là P3.', 'Sai. Chưa chắc có impact.', 'Sai. Dev fail thường không phải P0.']],
+      ['Alert actionable cần có gì?', ['Impact, owner, severity, runbook và bước kiểm tra đầu tiên', 'Chỉ stack trace dài', 'Chỉ emoji', 'Không cần owner'], 'A', ['Đúng. Alert phải dẫn đến hành động rõ.', 'Sai. Stack trace không đủ context.', 'Sai. Không đủ thông tin.', 'Sai. Thiếu owner gây delay.']],
+      ['Alert fatigue xảy ra khi nào?', ['Quá nhiều alert không quan trọng hoặc không hành động được', 'Không có alert nào', 'Dashboard quá nhanh', 'Runbook quá rõ'], 'A', ['Đúng. Noise làm team bỏ qua tín hiệu thật.', 'Sai. Không alert là blind spot, không phải fatigue.', 'Sai. Không liên quan.', 'Sai. Runbook rõ giảm fatigue.']],
+      ['Runtime SLI nên đo thế nào?', ['p95 runtime rolling window so với ngưỡng SLO', 'Số dòng code DAG', 'Số biểu đồ dashboard', 'Tên owner'], 'A', ['Đúng. p95 giúp thấy tail latency.', 'Sai. Code length không đo runtime.', 'Sai. Chart count không đo runtime.', 'Sai. Owner không đo hiệu năng.']],
+      ['Routing alert đúng owner giúp gì?', ['Giảm MTTR vì người có context nhận alert', 'Tăng số incident', 'Xóa cần runbook', 'Đảm bảo không cần stakeholder'], 'A', ['Đúng. Context đúng giúp triage nhanh.', 'Sai. Routing không tạo incident.', 'Sai. Runbook vẫn cần.', 'Sai. Stakeholder vẫn cần update khi impact.']],
+      ['Anti-pattern alerting on everything without runbook gây hậu quả gì?', ['Alert bị bỏ qua và incident thật dễ bị miss', 'Reliability tự tăng', 'Không cần on-call nữa', 'SLO trở thành SLA'], 'A', ['Đúng. Noise làm mất niềm tin vào alert.', 'Sai. Không tự tăng.', 'Sai. On-call vẫn cần.', 'Sai. Khái niệm không tự đổi.']]
+    ],
+    summary: [
+      ['SLA', 'Lời hứa với business về data availability/quality.'],
+      ['SLO', 'Mục tiêu nội bộ có buffer để bảo vệ SLA.'],
+      ['SLI', 'Chỉ số đo được: freshness, success, runtime, anomaly.'],
+      ['Severity', 'P0/P1/P2/P3 phải dựa trên business impact.'],
+      ['Actionable alert', 'Alert phải có owner, impact và runbook.'],
+      ['Alert hygiene', 'Ít alert hơn nhưng đúng người và xử lý được.']
+    ],
+    practices: [
+      ['Phân loại severity', 'Phân loại các tình huống: investor mart sai, dashboard stale 10 phút, experiment mart trễ không ai dùng hôm nay, runtime tăng 25%.', 'Expected: P0/P1/P2/P3 có lý do.', `investor mart sai trước board pack -> P0.
+dashboard stale 10 phút trước SLA 08:00 -> P1 nếu core dashboard.
+experiment mart trễ nhưng không có launch hôm nay -> P2.
+runtime tăng 25% nhưng chưa miss SLO -> P3 reliability debt.`],
+      ['Thiết kế alert message', 'Viết alert cho row-count anomaly của daily_sales có đủ owner, impact, severity, runbook.', 'Expected: alert không chỉ nói “failed”.', `[P1] daily_sales row-count anomaly
+Impact: Revenue dashboard may under-report D-1 sales.
+SLI: mart_sales_daily row_count = 41,200, median same weekday = 72,500, deviation = -43%.
+Owner: An primary, Binh secondary.
+First check: confirm raw orders partition arrival and payment_api extraction status.
+Runbook: runbook_daily_sales.md#row-count-anomaly
+Channel: #data-incidents`]
+    ]
+  },
+  {
+    tag: 'Tuần 23 · W23.04',
+    title: 'Runbook, Incident Response & Post-mortem',
+    subtitle: 'Biến xử lý sự cố từ phản xạ cá nhân thành quy trình có thể lặp lại và cải tiến được.',
+    menu: [
+      ['Runbook', 'Tài liệu step-by-step giúp người trực xử lý lỗi phổ biến an toàn.'],
+      ['Incident flow', 'Detect, triage, mitigate, recover, communicate, prevent.'],
+      ['Decision points', 'Rollback, rerun, backfill, pause dashboard hoặc publish warning.'],
+      ['Post-mortem', 'Blameless, timeline rõ, root cause, action items có owner và due date.']
+    ],
+    goals: [
+      'Viết runbook đủ thực tế cho pipeline `daily_sales`.',
+      'Thực hành incident timeline và status updates.',
+      'Biết khi nào rollback, rerun hoặc backfill.',
+      'Hiểu post-mortem blameless và cách biến incident thành cải tiến hệ thống.'
+    ],
+    detail: `
+      <h3>Runbook dùng để làm gì?</h3>
+      <p>Runbook không phải tài liệu trang trí. Nó giảm MTTR vì người trực không phải nhớ mọi chi tiết lúc căng thẳng. Runbook tốt có scope, symptoms, severity, first checks, safe commands, decision tree, communication template và prevention notes.</p>
+      ${codeBlock('runbook_daily_sales.md', `# Runbook: daily_sales
+Scope: order_db + payment_api -> raw -> stg_orders/stg_payments -> mart_sales_daily -> revenue dashboard
+SLA: dashboard ready by 08:00 ICT
+Owner: An primary, Binh secondary
+
+Symptoms:
+- Airflow DAG daily_sales failed
+- freshness SLI stale
+- row-count anomaly > 20%
+- dashboard revenue lower than expected
+
+Detect:
+1. Open Airflow DAG run for target date.
+2. Check source partitions and API extraction logs.
+3. Check dbt test failures and mart row counts.
+
+Triage:
+- Auth/API failure -> verify secret expiry and upstream API status.
+- Missing raw partition -> contact upstream owner and check late file policy.
+- dbt schema failure -> inspect changed fields and downstream impact.
+- Quality failure -> compare row count/revenue with 14-day baseline.
+
+Mitigate:
+- If raw data complete and transform failed: rerun failed task only.
+- If source data late: publish stakeholder warning and rerun after arrival.
+- If bad deploy: rollback model version, rerun affected partition.
+
+Recover:
+- Validate freshness, row count, revenue sanity, dashboard timestamp.
+- Post final status update in #data-incidents.
+
+Prevent:
+- Add missing test, contract, alert threshold, or runbook step.`)}
+      <h3>Incident response flow</h3>
+      <ol><li><strong>Detect:</strong> alert hoặc user report xác định sự cố.</li><li><strong>Triage:</strong> xác định severity, scope, owner, impacted consumer.</li><li><strong>Mitigate:</strong> giảm impact trước, ví dụ publish warning hoặc rollback.</li><li><strong>Recover:</strong> khôi phục dữ liệu đúng và xác minh SLI.</li><li><strong>Communicate:</strong> status update ngắn, đều, không đoán mò.</li><li><strong>Prevent:</strong> action item để lỗi không lặp lại.</li></ol>
+      <h3>Rollback, rerun hay backfill?</h3>
+      <table><tr><th>Quyết định</th><th>Khi phù hợp</th><th>Rủi ro cần kiểm tra</th></tr>
+      <tr><td>Rerun</td><td>Task transient fail, input đúng, job idempotent.</td><td>Không duplicate data, target partition overwrite/upsert an toàn.</td></tr>
+      <tr><td>Rollback</td><td>Deploy mới gây schema/logic regression.</td><td>Version cũ còn compatible với source hiện tại.</td></tr>
+      <tr><td>Backfill</td><td>Dữ liệu đến muộn hoặc cần sửa lịch sử.</td><td>Ảnh hưởng downstream, chi phí warehouse, dashboard refresh.</td></tr>
+      <tr><td>Pause dashboard</td><td>Dữ liệu sai có thể gây quyết định sai.</td><td>Communication rõ để stakeholder không dùng số cũ.</td></tr></table>
+      ${codeBlock('incident status update', `[07:42 ICT] P1 daily_sales freshness delay
+Impact: Revenue dashboard for 2026-05-15 may be stale at 08:00.
+Current finding: payment_api extraction succeeded; order raw partition missing 18% expected files.
+Action: contacted Order Platform owner; waiting for file arrival. Next update at 08:00.
+Workaround: Finance should use yesterday's certified export until final update.`)}
+      <h3>Blameless post-mortem</h3>
+      <p>Blameless không có nghĩa là không có trách nhiệm. Nó nghĩa là tập trung vào system conditions: vì sao một schema change có thể vào production mà downstream không biết, vì sao alert không route đúng owner, vì sao runbook thiếu bước kiểm tra. Action items phải cụ thể, có owner và due date.</p>
+      ${info('warn', 'Anti-pattern: fix silently without documenting. Nếu không có timeline và action item, incident sẽ quay lại với tên khác.')}
+    `,
+    quiz: [
+      ['Runbook tốt giúp gì khi incident xảy ra?', ['Giảm MTTR bằng các bước xử lý đã được chuẩn hóa', 'Thay thế hoàn toàn owner', 'Đảm bảo không bao giờ fail', 'Chỉ làm đẹp repo'], 'A', ['Đúng. Runbook giúp xử lý nhanh và an toàn.', 'Sai. Owner vẫn cần quyết định.', 'Sai. Không tài liệu nào loại bỏ mọi lỗi.', 'Sai. Mục tiêu chính là vận hành.']],
+      ['Bước đầu trong incident response là gì?', ['Detect và xác nhận sự cố', 'Viết post-mortem ngay', 'Đổ lỗi upstream', 'Backfill toàn bộ lịch sử'], 'A', ['Đúng. Cần xác nhận symptom và scope.', 'Sai. Post-mortem sau recovery.', 'Sai. Blame không giúp triage.', 'Sai. Backfill sớm có thể gây hại.']],
+      ['Khi nào rerun là lựa chọn phù hợp?', ['Input đúng, lỗi transient, job idempotent', 'Source thiếu dữ liệu', 'Logic mới sai', 'Không biết lỗi gì'], 'A', ['Đúng. Rerun an toàn khi job idempotent và input ổn.', 'Sai. Source thiếu thì rerun có thể vẫn sai.', 'Sai. Logic sai cần rollback/fix.', 'Sai. Cần triage trước.']],
+      ['Khi nào nên rollback?', ['Deploy mới gây regression và version cũ còn compatible', 'Mọi incident đều rollback', 'Source file đến muộn', 'Stakeholder hỏi status'], 'A', ['Đúng. Rollback phù hợp với bad deploy.', 'Sai. Không phải mọi lỗi do deploy.', 'Sai. Late file thường cần wait/rerun/backfill.', 'Sai. Status update không quyết định rollback.']],
+      ['Status update tốt nên có gì?', ['Impact, finding hiện tại, action, next update và workaround nếu có', 'Chỉ “đang xử lý”', 'Stack trace đầy đủ', 'Không cần thời gian'], 'A', ['Đúng. Stakeholder cần thông tin hành động được.', 'Sai. Quá mơ hồ.', 'Sai. Stack trace không phù hợp cho business.', 'Sai. Next update giảm lo lắng.']],
+      ['Post-mortem blameless tập trung vào gì?', ['Điều kiện hệ thống và action items cụ thể', 'Tìm người đáng trách', 'Xóa mọi log', 'Chứng minh không ai sai'], 'A', ['Đúng. Trọng tâm là cải thiện hệ thống.', 'Sai. Blame làm giảm học hỏi.', 'Sai. Log cần giữ.', 'Sai. Vẫn cần trách nhiệm và owner.']],
+      ['Incident timeline dùng để làm gì?', ['Hiểu diễn biến, quyết định và delay để cải thiện response', 'Trang trí tài liệu', 'Che giấu thời điểm lỗi', 'Thay thế monitoring'], 'A', ['Đúng. Timeline giúp học từ sự cố.', 'Sai. Nó có mục đích vận hành.', 'Sai. Cần minh bạch.', 'Sai. Monitoring vẫn cần.']],
+      ['Nếu dữ liệu sai có thể gây quyết định sai, mitigation hợp lý là gì?', ['Publish warning hoặc pause dashboard trong khi recover', 'Im lặng sửa', 'Đổi tên dashboard', 'Tắt mọi alert'], 'A', ['Đúng. Giảm impact trước khi recover xong.', 'Sai. Im lặng làm mất trust.', 'Sai. Không xử lý gốc.', 'Sai. Làm team mù.']],
+      ['Action item post-mortem tốt cần gì?', ['Owner, due date, outcome đo được', 'Câu “sẽ cẩn thận hơn”', 'Không cần người phụ trách', 'Chỉ ghi root cause'], 'A', ['Đúng. Action item phải thực thi được.', 'Sai. Quá chung.', 'Sai. Không có owner thì dễ trôi.', 'Sai. Root cause chưa đủ.']],
+      ['Anti-pattern fix silently nguy hiểm vì sao?', ['Không ai học được gì và incident dễ lặp lại', 'Làm runbook quá dài', 'Giảm số file markdown', 'Tăng dashboard speed'], 'A', ['Đúng. Thiếu documentation làm mất learning loop.', 'Sai. Runbook dài không phải vấn đề chính.', 'Sai. Số file không quan trọng.', 'Sai. Không liên quan.']]
+    ],
+    summary: [
+      ['Runbook', 'Tài liệu xử lý an toàn, không phải checklist trang trí.'],
+      ['Incident flow', 'Detect, triage, mitigate, recover, communicate, prevent.'],
+      ['Decision tree', 'Rerun, rollback, backfill phụ thuộc nguyên nhân và idempotency.'],
+      ['Status update', 'Ngắn, rõ impact, action và next update.'],
+      ['Post-mortem', 'Blameless nhưng có trách nhiệm và action item.'],
+      ['Learning loop', 'Mỗi incident phải cải thiện system.']
+    ],
+    practices: [
+      ['Viết runbook skeleton', 'Viết runbook 12-15 dòng cho tình huống `daily_sales` row-count drop 40%.', 'Expected: có detect, triage, mitigation, recovery, communication.', `Detect: alert row-count deviation -40%.
+Triage: compare raw orders count, payment count, dbt tests, recent deploy.
+Severity: P1 nếu dashboard core trước SLA; P2 nếu ngoài giờ business và có workaround.
+Mitigate: publish warning to Finance; do not certify dashboard.
+Recover: if raw complete -> rerun transform; if raw missing -> wait/contact upstream then backfill partition.
+Validate: freshness, row count within threshold, revenue sanity, dashboard timestamp.
+Communicate: update every 30 min until resolved.
+Prevent: add upstream file completeness check and contract review.`],
+      ['Post-mortem action items', 'Từ incident schema đổi `order_total` thành `gross_amount`, viết 3 action items tốt.', 'Expected: mỗi item có owner và due date.', `1. Add schema contract check for order_db source; owner An; due 2026-05-24.
+2. Update upstream change management rule: Order Platform must notify #data-changes 48h before breaking change; owner Platform Lead; due 2026-05-22.
+3. Add dbt test and lineage impact review step before revenue model deploy; owner Binh; due 2026-05-25.`]
+    ]
+  },
+  {
+    tag: 'Tuần 23 · W23.05',
+    title: 'Data Lineage, Impact Analysis & Change Management',
+    subtitle: 'Biết dữ liệu đi từ đâu đến đâu trước khi thay đổi một field tưởng như nhỏ.',
+    menu: [
+      ['Lineage', 'Source -> raw -> staging -> marts -> dashboard.'],
+      ['Impact analysis', 'Xác định downstream nào bị ảnh hưởng trước khi đổi schema/logic.'],
+      ['Change management', 'Backward compatibility, versioning contracts, announcement window.'],
+      ['Dependency maps', 'Sơ đồ dependency giúp incident và review change nhanh hơn.']
+    ],
+    goals: [
+      'Vẽ lineage cho pipeline `daily_sales` từ source đến dashboard.',
+      'Thực hiện impact analysis trước schema change.',
+      'Hiểu backward compatibility và versioning contracts.',
+      'Biết nhắc OpenLineage như một open standard hữu ích cho metadata/lineage.'
+    ],
+    detail: `
+      <h3>Data lineage là bản đồ trách nhiệm</h3>
+      <p>Lineage trả lời: dữ liệu này đến từ đâu, qua những transform nào, đang nuôi dashboard/model nào, ai sẽ bị ảnh hưởng nếu một field đổi nghĩa. Không có lineage, incident triage chậm và change review dễ bỏ sót downstream.</p>
+      ${codeBlock('lineage_diagram.md', `order_db.orders
+  -> raw.orders_daily (S3 dt partition)
+  -> stg_orders (dbt: cast types, standardize timezone)
+  -> int_orders_enriched (join customers, payment status)
+  -> mart_sales_daily (daily revenue, order_count, refund_amount)
+  -> Revenue Dashboard / Finance export / investor_profit
+
+payment_api.transactions
+  -> raw.payments_daily
+  -> stg_payments
+  -> int_orders_enriched
+
+Change owner map:
+- order_db.orders: Order Platform
+- payment_api.transactions: Payment Platform
+- mart_sales_daily: Data Platform
+- Revenue Dashboard: Finance Analytics`)}
+      <h3>Impact analysis trước thay đổi</h3>
+      <p>Ví dụ upstream muốn đổi <code>order_total</code> thành <code>gross_amount</code>. Câu hỏi đúng không phải “SQL sửa ở đâu?” mà là “field này nuôi mart nào, dashboard nào, metric nào, contract nào, và có cần giai đoạn backward compatibility không?”</p>
+      <table><tr><th>Bước</th><th>Câu hỏi</th><th>Output</th></tr>
+      <tr><td>Inventory</td><td>Field/model đang được dùng ở đâu?</td><td>Danh sách dbt models, dashboards, exports.</td></tr>
+      <tr><td>Impact</td><td>Thay đổi type/name/semantics ảnh hưởng metric nào?</td><td>Severity và consumer list.</td></tr>
+      <tr><td>Compatibility</td><td>Có thể giữ field cũ song song trong 2 release không?</td><td>Migration plan.</td></tr>
+      <tr><td>Communication</td><td>Ai cần biết, trước bao lâu?</td><td>Change announcement.</td></tr>
+      <tr><td>Validation</td><td>Test nào chứng minh không đổi metric ngoài ý muốn?</td><td>Diff report, data tests.</td></tr></table>
+      <h3>Backward compatibility và contracts</h3>
+      <p>Schema change production nên ưu tiên additive change: thêm field mới trước, giữ field cũ trong một window, migrate downstream, rồi deprecate. Với breaking change, cần versioning contract như <code>orders_v1</code> và <code>orders_v2</code>, hoặc view compatibility để downstream không gãy ngay.</p>
+      ${codeBlock('change request template', `Change: rename order_total -> gross_amount
+Type: breaking schema change
+Requested deploy date: 2026-05-23
+Compatibility plan:
+- Add gross_amount while keeping order_total for 14 days.
+- Update stg_orders to read coalesce(gross_amount, order_total).
+- Compare mart_sales_daily revenue for 7 days.
+- Announce deprecation date in #data-changes.
+Required approvals: Order Platform owner, daily_sales primary owner, Finance stakeholder.`)}
+      <h3>Formal Data Contracts</h3>
+      <p>Khi pipeline bắt đầu phục vụ dashboard critical hoặc investor metrics, “contract” không nên chỉ là thỏa thuận miệng. <strong>Formal Data Contract</strong> thường được mô tả bằng YAML/JSON schema, có owner, field types, constraints, compatibility rule và CI/CD check. Một số team dùng Data Contract CLI hoặc framework nội bộ để fail pull request nếu producer tạo breaking change không được approve.</p>
+      ${codeBlock('data_contract.yaml', `dataset: order_db.orders
+owner: order-platform
+version: 1.2.0
+compatibility: backward
+fields:
+  - name: order_id
+    type: string
+    required: true
+    constraints: [unique]
+  - name: customer_id
+    type: string
+    required: true
+  - name: order_total
+    type: decimal(18,2)
+    required: true
+    semantic: gross merchandise value before refunds
+  - name: updated_at
+    type: timestamp
+    required: true
+slo:
+  freshness: "D+1 07:00 ICT"
+change_policy:
+  breaking_change_notice: ">= 7 business days"
+  requires_downstream_approval: true`)}
+      <h3>OpenLineage mention</h3>
+      <p>OpenLineage là một open standard để capture metadata về job, dataset input/output và lineage events. Bạn không cần triển khai ngay trong portfolio tuần này, nhưng nên biết nó giải quyết bài toán: lineage không chỉ là diagram tĩnh, mà có thể được thu thập từ orchestration/transform jobs.</p>
+      ${info('warn', 'Anti-pattern: đổi upstream field mà không báo downstream. Đây là cách tạo incident có thể tránh được nhất trong data platform.')}
+    `,
+    quiz: [
+      ['Data lineage trả lời câu hỏi chính nào?', ['Dữ liệu đi từ nguồn nào qua transform nào đến consumer nào', 'CPU dùng bao nhiêu watt', 'Ai thích dashboard nhất', 'Tên branch Git'], 'A', ['Đúng. Lineage là bản đồ luồng dữ liệu và dependency.', 'Sai. Không phải energy metric.', 'Sai. Adoption không phải lineage.', 'Sai. Git branch không đủ.']],
+      ['Impact analysis nên làm khi nào?', ['Trước khi deploy schema/logic change', 'Sau khi dashboard sai', 'Chỉ cuối năm', 'Không cần nếu change nhỏ'], 'A', ['Đúng. Phải phân tích trước thay đổi.', 'Sai. Sau incident là quá muộn.', 'Sai. Change diễn ra thường xuyên.', 'Sai. Change nhỏ vẫn có downstream lớn.']],
+      ['Backward compatibility trong schema change nghĩa là gì?', ['Giữ downstream cũ vẫn chạy trong thời gian migration', 'Xóa field cũ ngay', 'Đổi tên tất cả model cùng lúc không test', 'Tắt alert'], 'A', ['Đúng. Compatibility giảm breakage.', 'Sai. Đây là breaking change đột ngột.', 'Sai. Big bang change rủi ro cao.', 'Sai. Alert vẫn cần.']],
+      ['Ví dụ additive change là gì?', ['Thêm field gross_amount mới nhưng giữ order_total tạm thời', 'Xóa order_total ngay', 'Đổi type numeric sang string', 'Đổi nghĩa revenue không báo'], 'A', ['Đúng. Thêm field song song ít rủi ro hơn.', 'Sai. Đây là breaking.', 'Sai. Type change có thể breaking.', 'Sai. Semantic change rất nguy hiểm.']],
+      ['Dependency map giúp incident response thế nào?', ['Xác định nhanh downstream bị ảnh hưởng và owner cần gọi', 'Tự sửa SQL', 'Loại bỏ nhu cầu test', 'Tăng số alert'], 'A', ['Đúng. Map giảm thời gian tìm scope.', 'Sai. Nó không tự sửa code.', 'Sai. Test vẫn cần.', 'Sai. Không phải mục tiêu.']],
+      ['OpenLineage hữu ích vì sao?', ['Là standard capture lineage metadata từ jobs/datasets', 'Là BI dashboard', 'Là database engine', 'Là công cụ thay thế owner'], 'A', ['Đúng. OpenLineage chuẩn hóa lineage events.', 'Sai. Nó không phải BI dashboard.', 'Sai. Không phải database engine.', 'Sai. Owner vẫn cần.']],
+      ['Change announcement nên bao gồm gì?', ['Change type, impact, compatibility plan, date, rollback và owner', 'Chỉ câu “sắp đổi”', 'Không cần thời gian', 'Chỉ gửi riêng cho người deploy'], 'A', ['Đúng. Announcement cần đủ context hành động.', 'Sai. Quá thiếu.', 'Sai. Date rất quan trọng.', 'Sai. Downstream cần biết.']],
+      ['Nếu field đổi nghĩa nhưng tên không đổi, rủi ro là gì?', ['Metric downstream sai âm thầm', 'Pipeline chắc chắn fail compile', 'Không có rủi ro', 'Chỉ ảnh hưởng CSS'], 'A', ['Đúng. Semantic change có thể không fail nhưng làm số sai.', 'Sai. Compile có thể vẫn pass.', 'Sai. Có rủi ro cao.', 'Sai. Không liên quan CSS.']],
+      ['Trong lineage source -> raw -> staging -> marts -> dashboard, staging thường làm gì?', ['Chuẩn hóa kiểu dữ liệu, tên field, timezone gần source', 'Gửi email stakeholder', 'Chấm điểm SLA', 'Xóa mọi raw data'], 'A', ['Đúng. Staging là lớp chuẩn hóa gần source.', 'Sai. Không phải nhiệm vụ chính.', 'Sai. SLA thuộc ops.', 'Sai. Raw nên giữ theo retention policy.']],
+      ['Anti-pattern change management nghiêm trọng là gì?', ['Breaking upstream field without downstream notice', 'Có migration plan', 'Có compatibility window', 'Có diff report'], 'A', ['Đúng. Không báo downstream tạo incident tránh được.', 'Sai. Migration plan là tốt.', 'Sai. Compatibility giảm rủi ro.', 'Sai. Diff report giúp kiểm soát.']]
+    ],
+    summary: [
+      ['Lineage', 'Bản đồ source, transform, mart và consumer.'],
+      ['Impact', 'Đánh giá downstream trước khi thay đổi.'],
+      ['Contracts', 'Schema/semantic expectations giữa producer và consumer.'],
+      ['Compatibility', 'Giữ đường cũ đủ lâu để migration an toàn.'],
+      ['OpenLineage', 'Standard hữu ích để capture lineage events.'],
+      ['Change hygiene', 'Thông báo, diff, approval và rollback rõ ràng.']
+    ],
+    practices: [
+      ['Lineage diagram', 'Vẽ lineage text cho `daily_sales` gồm order_db, payment_api, raw, staging, marts, dashboard.', 'Expected: có ít nhất 2 source, 5 layer, owner map.', `order_db.orders -> raw.orders_daily -> stg_orders -> int_orders_enriched -> mart_sales_daily -> Revenue Dashboard
+payment_api.transactions -> raw.payments_daily -> stg_payments -> int_orders_enriched -> mart_sales_daily
+Owners: Order Platform, Payment Platform, Data Platform, Finance Analytics.`],
+      ['Impact analysis', 'Upstream muốn đổi `customer_id` từ integer sang string. Viết 5 kiểm tra trước deploy.', 'Expected: cover type compatibility, joins, tests, consumers, rollback.', `1. List all models joining on customer_id.
+2. Check dashboard filters and exports expecting integer.
+3. Add staging cast strategy and dbt relationship test.
+4. Run diff count/revenue before and after cast.
+5. Prepare rollback to previous source view or compatibility cast.`]
+    ]
+  },
+  {
+    tag: 'Tuần 23 · W23.06',
+    title: 'Risk Register, Reliability Debt & Continuous Improvement',
+    subtitle: 'Biến incident rời rạc thành pattern cải tiến có ưu tiên và owner.',
+    menu: [
+      ['Risk register', 'Ghi probability, impact, mitigation, owner, review date.'],
+      ['Reliability debt', 'Nợ vận hành: manual steps, flaky tests, noisy alerts, missing contracts.'],
+      ['Recurring incidents', 'Nhìn pattern thay vì xử lý từng lần như sự cố riêng lẻ.'],
+      ['Improvement loop', 'Measure, prioritize, fix, validate, document.']
+    ],
+    goals: [
+      'Tạo risk register thực tế cho pipeline production.',
+      'Nhận diện reliability debt và bus factor.',
+      'Ưu tiên maintenance work dựa trên probability x impact.',
+      'Thiết kế continuous improvement loop sau mỗi incident.'
+    ],
+    detail: `
+      <h3>Risk register là gì?</h3>
+      <p>Risk register là bảng sống ghi lại rủi ro đáng chú ý của pipeline: xác suất, impact, mitigation, owner, review date. Nó giúp maintenance không bị chìm dưới feature work vì rủi ro được nhìn thấy và ưu tiên rõ.</p>
+      ${codeBlock('risk_register.md', `| Risk | Probability | Impact | Score | Mitigation | Owner | Review |
+|---|---:|---:|---:|---|---|---|
+| payment_api credential expires without notice | 3 | 5 | 15 | secret expiry alert 14 days before expiry | Binh | monthly |
+| order file late after 07:30 | 4 | 4 | 16 | file arrival SLI + upstream escalation | An | weekly |
+| manual backfill steps cause duplicate rows | 2 | 5 | 10 | idempotent partition overwrite + backfill checklist | Chi | monthly |
+| revenue query cost spikes after model change | 3 | 3 | 9 | query scan budget + PR review for marts | Dung | monthly |
+| only An understands investor_profit | 3 | 5 | 15 | secondary training + runbook drill | An | biweekly |`)}
+      <h3>Reliability debt</h3>
+      <p>Reliability debt là phần “nợ” khiến pipeline dễ fail hoặc khó recover: manual steps không được script, alert không có owner, test flaky, runbook lỗi thời, secrets không có rotation, một người duy nhất hiểu pipeline, hoặc quality checks chỉ nằm trong đầu analyst.</p>
+      <table><tr><th>Debt</th><th>Dấu hiệu</th><th>Maintenance task</th></tr>
+      <tr><td>Manual step</td><td>Backfill cần copy query từ Slack.</td><td>Script hóa và thêm dry-run.</td></tr>
+      <tr><td>Noisy alert</td><td>P3 warning đánh thức on-call.</td><td>Điều chỉnh threshold và routing.</td></tr>
+      <tr><td>Bus factor</td><td>Một người duy nhất biết logic investor metric.</td><td>Pairing, docs, secondary owner drill.</td></tr>
+      <tr><td>Missing contract</td><td>Schema change phá staging.</td><td>Schema tests và change policy.</td></tr>
+      <tr><td>Cost risk</td><td>Runtime/scan tăng dần không ai review.</td><td>Cost SLI và PR checklist.</td></tr></table>
+      <h3>Prioritizing maintenance work</h3>
+      <p>Không phải risk nào cũng xử lý ngay. Dùng score đơn giản: probability 1-5 x impact 1-5. Risk có score cao, lặp lại nhiều lần hoặc ảnh hưởng stakeholder critical nên được đưa vào sprint. Maintenance work tốt luôn có outcome đo được: giảm P1, giảm runtime, giảm alert noise, tăng test coverage cho mart critical.</p>
+      <h3>Continuous improvement loop</h3>
+      <ol><li>Measure: xem SLI, incident count, alert volume.</li><li>Identify pattern: lỗi source late lặp lại thứ Hai?</li><li>Prioritize: impact business và effort.</li><li>Fix: contract, automation, test, runbook, owner training.</li><li>Validate: theo dõi SLI sau fix.</li><li>Document: cập nhật artifact để người sau dùng được.</li></ol>
+      ${info('warn', 'Anti-pattern: xem incident là one-off. Nếu cùng một nhóm lỗi lặp lại, đó là reliability debt cần được trả.')}
+    `,
+    quiz: [
+      ['Risk register nên có trường nào?', ['Probability, impact, mitigation, owner, review date', 'Chỉ tên lỗi', 'Chỉ màu severity', 'Chỉ số dòng code'], 'A', ['Đúng. Đây là các trường giúp quản lý rủi ro.', 'Sai. Tên lỗi không đủ.', 'Sai. Severity không đủ để hành động.', 'Sai. Code length không phải risk field.']],
+      ['Reliability debt là gì?', ['Nợ vận hành làm pipeline dễ fail hoặc khó recover', 'Nợ tiền cloud duy nhất', 'Một loại SQL join', 'Dashboard đẹp'], 'A', ['Đúng. Debt vận hành tích lũy thành risk.', 'Sai. Cost chỉ là một phần có thể.', 'Sai. Không phải join.', 'Sai. Không liên quan giao diện.']],
+      ['Bus factor thấp nghĩa là gì?', ['Quá ít người hiểu hệ thống critical', 'Có quá nhiều backup', 'Pipeline chạy quá nhanh', 'Không có stakeholder'], 'A', ['Đúng. Một người vắng có thể làm team không recover được.', 'Sai. Nhiều backup là tốt.', 'Sai. Runtime không liên quan.', 'Sai. Stakeholder là vai trò khác.']],
+      ['Manual steps risk nguy hiểm vì sao?', ['Dễ sai, khó audit và khó lặp lại khi incident căng thẳng', 'Luôn nhanh hơn automation', 'Không bao giờ gây duplicate', 'Không cần runbook'], 'A', ['Đúng. Manual step dễ tạo lỗi người dùng.', 'Sai. Không luôn nhanh và ổn định.', 'Sai. Có thể duplicate.', 'Sai. Càng cần runbook/script.']],
+      ['Cost risk trong maintenance ví dụ là gì?', ['Query scan tăng 10x sau model change', 'README dài hơn', 'Slack channel đổi tên', 'Owner đi họp'], 'A', ['Đúng. Cost spike là production risk.', 'Sai. README dài không trực tiếp là cost risk.', 'Sai. Không phải cost data.', 'Sai. Không đủ.']],
+      ['Ưu tiên maintenance work nên dựa trên gì?', ['Probability x impact, recurrence và business criticality', 'Ai nói to hơn', 'Tên task ngắn', 'Tool mới nhất'], 'A', ['Đúng. Ưu tiên cần dựa trên risk và impact.', 'Sai. Không nên dựa vào tiếng nói.', 'Sai. Tên task không quan trọng.', 'Sai. Tool không phải tiêu chí chính.']],
+      ['Recurring incident cho thấy điều gì?', ['Có pattern hoặc reliability debt chưa được xử lý', 'Team quá chăm chỉ', 'Không cần action item', 'Alert nên tắt hết'], 'A', ['Đúng. Lặp lại là tín hiệu debt.', 'Sai. Không phải điểm tốt tự thân.', 'Sai. Càng cần action item.', 'Sai. Tắt alert không sửa gốc.']],
+      ['Mitigation plan tốt phải thế nào?', ['Cụ thể, có owner, giảm probability hoặc impact', 'Chỉ ghi “monitor more”', 'Không có deadline', 'Chỉ giao cho stakeholder'], 'A', ['Đúng. Mitigation phải hành động được.', 'Sai. Monitor more quá mơ hồ.', 'Sai. Thiếu deadline dễ trôi.', 'Sai. Stakeholder không nhất thiết xử lý kỹ thuật.']],
+      ['Continuous improvement loop bắt đầu bằng gì?', ['Measure tình trạng hiện tại bằng SLI/incident/alert data', 'Mua tool mới ngay', 'Xóa lịch sử incident', 'Đổi tên pipeline'], 'A', ['Đúng. Đo trước để biết vấn đề thật.', 'Sai. Tool không phải bước đầu mặc định.', 'Sai. Lịch sử cần giữ.', 'Sai. Đổi tên không cải thiện reliability.']],
+      ['Anti-pattern “incident là one-off” gây hậu quả gì?', ['Không xử lý pattern nên lỗi lặp lại', 'Giảm reliability debt', 'Tăng test coverage', 'Tự tạo lineage'], 'A', ['Đúng. Pattern bị bỏ qua sẽ quay lại.', 'Sai. Debt không tự giảm.', 'Sai. Test không tự tăng.', 'Sai. Lineage cần tạo.']]
+    ],
+    summary: [
+      ['Risk register', 'Biến rủi ro thành bảng có owner và review cadence.'],
+      ['Probability/Impact', 'Cách đơn giản để ưu tiên maintenance.'],
+      ['Reliability debt', 'Nợ vận hành như manual steps, noisy alerts, missing contracts.'],
+      ['Bus factor', 'Pipeline critical không nên phụ thuộc một người.'],
+      ['Recurring pattern', 'Incident lặp lại là tín hiệu system issue.'],
+      ['Improvement loop', 'Measure, prioritize, fix, validate, document.']
+    ],
+    practices: [
+      ['Risk register 5 risks', 'Viết risk register cho `daily_sales` với 5 rủi ro: credential, late file, cost, bus factor, manual backfill.', 'Expected: probability, impact, score, mitigation, owner.', `credential expiry: P3 I5 score15 -> expiry alert, owner Binh.
+late file: P4 I4 score16 -> file arrival SLI, owner An.
+cost spike: P3 I3 score9 -> query budget review, owner Dung.
+bus factor: P3 I5 score15 -> secondary drill, owner An.
+manual backfill: P2 I5 score10 -> script idempotent backfill, owner Chi.`],
+      ['Reliability debt backlog', 'Chọn 3 debt và viết backlog item có measurable outcome.', 'Expected: outcome đo được.', `1. Replace manual backfill doc with script --dry-run; outcome: zero duplicate rows in next 3 backfills.
+2. Tune P3 freshness warning route to business-hours queue; outcome: reduce non-actionable pages by 50%.
+3. Add source schema contract for orders; outcome: breaking schema change detected before dbt build.`]
+    ]
+  },
+  {
+    tag: 'Tuần 23 · W23.07',
+    title: 'Artifact: week23_maintenance/',
+    subtitle: 'Xây bộ tài liệu vận hành recruiter-grade cho portfolio Data Engineering.',
+    menu: [
+      ['Folder artifact', 'Một thư mục markdown đầy đủ ownership, on-call, runbook, post-mortem, risk, lineage, SLO.'],
+      ['README', 'Giải thích pipeline context, owners, alerting policy, runbook usage, lineage, risks, improvement plan.'],
+      ['Portfolio quality', 'Tài liệu phải đọc như production artifact, không như bài tập lý thuyết.'],
+      ['Review checklist', 'Không placeholder, có example cụ thể, có decision và trade-off.']
+    ],
+    goals: [
+      'Biết cấu trúc thư mục `week23_maintenance/` đúng yêu cầu.',
+      'Viết README kể được câu chuyện production ownership.',
+      'Tạo nội dung mẫu cho từng markdown file.',
+      'Biến Week23 thành artifact có thể đưa vào GitHub portfolio.'
+    ],
+    detail: `
+      <h3>Cấu trúc bắt buộc</h3>
+      ${codeBlock('week23_maintenance/', `week23_maintenance/
+├── ownership_matrix.md
+├── on_call_schedule.md
+├── runbook_daily_sales.md
+├── incident_postmortem_template.md
+├── risk_register.md
+├── lineage_diagram.md
+├── sla_slo_sli.md
+├── data_contract.yaml
+└── README.md`)}
+      <h3>README phải kể được production context</h3>
+      <p>Recruiter hoặc hiring manager không chỉ muốn thấy bạn biết định nghĩa SLA. Họ muốn thấy bạn hiểu một pipeline thật cần ai sở hữu, alert nào đáng gọi người, runbook dùng ra sao, lineage ảnh hưởng change management thế nào, và bạn cải thiện reliability sau incident ra sao.</p>
+      ${codeBlock('README.md', `# Week23 Maintenance - daily_sales Production Ownership
+
+## Pipeline context
+daily_sales builds D-1 revenue metrics from order_db and payment_api. Output mart_sales_daily powers Finance dashboard and investor reporting.
+
+## Owners
+- Primary owner: An
+- Secondary owner: Binh
+- Stakeholder: Finance Lead
+- Upstream owners: Order Platform, Payment Platform
+- Downstream consumers: Revenue Dashboard, Finance export, investor_profit
+
+## Alerting policy
+- P0: external/investor reporting wrong or blocked.
+- P1: core dashboard stale or daily_sales misses SLA.
+- P2: degraded pipeline with workaround.
+- P3: reliability debt or non-urgent warning.
+Every P0/P1 alert links to runbook_daily_sales.md.
+
+## Runbook usage
+On-call starts with detect -> triage -> mitigate -> recover -> communicate -> prevent. Rerun only when target partition is idempotent and source data is complete.
+
+## Lineage
+order_db.orders and payment_api.transactions feed raw, staging, intermediate, mart_sales_daily, then Revenue Dashboard.
+
+## Data contract
+data_contract.yaml defines producer owner, required fields, types, semantic meaning, freshness expectation and breaking-change policy.
+
+## Risks
+Top risks: late files, credential expiry, schema change, manual backfill, bus factor, warehouse cost spike.
+
+## Improvement plan
+Add source contract checks, automate backfill dry-run, tune noisy alerts, run quarterly owner drills.
+
+## Lessons learned
+Pipeline reliability is not just job success. It is freshness, correctness, ownership, communication and trust.`)}
+      <h3>Portfolio-ready tiêu chí</h3>
+      <ul><li>Có một domain cụ thể, không viết chung chung.</li><li>Có owners và escalation path thật, không “TBD”.</li><li>Có severity và SLI đo được.</li><li>Runbook có decision tree rerun/rollback/backfill.</li><li>Risk register có probability/impact/owner.</li><li>Lineage đủ để review schema change.</li><li>Có <code>data_contract.yaml</code> mô tả schema, semantics và change policy.</li><li>Post-mortem template có action items owner/due date.</li></ul>
+      ${info('tip', 'Bạn không cần dựng tool monitoring thật trong tuần này. Nhưng artifact phải cho thấy nếu pipeline production có sự cố, bạn biết vận hành nó như một chủ sở hữu.')}
+    `,
+    quiz: [
+      ['Artifact Week23 cần thư mục nào?', ['week23_maintenance/', 'random_notes/', 'dashboard_theme/', 'tmp_logs/'], 'A', ['Đúng. Đây là thư mục artifact bắt buộc.', 'Sai. Không đúng scope.', 'Sai. Không phải maintenance artifact.', 'Sai. Log tạm không phải portfolio artifact.']],
+      ['README portfolio-ready nên có gì?', ['Pipeline context, owners, alerting, runbook, lineage, risks, improvement plan, lessons learned', 'Chỉ một câu định nghĩa SLA', 'Chỉ ảnh screenshot', 'Chỉ tên file'], 'A', ['Đúng. README phải kể được câu chuyện vận hành.', 'Sai. Quá nông.', 'Sai. Screenshot không đủ.', 'Sai. Tên file không giải thích gì.']],
+      ['File nào ghi primary/secondary owner?', ['ownership_matrix.md', 'lineage_diagram.md', 'risk_register.md', 'incident_postmortem_template.md'], 'A', ['Đúng. Ownership matrix chứa trách nhiệm.', 'Sai. Lineage chứa flow dữ liệu.', 'Sai. Risk register chứa rủi ro.', 'Sai. Postmortem chứa incident template.']],
+      ['File nào nên mô tả P0/P1/P2/P3 và SLI?', ['sla_slo_sli.md', 'on_call_schedule.md', 'README chỉ có title', 'Không file nào'], 'A', ['Đúng. SLA/SLO/SLI file chứa policy đo và alert.', 'Sai. Schedule chỉ lịch trực.', 'Sai. README cần nội dung.', 'Sai. Bắt buộc phải có.']],
+      ['Runbook_daily_sales.md nên có gì?', ['Symptoms, triage, mitigation, recovery, communication, prevention', 'Chỉ tên owner', 'Chỉ lịch nghỉ', 'Chỉ diagram'], 'A', ['Đúng. Runbook cần các bước xử lý.', 'Sai. Owner chưa đủ.', 'Sai. Lịch trực ở file khác.', 'Sai. Diagram thuộc lineage.']],
+      ['Risk_register.md thiếu owner thì sao?', ['Risk dễ không được xử lý', 'Tự giảm severity', 'Tự chuyển thành SLO', 'Không ảnh hưởng'], 'A', ['Đúng. Không owner thì action dễ trôi.', 'Sai. Severity không tự giảm.', 'Sai. Risk không thành SLO.', 'Sai. Có ảnh hưởng lớn.']],
+      ['Lineage_diagram.md nên hỗ trợ việc gì?', ['Impact analysis khi schema/logic thay đổi', 'Tính lương team', 'Đổi màu alert', 'Xóa need for tests'], 'A', ['Đúng. Lineage giúp biết downstream impact.', 'Sai. Không liên quan.', 'Sai. UI không trọng tâm.', 'Sai. Tests vẫn cần.']],
+      ['Postmortem template tốt cần gì?', ['Timeline, impact, root cause, what went well, action items, owner, due date', 'Chỉ “đã fix”', 'Tên người gây lỗi', 'Không cần action'], 'A', ['Đúng. Đây là template học hỏi đầy đủ.', 'Sai. Quá thiếu.', 'Sai. Blameless không tập trung blame.', 'Sai. Action item là phần quan trọng.']],
+      ['Portfolio artifact maintenance khác note học ở điểm nào?', ['Nó dùng bối cảnh pipeline cụ thể và có decision vận hành thực tế', 'Nó dài hơn là đủ', 'Nó không cần ví dụ', 'Nó chỉ cần định nghĩa'], 'A', ['Đúng. Specific decisions tạo giá trị portfolio.', 'Sai. Dài không đồng nghĩa tốt.', 'Sai. Ví dụ rất cần.', 'Sai. Định nghĩa chưa đủ.']],
+      ['Không nên có gì trong artifact?', ['Placeholder như TBD hoặc ví dụ mơ hồ monitor everything', 'Owner rõ ràng', 'SLI đo được', 'Risk mitigation'], 'A', ['Đúng. Placeholder làm artifact yếu.', 'Sai. Owner rõ là cần.', 'Sai. SLI đo được là cần.', 'Sai. Mitigation là cần.']]
+    ],
+    summary: [
+      ['Folder rõ', '8 file markdown tạo bộ vận hành hoàn chỉnh.'],
+      ['README mạnh', 'Kể context, owners, policy, risks và lessons learned.'],
+      ['Specific domain', 'daily_sales giúp ví dụ tin được và nối logic.'],
+      ['No placeholder', 'Không TBD, không monitor everything.'],
+      ['Recruiter-grade', 'Chứng minh production ownership, không chỉ theory.'],
+      ['Commit-ready', 'Artifact có thể đưa vào GitHub portfolio.']
+    ],
+    practices: [
+      ['README outline', 'Viết outline README cho `week23_maintenance/` với 9 heading bắt buộc.', 'Expected: đủ context, owners, alerting, runbook, lineage, data contract, risks, improvement, lessons.', `# Week23 Maintenance - daily_sales
+## Pipeline context
+## Owners
+## Alerting policy
+## Runbook usage
+## Lineage
+## Data contract
+## Risks
+## Improvement plan
+## Lessons learned`],
+      ['File content review', 'Kiểm tra artifact giả định: nếu `risk_register.md` chỉ có 3 dòng risk không owner, bạn sẽ yêu cầu bổ sung gì?', 'Expected: probability, impact, mitigation, owner, review cadence.', `Bổ sung:
+- probability 1-5
+- impact 1-5
+- score
+- mitigation cụ thể
+- owner chịu trách nhiệm
+- review cadence/date
+- link tới incident hoặc SLI nếu risk đã xảy ra`]
+    ]
+  },
+  {
+    tag: 'Tuần 23 · W23.08',
+    title: 'Mini Test Tổng Kết',
+    subtitle: 'Tự kiểm tra production mindset: ownership, on-call, SLA/SLO/SLI, runbook, incident, lineage, risk và post-mortem.',
+    menu: [
+      ['Review', 'Ôn lại 7 nhóm năng lực maintenance production.'],
+      ['Mini test', '20 câu trắc nghiệm có chấm điểm và hướng dẫn kết quả.'],
+      ['Gap analysis', 'Dùng câu sai để quay lại module yếu.'],
+      ['Next step', 'Hoàn thiện artifact `week23_maintenance/` và commit lên portfolio.']
+    ],
+    goals: [
+      'Củng cố các khái niệm production ownership bằng tình huống thực tế.',
+      'Tự đánh giá readiness trước khi qua capstone.',
+      'Biết module nào cần ôn nếu điểm thấp.',
+      'Có checklist cuối cùng để hoàn thiện artifact Week23.'
+    ],
+    detail: `
+      <h3>Cách làm mini test</h3>
+      <p>Hãy trả lời theo mindset người đang trực pipeline production, không theo định nghĩa sách vở. Nếu một đáp án nghe “đúng lý thuyết” nhưng không giúp owner hành động khi <code>daily_sales</code> fail, thường đó không phải đáp án tốt nhất.</p>
+      <table><tr><th>Điểm</th><th>Diễn giải</th><th>Hành động</th></tr>
+      <tr><td>0-11</td><td>Chưa đủ production readiness.</td><td>Ôn W23.02-W23.04 trước.</td></tr>
+      <tr><td>12-15</td><td>Nắm nền tảng nhưng còn gap.</td><td>Hoàn thiện artifact và làm lại test.</td></tr>
+      <tr><td>16-18</td><td>Sẵn sàng dùng Week23 cho portfolio.</td><td>Review kỹ README và runbook.</td></tr>
+      <tr><td>19-20</td><td>Rất tốt.</td><td>Thêm incident drill hoặc demo video ngắn.</td></tr></table>
+      ${info('note', 'Mini test nằm trong phần thực hành của module này để giữ đúng 6 section chuẩn và vẫn có scoring/reset cuối file.')}
+    `,
+    quiz: [],
+    summary: [
+      ['Ownership', 'Không có owner rõ thì incident sẽ chậm và mơ hồ.'],
+      ['SLI/SLO/SLA', 'Đo đúng để biết khi nào business trust bị đe dọa.'],
+      ['Runbook', 'Biến xử lý incident thành quy trình lặp lại.'],
+      ['Lineage', 'Cho phép impact analysis trước change.'],
+      ['Risk', 'Ưu tiên maintenance dựa trên probability và impact.'],
+      ['Portfolio', 'Artifact Week23 là bằng chứng production mindset.']
+    ],
+    practices: [
+      ['Final artifact checklist', 'Trước khi commit, tick đủ 8 file và tự review không có placeholder.', 'Expected: artifact đầy đủ và có example cụ thể.', `Checklist:
+[ ] ownership_matrix.md
+[ ] on_call_schedule.md
+[ ] runbook_daily_sales.md
+[ ] incident_postmortem_template.md
+[ ] risk_register.md
+[ ] lineage_diagram.md
+[ ] sla_slo_sli.md
+[ ] data_contract.yaml
+[ ] README.md
+[ ] Không có TBD hoặc ví dụ chung chung
+[ ] README giải thích lessons learned`],
+      ['Mini test cuối file', 'Làm 20 câu bên dưới. Sau khi chấm điểm, quay lại module có nhiều câu sai nhất.', 'Expected: đạt tối thiểu 16/20 trước khi sang capstone.', `<div id="final-test"></div>`]
+    ],
+    finalTest: true
+  }
+];
+
+const finalQuestions = [
+  ['Trong ownership matrix, primary owner chịu trách nhiệm chính về gì?', 'Màu dashboard', 'SLO, runbook, incident follow-up và reliability design', 'Lịch nghỉ của stakeholder', 'Xóa raw data', 'B'],
+  ['Anti-pattern “everyone owns it” thường dẫn tới điều gì?', 'Không ai chịu trách nhiệm rõ khi incident xảy ra', 'MTTR luôn giảm', 'Runbook tự sinh', 'SLA không cần nữa', 'A'],
+  ['Freshness SLI đo gì?', 'Dữ liệu mới nhất đã cập nhật đến thời điểm kỳ vọng chưa', 'Số người xem dashboard', 'Tên DAG', 'Số file markdown', 'A'],
+  ['SLA khác SLO ở điểm nào?', 'SLA là cam kết với stakeholder, SLO là mục tiêu nội bộ', 'SLA là SQL, SLO là Python', 'Không khác gì', 'SLO chỉ dùng cho UI', 'A'],
+  ['Alert P1 phù hợp với tình huống nào?', 'Core dashboard có nguy cơ miss SLA', 'Một typo trong README', 'Một warning không impact', 'Task dev fail trong sandbox', 'A'],
+  ['Alert actionable cần có yếu tố nào?', 'Owner, impact, severity, runbook và first check', 'Chỉ stack trace', 'Chỉ emoji', 'Không cần route', 'A'],
+  ['Runbook tốt nên hỗ trợ quyết định nào?', 'Rerun, rollback, backfill hoặc communicate warning', 'Chọn màu chart', 'Đổi tên branch', 'Xóa incident history', 'A'],
+  ['Khi nào rerun an toàn nhất?', 'Input đúng, lỗi transient, pipeline idempotent', 'Source thiếu dữ liệu', 'Logic deploy mới sai', 'Không biết nguyên nhân', 'A'],
+  ['Post-mortem blameless nghĩa là gì?', 'Tập trung điều kiện hệ thống và cải tiến, không đổ lỗi cá nhân', 'Không ai chịu trách nhiệm', 'Không cần action item', 'Không cần timeline', 'A'],
+  ['Action item post-mortem tốt cần gì?', 'Owner, due date và outcome đo được', 'Câu “cẩn thận hơn”', 'Không cần người phụ trách', 'Chỉ ghi cảm nhận', 'A'],
+  ['Data lineage giúp gì trước schema change?', 'Biết downstream models/dashboard nào bị ảnh hưởng', 'Tăng CPU', 'Tự sửa schema', 'Ẩn impact khỏi stakeholder', 'A'],
+  ['Backward compatibility trong change management là gì?', 'Giữ downstream cũ hoạt động trong giai đoạn migration', 'Xóa field cũ ngay', 'Không cần báo ai', 'Chỉ đổi dashboard title', 'A'],
+  ['OpenLineage là gì?', 'Open standard để capture lineage metadata từ job/dataset', 'BI tool', 'Database engine', 'Slack bot', 'A'],
+  ['Risk register nên có gì?', 'Probability, impact, mitigation, owner, review date', 'Chỉ tên lỗi', 'Chỉ screenshot', 'Chỉ commit hash', 'A'],
+  ['Reliability debt ví dụ là gì?', 'Manual backfill, noisy alert, missing contract, bus factor', 'Dashboard đẹp', 'SQL viết hoa', 'Tên folder ngắn', 'A'],
+  ['Bus factor thấp nguy hiểm vì sao?', 'Một người vắng có thể làm team không vận hành được pipeline', 'Tăng redundancy', 'Giảm risk', 'Tự tạo backup', 'A'],
+  ['Cost risk trong data pipeline có thể phát hiện qua gì?', 'Runtime/query scan/cost SLI tăng bất thường', 'Số emoji trong alert', 'Tên owner', 'Sidebar width', 'A'],
+  ['README artifact Week23 phải giải thích gì?', 'Pipeline context, owners, alerting policy, runbook, lineage, risks, improvement plan, lessons learned', 'Chỉ tên tác giả', 'Chỉ link dashboard', 'Chỉ định nghĩa ETL', 'A'],
+  ['Incident recurring cho thấy điều gì?', 'Có pattern hoặc reliability debt chưa xử lý', 'Không cần cải tiến', 'Alert quá tốt', 'Pipeline không có owner', 'A'],
+  ['Mục tiêu cuối của maintenance trong DE là gì?', 'Giữ dữ liệu đúng, kịp, đáng tin và có người chịu trách nhiệm', 'Tạo nhiều markdown nhất', 'Không bao giờ thay đổi pipeline', 'Tắt toàn bộ alert', 'A']
+];
+
+function renderMenuRows(rows) {
+  return `<table><tr><th>Chủ đề</th><th>Ý nghĩa trong production</th></tr>${rows.map(r => `<tr><td><strong>${esc(r[0])}</strong></td><td>${r[1]}</td></tr>`).join('')}</table>`;
+}
+
+function renderGoals(goals) {
+  return `<ul>${goals.map(g => `<li>${g}</li>`).join('')}</ul>`;
+}
+
+function renderQuiz(quiz) {
+  if (!quiz || quiz.length === 0) {
+    return `${info('note', 'Module này dùng phần Mini Test 20 câu ở cuối file làm bài kiểm tra chính. Hãy tập trung vào final test thay vì làm thêm một quiz lặp lại.')}`;
+  }
+  return quiz.map((q, qi) => {
+    const labels = ['A','B','C','D'];
+    const correctIndex = labels.indexOf(q[2]);
+    const choices = q[1].map((opt, oi) => ({ opt, explanation: q[3][oi], correct: oi === correctIndex }));
+    const shift = qi % labels.length;
+    const shuffled = choices.slice(shift).concat(choices.slice(0, shift));
+    const opts = shuffled.map((choice, oi) => `<div class="quiz-opt" data-correct="${choice.correct}" data-explanation="${esc(choice.explanation)}" onclick="answerQuiz(this, ${choice.correct}, this.dataset.explanation)">${labels[oi]}. ${esc(choice.opt)}</div>`).join('');
+    return `<div class="quiz-item"><div class="quiz-q">${esc(q[0])}</div><div class="quiz-options">${opts}</div><div class="quiz-explain"></div></div>`;
+  }).join('');
+}
+
+function renderSummary(items) {
+  return `<div class="summary-grid">${items.map(i => `<div class="summary-item"><strong>${esc(i[0])}</strong>${esc(i[1])}</div>`).join('')}</div>`;
+}
+
+function renderPractices(items) {
+  return items.map(item => {
+    if (item[3].startsWith('<div id="final-test"')) {
+      return `<div class="practice-task"><div class="practice-task-header">${esc(item[0])}</div><div class="practice-task-body"><p>${item[1]}</p><p><strong>Expected output:</strong> ${item[2]}</p>${item[3]}</div></div>`;
+    }
+    return `<div class="practice-task"><div class="practice-task-header">${esc(item[0])}</div><div class="practice-task-body"><p>${item[1]}</p><p><strong>Expected output:</strong> ${item[2]}</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box">${item[3].startsWith('<div') ? item[3] : codeBlock('Lời giải gợi ý', item[3])}</div></div></div>`;
+  }).join('');
+}
+
+function renderFinalTest() {
+  const labels = ['A','B','C','D'];
+  const html = finalQuestions.map((q, i) => {
+    const originalCorrectIndex = labels.indexOf(q[5]);
+    const choices = labels.map((l, idx) => ({ text: q[idx + 1], correct: idx === originalCorrectIndex }));
+    const shift = i % labels.length;
+    const shuffled = choices.slice(shift).concat(choices.slice(0, shift));
+    const correctLabel = labels[shuffled.findIndex(choice => choice.correct)];
+    const opts = shuffled.map((choice, idx) => `<label class="test-option"><input type="radio" name="q${i + 1}" value="${labels[idx]}"> ${labels[idx]}. ${esc(choice.text)}</label>`).join('');
+    return `<div class="test-question" data-q="${i + 1}" data-correct="${correctLabel}"><div class="test-question-title">Q${i + 1}. ${esc(q[0])}</div><div class="test-options">${opts}</div></div>`;
+  }).join('');
+  return `${html}<div class="test-actions"><button class="nav-btn primary" onclick="gradeFinalTest()">Chấm điểm mini test</button><button class="nav-btn" onclick="resetFinalTest()">Làm lại từ đầu</button></div><div class="test-result" id="final-test-result" style="display:none"></div>`;
+}
+
+function renderModules() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = moduleNames.map((m, i) => `<div class="nav-item ${i === 0 ? 'active' : ''}" onclick="showModule(${i}, this)"><span class="nav-number">${m[0]}</span>${m[1]}</div>`).join('');
+  const main = document.getElementById('main');
+  main.innerHTML = modulesData.map((m, i) => {
+    const finalPractice = renderPractices(m.practices).replace('<div id="final-test"></div>', `<div id="final-test">${renderFinalTest()}</div>`);
+    const prev = i > 0 ? `<button class="nav-btn" onclick="goPrev(${i})">Quay lại ${moduleNames[i - 1][0]}</button>` : '<span></span>';
+    const next = i < modulesData.length - 1 ? `<button class="nav-btn primary" onclick="goNext(${i})">Module tiếp theo</button>` : '<div style="color:var(--accent2);font-weight:700">Hoàn thành Tuần 23</div>';
+    return `<div class="module ${i === 0 ? 'active' : ''}" id="m${i}">
+      <div class="module-header"><div class="module-tag">${m.tag}</div><div class="module-title">${m.title}</div><div class="module-subtitle">${m.subtitle}</div><div class="progress-bar"><div class="progress-fill" style="width:${Math.round(((i + 1) / modulesData.length) * 100)}%"></div></div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">1</div>1. Menu Tổng Thể<span class="section-toggle">▼</span></div><div class="section-content">${renderMenuRows(m.menu)}</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-purpose">2</div>2. Mục Đích Module<span class="section-toggle">▼</span></div><div class="section-content">${renderGoals(m.goals)}</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-detail">3</div>3. Giải Thích Chi Tiết<span class="section-toggle">▼</span></div><div class="section-content">${m.detail}</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-quiz">4</div>4. Câu Hỏi Ôn Tập<span class="section-toggle">▼</span></div><div class="section-content">${renderQuiz(m.finalTest ? [] : m.quiz)}</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-summary">5</div>5. Tổng Kết<span class="section-toggle">▼</span></div><div class="section-content">${renderSummary(m.summary)}</div></div>
+      <div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon icon-practice">6</div>6. Bài Tập Thực Hành<span class="section-toggle">▼</span></div><div class="section-content">${finalPractice}</div></div>
+      <div class="nav-buttons">${prev}${next}</div>
+    </div>`;
+  }).join('');
+}
+
+function showModule(idx, el) {
+  const modules = document.querySelectorAll('.module');
+  const navItems = document.querySelectorAll('.nav-item');
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  const modules = document.querySelectorAll('.module');
+  const navItems = document.querySelectorAll('.nav-item');
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  const navItems = document.querySelectorAll('.nav-item');
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.dataset.correct === 'true') o.classList.add('correct');
+    });
+  }
+  explain.textContent = (correct ? 'Chính xác. ' : 'Chưa đúng. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+  if (correctCount >= 19) { levelText = 'Rất tốt'; chipClass = 'good'; guidance = 'Bạn có production mindset mạnh. Hãy hoàn thiện artifact và thêm một incident drill ngắn vào README.'; }
+  else if (correctCount >= 16) { levelText = 'Sẵn sàng'; chipClass = 'good'; guidance = 'Bạn đã đủ nền tảng để dùng Week23 cho portfolio. Review kỹ runbook và risk register trước khi commit.'; }
+  else if (correctCount >= 12) { levelText = 'Cần củng cố'; chipClass = 'warn'; guidance = 'Ôn lại các câu sai, đặc biệt SLA/SLO/SLI, incident response và lineage trước khi sang capstone.'; }
+  else { levelText = 'Chưa sẵn sàng'; chipClass = 'bad'; guidance = 'Quay lại W23.02-W23.06 và viết lại artifact bằng ví dụ daily_sales trước khi làm lại test.'; }
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length ? `<p><strong>Câu sai:</strong></p><ul class="mistake-list">${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đáp án đúng <strong>${i.correct}</strong></li>`).join('')}</ul>` : '<p><strong>Tất cả câu đã trả lời đều đúng.</strong></p>';
+  result.innerHTML = `<div class="score-row"><span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span><span class="score-chip">Tỷ lệ: ${percent}%</span><span class="score-chip ${chipClass}">Mức: ${levelText}</span><span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span></div><p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+
+renderModules();
+</script>
+</body>
+</html>

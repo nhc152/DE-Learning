@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 24 · Data Engineering Capstone</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  .hero { background: linear-gradient(135deg, #0d1117 0%, #161b22 42%, #142336 100%); border-bottom: 2px solid var(--accent); padding: 42px 24px 32px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { position: relative; font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: 0; }
+  .hero p { position: relative; color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { position: relative; display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+  .container { display: flex; min-height: calc(100vh - 160px); }
+  .sidebar { width: 330px; min-width: 330px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--accent2); }
+  .nav-item { display: block; padding: 8px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 58px; font-size: 0.7rem; color: var(--text-muted); font-family: monospace; }
+  .main { flex: 1; padding: 32px 40px; max-width: 1060px; }
+  .module { display: none; }
+  .module.active { display: block; }
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+  code { font-family: 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: 'Courier New', Consolas, monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #ffffff05; }
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; align-items: center; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .summary-grid, .test-options { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.55rem; }
+  }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>Tuần 24 · Data Engineering Capstone Project</h1>
+  <p>Xây dựng một data platform end-to-end đủ thuyết phục cho portfolio, demo và phỏng vấn Data Engineer.</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 6 · Expert Capstone</span>
+    <span class="badge badge-orange">E-commerce analytics platform</span>
+    <span class="badge badge-blue">Batch + Streaming + Ops + Portfolio</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương trình Tuần 24</div>
+    <div class="level-label">CAPSTONE · PORTFOLIO-GRADE</div>
+    <div id="nav-list"></div>
+  </nav>
+  <main class="main" id="module-root"></main>
+</div>
+
+<script>
+const scenario = 'E-commerce analytics platform cho NHC Commerce: marketplace tầm trung cần theo dõi doanh thu, conversion funnel, tồn kho, fulfillment và fraud signal gần real-time.';
+const assumptions = 'Quy mô giả định: 80k đơn/ngày, 8-12 triệu events/ngày, dashboard executive fresh theo giờ, dashboard vận hành fresh 5 phút, batch SLA 07:00 mỗi sáng, team 4 người gồm 2 DE, 1 analytics engineer, 1 analyst. Hạ tầng deploy qua Infrastructure as Code và CI/CD từ ngày đầu, không tạo thủ công bằng Cloud Console.';
+
+const baseQuizzes = {
+  "capstone": [
+    [
+      "Điểm khác biệt lớn nhất giữa tutorial project và portfolio capstone là gì?",
+      [
+        "Tutorial chỉ cần chạy happy path",
+        "Capstone phải giải thích business problem, trade-off, vận hành và failure mode",
+        "Portfolio không cần README",
+        "Capstone càng nhiều tool càng tốt"
+      ],
+      1
+    ],
+    [
+      "Vì sao capstone nên có một scenario xuyên suốt?",
+      [
+        "Để tránh phải viết dashboard",
+        "Để giảm số dòng code",
+        "Để mọi quyết định kỹ thuật gắn với cùng một business context",
+        "Để không cần data quality"
+      ],
+      2
+    ],
+    [
+      "Data pipeline khác data platform ở điểm nào?",
+      [
+        "Platform chỉ là dashboard",
+        "Pipeline luôn streaming, platform luôn batch",
+        "Pipeline không có data",
+        "Pipeline là một luồng xử lý; platform gồm nhiều pipeline, storage, serving, monitoring và ownership"
+      ],
+      3
+    ],
+    [
+      "Recruiter thường đánh giá cao điều gì trong DE capstone?",
+      [
+        "Trade-off rõ, artifact chạy được, tài liệu tốt, xử lý lỗi thực tế",
+        "Tên tool nổi tiếng",
+        "Số logo trong diagram",
+        "File README thật dài nhưng không có bằng chứng"
+      ],
+      0
+    ],
+    [
+      "Anti-pattern của capstone là gì?",
+      [
+        "Bắt đầu từ business requirement",
+        "Có runbook",
+        "Chọn tool chỉ vì trendy mà không giải thích nhu cầu",
+        "Có dashboard ownership"
+      ],
+      2
+    ],
+    [
+      "End-to-end mindset nghĩa là gì?",
+      [
+        "Chỉ tập trung transform SQL",
+        "Theo dữ liệu từ source đến consumption và vận hành sau deploy",
+        "Chỉ vẽ architecture diagram",
+        "Chỉ làm notebook"
+      ],
+      1
+    ],
+    [
+      "Khi cân bằng đơn giản và thực tế, lựa chọn tốt là gì?",
+      [
+        "Bỏ README để nhanh",
+        "Dùng mọi tool enterprise",
+        "Bỏ streaming để nhẹ",
+        "Dùng kiến trúc vừa sức nhưng có retry, idempotency, tests và monitoring tối thiểu"
+      ],
+      3
+    ],
+    [
+      "Outcome tốt của Week24 là gì?",
+      [
+        "Một repo có architecture, ingestion, transformation, orchestration, dashboard, monitoring, runbook và interview notes",
+        "Một file SQL duy nhất",
+        "Một notebook EDA",
+        "Một ảnh dashboard không có source"
+      ],
+      0
+    ],
+    [
+      "Vì sao cần kể được business impact?",
+      [
+        "Vì làm đẹp README",
+        "Vì DE phục vụ quyết định kinh doanh, không chỉ chạy job",
+        "Vì thay thế unit test",
+        "Vì không cần giải thích architecture"
+      ],
+      1
+    ],
+    [
+      "Một capstone production-minded phải trả lời câu hỏi nào?",
+      [
+        "Có bao nhiêu icon?",
+        "Màu dashboard là gì?",
+        "Nếu pipeline fail lúc 06:30 thì ai biết, ai xử lý, dashboard nào bị ảnh hưởng?",
+        "Dùng bao nhiêu ngôn ngữ?"
+      ],
+      2
+    ]
+  ],
+  "arch": [
+    [
+      "Bước đầu tiên khi design capstone architecture là gì?",
+      [
+        "Chọn Kafka ngay",
+        "Thu thập business requirement và stakeholder",
+        "Viết DAG trước",
+        "Tạo dashboard trước"
+      ],
+      1
+    ],
+    [
+      "Freshness requirement ảnh hưởng trực tiếp đến quyết định nào?",
+      [
+        "Màu chart",
+        "Tên folder",
+        "Batch hay streaming, schedule, serving engine và alerting",
+        "Số branch Git"
+      ],
+      2
+    ],
+    [
+      "Nguồn OLTP DB thường chứa gì?",
+      [
+        "Screenshot dashboard",
+        "Log CPU Airflow",
+        "README",
+        "Orders, payments, users, products dạng transaction"
+      ],
+      3
+    ],
+    [
+      "Nguồn events phù hợp cho use case nào?",
+      [
+        "Clickstream, add_to_cart, checkout_started gần real-time",
+        "Dimension country tĩnh",
+        "File README",
+        "Manual runbook"
+      ],
+      0
+    ],
+    [
+      "Khi nào nên chọn warehouse thay vì lakehouse phức tạp?",
+      [
+        "Khi không có dashboard",
+        "Luôn luôn khi có Kafka",
+        "Analytics SQL, BI ổn định, team nhỏ, latency batch/near-real-time vừa đủ",
+        "Khi không cần governance"
+      ],
+      2
+    ],
+    [
+      "Architecture diagram tốt phải thể hiện gì?",
+      [
+        "Chỉ logo tool",
+        "Source, ingestion, storage, transform, serving, monitoring và data flow",
+        "Chỉ dashboard",
+        "Chỉ cloud provider"
+      ],
+      1
+    ],
+    [
+      "Trade-off tốt cần nêu gì?",
+      [
+        "Không cần vì project học",
+        "Chỉ ưu điểm",
+        "Chỉ tên vendor",
+        "Lợi ích, chi phí, giới hạn và lý do phù hợp với scale hiện tại"
+      ],
+      3
+    ],
+    [
+      "Stakeholder mapping giúp gì?",
+      [
+        "Biết ai dùng metric, ai chịu SLA, ai approve definition",
+        "Tăng tốc query",
+        "Tự động tạo data",
+        "Thay thế testing"
+      ],
+      0
+    ],
+    [
+      "Anti-pattern trong tool selection là gì?",
+      [
+        "So sánh warehouse và lakehouse",
+        "Chọn công cụ theo trendy thay vì requirement, team skill và cost",
+        "Nêu latency",
+        "Gắn tool với business need"
+      ],
+      1
+    ],
+    [
+      "SLA 07:00 nghĩa là gì?",
+      [
+        "Dashboard không cần fresh",
+        "Job bắt đầu lúc 07:00",
+        "Data phải sẵn sàng đáng tin cậy trước 07:00 cho người dùng đã cam kết",
+        "Chỉ là ghi chú trong README"
+      ],
+      2
+    ]
+  ],
+  "ingest": [
+    [
+      "CDC phù hợp nhất với nguồn nào?",
+      [
+        "Ảnh dashboard",
+        "OLTP DB cần lấy thay đổi orders/payments mà không full scan",
+        "Static README",
+        "Manual diagram"
+      ],
+      1
+    ],
+    [
+      "Bronze/raw layer nên lưu gì?",
+      [
+        "Chỉ dashboard",
+        "Chỉ metric đã aggregate",
+        "Dữ liệu gần nguyên bản kèm metadata ingestion để replay/debug",
+        "Chỉ dữ liệu đã xóa null"
+      ],
+      2
+    ],
+    [
+      "Idempotency trong ingestion nghĩa là gì?",
+      [
+        "Chỉ chạy một lần",
+        "Chạy càng nhanh càng tốt",
+        "Không cần checkpoint",
+        "Chạy lại cùng input không tạo duplicate hoặc sai lệch output"
+      ],
+      3
+    ],
+    [
+      "Watermark dùng để làm gì?",
+      [
+        "Theo dõi mốc đã xử lý để incremental load và late data control",
+        "Đổi schema",
+        "Tạo dashboard",
+        "Tăng số partition Kafka"
+      ],
+      0
+    ],
+    [
+      "Schema evolution nên xử lý thế nào?",
+      [
+        "Drop cột lạ",
+        "Fail im lặng",
+        "Cho phép thêm cột an toàn, version schema, cảnh báo breaking change",
+        "Sửa dashboard thủ công"
+      ],
+      2
+    ],
+    [
+      "API ingestion cần quan tâm gì?",
+      [
+        "Chỉ GET một page",
+        "Pagination, rate limit, retry, auth, backoff và audit log",
+        "Không cần lưu response raw",
+        "Chỉ print JSON"
+      ],
+      1
+    ],
+    [
+      "Kafka/event ingestion cần tracking gì?",
+      [
+        "Chỉ file CSV",
+        "Chỉ tên consumer",
+        "Chỉ số chart",
+        "Topic, partition, offset, lag, dead-letter và replay window"
+      ],
+      3
+    ],
+    [
+      "Anti-pattern ingestion nghiêm trọng là gì?",
+      [
+        "Không có replay strategy khi raw data lỗi hoặc transform sai",
+        "Có retry",
+        "Có checkpoint",
+        "Có raw layer"
+      ],
+      0
+    ],
+    [
+      "Ingestion observability tối thiểu gồm gì?",
+      [
+        "Chỉ CPU laptop",
+        "Rows/events ingested, latency, failure, lag, schema drift",
+        "Chỉ màu UI",
+        "Chỉ tên file"
+      ],
+      1
+    ],
+    [
+      "Batch và streaming nên tích hợp thế nào?",
+      [
+        "Batch bỏ hoàn toàn",
+        "Streaming thay hết mọi thứ",
+        "Batch làm source of truth định kỳ, streaming phục vụ tín hiệu nhanh và reconcile sau",
+        "Không cần reconcile"
+      ],
+      2
+    ]
+  ],
+  "transform": [
+    [
+      "Bronze/Silver/Gold mô tả đúng là gì?",
+      [
+        "Dashboard, API, README",
+        "Raw gần nguồn, cleaned/conformed, business-ready marts",
+        "Kafka, Spark, Git",
+        "Dev, staging, prod"
+      ],
+      1
+    ],
+    [
+      "dbt-style transformations mạnh ở điểm nào?",
+      [
+        "Không cần warehouse",
+        "Thay thế mọi ingestion",
+        "Lineage qua ref/source, test, docs, version control và modular SQL",
+        "Chỉ dùng notebook"
+      ],
+      2
+    ],
+    [
+      "Fact table grain phải được định nghĩa vì sao?",
+      [
+        "Để bỏ dimension",
+        "Để đặt tên đẹp",
+        "Để giảm README",
+        "Để tránh duplicate, sai aggregate và join mơ hồ"
+      ],
+      3
+    ],
+    [
+      "Dimension SCD2 phù hợp khi nào?",
+      [
+        "Cần giữ lịch sử thay đổi thuộc tính customer/product",
+        "Chỉ cần overwrite",
+        "Không có key",
+        "Không cần query lịch sử"
+      ],
+      0
+    ],
+    [
+      "Partitioning strategy nên dựa vào gì?",
+      [
+        "Sở thích cá nhân",
+        "Tên tool",
+        "Query pattern, event/order date, volume và retention",
+        "Màu dashboard"
+      ],
+      2
+    ],
+    [
+      "Spark/Flink nên dùng khi nào trong capstone?",
+      [
+        "Luôn dùng cho mọi SELECT",
+        "Spark cho historical large batch; Flink cho stateful event-time streaming",
+        "Chỉ để làm README",
+        "Thay thế dbt docs"
+      ],
+      1
+    ],
+    [
+      "Data quality check ở mart nên kiểm gì?",
+      [
+        "Chỉ số file",
+        "Chỉ tên bảng",
+        "Chỉ font",
+        "Unique key, not null, relationship, accepted values, freshness, metric sanity"
+      ],
+      3
+    ],
+    [
+      "Orchestration flow tốt phải thể hiện gì?",
+      [
+        "Dependency, retry, backfill, test gate, alert và SLA",
+        "Chỉ schedule",
+        "Chỉ icon Airflow",
+        "Chỉ số task"
+      ],
+      0
+    ],
+    [
+      "Anti-pattern transformation là gì?",
+      [
+        "Tách staging và marts",
+        "Business logic revenue bị duplicate trong nhiều dashboard/query",
+        "Có tests",
+        "Có lineage"
+      ],
+      1
+    ],
+    [
+      "Gold mart nên phục vụ ai?",
+      [
+        "Chỉ Airflow",
+        "Chỉ raw replay",
+        "BI, analyst, product, finance qua metric đã được chuẩn hóa",
+        "Chỉ developer laptop"
+      ],
+      2
+    ]
+  ],
+  "serving": [
+    [
+      "Serving layer trả lời câu hỏi gì?",
+      [
+        "Kafka topic tên gì",
+        "Ai consume data, latency bao nhiêu, query pattern nào, metric owner là ai",
+        "Có bao nhiêu file raw",
+        "Dùng editor nào"
+      ],
+      1
+    ],
+    [
+      "Certified metric nghĩa là gì?",
+      [
+        "Metric chỉ nằm trong notebook",
+        "Chart được tô màu xanh",
+        "Metric có định nghĩa, owner, source-of-truth và test rõ ràng",
+        "Metric không cần approval"
+      ],
+      2
+    ],
+    [
+      "Executive dashboard khác operational dashboard thế nào?",
+      [
+        "Hai loại giống nhau",
+        "Executive luôn real-time",
+        "Operational không cần owner",
+        "Executive tập trung KPI tổng hợp; operational cần drill-down và freshness cao hơn"
+      ],
+      3
+    ],
+    [
+      "OLAP engine như ClickHouse phù hợp khi nào?",
+      [
+        "Event/time-series query nhiều, latency thấp, dashboard vận hành",
+        "Chỉ lưu README",
+        "Chỉ batch monthly",
+        "Không có event"
+      ],
+      0
+    ],
+    [
+      "Warehouse phù hợp cho gì?",
+      [
+        "Log container thô",
+        "Offset Kafka",
+        "Governed analytics, BI, marts, finance reporting và SQL standard",
+        "Ảnh diagram"
+      ],
+      2
+    ],
+    [
+      "Dashboard freshness phải gắn với gì?",
+      [
+        "Màu chart",
+        "Business decision cadence và SLA của từng stakeholder",
+        "Số tab trình duyệt",
+        "Tên repo"
+      ],
+      1
+    ],
+    [
+      "Semantic consistency giúp tránh gì?",
+      [
+        "Thay thế dashboard",
+        "Tăng dung lượng disk",
+        "Tạo thêm source",
+        "Cùng metric doanh thu có nhiều định nghĩa trái nhau"
+      ],
+      3
+    ],
+    [
+      "Dashboard ownership cần có vì sao?",
+      [
+        "Có người chịu trách nhiệm metric, freshness, access và thay đổi definition",
+        "Để đẹp portfolio",
+        "Để tránh viết SQL",
+        "Để bỏ tests"
+      ],
+      0
+    ],
+    [
+      "Anti-pattern serving là gì?",
+      [
+        "Có semantic layer",
+        "Dashboard không rõ source-of-truth và metric definition",
+        "Có owner",
+        "Có freshness"
+      ],
+      1
+    ],
+    [
+      "KPI layer tốt nên có gì?",
+      [
+        "Chỉ raw events",
+        "Chỉ tổng doanh thu",
+        "North Star, supporting metrics, guardrails, grain và refresh policy",
+        "Chỉ screenshot"
+      ],
+      2
+    ]
+  ],
+  "ops": [
+    [
+      "Freshness monitoring đo gì?",
+      [
+        "Màu dashboard",
+        "Dữ liệu mới nhất trong bảng/mart có trễ so với SLA không",
+        "Số dòng code",
+        "Tên branch"
+      ],
+      1
+    ],
+    [
+      "Pipeline lag quan trọng với nguồn nào?",
+      [
+        "Diagram",
+        "README",
+        "Streaming hoặc CDC vì consumer có thể tụt sau producer",
+        "Static dimension"
+      ],
+      2
+    ],
+    [
+      "Runbook tốt phải có gì?",
+      [
+        "Chỉ link dashboard",
+        "Chỉ mô tả chung",
+        "Chỉ ảnh đẹp",
+        "Triệu chứng, impact, owner, bước kiểm tra, lệnh xử lý, escalation"
+      ],
+      3
+    ],
+    [
+      "Lineage giúp gì khi có incident?",
+      [
+        "Biết bảng/dashboard nào bị ảnh hưởng từ source lỗi",
+        "Tăng tốc internet",
+        "Tự sửa schema",
+        "Thay thế ownership"
+      ],
+      0
+    ],
+    [
+      "SLA/SLO/SLI liên hệ thế nào?",
+      [
+        "SLA là chart",
+        "Ba khái niệm giống nhau",
+        "SLI là chỉ số đo, SLO là mục tiêu nội bộ, SLA là cam kết",
+        "SLO là source system"
+      ],
+      2
+    ],
+    [
+      "Post-mortem culture tốt là gì?",
+      [
+        "Tìm người đổ lỗi",
+        "Blameless, tập trung timeline, root cause và action item cụ thể",
+        "Xóa log",
+        "Không ghi lại sự cố"
+      ],
+      1
+    ],
+    [
+      "Cost monitoring nên theo dõi gì?",
+      [
+        "Chỉ màu chart",
+        "Chỉ font size",
+        "Chỉ số README",
+        "Warehouse query cost, storage, compute, streaming retention và dashboard refresh"
+      ],
+      3
+    ],
+    [
+      "Quality incident ví dụ nào đúng?",
+      [
+        "Revenue mart tăng 40% do duplicate payment event chưa dedup",
+        "Button không xanh",
+        "README thiếu emoji",
+        "Tên folder dài"
+      ],
+      0
+    ],
+    [
+      "Anti-pattern operations là gì?",
+      [
+        "Có on-call",
+        "Deploy xong không owner, không alert, không runbook",
+        "Có impact analysis",
+        "Có quality gate"
+      ],
+      1
+    ],
+    [
+      "Alert tốt nên tránh gì?",
+      [
+        "Có owner",
+        "Có severity",
+        "Báo quá nhiều noise không actionable",
+        "Có link runbook"
+      ],
+      2
+    ]
+  ],
+  "portfolio": [
+    [
+      "README capstone tốt cần mở đầu bằng gì?",
+      [
+        "Danh sách tool thật dài",
+        "Business problem, user, KPI và demo outcome",
+        "Chỉ ảnh banner",
+        "Chỉ lệnh cài đặt"
+      ],
+      1
+    ],
+    [
+      "Recruiter quan tâm gì nhất trong capstone?",
+      [
+        "Bạn có folder thật nhiều",
+        "Bạn dùng bao nhiêu logo",
+        "Bạn hiểu trade-off, scope, chất lượng artifact và cách vận hành",
+        "Bạn viết code dài"
+      ],
+      2
+    ],
+    [
+      "Interview storytelling nên theo mạch nào?",
+      [
+        "Chỉ đọc README",
+        "Tool → tool → tool",
+        "Screenshot → kết thúc",
+        "Problem → constraints → architecture → trade-offs → incident → impact"
+      ],
+      3
+    ],
+    [
+      "Architecture explanation tốt phải nêu gì?",
+      [
+        "Vì sao chọn mỗi layer và bỏ qua lựa chọn khác",
+        "Chỉ tên service",
+        "Chỉ URL dashboard",
+        "Không cần cost"
+      ],
+      0
+    ],
+    [
+      "Screenshot/diagram nên dùng thế nào?",
+      [
+        "Càng nhiều càng tốt",
+        "Thay cho giải thích",
+        "Làm bằng chứng cho luồng chạy, dashboard, lineage, incident debug",
+        "Không cần caption"
+      ],
+      2
+    ],
+    [
+      "Anti-pattern portfolio là gì?",
+      [
+        "README có runbook",
+        "Kiến trúc khổng lồ nhưng không giải thích được vận hành và trade-off",
+        "Có interview notes",
+        "Có tests"
+      ],
+      1
+    ],
+    [
+      "Interview note tốt nên chuẩn bị gì?",
+      [
+        "Chỉ định nghĩa tool",
+        "Script học thuộc từng chữ",
+        "Chỉ link repo",
+        "Câu trả lời ngắn về choices, scaling, failures learned và future improvement"
+      ],
+      3
+    ],
+    [
+      "Portfolio folder nên chứng minh điều gì?",
+      [
+        "End-to-end completeness: ingestion, transform, orchestration, warehouse, dashboard, monitoring",
+        "Rằng có nhiều file trống",
+        "Rằng code không cần chạy",
+        "Rằng không có docs"
+      ],
+      0
+    ],
+    [
+      "Future improvement nên viết thế nào?",
+      [
+        "Viết càng nhiều càng tốt",
+        "Cụ thể, gắn với scale/cost/reliability, không hứa mơ hồ",
+        "Chỉ nói dùng thêm AI",
+        "Không cần vì capstone đã xong"
+      ],
+      1
+    ],
+    [
+      "Một câu chuyện capstone mạnh là gì?",
+      [
+        "Tôi bỏ monitoring để nhanh",
+        "Tôi dùng Kafka vì nổi tiếng",
+        "Tôi chọn batch cho finance vì correctness, streaming cho ops vì latency, và reconcile hai luồng bằng daily mart",
+        "Tôi không biết dashboard lấy từ đâu"
+      ],
+      2
+    ]
+  ],
+  "artifact": [
+    [
+      "Folder week24_capstone/ nên có gì?",
+      [
+        "Chỉ notebook",
+        "Architecture, ingestion, transformations, orchestration, warehouse, dashboards, monitoring, tests, runbooks, README, interview notes",
+        "Chỉ CSV",
+        "Chỉ screenshot"
+      ],
+      1
+    ],
+    [
+      "system_design.md nên chứa gì?",
+      [
+        "Chỉ câu lệnh git",
+        "Chỉ logo tool",
+        "Context, requirements, architecture diagram, trade-offs, failure modes, scaling",
+        "Chỉ dashboard color"
+      ],
+      2
+    ],
+    [
+      "README tooling choices nên giải thích gì?",
+      [
+        "Không cần giải thích",
+        "Tool nào hot",
+        "Tool nào nhiều sao GitHub",
+        "Tool được chọn vì requirement, team skill, cost và constraints"
+      ],
+      3
+    ],
+    [
+      "tests/ nên bao phủ gì?",
+      [
+        "dbt tests, data quality checks, transformation unit tests, sample reconciliation",
+        "Chỉ empty file",
+        "Chỉ screenshot",
+        "Chỉ README"
+      ],
+      0
+    ],
+    [
+      "runbooks/ nên có tài liệu nào?",
+      [
+        "Chỉ CV",
+        "Chỉ changelog",
+        "Pipeline fail, schema drift, dashboard stale, quality breach, backfill",
+        "Chỉ raw SQL"
+      ],
+      2
+    ],
+    [
+      "dashboard examples cần đi kèm gì?",
+      [
+        "Chỉ ảnh không nguồn",
+        "Metric definition, source mart, freshness, owner và screenshot/link",
+        "Chỉ chart title",
+        "Chỉ màu"
+      ],
+      1
+    ],
+    [
+      "SQL transformations artifact nên thể hiện gì?",
+      [
+        "Chỉ notebook",
+        "Chỉ SELECT *",
+        "Chỉ create table trống",
+        "Staging, intermediate, marts, fact/dim, tests và comments về grain"
+      ],
+      3
+    ],
+    [
+      "Monitoring plan nên có gì?",
+      [
+        "Freshness, failures, lag, cost, quality, alert routing và severity",
+        "Chỉ log file",
+        "Chỉ CPU",
+        "Chỉ uptime app"
+      ],
+      0
+    ],
+    [
+      "Scaling considerations nên nói gì?",
+      [
+        "Chỉ nói scale vô hạn",
+        "Điểm nghẽn dự kiến và phương án tăng partition/warehouse/OLAP/replay",
+        "Không cần vì project nhỏ",
+        "Chỉ thêm tool"
+      ],
+      1
+    ],
+    [
+      "Artifact recruiter-grade khác toy project ở đâu?",
+      [
+        "Có nhiều folder rỗng",
+        "Có tên thật dài",
+        "Có quyết định believable, bằng chứng chạy, docs vận hành và story phỏng vấn",
+        "Có logo cloud"
+      ],
+      2
+    ]
+  ],
+  "final": [
+    [
+      "Mini test Week24 kiểm tra trọng tâm gì?",
+      [
+        "Chỉ nhớ định nghĩa Kafka",
+        "Khả năng nối business, architecture, pipeline, serving, ops và portfolio story",
+        "Chỉ cú pháp CSS",
+        "Chỉ Git command"
+      ],
+      1
+    ],
+    [
+      "Điểm pass tốt cho capstone là gì?",
+      [
+        "Chỉ cần làm dashboard",
+        "5/20 là đủ",
+        "Từ 16/20 trở lên và không yếu phần architecture/ops",
+        "Không cần tự kiểm tra"
+      ],
+      2
+    ],
+    [
+      "Nếu sai nhiều câu observability, nên làm gì?",
+      [
+        "Đổi scenario",
+        "Bỏ phần ops khỏi portfolio",
+        "Chỉ sửa màu UI",
+        "Ôn lại monitoring, runbook, SLA/SLO/SLI và incident handling trước khi demo"
+      ],
+      3
+    ],
+    [
+      "Mini test không thay thế gì?",
+      [
+        "Artifact thực tế có code, README, dashboard và runbook",
+        "Quiz",
+        "Scoring",
+        "Reset button"
+      ],
+      0
+    ],
+    [
+      "Khi tự chấm capstone, câu hỏi quan trọng là gì?",
+      [
+        "Có nhiều icon không?",
+        "File có dài không?",
+        "Người khác có thể hiểu, chạy, kiểm tra và tin quyết định thiết kế của bạn không?",
+        "Có dùng mọi tool không?"
+      ],
+      2
+    ],
+    [
+      "Kết quả mini test nên dùng để làm gì?",
+      [
+        "Chỉ để lấy điểm",
+        "Tìm lỗ hổng trước khi public portfolio hoặc phỏng vấn",
+        "Để bỏ qua practice",
+        "Để xóa README"
+      ],
+      1
+    ],
+    [
+      "Một câu trả lời interview tốt cần gì?",
+      [
+        "Không nhắc failure",
+        "Định nghĩa tool chung chung",
+        "Trả lời thật dài",
+        "Context cụ thể, trade-off, metric impact và điều học được"
+      ],
+      3
+    ],
+    [
+      "Nếu project chưa có incident thật, nên làm gì?",
+      [
+        "Mô phỏng incident hợp lý và ghi lại runbook/post-mortem",
+        "Bịa production outage",
+        "Bỏ phần incident",
+        "Xóa monitoring"
+      ],
+      0
+    ],
+    [
+      "Khi demo 20-30 phút, thứ tự tốt là gì?",
+      [
+        "Mở từng file ngẫu nhiên",
+        "Business problem, architecture, data flow, dashboard, ops, trade-off, lessons",
+        "Chỉ chạy notebook",
+        "Chỉ đọc code"
+      ],
+      1
+    ],
+    [
+      "Hoàn thành Week24 nghĩa là gì?",
+      [
+        "Có một query",
+        "Có một HTML đẹp",
+        "Có capstone end-to-end đáng tin, có thể public và kể được trong phỏng vấn",
+        "Có một dashboard không docs"
+      ],
+      2
+    ]
+  ]
+};
+
+const modulesData = [
+  {
+    no:'W24.01', title:'Tổng Quan: Capstone Project là gì và mục tiêu cuối cùng', tag:'Tuần 24 · W24.01', key:'capstone',
+    subtitle:'Chuyển từ học từng kỹ năng sang xây một hệ thống dữ liệu có business context, vận hành và câu chuyện portfolio.',
+    menu:[['Scope roadmap','Giai đoạn 6 · Expert Capstone tổng hợp modeling, dbt, Airflow, Spark, Kafka/Flink, OLAP, KPI và maintenance.'],['Format kế thừa','Week00 family: hero, fixed sidebar, module switching, 6 section chuẩn, quiz, practice, mini test, dark premium UI.'],['Scenario chọn','E-commerce analytics vì có đủ OLTP, API, events, file, batch, streaming, dashboard và incident thực tế.'],['Assumptions', assumptions]],
+    objectives:['Phân biệt capstone thật với toy tutorial project.','Hiểu data pipeline vs data platform.','Biết cách recruiter đánh giá project Data Engineering.','Đặt tiêu chí hoàn thành cho toàn bộ Week24.'],
+    detail:`<h3>Capstone là bài kiểm tra tư duy hệ thống</h3><p>Capstone không phải là ghép nhiều tool vào một repo. Nó là bằng chứng rằng bạn hiểu dữ liệu đi từ business event đến dashboard, đi qua ingestion, storage, transformation, serving, monitoring, và vẫn có người chịu trách nhiệm khi pipeline fail.</p><div class="info-box note">📌 <span><strong>Scope sử dụng từ roadmap:</strong> Expert Capstone tuần 24-27 với 7 layer: ingestion, storage, batch transform, stream, big data compute, analytics/BI và operations.</span></div><div class="info-box tip">✅ <span><strong>Format kế thừa:</strong> mỗi module giữ 6 section chuẩn, sidebar cố định, hero banner, code block terminal-style, quiz tương tác, practice có lời giải ẩn và final mini test.</span></div><h3>Scenario xuyên suốt</h3><p>${scenario}</p><p>E-commerce được chọn vì beginner dễ hình dung nhưng vẫn đủ production realism: order correctness quan trọng với finance, clickstream cần freshness cho vận hành, payment/fraud có late event, inventory có SLA riêng, dashboard có nhiều stakeholder.</p><h3>Portfolio khác tutorial</h3><table><tr><th>Tiêu chí</th><th>Tutorial project</th><th>Portfolio-grade capstone</th></tr><tr><td>Business</td><td>Làm theo đề bài</td><td>Nêu problem, KPI, stakeholder, SLA</td></tr><tr><td>Architecture</td><td>Chạy được happy path</td><td>Có trade-off, failure mode, replay, cost</td></tr><tr><td>Ops</td><td>Không bàn sau deploy</td><td>Monitoring, runbook, incident, ownership</td></tr><tr><td>Interview</td><td>Kể dùng tool gì</td><td>Kể vì sao chọn, bỏ gì, học gì khi lỗi</td></tr></table><h3>Checklist outcome</h3><ul><li>Giải thích được kiến trúc end-to-end trong 5 phút.</li><li>Có artifact <code>week24_capstone/</code> với folder đầy đủ.</li><li>Có ít nhất một batch path, một streaming/near-real-time path, một mart KPI và một runbook.</li><li>Có README nói rõ cost, trade-off, reliability và future improvement.</li></ul>`,
+    summary:['Capstone là bằng chứng tư duy hệ thống, không phải bộ sưu tập tool.','Scenario e-commerce giúp nối business, event, finance, inventory và dashboard.','Pipeline xử lý một luồng; platform có nhiều luồng, serving, monitoring và ownership.','Recruiter đánh giá clarity, trade-off, artifact chạy được và storytelling.','Simplicity tốt là vừa sức nhưng vẫn có replay, tests, alert, README.','Outcome cuối là một repo có thể demo, review và kể trong phỏng vấn.'],
+    practices:[['Capstone charter','Viết 1 trang mô tả business problem, KPI chính, stakeholder và success criteria cho NHC Commerce.','Dùng cấu trúc: Problem → Users → Decisions supported → Data sources → SLA → Risks. KPI chính: gross merchandise value, paid conversion, order fulfillment SLA, refund rate, stockout rate.'],['Portfolio rubric','Tạo rubric 0-3 cho architecture, ingestion, modeling, dashboard, monitoring, README, IaC/CI/CD và interview story.','Mức 3 phải có evidence: diagram, code, tests, screenshots, runbook, incident note, Terraform/IaC plan, CI/CD badge và trade-off table.']]
+  },
+  {
+    no:'W24.02', title:'Business Problem & Architecture Design', tag:'Tuần 24 · W24.02', key:'arch',
+    subtitle:'Dịch yêu cầu kinh doanh thành kiến trúc có source systems, SLA, freshness, trade-off và tool choices hợp lý.',
+    menu:[['Stakeholder','CEO/Finance cần doanh thu đúng; Ops cần lag thấp; Marketing cần funnel; Product cần retention.'],['Sources','OLTP PostgreSQL, payment/refund API, clickstream events, daily inventory CSV.'],['Serving','Warehouse cho governed BI; ClickHouse/OLAP cho operational event dashboard.'],['Constraint','Team nhỏ, budget vừa phải, ưu tiên correctness cho finance và latency vừa đủ cho ops.']],
+    objectives:['Thu thập business requirement có thể chuyển thành data contract.','Xác định SLA/freshness theo từng dashboard.','Vẽ architecture high-level có nguồn, flow và ownership.','So sánh warehouse, lakehouse, OLAP, orchestration, streaming theo trade-off.'],
+    detail:`<h3>Từ business question đến system boundary</h3><p>Hãy bắt đầu bằng câu hỏi: ai ra quyết định nào, dựa trên metric nào, cần fresh đến mức nào, và sai số nào là không chấp nhận được. Với NHC Commerce, finance không cần real-time nhưng cần đúng; ops cần biết checkout lag trong vài phút để xử lý incident.</p><table><tr><th>Stakeholder</th><th>Decision</th><th>Freshness</th><th>Metric</th></tr><tr><td>Finance</td><td>Đối soát doanh thu</td><td>Daily 07:00</td><td>Net revenue, refund rate</td></tr><tr><td>Ops</td><td>Phát hiện checkout/payment drop</td><td>5 phút</td><td>Checkout success rate, event lag</td></tr><tr><td>Marketing</td><td>Tối ưu campaign</td><td>Hourly/Daily</td><td>Funnel conversion, CAC proxy</td></tr><tr><td>Product</td><td>Giảm drop-off</td><td>Daily</td><td>Session conversion, cohort retention</td></tr></table><h3>Architecture đề xuất</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>architecture/system_design.md</span></div><div class="cmd-body"><pre>OLTP PostgreSQL orders/payments/customers
+ Payment API + Inventory CSV + Web/App Events
+--------------------+
+ Batch/CDC/API/Event Ingestion
+--------------------+
+ Raw/Bronze object storage
+ Silver conformed tables
+ Gold marts in Warehouse
+ ClickHouse operational events
+--------------------+
+ Executive BI + Ops Dashboard + Alerts
+--------------------+
+ Airflow/dbt tests/lineage/runbooks</pre></div></div><h3>Tool choice reasoning</h3><ul><li><strong>Warehouse:</strong> BigQuery/Snowflake style cho governed marts, BI, access control, SQL analytics.</li><li><strong>Lakehouse/Object storage:</strong> raw replay, schema evolution, giữ source payload để debug.</li><li><strong>OLAP:</strong> ClickHouse cho event dashboard thấp latency, không thay thế finance warehouse.</li><li><strong>Orchestration:</strong> Airflow để schedule batch, CDC sync, dbt build, quality gate và backfill.</li><li><strong>Streaming:</strong> Kafka/Flink hoặc Kafka Connect + stream processor cho clickstream session và lag metrics.</li><li><strong>Infrastructure as Code:</strong> Terraform quản lý bucket raw, warehouse dataset/schema, service account, secrets reference và alert policy để môi trường dev/staging/prod có thể tái tạo bằng Git review.</li></ul><div class="info-box warn">⚠️ <span>Anti-pattern: chọn Kafka, Spark, Iceberg, Airflow chỉ vì trendy hoặc tạo cloud resources bằng UI rồi không ai reproduce được. Mỗi tool phải trả lời được: latency, volume, reliability, team skill hoặc cost nào buộc ta dùng nó?</span></div>`,
+    summary:['Requirement tốt bắt đầu từ stakeholder và decision, không bắt đầu từ tool.','Freshness khác nhau: finance daily đúng, ops 5 phút đủ nhanh.','Architecture diagram phải có source, ingestion, storage, transform, serving, ops.','Warehouse phục vụ governed BI; OLAP phục vụ event dashboard latency thấp.','Lake/raw layer bảo vệ khả năng replay và debug.','Tool trendy không có requirement rõ là technical debt.'],
+    practices:[['Vẽ architecture v1','Vẽ diagram text hoặc Mermaid cho NHC Commerce từ source đến dashboard, kèm latency từng path.','Tách batch path orders/payments/inventory và streaming path clickstream. Ghi rõ finance mart chạy daily, ops event mart cập nhật 5 phút.'],['Trade-off table','So sánh Snowflake/BigQuery vs DuckDB local vs ClickHouse cho serving layer.','Warehouse thắng về governance/BI; DuckDB tốt demo local; ClickHouse tốt event latency thấp nhưng cần vận hành riêng.']]
+  },
+  {
+    no:'W24.03', title:'Ingestion Layer: Batch, CDC, APIs, Streaming', tag:'Tuần 24 · W24.03', key:'ingest',
+    subtitle:'Thiết kế ingestion có raw layer, schema evolution, retry, idempotency, checkpoint, observability và replay strategy.',
+    menu:[['Batch','Inventory CSV và product catalog sync daily.'],['CDC','Orders, payments, customers từ OLTP.'],['API','Refund, payment settlement, campaign cost.'],['Streaming','Clickstream events: product_viewed, add_to_cart, checkout_started, payment_succeeded.']],
+    objectives:['Chọn pattern ingestion theo loại source.','Thiết kế bronze/raw layer có metadata để replay.','Xử lý idempotency, retry, schema evolution, watermark/checkpoint.','Biết quan sát ingestion bằng lag, row count, failure và freshness.'],
+    detail:`<h3>Ingestion không chỉ là lấy data</h3><p>Ingestion tốt giữ được dữ liệu raw, biết đã xử lý đến đâu, có thể chạy lại, và phát hiện sớm khi source đổi schema. Đây là nơi nhiều project portfolio yếu vì chỉ viết một script API rồi load thẳng vào mart.</p><table><tr><th>Source</th><th>Pattern</th><th>Key control</th><th>Raw path</th></tr><tr><td>orders/payments</td><td>CDC</td><td>LSN/updated_at, dedup key</td><td>raw/postgres/orders/date=...</td></tr><tr><td>inventory.csv</td><td>Batch file</td><td>file checksum, load date</td><td>raw/files/inventory/date=...</td></tr><tr><td>refund API</td><td>API incremental</td><td>cursor, rate limit, backoff</td><td>raw/api/refunds/date=...</td></tr><tr><td>clickstream</td><td>Kafka events</td><td>topic/partition/offset, DLQ</td><td>raw/events/clickstream/hour=...</td></tr></table><h3>Bronze contract</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>ingestion/bronze_contract.sql</span></div><div class="cmd-body"><pre><span class="comment">-- Mỗi raw record cần đủ metadata để debug và replay</span>
+raw_payload
+source_system
+ingested_at
+source_updated_at
+batch_id
+schema_version
+record_hash
+is_deleted</pre></div></div><h3>Retry, checkpoint và replay</h3><ul><li><strong>Retry:</strong> retry transient error với exponential backoff, không retry vô hạn khi schema breaking.</li><li><strong>Idempotency:</strong> dùng natural key + source updated_at + record_hash, hoặc partition overwrite cho batch file.</li><li><strong>Watermark:</strong> lưu mốc cuối đã xử lý theo source, không hard-code trong script.</li><li><strong>DLQ:</strong> event lỗi schema đi vào dead-letter topic/table để inspect, không làm chết toàn bộ stream.</li></ul><div class="info-box warn">⚠️ <span>Anti-pattern: không có replay strategy. Nếu transform sai trong 3 ngày, bạn phải có raw data và checkpoint để rebuild silver/gold thay vì sửa tay dashboard.</span></div>`,
+    summary:['Mỗi source cần ingestion pattern riêng: batch, CDC, API, streaming.','Bronze/raw giữ payload và metadata để replay/debug.','Idempotency bảo vệ pipeline khỏi duplicate khi retry hoặc backfill.','Watermark/checkpoint là trạng thái vận hành, không phải biến hard-code.','Observability ingestion cần rows, lag, failure, schema drift, freshness.','Không có replay strategy là lỗi thiết kế nghiêm trọng.'],
+    practices:[['Ingestion strategy matrix','Lập bảng cho 4 source của NHC Commerce: pattern, frequency, key, watermark, retry, failure action.','Orders dùng CDC theo updated_at/LSN; API refund dùng cursor; inventory dùng file checksum; events dùng Kafka offset và DLQ.'],['Replay design','Mô tả cách rebuild gold marts từ raw khi phát hiện duplicate payment trong 2 ngày.','Pause dashboard nếu impact cao, fix silver dedup, backfill partition 2 ngày, chạy dbt tests, compare revenue before/after, ghi incident note.']]
+  },
+  {
+    no:'W24.04', title:'Storage & Transformation Layer', tag:'Tuần 24 · W24.04', key:'transform',
+    subtitle:'Tổ chức bronze/silver/gold, dbt-style transformations, fact/dimension modeling, data quality và orchestration flow.',
+    menu:[['Storage','Raw object storage + curated warehouse tables.'],['Transform','staging → intermediate → marts theo dbt pattern.'],['Modeling','dim_customer, dim_product, fct_orders, fct_payments, fct_web_sessions.'],['Quality','Unique, not null, relationship, freshness, revenue reconciliation.']],
+    objectives:['Thiết kế bronze/silver/gold và staging/intermediate/marts.','Định nghĩa grain cho fact/dimension.','Chọn partitioning theo query pattern và backfill.','Gắn data quality vào orchestration trước khi serving.'],
+    detail:`<h3>Layering để giảm hỗn loạn</h3><p>Bronze giữ raw. Silver chuẩn hóa kiểu dữ liệu, dedup, join key và contract. Gold biến dữ liệu thành mart có grain rõ, metric nhất quán và dùng được cho BI. Nếu business logic nằm rải rác ở dashboard, project sẽ khó debug và khó phỏng vấn.</p><table><tr><th>Layer</th><th>Ví dụ NHC Commerce</th><th>Rule</th></tr><tr><td>Staging</td><td>stg_orders, stg_payments, stg_events</td><td>1:1 với source, rename/cast nhẹ</td></tr><tr><td>Intermediate</td><td>int_order_payments_deduped, int_sessions</td><td>Business logic dùng lại</td></tr><tr><td>Marts</td><td>fct_orders, dim_customer, mart_daily_revenue</td><td>BI-ready, tested, documented</td></tr></table><h3>Modeling sketch</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>transformations/marts/fct_orders.sql</span></div><div class="cmd-body"><pre><span class="comment">-- Grain: one row per order_id</span>
+order_key
+customer_key
+product_count
+gross_amount
+discount_amount
+net_amount
+payment_status
+order_created_at
+order_date</pre></div></div><h3>Partitioning và compute</h3><ul><li>Partition fact lớn theo <code>order_date</code> hoặc <code>event_date</code> vì backfill và dashboard thường lọc theo ngày.</li><li>Spark dùng cho historical event rebuild hoặc join lớn; dbt SQL đủ tốt cho marts warehouse hằng ngày.</li><li>Flink dùng cho sessionization near-real-time nếu cần event-time, watermark và state.</li><li>Airflow orchestrate: ingest → source freshness → staging → intermediate → marts → tests → publish dashboard flag.</li></ul><div class="info-box tip">✅ <span>Đặt metric logic ở mart hoặc semantic layer. Dashboard chỉ visualize, không tự tính revenue khác nhau ở mỗi chart.</span></div><div class="info-box warn">⚠️ <span>Anti-pattern: revenue definition bị copy-paste trong dbt model, notebook analyst và dashboard SQL. Một lỗi refund sẽ phải sửa ở nhiều nơi và vẫn dễ lệch.</span></div>`,
+    summary:['Bronze/Silver/Gold giúp tách raw, cleaned và business-ready data.','dbt pattern làm rõ lineage, tests, docs và dependency.','Fact grain là hợp đồng quan trọng nhất của model.','Partition theo date giúp backfill, pruning và cost control.','Spark/Flink chỉ dùng khi volume/latency/state thật sự cần.','Business logic duplicate là nguồn sai lệch metric phổ biến.'],
+    practices:[['Warehouse modeling','Thiết kế star schema cho executive dashboard NHC Commerce.','Facts: fct_orders, fct_payments, fct_web_sessions. Dimensions: dim_customer SCD2, dim_product, dim_date, dim_campaign. Marts: mart_daily_revenue, mart_funnel_daily.'],['Orchestration plan','Viết DAG steps từ ingestion đến publish mart với quality gate.','Tasks: ingest_cdc, ingest_api, load_events, dbt_source_freshness, dbt_build_staging, dbt_build_marts, dbt_test, revenue_reconcile, notify_success/failure.']]
+  },
+  {
+    no:'W24.05', title:'Serving Layer: Warehouse, OLAP, KPI Dashboard', tag:'Tuần 24 · W24.05', key:'serving',
+    subtitle:'Biến gold marts thành dashboard đáng tin: source-of-truth, certified metrics, semantic consistency, ownership và freshness.',
+    menu:[['Warehouse serving','Executive finance/product dashboard từ gold marts.'],['OLAP serving','Operational checkout/payment dashboard từ event stream.'],['KPI layer','North Star, supporting metrics, guardrails và definitions.'],['Ownership','Metric owner, dashboard owner, freshness owner.']],
+    objectives:['Thiết kế serving theo người dùng và latency.','Phân biệt executive vs operational dashboard.','Định nghĩa certified metrics và source-of-truth.','Tránh dashboard không rõ nguồn và metric lệch nhau.'],
+    detail:`<h3>Serving layer là nơi dữ liệu bị hiểu sai nhiều nhất</h3><p>Nếu cùng một câu hỏi "doanh thu hôm qua bao nhiêu" có ba con số khác nhau, vấn đề không nằm ở chart. Vấn đề nằm ở semantic layer, metric ownership và source-of-truth.</p><table><tr><th>Dashboard</th><th>User</th><th>Source</th><th>Freshness</th><th>Owner</th></tr><tr><td>Executive Revenue</td><td>CEO/Finance</td><td>mart_daily_revenue</td><td>Daily 07:00</td><td>Analytics Engineer</td></tr><tr><td>Checkout Ops</td><td>Operations</td><td>ClickHouse events</td><td>5 phút</td><td>Data Engineer</td></tr><tr><td>Marketing Funnel</td><td>Marketing</td><td>mart_funnel_daily</td><td>Hourly/Daily</td><td>Analyst</td></tr></table><h3>Certified metrics</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>warehouse/metrics.yml</span></div><div class="cmd-body"><pre>net_revenue:
+ definition: gross_amount - discount_amount - refunded_amount
+ grain: order_date, channel, category
+ source: mart_daily_revenue
+ owner: finance_analytics
+ freshness_sla: daily before 07:00
+ tests: non_negative, reconciled_with_payments</pre></div></div><h3>Executive vs operational</h3><ul><li><strong>Executive:</strong> ít chart, metric được certify, trend rõ, dùng cho quyết định chiến lược.</li><li><strong>Operational:</strong> latency thấp, drill-down theo service/channel/error type, phục vụ xử lý incident.</li><li><strong>Exploratory:</strong> cho analyst tự khám phá nhưng vẫn dựa trên marts đáng tin.</li></ul><div class="info-box warn">⚠️ <span>Anti-pattern: dashboard có SQL riêng join raw tables, không owner, không freshness, không metric definition. Nó có thể đẹp nhưng không đáng tin.</span></div>`,
+    summary:['Serving bắt đầu từ người dùng, decision và latency.','Warehouse phù hợp governed BI; OLAP phù hợp operational event analytics.','Certified metric phải có definition, source, owner, freshness và tests.','Executive dashboard cần ít nhưng đúng; operational dashboard cần nhanh và actionable.','Semantic consistency tránh nhiều định nghĩa revenue/conversion.','Dashboard không source-of-truth là rủi ro business.'],
+    practices:[['KPI framework','Định nghĩa North Star và 8 metric hỗ trợ cho NHC Commerce.','North Star: paid orders with positive margin. Supporting: GMV, net revenue, paid conversion, refund rate, stockout rate, fulfillment SLA, checkout success, repeat purchase rate.'],['Dashboard ownership','Tạo bảng owner/freshness/source cho 3 dashboard.','Ghi rõ dashboard owner, mart owner, alert channel, SLA, link runbook khi stale.']]
+  },
+  {
+    no:'W24.06', title:'Reliability, Observability & Operations', tag:'Tuần 24 · W24.06', key:'ops',
+    subtitle:'Thiết kế vận hành sau deploy: freshness, failures, lag, cost, quality, lineage, incident, runbook, SLA/SLO/SLI và post-mortem.',
+    menu:[['Monitoring','Freshness, failures, lag, cost, quality.'],['Incident','Triage, impact analysis, mitigation, communication.'],['Runbooks','Step-by-step cho pipeline fail, schema drift, stale dashboard.'],['Culture','Ownership, on-call, blameless post-mortem.']],
+    objectives:['Biết monitor data platform theo SLI cụ thể.','Viết runbook actionable cho incident thật.','Phân biệt SLA, SLO, SLI trong data context.','Thực hành impact analysis bằng lineage và ownership.'],
+    detail:`<h3>Production không kết thúc ở deploy</h3><p>Data platform chỉ đáng tin khi có người biết nó đang khỏe hay hỏng, dashboard nào bị ảnh hưởng, và xử lý thế nào. Week23 maintenance được đưa thẳng vào capstone để chứng minh bạn hiểu ownership.</p><p><strong>CI/CD là một phần của reliability:</strong> mọi thay đổi dbt model, DAG, data quality rule hoặc Terraform plan nên đi qua pull request. Pipeline CI chạy SQL lint, dbt compile/test, unit tests và terraform plan trước khi merge vào <code>main</code>; deploy bằng Git thay vì copy file thủ công lên server.</p><table><tr><th>Signal</th><th>SLI</th><th>Alert khi</th><th>Owner</th></tr><tr><td>Freshness</td><td>max(order_date) age</td><td>mart_daily_revenue chưa cập nhật trước 07:00</td><td>AE</td></tr><tr><td>Failures</td><td>Airflow task failed</td><td>dbt_test hoặc ingestion fail</td><td>DE</td></tr><tr><td>Lag</td><td>Kafka consumer lag</td><td>lag > 10 phút</td><td>DE</td></tr><tr><td>Quality</td><td>Revenue reconciliation delta</td><td>delta > 0.5%</td><td>Finance analytics</td></tr><tr><td>Cost</td><td>Warehouse spend/query</td><td>daily cost > budget 30%</td><td>Platform owner</td></tr><tr><td>CI/CD</td><td>build/test/plan status</td><td>main branch pipeline failed hoặc terraform plan có drift</td><td>Platform owner</td></tr></table><h3>Runbook mẫu</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>runbooks/dashboard_stale.md</span></div><div class="cmd-body"><pre>Symptom: Executive Revenue Dashboard stale after 07:00
+ Check Airflow DAG ecommerce_daily_marts
+ Check dbt source freshness for orders/payments
+ If ingestion failed: rerun source task with same batch_id
+ If dbt test failed: inspect failing model and impacted dashboards
+ Communicate: #data-alerts + Finance owner
+ Mitigate: mark dashboard stale, pause decision email
+ After fix: backfill partition, rerun tests, post incident note</pre></div></div><h3>SLA/SLO/SLI</h3><ul><li><strong>SLI:</strong> số đo, ví dụ mart freshness minutes, test pass rate, lag seconds.</li><li><strong>SLO:</strong> mục tiêu nội bộ, ví dụ 99% ngày mart sẵn sàng trước 07:00.</li><li><strong>SLA:</strong> cam kết với stakeholder, ví dụ Finance dashboard available before 07:30 business days.</li></ul><div class="info-box warn">⚠️ <span>Anti-pattern: deploy xong không owner, không alert, không runbook. Khi dashboard sai, cả team tranh luận bằng cảm giác thay vì bằng lineage và evidence.</span></div>`,
+    summary:['Reliability phải có SLI đo được, không chỉ nói ổn định.','Monitoring cần freshness, failures, lag, quality và cost.','Runbook phải actionable, có lệnh kiểm tra, owner và escalation.','Lineage giúp xác định dashboard và stakeholder bị ảnh hưởng.','Post-mortem tốt là blameless và có action item cụ thể.','Không có ownership sau deploy là anti-pattern production.'],
+    practices:[['Incident handling','Mô phỏng incident: payment API trả duplicate refund trong 3 giờ. Viết impact analysis và mitigation.','Impact: net revenue thấp sai, refund rate tăng. Mitigation: freeze dashboard, dedup by refund_id+updated_at, backfill affected partitions, validate reconciliation, publish post-mortem.'],['Runbook writing','Viết runbook cho Kafka lag vượt 10 phút trong checkout events.','Include: check broker/consumer health, consumer group lag, DLQ volume, scale consumer, replay from offset, notify ops dashboard owner.']]
+  },
+  {
+    no:'W24.07', title:'Portfolio, Documentation & Interview Storytelling', tag:'Tuần 24 · W24.07', key:'portfolio',
+    subtitle:'Đóng gói capstone thành repo recruiter-grade: README, diagram, screenshots, trade-offs, scaling, failures learned và interview story.',
+    menu:[['GitHub repo','Clean structure, README rõ, screenshots có caption.'],['Documentation','Architecture, data model, orchestration, monitoring, runbook.'],['Storytelling','Problem → constraints → design → trade-offs → incident → impact.'],['Review','Recruiter cần thấy maturity, không chỉ code chạy local.']],
+    objectives:['Viết README capstone có business và kỹ thuật cân bằng.','Chuẩn bị architecture explanation và interview notes.','Biết recruiter thực sự quan tâm điều gì.','Tránh kiến trúc quá lớn nhưng không giải thích được.'],
+    detail:`<h3>Portfolio là bằng chứng giao tiếp kỹ thuật</h3><p>Một repo tốt giúp người đọc hiểu vấn đề trước khi đọc code. Bạn cần chứng minh: tại sao hệ thống này tồn tại, dữ liệu đi thế nào, quyết định nào đã cân nhắc, lỗi nào đã gặp, và business nhận được gì.</p><table><tr><th>README section</th><th>Nội dung cần có</th></tr><tr><td>Business problem</td><td>NHC Commerce cần dashboard doanh thu, funnel, vận hành checkout</td></tr><tr><td>Architecture decisions</td><td>Batch cho finance correctness, streaming cho ops latency</td></tr><tr><td>Tooling choices</td><td>Airflow/dbt/warehouse/ClickHouse/Kafka theo requirement</td></tr><tr><td>Reliability</td><td>Tests, alerts, runbooks, incident example</td></tr><tr><td>Costs & trade-offs</td><td>Giới hạn scale, budget, future improvements</td></tr></table><h3>Interview storytelling template</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>interview_notes.md</span></div><div class="cmd-body"><pre>1. Problem: finance and ops did not trust revenue/checkout metrics.
+2. Constraints: team small, 80k orders/day, ops needs 5-min signals.
+3. Design: CDC/API/batch/events into raw, dbt marts, warehouse + OLAP.
+4. Trade-off: batch source of truth, stream fast but reconciled daily.
+5. Failure: duplicate refund incident; fixed with dedup and backfill.
+6. Impact: one source-of-truth for revenue and actionable ops dashboard.</pre></div></div><h3>Recruiter lens</h3><ul><li>Họ không cần bạn vận hành hệ thống FAANG-scale. Họ cần thấy bạn biết scope, correctness, trade-off và ownership.</li><li>Screenshot không thay thế explanation. Diagram không thay thế runbook. Code không thay thế metric definition.</li><li>Repo nên có demo path 20-30 phút: architecture → run pipeline → inspect mart → view dashboard → explain incident.</li><li>Đưa GitHub/GitLab badges lên đầu README: <code>build passing</code>, <code>dbt tests passing</code>, <code>terraform plan clean</code>, <code>data quality checks</code>. Badge không thay chất lượng, nhưng tạo tín hiệu rằng repo có CI/CD và được kiểm soát bằng Git.</li></ul><div class="info-box warn">⚠️ <span>Anti-pattern: kiến trúc rất lớn với nhiều logo nhưng README không nói data nào, SLA nào, lỗi nào, và vì sao chọn như vậy.</span></div>`,
+    summary:['Portfolio tốt mở bằng business problem, không mở bằng tool list.','README phải giải thích decisions, trade-offs, monitoring và lessons learned.','Interview story nên có context, constraints, design, failure và impact.','Recruiter đánh giá maturity qua clarity và evidence.','Diagram/screenshot cần caption và liên kết với source/mart/dashboard.','Kiến trúc khổng lồ không giải thích được sẽ phản tác dụng.'],
+    practices:[['README rewrite','Viết outline README 10 section cho capstone.','Include: overview, business problem, architecture, setup, ingestion, transformations, warehouse/BI, monitoring, trade-offs, lessons, future work.'],['Interview pitch','Soạn câu trả lời 90 giây: “Tell me about your DE capstone.”','Mở bằng problem, nói constraints, nêu 2 trade-off, một incident, kết thúc bằng impact và improvement.']]
+  },
+  {
+    no:'W24.08', title:'Artifact: week24_capstone/', tag:'Tuần 24 · W24.08', key:'artifact',
+    subtitle:'Blueprint folder artifact end-to-end: architecture, ingestion, transformations, orchestration, warehouse, dashboards, monitoring, tests, runbooks, infrastructure, CI/CD, README và interview notes.',
+    menu:[['Artifact root','week24_capstone/ có cấu trúc đủ để review.'],['Evidence','Diagram, SQL, DAG, tests, dashboard screenshot, monitoring plan, Terraform plan và CI status.'],['README','Business, architecture, tooling, cost, trade-off, lessons.'],['Quality bar','Believable, production-minded, không placeholder, không folder rỗng.']],
+    objectives:['Tạo cấu trúc portfolio artifact đầy đủ.','Biết mỗi folder phải chứng minh điều gì.','Viết README capstone recruiter-grade.','Gắn artifact với scaling, monitoring, IaC/CI/CD và interview.'],
+    detail:`<h3>Cấu trúc bắt buộc</h3><div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>week24_capstone/</span></div><div class="cmd-body"><pre>week24_capstone/
+  architecture/
+    system_design.md
+    diagrams/
+  ingestion/
+    cdc_orders.md
+    api_refunds.py
+    event_contracts.md
+  transformations/
+    staging/
+    intermediate/
+    marts/
+  orchestration/
+    ecommerce_daily_dag.py
+    streaming_health_dag.py
+  infrastructure/
+    main.tf
+    variables.tf
+    environments/
+      dev.tfvars
+      prod.tfvars
+  warehouse/
+    ddl/
+    metrics.yml
+  dashboards/
+    executive_revenue.md
+    checkout_ops.md
+  monitoring/
+    slis_slos.md
+    alerts.md
+  tests/
+    dbt_tests.md
+    reconciliation_checks.sql
+  runbooks/
+    dashboard_stale.md
+    schema_drift.md
+    backfill.md
+  .github/
+    workflows/
+      ci.yml
+      dbt-checks.yml
+      terraform-plan.yml
+  README.md
+  interview_notes.md</pre></div></div><h3>README phải trả lời</h3><ul><li>Business problem: NHC Commerce cần metric nào và vì sao.</li><li>Architecture decisions: batch, CDC, API, streaming đi qua layer nào.</li><li>Tooling choices: vì sao chọn warehouse + OLAP, dbt, Airflow, Kafka/Flink/Spark khi phù hợp.</li><li>Infrastructure decisions: Terraform quản lý resource nào, state lưu ở đâu, quyền IAM/service account được giới hạn ra sao.</li><li>CI/CD decisions: pull request chạy lint, dbt compile/test, data quality smoke test và terraform plan trước khi merge.</li><li>Warehouse/lakehouse decisions: raw replay vs governed marts.</li><li>Monitoring/reliability: freshness, quality, lag, cost, incidents.</li><li>Costs and trade-offs: giới hạn scale hiện tại và phương án nâng cấp.</li><li>Lessons learned và future improvements: cụ thể, không nói chung chung.</li></ul><h3>Artifact phải có chiều sâu vừa đủ</h3><p>Không cần build toàn bộ cloud thật nếu chi phí cao, nhưng mỗi phần phải có bằng chứng believable: sample data contract, SQL transformation, DAG skeleton chạy được, Terraform skeleton có plan, CI workflow chạy tests, data quality query, dashboard mock có metric definition, runbook có steps.</p><div class="info-box tip">✅ <span>Rule kiểm tra nhanh: nếu một senior DE mở repo trong 10 phút, họ phải hiểu source, metric, failure mode, cách deploy bằng Git và cách demo.</span></div>`,
+    summary:['Artifact root cần đầy đủ folder theo lifecycle data platform.','Mỗi folder phải có nội dung chứng minh, không để placeholder rỗng.','README là entry point cho business, architecture và trade-off.','Tests, CI/CD và runbooks làm project khác toy portfolio.','Monitoring plan cần freshness, lag, quality, cost và alert routing.','Scaling considerations phải cụ thể theo bottleneck, không hứa vô hạn.'],
+    practices:[['Artifact checklist','Tạo checklist “done” cho từng folder trong week24_capstone/.','Done nghĩa là có file thật, mục đích rõ, liên kết với scenario, có ít nhất một command/query/example hoặc decision. Riêng infrastructure/ cần có Terraform skeleton và .github/workflows/ cần có workflow chạy lint/test/terraform plan.'],['README quality review','Review README theo 10 câu hỏi: problem, sources, architecture, choices, infrastructure, CI/CD, tests, dashboards, ops, future work.','Nếu câu trả lời không tìm được trong 2 phút, README cần sửa. Badges ở đầu README phải phản ánh workflow thật, không chỉ là decoration.']]
+  },
+  {
+    no:'W24.09', title:'Mini Test Tổng Kết', tag:'Tuần 24 · W24.09', key:'final',
+    subtitle:'Tự kiểm tra khả năng nối toàn bộ capstone: architecture, ingestion, warehouse, streaming, orchestration, dashboard, observability, maintenance và storytelling.',
+    menu:[['Coverage','20 câu cuối file về architecture, ingestion, warehouse, streaming, orchestration, dashboards, observability, maintenance, portfolio.'],['Scoring','Chấm điểm, highlight đúng/sai/chưa trả lời, guidance theo mức điểm.'],['Reset','Làm lại không reload page.'],['Next action','Dùng kết quả để sửa artifact trước khi public repo.']],
+    objectives:['Tự đánh giá readiness trước khi demo capstone.','Nhận diện lỗ hổng về architecture, ops hoặc portfolio story.','Luyện tư duy phỏng vấn qua câu hỏi scenario-based.','Chuyển điểm test thành checklist sửa repo.'],
+    detail:`<h3>Cách dùng mini test</h3><p>Làm test sau khi đã có bản nháp artifact. Nếu điểm thấp ở operations, đừng chỉ học lại khái niệm; hãy bổ sung runbook, alert plan, SLI/SLO và incident note vào repo. Nếu điểm thấp ở serving, kiểm tra lại metric definition và dashboard source-of-truth.</p><div class="info-box note">📌 <span>Mini test không thay thế artifact. Nó là bộ lọc để phát hiện điểm yếu trước khi bạn public GitHub hoặc dùng project trong phỏng vấn.</span></div><h3>Thang đánh giá</h3><table><tr><th>Điểm</th><th>Ý nghĩa</th><th>Hành động</th></tr><tr><td>0-11</td><td>Chưa đủ để demo</td><td>Ôn lại architecture, ingestion, modeling và ops</td></tr><tr><td>12-15</td><td>Nền tảng ổn nhưng còn lỗ hổng</td><td>Sửa README, runbook và metric definitions</td></tr><tr><td>16-18</td><td>Sẵn sàng demo thử</td><td>Refine story, thêm screenshots và incident note</td></tr><tr><td>19-20</td><td>Rất mạnh</td><td>Chuẩn bị demo video hoặc mock interview</td></tr></table>`,
+    summary:['Mini test kiểm tra tư duy nối hệ thống, không chỉ nhớ định nghĩa.','Điểm thấp phải chuyển thành action sửa artifact.','Architecture và ops là hai phần phân biệt portfolio thật với project toy.','Scoring/reset hoạt động trực tiếp trong file HTML.','20 câu bao phủ batch, streaming, warehouse, dashboard, observability và story.','Kết quả tốt nhất là repo rõ, demo được, kể được, vận hành được.'],
+    practices:[['Final readiness review','Trước khi chấm điểm, tự trả lời: tôi có demo 20 phút được không?','Nếu chưa, viết demo script: business problem → architecture → ingestion → marts → dashboard → incident → trade-off → future improvement.'],['Fix plan sau test','Sau khi chấm, liệt kê 5 việc sửa artifact dựa trên câu sai.','Ví dụ: thêm freshness SLI, bổ sung metric owner, viết replay strategy, thêm trade-off warehouse vs OLAP, cập nhật interview_notes.md.']],
+    finalTest:true
+  }
+];
+
+const finalQuestions = [
+  ['Trong capstone NHC Commerce, vì sao finance dashboard nên dùng batch/gold mart làm source-of-truth?', ['Vì batch luôn rẻ hơn mọi streaming', 'Vì correctness và reconciliation quan trọng hơn latency vài phút', 'Vì dashboard không cần tests', 'Vì OLTP không có orders'], 'B'],
+  ['Khi ops cần checkout success rate trong 5 phút, serving phù hợp là gì?', ['Monthly CSV export', 'Chỉ executive dashboard', 'Operational OLAP/event mart với lag monitoring', 'Manual SQL mỗi tuần'], 'C'],
+  ['CDC orders phải có control nào?', ['Chỉ SELECT * mỗi lần', 'Không cần dedup', 'Chỉ dashboard refresh', 'Watermark/LSN, idempotent key, raw capture và replay'], 'D'],
+  ['Raw/bronze layer tồn tại chủ yếu để làm gì?', ['Replay, audit, debug và bảo vệ source payload', 'Thay thế mọi mart', 'Làm dashboard trực tiếp', 'Giảm nhu cầu README'], 'A'],
+  ['Data quality gate trước publish mart nên gồm gì?', ['Chỉ kiểm tra file tồn tại', 'Unique/not null/relationship/freshness/reconciliation', 'Chỉ nhìn dashboard', 'Không cần vì dbt đã chạy'], 'B'],
+  ['Fact grain của fct_orders nên là gì?', ['Một row cho mỗi dashboard', 'Một row cho mỗi tháng duy nhất', 'Một row cho mỗi order_id', 'Không cần grain'], 'C'],
+  ['Dashboard có cùng metric revenue khác nhau thường do đâu?', ['Do thiếu icon', 'Do chạy quá nhanh', 'Do dùng SQL', 'Semantic/source-of-truth không rõ và business logic bị duplicate'], 'D'],
+  ['SLA/SLO/SLI đúng là gì?', ['SLI đo, SLO mục tiêu nội bộ, SLA cam kết stakeholder', 'Ba khái niệm giống nhau', 'SLA là query SQL', 'SLO là dashboard'], 'A'],
+  ['Runbook dashboard stale cần có gì?', ['Chỉ mô tả chung', 'Symptom, impact, owner, checks, mitigation, escalation', 'Chỉ screenshot', 'Chỉ tên dashboard'], 'B'],
+  ['Kafka consumer lag tăng cao ảnh hưởng trực tiếp đến gì?', ['Số dòng README', 'Dimension country', 'Freshness của operational event dashboard', 'Static CSV'], 'C'],
+  ['Trade-off batch + streaming đúng là gì?', ['Streaming thay toàn bộ warehouse', 'Batch không cần monitoring', 'Hai luồng không cần reconcile', 'Stream nhanh cho ops, batch reconcile làm source-of-truth định kỳ'], 'D'],
+  ['Portfolio README nên giải thích tooling choices thế nào?', ['Gắn tool với requirement, scale, team skill, cost và trade-off', 'Liệt kê tool theo độ nổi tiếng', 'Chỉ gắn logo', 'Không cần giải thích'], 'A'],
+  ['Anti-pattern lớn nhất khi chọn architecture là gì?', ['Có stakeholder mapping', 'Chọn tool trendy mà không có business constraint', 'Có raw layer', 'Có data quality'], 'B'],
+  ['Lineage giúp gì khi dbt mart revenue fail?', ['Tự tăng CPU', 'Tự sửa payment API', 'Biết source, model và dashboard nào bị ảnh hưởng', 'Thay thế incident comms'], 'C'],
+  ['Incident duplicate refund nên xử lý đúng là gì?', ['Sửa chart màu đỏ', 'Xóa raw data', 'Ẩn lỗi trong README', 'Freeze/label dashboard, fix dedup, backfill, validate, post-mortem'], 'D'],
+  ['Warehouse và OLAP nên phân vai thế nào?', ['Warehouse cho governed BI; OLAP cho low-latency event analytics', 'OLAP thay hết finance marts', 'Warehouse chỉ lưu raw JSON', 'Không cần phân vai'], 'A'],
+  ['Orchestration flow production-minded phải có gì?', ['Chỉ schedule cron', 'Dependency, retry, backfill, quality gate, alert', 'Chỉ một task', 'Không cần failure path'], 'B'],
+  ['Interview storytelling tốt nhất theo mạch nào?', ['Tool list → kết thúc', 'Screenshot → kết thúc', 'Problem → constraints → architecture → trade-offs → incident → impact', 'Định nghĩa Kafka → kết thúc'], 'C'],
+  ['Scaling considerations nên viết ra sao?', ['Nói scale vô hạn', 'Không cần vì portfolio', 'Chỉ thêm Spark vào mọi nơi', 'Nêu bottleneck cụ thể và phương án tăng capacity/partition/compute/replay'], 'D'],
+  ['Dấu hiệu capstone sẵn sàng public là gì?', ['Người khác hiểu, chạy/review được, tin metric và thấy ops plan', 'Có nhiều folder rỗng', 'Có một notebook', 'Có dashboard không nguồn'], 'A']
+];
+
+function escAttr(text) {
+  return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function buildQuiz(key) {
+  return baseQuizzes[key].map(q => {
+    const opts = q[1].map((opt, idx) => {
+      const correct = idx === q[2];
+      const why = correct
+        ? `Đúng. ${opt} là lựa chọn phù hợp với scenario capstone.`
+        : `Sai. ${opt} không giải quyết đúng yêu cầu production hoặc business context của capstone.`;
+      return `<div class="quiz-opt" onclick="answerQuiz(this, ${correct}, '${escAttr(why)}')">${'ABCD'[idx]}. ${opt}</div>`;
+    }).join('');
+    return `<div class="quiz-item"><div class="quiz-q">${q[0]}</div><div class="quiz-options">${opts}</div><div class="quiz-explain"></div></div>`;
+  }).join('');
+}
+
+function buildSection(iconClass, icon, title, content, closed) {
+  const style = closed ? ' style="display:none"' : '';
+  const toggle = closed ? '▶' : '▼';
+  return `<div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon ${iconClass}">${icon}</div>${title}<span class="section-toggle">${toggle}</span></div><div class="section-content"${style}>${content}</div></div>`;
+}
+
+function buildModule(m, idx) {
+  const rows = m.menu.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td></tr>`).join('');
+  const objectives = `<ul>${m.objectives.map(i => `<li>${i}</li>`).join('')}</ul>`;
+  const summary = `<div class="summary-grid">${m.summary.map((s, i) => `<div class="summary-item"><strong>${['Thiết kế','Business','Reliability','Serving','Portfolio','Mindset'][i]}</strong>${s}</div>`).join('')}</div>`;
+  const practices = m.practices.map(p => `<div class="practice-task"><div class="practice-task-header">${p[0]}</div><div class="practice-task-body"><p>${p[1]}</p><button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box"><p>${p[2]}</p></div></div></div>`).join('');
+  const finalTest = m.finalTest ? buildFinalTest() : '';
+  const prev = idx > 0 ? `<button class="nav-btn" onclick="goPrev(${idx})">← Module trước</button>` : `<span></span>`;
+  const next = idx < modulesData.length - 1 ? `<button class="nav-btn primary" onclick="goNext(${idx})">Module tiếp theo →</button>` : `<div style="color:var(--accent2);font-weight:700">Hoàn thành Tuần 24</div>`;
+  return `<div class="module ${idx === 0 ? 'active' : ''}" id="m${idx}">
+    <div class="module-header">
+      <div class="module-tag">${m.tag}</div>
+      <div class="module-title">${m.title}</div>
+      <div class="module-subtitle">${m.subtitle}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(((idx + 1) / modulesData.length) * 100)}%"></div></div>
+    </div>
+    ${buildSection('icon-purpose','1','1. Menu Tổng Thể', `<table><tr><th>Hạng mục</th><th>Nội dung</th></tr>${rows}</table>`)}
+    ${buildSection('icon-purpose','2','2. Mục Đích Module', objectives)}
+    ${buildSection('icon-detail','3','3. Giải Thích Chi Tiết', m.detail)}
+    ${buildSection('icon-quiz','4','4. Câu Hỏi Ôn Tập', buildQuiz(m.key))}
+    ${buildSection('icon-summary','5','5. Tổng Kết', summary)}
+    ${buildSection('icon-practice','6','6. Bài Tập Thực Hành', practices + finalTest, idx !== modulesData.length - 1)}
+    <div class="nav-buttons">${prev}${next}</div>
+  </div>`;
+}
+
+function buildFinalTest() {
+  const questions = finalQuestions.map((q, i) => {
+    const options = q[1].map((opt, idx) => `<label class="test-option"><input type="radio" name="q${i+1}" value="${'ABCD'[idx]}"> ${'ABCD'[idx]}. ${opt}</label>`).join('');
+    return `<div class="test-question" data-q="${i+1}" data-correct="${q[2]}"><div class="test-question-title">Q${i+1}. ${q[0]}</div><div class="test-options">${options}</div></div>`;
+  }).join('');
+  return `<h3>Mini Test Tổng Kết: 20 câu</h3><div id="final-test">${questions}<div class="test-actions"><button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button><button class="nav-btn" onclick="resetFinalTest()">🔁 Làm lại từ đầu</button></div><div class="test-result" id="final-test-result" style="display:none"></div></div>`;
+}
+
+document.getElementById('nav-list').innerHTML = modulesData.map((m, i) => `<div class="nav-item ${i === 0 ? 'active' : ''}" onclick="showModule(${i},this)"><span class="nav-number">${m.no}</span>${m.title.replace(/^.*?: /, '')}</div>`).join('');
+document.getElementById('module-root').innerHTML = modulesData.map(buildModule).join('');
+
+const modules = document.querySelectorAll('.module');
+const navItems = document.querySelectorAll('.nav-item');
+
+function showModule(idx, el) {
+  modules.forEach(m => m.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  modules[idx].classList.add('active');
+  if (el) el.classList.add('active');
+  else if (navItems[idx]) navItems[idx].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goNext(idx) {
+  if (idx < modules.length - 1) showModule(idx + 1, navItems[idx + 1]);
+}
+
+function goPrev(idx) {
+  if (idx > 0) showModule(idx - 1, navItems[idx - 1]);
+}
+
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const isHidden = content.style.display === 'none';
+  content.style.display = isHidden ? 'block' : 'none';
+  toggle.textContent = isHidden ? '▼' : '▶';
+}
+
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  const opts = item.querySelectorAll('.quiz-opt');
+  const explain = item.querySelector('.quiz-explain');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) o.classList.add('correct');
+    });
+  }
+  explain.textContent = (correct ? 'Chính xác. ' : 'Chưa đúng. ') + explanation;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  const show = box.classList.toggle('show');
+  btn.textContent = show ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  let correctCount = 0, answeredCount = 0;
+  const wrongAnswers = [], unanswered = [];
+  questions.forEach(q => {
+    const qNum = q.dataset.q;
+    const correct = q.dataset.correct;
+    const selected = q.querySelector(`input[name="q${qNum}"]:checked`);
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    if (!selected) { q.classList.add('unanswered'); unanswered.push(qNum); return; }
+    answeredCount++;
+    if (selected.value === correct) { q.classList.add('correct'); correctCount++; }
+    else { q.classList.add('wrong'); wrongAnswers.push({ q: qNum, selected: selected.value, correct }); }
+  });
+  const total = questions.length;
+  const percent = Math.round((correctCount / total) * 100);
+  let levelText = '', chipClass = 'warn', guidance = '';
+  if (percent >= 90) { levelText = 'Rất mạnh'; chipClass = 'good'; guidance = 'Bạn đã sẵn sàng demo capstone và chuẩn bị mock interview.'; }
+  else if (percent >= 80) { levelText = 'Sẵn sàng demo thử'; chipClass = 'good'; guidance = 'Hãy refine README, screenshots và interview_notes trước khi public.'; }
+  else if (percent >= 60) { levelText = 'Cần gia cố'; chipClass = 'warn'; guidance = 'Hãy sửa các phần sai trong architecture, ops, serving hoặc portfolio artifact.'; }
+  else { levelText = 'Chưa nên public'; chipClass = 'bad'; guidance = 'Quay lại W24.02-W24.08, đặc biệt là trade-off, quality gate, monitoring và runbook.'; }
+  const unansweredHtml = unanswered.length ? `<p><strong>Câu chưa trả lời:</strong> Q${unanswered.join(', Q')}</p>` : '';
+  const wrongHtml = wrongAnswers.length ? `<p><strong>Câu sai:</strong></p><ul>${wrongAnswers.map(i => `<li>Q${i.q}: bạn chọn <strong>${i.selected}</strong>, đáp án đúng <strong>${i.correct}</strong></li>`).join('')}</ul>` : '<p><strong>Tất cả câu đã trả lời đều đúng.</strong></p>';
+  result.innerHTML = `<div class="score-row"><span class="score-chip ${chipClass}">Điểm: ${correctCount}/${total}</span><span class="score-chip">Tỷ lệ: ${percent}%</span><span class="score-chip ${chipClass}">Mức: ${levelText}</span><span class="score-chip">Đã trả lời: ${answeredCount}/${total}</span></div><p>${guidance}</p>${unansweredHtml}${wrongHtml}`;
+  result.style.display = 'block';
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  const result = document.getElementById('final-test-result');
+  questions.forEach(q => {
+    q.classList.remove('correct', 'wrong', 'unanswered');
+    q.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+  });
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+</script>
+</body>
+</html>

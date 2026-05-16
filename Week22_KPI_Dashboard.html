@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Handbook · Tuần 22 · KPI, Experimentation & Dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --accent3: #f78166;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --code-bg: #0d1117;
+    --highlight: #388bfd26;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  .hero { background: linear-gradient(135deg, #0d1117 0%, #161b22 48%, #1f2a3d 100%); border-bottom: 2px solid var(--accent); padding: 42px 24px 32px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #1f6feb33, transparent 70%); pointer-events: none; }
+  .hero h1 { position: relative; font-size: 2rem; font-weight: 800; color: var(--accent); letter-spacing: 0; }
+  .hero p { position: relative; color: var(--text-muted); margin-top: 8px; font-size: 0.95rem; }
+  .badge-row { position: relative; display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge-blue { color: var(--accent); border-color: var(--accent); background: #1f6feb1a; }
+  .badge-green { color: var(--accent2); border-color: var(--accent2); background: #2ea04326; }
+  .badge-orange { color: var(--accent5); border-color: var(--accent5); background: #d2940026; }
+  .container { display: flex; min-height: calc(100vh - 160px); }
+  .sidebar { width: 330px; min-width: 330px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 16px 12px; }
+  .level-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px 4px; color: var(--accent2); }
+  .nav-item { display: block; padding: 8px 16px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted); border-left: 3px solid transparent; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--highlight); font-weight: 600; }
+  .nav-number { display: inline-block; width: 58px; font-size: 0.7rem; color: var(--text-muted); font-family: Consolas, 'Courier New', monospace; }
+  .main { flex: 1; padding: 32px 40px; max-width: 1040px; }
+  .module { display: none; }
+  .module.active { display: block; }
+  .module-header { border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; background: var(--surface); margin-bottom: 24px; position: relative; overflow: hidden; }
+  .module-header::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+  .module-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+  .module-title { font-size: 1.55rem; font-weight: 800; margin-bottom: 8px; }
+  .module-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+  .progress-bar { background: var(--surface2); border-radius: 4px; height: 4px; margin: 16px 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+  .section { margin-bottom: 28px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .section-header { padding: 14px 20px; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); border-bottom: 1px solid var(--border); user-select: none; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-purpose { background: #1f6feb33; }
+  .icon-detail { background: #2ea04326; }
+  .icon-quiz { background: #d2940026; }
+  .icon-summary { background: #6e40c926; }
+  .icon-practice { background: #f7816626; }
+  .section-content { padding: 20px; background: var(--surface); }
+  .section-toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+  h3 { font-size: 1rem; font-weight: 700; color: var(--accent); margin: 18px 0 10px; }
+  h3:first-child { margin-top: 0; }
+  p { margin-bottom: 12px; color: var(--text); font-size: 0.88rem; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { font-size: 0.88rem; margin-bottom: 5px; }
+  strong { color: var(--text); }
+  code { font-family: Consolas, 'Courier New', monospace; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; color: var(--accent4); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.83rem; }
+  th { background: var(--surface2); padding: 8px 12px; text-align: left; border: 1px solid var(--border); color: var(--accent); }
+  td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #ffffff05; }
+  .cmd-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; overflow: hidden; }
+  .cmd-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 0.72rem; color: var(--text-muted); font-family: Consolas, 'Courier New', monospace; }
+  .cmd-dots { display: flex; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f7816680; }
+  .dot-yellow { background: #ffa65780; }
+  .dot-green { background: #3fb95080; }
+  .cmd-body { padding: 14px; }
+  pre { font-family: Consolas, 'Courier New', monospace; font-size: 0.82rem; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--text); }
+  .prompt { color: var(--accent2); }
+  .comment { color: var(--text-muted); }
+  .output { color: var(--accent5); }
+  .info-box { border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 0.84rem; border: 1px solid; display: flex; gap: 10px; }
+  .info-box.tip { border-color: var(--accent2); background: #2ea04310; color: var(--accent2); }
+  .info-box.warn { border-color: var(--accent5); background: #d2940015; color: var(--accent5); }
+  .info-box.note { border-color: var(--accent); background: #1f6feb15; color: var(--accent); }
+  .info-box span { color: var(--text); }
+  .quiz-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .quiz-q { font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  .quiz-q::before { content: 'Q'; display: inline-block; width: 22px; height: 22px; background: var(--accent); color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; text-align: center; line-height: 22px; margin-right: 8px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .quiz-opt { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.84rem; transition: all 0.15s; background: var(--bg); }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--accent2); color: var(--accent2); background: #2ea04310; }
+  .quiz-opt.wrong { border-color: var(--accent3); color: var(--accent3); background: #f7816610; }
+  .quiz-explain { font-size: 0.82rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 8px; display: none; }
+  .quiz-explain.show { display: block; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 0.82rem; }
+  .summary-item strong { color: var(--accent); display: block; margin-bottom: 4px; }
+  .practice-task { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .practice-task-header { padding: 12px 16px; background: #d2940015; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; color: var(--accent5); }
+  .practice-task-body { padding: 16px; }
+  .solution-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; color: var(--accent2); margin-top: 10px; transition: all 0.15s; }
+  .solution-toggle:hover { background: var(--surface2); }
+  .solution-box { margin-top: 10px; display: none; border-top: 1px solid var(--border); padding-top: 12px; }
+  .solution-box.show { display: block; }
+  .nav-buttons { display: flex; gap: 12px; margin-top: 32px; justify-content: space-between; }
+  .nav-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .test-question { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .test-question.correct { border-color: var(--accent2); background: #2ea04312; }
+  .test-question.wrong { border-color: var(--accent3); background: #f7816612; }
+  .test-question.unanswered { border-color: var(--accent5); background: #d2940015; }
+  .test-question-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 8px; }
+  .test-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .test-option { display: flex; align-items: center; gap: 6px; font-size: 0.83rem; color: var(--text); }
+  .test-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .test-result { margin-top: 16px; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); }
+  .score-chip { border: 1px solid var(--border); border-radius: 14px; padding: 4px 10px; font-size: 0.78rem; color: var(--text); background: var(--bg); display: inline-block; margin: 0 6px 8px 0; }
+  .score-chip.good { border-color: var(--accent2); color: var(--accent2); }
+  .score-chip.warn { border-color: var(--accent5); color: var(--accent5); }
+  .score-chip.bad { border-color: var(--accent3); color: var(--accent3); }
+  .callout-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0; }
+  .mini-card { border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); padding: 12px; font-size: 0.84rem; }
+  .mini-card strong { display: block; color: var(--accent); margin-bottom: 4px; }
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 16px; }
+    .hero h1 { font-size: 1.55rem; }
+    .summary-grid, .test-options, .callout-grid { grid-template-columns: 1fr; }
+    .nav-buttons { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>KPI, Experimentation & Dashboard cho Data Engineer</h1>
+  <p>Tuần 22 · Thiết kế metric đáng tin, dashboard ra quyết định và experiment đọc được bằng dữ liệu production</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Giai đoạn 4 · Analytics Impact</span>
+    <span class="badge badge-orange">KPI · A/B Testing · Dashboard</span>
+    <span class="badge badge-blue">Portfolio-grade Artifact</span>
+  </div>
+</div>
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Chương trình Tuần 22</div>
+    <div class="level-label">WEEK 22 · DECISION DATA PRODUCTS</div>
+    <div id="nav"></div>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+<script>
+const labels = ['A','B','C','D'];
+const moduleTitles = [
+  ['W22.01','Tổng Quan: KPI, Metrics & Decision-Making'],
+  ['W22.02','North Star Metric, Supporting Metrics & Guardrails'],
+  ['W22.03','Metric Definitions, Ownership & Data Trust'],
+  ['W22.04','Dashboard Design: Executive vs Operational vs Exploratory'],
+  ['W22.05','A/B Testing Fundamentals cho Data Engineer'],
+  ['W22.06','Experiment Readout, Pitfalls & Business Interpretation'],
+  ['W22.07','Artifact: week22_kpi_dashboard/'],
+  ['W22.08','Mini Test Tổng Kết']
+];
+const quizBank = [
+  [
+    ['Một KPI tốt khác metric thông thường ở điểm nào?', ['KPI gắn với quyết định và mục tiêu kinh doanh cụ thể','KPI luôn là số tiền','KPI chỉ cần chart đẹp','KPI không cần owner'], 0, ['Đúng. KPI phải giúp quyết định hành động, không chỉ đo cho biết.','Sai. Revenue là KPI phổ biến nhưng không phải KPI nào cũng là tiền.','Sai. Chart đẹp không cứu được metric sai định nghĩa.','Sai. KPI production cần owner rõ ràng.']],
+    ['Vì sao dashboard hay thất bại khi metric definition mơ hồ?', ['Vì BI tool không đủ mạnh','Vì mỗi team có thể tính cùng một KPI theo cách khác nhau','Vì chart trend không hữu ích','Vì dashboard không nên có KPI'], 1, ['Sai. Tool mạnh vẫn sai nếu định nghĩa sai.','Đúng. Mâu thuẫn definition phá vỡ trust và làm cuộc họp xoay quanh tranh cãi số.','Sai. Trend hữu ích khi metric đáng tin.','Sai. Dashboard quyết định thường cần KPI.']],
+    ['Measure là gì trong chuỗi measure → metric → KPI?', ['Số đo thô như order_count hoặc revenue_amount','Mục tiêu chiến lược của công ty','Dashboard cuối cùng','Experiment result'], 0, ['Đúng. Measure là raw quantity trước khi được đặt ngữ cảnh.','Sai. Đó gần với KPI hoặc strategic goal.','Sai. Dashboard là bề mặt tiêu thụ dữ liệu.','Sai. Experiment dùng metrics để đọc tác động.']],
+    ['Decision-first dashboard bắt đầu bằng gì?', ['Chọn chart type','Chọn màu brand','Câu hỏi business và quyết định cần đưa ra','Export toàn bộ table'], 2, ['Sai. Chart type đến sau câu hỏi.','Sai. Màu không quyết định business action.','Đúng. Câu hỏi → metric → dataset → dashboard là flow đúng.','Sai. Dump table không phải dashboard ra quyết định.']],
+    ['Vanity metric là metric như thế nào?', ['Dễ tăng nhưng không chỉ ra hành động hoặc giá trị thật','Luôn sai về mặt SQL','Luôn là metric marketing','Metric có denominator'], 0, ['Đúng. Page views cao có thể vô nghĩa nếu không nối với activation/conversion.','Sai. SQL có thể đúng nhưng business value yếu.','Sai. Vanity metric có ở nhiều domain.','Sai. Denominator thường làm metric tốt hơn.']],
+    ['Vì sao Data Engineer phải quan tâm KPI definition?', ['DE chỉ cần ingest data','Vì model, freshness, filter và lineage quyết định KPI có đáng tin không','Vì dashboard là việc của designer','Vì stakeholder tự sửa được SQL'], 1, ['Sai. Ingest đúng schema chưa đủ để metric đúng.','Đúng. DE kiểm soát nền tảng làm metric reproducible và auditable.','Sai. Dashboard data product cần DE tham gia.','Sai. SQL tự phát là nguồn gây lệch KPI.']],
+    ['Ví dụ nào là actionable metric tốt hơn?', ['Total registered users mọi thời gian','Activation rate D7 theo acquisition channel','Số lượt mở app lifetime','Tổng số chart trong dashboard'], 1, ['Sai. Lifetime total dễ tăng nhưng khó hành động.','Đúng. Có denominator, time window và breakdown để quyết định channel.','Sai. Cần nối với retention/conversion để hành động.','Sai. Số chart không đo business.']],
+    ['SLA trong dashboard data product thường dùng để đo gì?', ['Độ tươi và độ tin cậy vận hành của dữ liệu/dashboard','Màu của KPI card','Số lượng nhân viên trong team','Giá license BI'], 0, ['Đúng. Ví dụ dashboard phải refresh trước 8:00 với completeness > 99%.','Sai. Màu là UX, không phải SLA.','Sai. Staffing không phải SLA metric.','Sai. Cost quan trọng nhưng không phải SLA definition.']],
+    ['Flow đúng khi xây dashboard là gì?', ['Dataset → chart → câu hỏi → metric','Business question → metric → dataset → dashboard','Chart → màu → metric → source','Dashboard → stakeholder → SQL'], 1, ['Sai. Dataset-first dễ dẫn đến chart có sẵn nhưng vô dụng.','Đúng. Đây là mindset decision-first.','Sai. Thiết kế bắt đầu từ quyết định, không từ chart.','Sai. Stakeholder input phải có trước dashboard.']],
+    ['Outcome tốt nhất của tuần này là gì?', ['Biết nhiều loại chart','Xây artifact KPI/dashboard có definition, query, quality checks và recommendation','Thuộc p-value công thức','Tạo dashboard một trang cho mọi người'], 1, ['Sai. Chart chỉ là phương tiện.','Đúng. Portfolio-grade artifact phải chứng minh decision quality và data trust.','Sai. Intuition thống kê quan trọng hơn học vẹt công thức.','Sai. Một dashboard cho mọi người là anti-pattern.']]
+  ],
+  [
+    ['North Star Metric nên đại diện cho điều gì?', ['Giá trị cốt lõi người dùng nhận được và business muốn tăng bền vững','Metric dễ kéo lên nhất','Metric do CEO thích nhất','Tất cả revenue của công ty'], 0, ['Đúng. NSM tốt nằm giữa user value và business health.','Sai. Dễ kéo lên có thể là vanity metric.','Sai. Cần logic sản phẩm, không chỉ sở thích.','Sai. Revenue quan trọng nhưng đôi khi là lagging metric.']],
+    ['Supporting metric dùng để làm gì?', ['Thay thế hoàn toàn North Star','Giải thích driver phía sau North Star','Chỉ để trang trí dashboard','Ẩn guardrail metric'], 1, ['Sai. Supporting metric bổ trợ, không thay thế.','Đúng. Chúng giúp biết phải kéo đòn bẩy nào.','Sai. Metric nào lên dashboard cũng cần mục đích.','Sai. Guardrail phải hiện rõ khi quyết định có rủi ro.']],
+    ['Leading indicator khác lagging indicator thế nào?', ['Leading phản ứng sớm hơn outcome cuối, lagging xác nhận kết quả sau','Leading luôn chính xác hơn','Lagging không bao giờ dùng','Leading chỉ dùng cho finance'], 0, ['Đúng. Activation có thể leading cho retention; revenue thường lagging.','Sai. Leading nhanh nhưng có thể nhiễu.','Sai. Lagging dùng để xác nhận giá trị thật.','Sai. Mọi domain đều có leading indicators.']],
+    ['Guardrail metric có vai trò gì?', ['Tối đa hóa bằng mọi giá','Phát hiện tác động phụ khi tối ưu metric chính','Thay primary metric trong experiment','Chỉ dùng cho security'], 1, ['Sai. Guardrail thường là giới hạn không được làm xấu.','Đúng. Ví dụ tăng conversion nhưng không được tăng refund hoặc latency.','Sai. Primary và guardrail phục vụ mục đích khác nhau.','Sai. Guardrail dùng rộng trong product, data và ops.']],
+    ['Metric tree giúp ích gì?', ['Biến mục tiêu cao cấp thành driver đo được và có owner','Tự động tạo dashboard đẹp','Loại bỏ nhu cầu SQL','Đảm bảo mọi metric đều tăng'], 0, ['Đúng. Tree cho thấy quan hệ NSM → input/output metrics.','Sai. Dashboard vẫn cần thiết kế.','Sai. Metric tree cần query implementation.','Sai. Có metric cần giữ ổn định như guardrail.']],
+    ['Trong e-commerce, guardrail hợp lý khi tối ưu checkout conversion là gì?', ['Refund rate hoặc payment failure rate','Số font trên dashboard','Tổng user lifetime','Tên campaign'], 0, ['Đúng. Conversion tăng nhưng refund/payment issue tăng là tín hiệu xấu.','Sai. Font không đo business health.','Sai. Lifetime total không đủ nhạy.','Sai. Campaign là dimension, không phải guardrail.']],
+    ['Marketplace thường cần cân bằng metric nào?', ['Chỉ số cung và cầu như fill rate, cancellation, liquidity','Chỉ số màu sắc','Chỉ số số dashboard','Chỉ revenue seller'], 0, ['Đúng. Marketplace dễ lệch nếu chỉ tối ưu một phía.','Sai. Không liên quan.','Sai. Không đo health.','Sai. Chỉ seller revenue có thể hại buyer experience.']],
+    ['Anti-pattern tối ưu một metric là gì?', ['Tăng push notification click bằng spam làm churn tăng','Giảm query cost bằng partition','Thêm owner cho KPI','Viết definition rõ timezone'], 0, ['Đúng. Metric chính tăng nhưng business health xấu đi.','Sai. Đây là optimization hợp lý nếu không hại freshness.','Sai. Ownership là thực hành tốt.','Sai. Timezone rõ giúp trust.']],
+    ['Input metric là gì?', ['Metric team có thể tác động trực tiếp hơn như số onboarding steps hoàn tất','Outcome cuối như annual revenue','Metric không có denominator','Metric luôn là guardrail'], 0, ['Đúng. Input metric thường gần hành động sản phẩm/vận hành.','Sai. Annual revenue thường là output/lagging.','Sai. Input metric vẫn nên có denominator khi cần.','Sai. Input và guardrail là khái niệm khác nhau.']],
+    ['Fintech nên có guardrail nào khi tăng loan approval rate?', ['Default rate, fraud rate hoặc delinquency rate','Số chart loan','Số màu trong app','Tổng pageview'], 0, ['Đúng. Approval tăng nhưng rủi ro tín dụng tăng là vấn đề nghiêm trọng.','Sai. Chart count không đo risk.','Sai. UI color không phải guardrail business.','Sai. Pageview không đủ liên quan.']]
+  ],
+  [
+    ['Metric definition document tối thiểu cần gì?', ['Tên, mục đích, numerator, denominator, grain, filters, timezone, owner','Chỉ tên metric','Chỉ screenshot dashboard','Chỉ chart type'], 0, ['Đúng. Đây là phần lõi để tái tính và audit metric.','Sai. Tên không đủ tránh hiểu nhầm.','Sai. Screenshot không nói cách tính.','Sai. Chart type là layer trình bày.']],
+    ['Grain của metric nghĩa là gì?', ['Mức đơn vị mà metric được tính như user-day, order, session','Kích thước font','Database engine','Số dòng SQL'], 0, ['Đúng. Grain sai gây double count hoặc denominator lệch.','Sai. Font không liên quan data grain.','Sai. Engine không phải grain.','Sai. SQL dài không định nghĩa grain.']],
+    ['Late-arriving data ảnh hưởng KPI thế nào?', ['Có thể làm số hôm nay thay đổi sau khi dashboard đã publish','Luôn không quan trọng','Chỉ ảnh hưởng UI','Làm metric không cần owner'], 0, ['Đúng. Cần watermark, lookback hoặc trạng thái preliminary/final.','Sai. Transaction, attribution, event logs thường arrive trễ.','Sai. Đây là data pipeline concern.','Sai. Càng cần owner quyết định rule.']],
+    ['Bot/internal traffic exclusion nên được ghi ở đâu?', ['Trong metric definition và query/model certified','Trong tên chart','Trong Slack message cá nhân','Không cần ghi'], 0, ['Đúng. Filter phải reproducible.','Sai. Tên chart không đủ chi tiết.','Sai. Slack không phải source of truth.','Sai. Không ghi sẽ khiến teams tính khác nhau.']],
+    ['Certified metric nghĩa là gì?', ['Metric đã được owner, definition, lineage và quality checks chấp nhận làm source of truth','Metric có màu xanh','Metric do intern viết','Metric nằm trong file CSV'], 0, ['Đúng. Certified metric giảm tranh cãi và tái sử dụng an toàn.','Sai. Màu không chứng nhận gì.','Sai. Người viết không quyết định certification.','Sai. Storage format không đủ.']],
+    ['Data lineage đến dashboard giúp gì?', ['Biết KPI đi từ source nào qua model nào tới dashboard nào','Tăng số lượng chart','Thay thế test dữ liệu','Ẩn lỗi pipeline'], 0, ['Đúng. Lineage hỗ trợ impact analysis và debugging.','Sai. Lineage không nhằm thêm chart.','Sai. Cần cả lineage và tests.','Sai. Lineage làm lỗi dễ thấy hơn.']],
+    ['Anti-pattern same KPI calculated differently thường gây hậu quả gì?', ['Mất trust vì sales, product và finance đưa ra 3 con số khác nhau','Dashboard load nhanh hơn','Metric dễ certified hơn','Không ảnh hưởng quyết định'], 0, ['Đúng. Cuộc họp chuyển thành tranh luận con số.','Sai. Nhiều logic rời rạc thường làm vận hành tệ hơn.','Sai. Certification khó hơn.','Sai. Ảnh hưởng trực tiếp quyết định.']],
+    ['Owner của metric chịu trách nhiệm gì?', ['Definition, change approval, interpretation và communication khi metric thay đổi','Chỉ đổi màu dashboard','Chỉ chạy query tay','Không cần nếu dùng BI'], 0, ['Đúng. Owner giữ ý nghĩa business và data trust.','Sai. Màu không phải ownership chính.','Sai. Query chỉ là implementation.','Sai. BI không thay governance.']],
+    ['Timezone cần rõ vì sao?', ['Daily KPI có thể lệch ngày nếu event UTC nhưng business đọc local time','Timezone chỉ là UI','SQL tự biết business timezone','Không ảnh hưởng retention'], 0, ['Đúng. Daily active, conversion day và SLA đều nhạy timezone.','Sai. Timezone ảnh hưởng aggregation.','Sai. Database không biết ngữ cảnh business nếu không định nghĩa.','Sai. Retention rất nhạy ngày bắt đầu.']],
+    ['Semantic Layer giúp giải quyết vấn đề nào tốt nhất?', ['Định nghĩa metric một lần, version-control và dùng lại nhất quán ở nhiều BI tool','Tự động chọn màu chart','Thay thế hoàn toàn data quality tests','Làm mọi metric tăng lên'], 0, ['Đúng. Semantic Layer biến metric thành contract dùng chung, có owner và review.','Sai. Màu chart là vấn đề presentation.','Sai. Vẫn cần tests cho source/model.','Sai. Semantic Layer không thay đổi business outcome.']]
+  ],
+  [
+    ['Executive dashboard nên ưu tiên gì?', ['Ít KPI, trend rõ, decision và risk nổi bật','Mọi dimension có thể có','Raw table 100 cột','Tất cả chart type trong BI'], 0, ['Đúng. Executive cần bức tranh và quyết định nhanh.','Sai. Quá nhiều dimension gây nhiễu.','Sai. Raw table phù hợp drill-down, không phải executive summary.','Sai. Tool capability không phải mục tiêu.']],
+    ['Operational dashboard dùng cho ai?', ['Team vận hành cần phát hiện issue và hành động nhanh','Chỉ investor','Chỉ data scientist exploratory','Không ai cả'], 0, ['Đúng. Ops dashboard cần freshness, threshold, alert và drill-down.','Sai. Investor cần summary khác.','Sai. Exploratory khác operational monitoring.','Sai. Đây là dashboard rất quan trọng.']],
+    ['Exploratory dashboard khác operational dashboard ở điểm nào?', ['Cho phép filter/drill để phân tích nguyên nhân, không nhất thiết là màn hình theo dõi SLA','Không cần metric','Không cần data quality','Chỉ có pie chart'], 0, ['Đúng. Exploratory hỗ trợ investigation.','Sai. Vẫn cần metric rõ.','Sai. Quality càng quan trọng khi phân tích.','Sai. Chart type tùy câu hỏi.']],
+    ['KPI card tốt cần gì ngoài con số?', ['So sánh kỳ trước/target, status, freshness và định nghĩa ngắn','Ảnh nền lớn','10 chữ viết tắt','Không cần context'], 0, ['Đúng. Con số đơn lẻ khó ra quyết định.','Sai. Trang trí không thay context.','Sai. Viết tắt gây hiểu nhầm.','Sai. Context là phần quan trọng nhất.']],
+    ['Freshness indicator dùng để làm gì?', ['Cho người đọc biết dữ liệu cập nhật đến thời điểm nào và có trễ không','Trang trí góc dashboard','Thay thế SQL test','Ẩn downtime'], 0, ['Đúng. Freshness là trust signal.','Sai. Đây là thông tin vận hành.','Sai. Cần test riêng.','Sai. Nó phải làm downtime rõ hơn.']],
+    ['Annotation trên trend chart nên dùng khi nào?', ['Có launch, outage, pricing change hoặc data incident ảnh hưởng metric','Mọi ngày đều ghi chú','Không bao giờ dùng','Chỉ khi chart đẹp hơn'], 0, ['Đúng. Annotation giúp tránh diễn giải sai trend.','Sai. Quá nhiều annotation làm nhiễu.','Sai. Không có annotation dễ bỏ context.','Sai. Mục tiêu là interpretation.']],
+    ['Khi nào anomaly detection alert tốt hơn threshold tĩnh?', ['Khi metric có seasonality và cần so với baseline lịch sử tương tự','Khi không có dữ liệu lịch sử','Khi muốn bỏ owner dashboard','Khi mọi ngày có cùng traffic'], 0, ['Đúng. So sánh revenue hôm qua với các ngày cùng thứ thường tốt hơn một ngưỡng cứng.','Sai. Không có lịch sử thì anomaly baseline yếu.','Sai. Alert vẫn cần owner.','Sai. Nếu traffic ổn định, threshold tĩnh có thể đủ.']],
+    ['Anti-pattern một dashboard cho mọi người sai vì sao?', ['Mỗi user có quyết định, độ chi tiết và latency khác nhau','Vì dashboard càng ít càng xấu','Vì executive không thích số','Vì operational không cần dashboard'], 0, ['Đúng. Audience khác nhau cần thiết kế khác nhau.','Sai. Ít dashboard nhưng đúng audience mới tốt.','Sai. Executive cần số nhưng ở độ tổng hợp phù hợp.','Sai. Operational rất cần dashboard.']],
+    ['Chart clutter thường đến từ đâu?', ['Quá nhiều metric, màu, breakdown và filter không phục vụ quyết định','Dùng line chart','Có title rõ ràng','Có source note'], 0, ['Đúng. Clutter làm người đọc mất tín hiệu.','Sai. Line chart thường phù hợp trend.','Sai. Title rõ giúp đọc nhanh.','Sai. Source note tăng trust.']],
+    ['Drill-down tốt nên nối với gì?', ['Dimension chẩn đoán như channel, region, cohort, plan và source data đủ grain','Logo công ty','Chart 3D','Metric không có owner'], 0, ['Đúng. Drill-down cần dimensions giúp tìm nguyên nhân.','Sai. Logo không giúp chẩn đoán.','Sai. 3D thường gây nhiễu.','Sai. Owner vẫn cần.']]
+  ],
+  [
+    ['Hypothesis experiment tốt có dạng nào?', ['Nếu thay đổi X cho nhóm Y thì primary metric Z tăng vì cơ chế W','Chúng ta thử vì thích','Variant B chắc thắng','Tăng mọi metric'], 0, ['Đúng. Hypothesis cần change, audience, metric và causal mechanism.','Sai. Sở thích không đủ test design.','Sai. Không nên biết trước kết quả.','Sai. Metric có trade-off.']],
+    ['Control group là gì?', ['Nhóm nhận trải nghiệm hiện tại để làm baseline','Nhóm nhận feature mới','Nhóm bị loại khỏi logging','Nhóm không có user'], 0, ['Đúng. Control là baseline so sánh causal.','Sai. Đó là treatment.','Sai. Cả control và treatment đều phải log.','Sai. Cần user đủ sample.']],
+    ['Vì sao nên dùng experiment_id làm hash salt khi randomize?', ['Để assignment độc lập giữa experiments và cùng user không luôn rơi vào cùng phía','Để p-value luôn nhỏ hơn','Để không cần log exposure','Để treatment luôn có nhiều user hơn'], 0, ['Đúng. Salt bằng experiment_id giúp tránh bias chéo giữa nhiều experiments.','Sai. Hash salt không điều khiển p-value.','Sai. Exposure logging vẫn bắt buộc.','Sai. Allocation phải theo design, không thiên vị treatment.']],
+    ['Allocation 50/50 thường dùng khi nào?', ['Khi rủi ro thấp và muốn power tốt cho hai nhóm','Khi treatment nguy hiểm','Khi không cần đo','Khi thiếu logging'], 0, ['Đúng. 50/50 cho so sánh hiệu quả nếu risk chấp nhận được.','Sai. Rủi ro cao có thể ramp nhỏ hơn.','Sai. Experiment luôn cần đo.','Sai. Thiếu logging là blocker.']],
+    ['Primary metric nên chọn thế nào?', ['Gắn với hypothesis, đủ nhạy và không quá xa outcome','Chọn sau khi xem kết quả','Chọn metric tăng nhiều nhất','Chọn 20 metric primary'], 0, ['Đúng. Primary metric phải predefine.','Sai. Chọn sau gây p-hacking.','Sai. Metric tăng nhiều nhất có thể là noise.','Sai. Quá nhiều primary tăng false positive.']],
+    ['Sample size intuition đúng là gì?', ['Effect nhỏ hoặc baseline thấp cần nhiều sample hơn','Sample size không liên quan variance','10 user luôn đủ','Cứ chạy 1 ngày là xong'], 0, ['Đúng. Detect lift nhỏ cần nhiều observation.','Sai. Variance ảnh hưởng mạnh.','Sai. 10 user gần như không đủ cho product metric.','Sai. Thời gian phụ thuộc traffic và cycle.']],
+    ['p-value giải thích beginner-friendly là gì?', ['Xác suất thấy kết quả ít nhất cực đoan như vậy nếu thật ra không có effect','Xác suất treatment đúng 95%','Mức tăng revenue','Độ lớn effect business'], 0, ['Đúng. Đây là trực giác đúng hơn cách nói treatment đúng.','Sai. p-value không phải xác suất hypothesis đúng.','Sai. Revenue lift là effect estimate.','Sai. Practical significance khác p-value.']],
+    ['Confidence interval giúp gì?', ['Cho khoảng giá trị plausible của lift, thấy uncertainty','Luôn chứng minh thắng','Không cần khi có p-value','Chỉ dùng cho dashboard UI'], 0, ['Đúng. CI giúp đọc effect size và risk.','Sai. CI có thể bao gồm 0 hoặc effect nhỏ.','Sai. CI bổ sung p-value rất tốt.','Sai. Đây là thống kê experiment.']],
+    ['Statistical significance khác practical significance thế nào?', ['Một kết quả có thể chắc về thống kê nhưng effect quá nhỏ để đáng triển khai','Hai khái niệm giống nhau','Practical nghĩa là p < 0.05','Statistical nghĩa là revenue cao'], 0, ['Đúng. Decision cần cả uncertainty và business value.','Sai. Khác nhau rõ.','Sai. p-value không đo practicality.','Sai. Revenue cao chưa nói significance.']],
+    ['Anti-pattern peeking là gì?', ['Nhìn kết quả quá sớm nhiều lần rồi declare winner khi vừa thấy đẹp','Theo dõi data quality','Predefine metric','Randomize user'], 0, ['Đúng. Peeking tăng false positive nếu không có sequential method.','Sai. Data quality monitoring cần thiết.','Sai. Predefine metric là tốt.','Sai. Randomization là tốt.']]
+  ],
+  [
+    ['Experiment readout tốt nên bắt đầu bằng gì?', ['Decision summary: ship, do not ship, iterate hoặc need more data','Danh sách mọi query','Màu chart','Raw event dump'], 0, ['Đúng. Readout phục vụ quyết định, không chỉ báo cáo số.','Sai. Query là appendix.','Sai. Màu không phải conclusion.','Sai. Raw dump không giúp executive.']],
+    ['Lift 5% cần đọc kèm gì?', ['Baseline, confidence interval, absolute impact và guardrail','Chỉ headline 5%','Số chart','Tên BI tool'], 0, ['Đúng. 5% từ baseline nhỏ và CI rộng có thể không đáng ship.','Sai. Headline dễ gây hiểu nhầm.','Sai. Chart count không liên quan.','Sai. Tool không quyết định interpretation.']],
+    ['Segmentation pitfall phổ biến là gì?', ['Cắt quá nhiều segment rồi chọn segment thắng đẹp nhất','Không xem bất kỳ segment nào','Predefine critical segment','Kiểm tra mobile vs desktop có lý do'], 0, ['Đúng. Multiple testing trong segments dễ false discovery.','Sai. Một số segment quan trọng cần đọc.','Sai. Predefine giúp giảm bias.','Sai. Segment có cơ chế hợp lý là tốt.']],
+    ['Novelty effect là gì?', ['User phản ứng tích cực ban đầu vì mới lạ nhưng effect giảm sau','Bug logging','Seasonality cuối tuần','Metric owner mới'], 0, ['Đúng. Cần theo dõi effect theo thời gian.','Sai. Bug logging là vấn đề instrumentation.','Sai. Seasonality là pattern lịch.','Sai. Owner không phải novelty effect.']],
+    ['Seasonality trong experiment gây rủi ro gì?', ['Effect bị lẫn với ngày trong tuần, campaign hoặc mùa vụ','Luôn làm treatment thắng','Không ảnh hưởng conversion','Chỉ xảy ra finance'], 0, ['Đúng. Cần chạy qua chu kỳ đủ dài hoặc stratify.','Sai. Có thể làm cả hai hướng.','Sai. Conversion rất nhạy mùa vụ.','Sai. Mọi product đều có seasonality.']],
+    ['SRM trong experiment là tín hiệu gì?', ['Tỷ lệ control/treatment thực tế lệch đáng kể so với allocation kỳ vọng','Treatment có lift lớn','Dashboard thiếu màu','Primary metric không có denominator'], 0, ['Đúng. SRM thường báo bug assignment, exposure logging hoặc eligibility filter.','Sai. Lift lớn không phải SRM.','Sai. Màu không liên quan.','Sai. Denominator là lỗi metric design khác.']],
+    ['Missing exposure events gây lỗi gì?', ['Không biết user đã thực sự thấy treatment/control nên denominator bị sai','Tăng sample size đúng cách','Làm p-value thấp hơn luôn đúng','Không ảnh hưởng readout'], 0, ['Đúng. Exposure event là khóa để define analysis population.','Sai. Nó làm sample không đáng tin.','Sai. Không thể tin p-value nếu denominator sai.','Sai. Readout phải nêu rõ.']],
+    ['Decision memo nên có gì?', ['Recommendation, evidence, risks, rollout plan và follow-up metrics','Chỉ screenshot','Chỉ SQL','Chỉ p-value'], 0, ['Đúng. Memo chuyển analysis thành business action.','Sai. Screenshot thiếu reasoning.','Sai. SQL không đủ cho quyết định.','Sai. p-value không đủ.']],
+    ['Multiple testing risk là gì?', ['Càng thử nhiều metric/segment, càng dễ thấy winner giả','Chạy test nhiều ngày luôn tốt','Có nhiều user quá','Dashboard nhiều filter'], 0, ['Đúng. Cần pre-registration hoặc correction/discipline.','Sai. Duration khác multiple testing.','Sai. Nhiều user thường tăng power.','Sai. Filter chỉ rủi ro nếu dùng để săn kết quả.']],
+    ['Anti-pattern reporting numbers without recommendation sai vì sao?', ['Stakeholder vẫn không biết nên ship, stop hay iterate','Vì số không quan trọng','Vì dashboard không cần business','Vì DE không được nói recommendation'], 0, ['Đúng. Data work phải kết thúc bằng quyết định hoặc next step rõ.','Sai. Số quan trọng nhưng chưa đủ.','Sai. Dashboard phục vụ business.','Sai. DE nên nêu recommendation dựa trên data constraints.']]
+  ],
+  [
+    ['Artifact portfolio Week22 nên chứng minh điều gì?', ['Bạn thiết kế metric, dashboard và experiment như data product đáng tin','Bạn biết chọn màu đẹp','Bạn có nhiều file rỗng','Bạn thuộc định nghĩa KPI'], 0, ['Đúng. Recruiter cần thấy decision quality, governance và implementation.','Sai. Visual polish chưa đủ.','Sai. File rỗng làm artifact yếu.','Sai. Học thuộc không chứng minh năng lực.']],
+    ['metric_framework.md nên có gì?', ['North Star, metric tree, supporting metrics, guardrails và trade-offs','Chỉ logo','Raw CSV','Password database'], 0, ['Đúng. Đây là khung business metric.','Sai. Logo không đủ.','Sai. CSV không giải thích framework.','Sai. Không bao giờ commit secret.']],
+    ['metric_definitions.md khác metric_framework.md thế nào?', ['Definitions đi sâu cách tính từng metric: numerator, denominator, grain, filters','Không khác gì','Chỉ chứa chart','Chỉ chứa experiment hypothesis'], 0, ['Đúng. Framework là cấu trúc, definitions là contract tính toán.','Sai. Hai file phục vụ mục tiêu khác nhau.','Sai. Chart nằm ở wireframe/dashboard.','Sai. Hypothesis ở experiment_design.md.']],
+    ['dashboard_queries.sql cần thể hiện gì?', ['Queries believable cho KPI cards, trends, breakdowns và freshness','Chỉ SELECT *','Query không có filter thời gian','Pseudo-code không chạy'], 0, ['Đúng. SQL phải nối dashboard với data model.','Sai. SELECT * không portfolio-grade.','Sai. Time window rất quan trọng.','Sai. Cần ví dụ thực tế.']],
+    ['data_quality_checks.sql nên check gì?', ['Freshness, null key, duplicate exposure, denominator sanity, bot/internal exclusion','Màu dashboard','Số slide','Tên file README'], 0, ['Đúng. Các check này bảo vệ trust.','Sai. Không phải data quality.','Sai. Không liên quan.','Sai. README không thay test.']],
+    ['README portfolio nên viết cho ai?', ['Recruiter, hiring manager và peer engineer muốn hiểu context nhanh','Chỉ bản thân','Chỉ BI tool','Không cần README'], 0, ['Đúng. README là entry point của artifact.','Sai. Portfolio cần người khác đọc được.','Sai. Tool không đọc README.','Sai. Thiếu README làm artifact khó đánh giá.']],
+    ['Dashboard implementation có thể bằng gì?', ['Tableau Public, Metabase, Looker Studio hoặc static mockup có link/screenshot','Chỉ PowerPoint','Chỉ terminal output','Không cần dashboard'], 0, ['Đúng. Miễn giải thích quyết định thiết kế và data source.','Sai. PowerPoint có thể phụ trợ nhưng không thay dashboard artifact.','Sai. Terminal không phải dashboard user-facing.','Sai. Tuần này bắt buộc dashboard.']],
+    ['Artifact recruiter-grade cần tránh gì?', ['Generic dashboard tips không có business context và metric contract','Decision memo','Quality checks','Dashboard wireframe'], 0, ['Đúng. Generic artifact khó chứng minh senior mindset.','Sai. Memo là điểm mạnh.','Sai. Quality checks tăng trust.','Sai. Wireframe giúp thấy design thinking.']],
+    ['experiment_readout.md nên khác experiment_design.md ở đâu?', ['Readout có kết quả, interpretation, recommendation; design có hypothesis và plan trước khi chạy','Không khác','Readout chỉ có raw SQL','Design viết sau khi xem kết quả'], 0, ['Đúng. Tách plan trước và readout sau giúp tránh bias.','Sai. Vai trò khác nhau.','Sai. Readout cần business interpretation.','Sai. Design phải có trước.']],
+    ['Một artifact tốt nên nối dashboard với data modeling ra sao?', ['Nêu fact/dim grain, certified metric layer, lineage và checks dùng bởi dashboard','Chỉ nói dùng BI tool','Không cần SQL','Chỉ thêm ảnh chart'], 0, ['Đúng. Đây là điểm Data Engineer khác dashboard maker.','Sai. Tool choice không đủ.','Sai. SQL/modeling là cốt lõi.','Sai. Ảnh chart thiếu trust layer.']]
+  ],
+  [
+    ['Điểm cốt lõi của Week22 là gì?', ['Dashboard là data product để quyết định, không chỉ là chart','Dashboard càng nhiều chart càng tốt','Experiment chỉ là p-value','KPI không cần definition'], 0, ['Đúng. Trust, ownership, action và interpretation là trọng tâm.','Sai. Nhiều chart dễ làm nhiễu.','Sai. Experiment cần design, logging, guardrails và recommendation.','Sai. Definition là nền tảng.']],
+    ['Khi stakeholder hỏi vì sao số retention khác nhau, bạn làm gì trước?', ['Kiểm tra metric definition, grain, filters, timezone và source lineage','Đổi màu dashboard','Xóa một dashboard','Đổ lỗi BI tool'], 0, ['Đúng. Đây là debugging đúng trọng tâm.','Sai. Màu không sửa logic.','Sai. Xóa không giải thích root cause.','Sai. Tool thường không phải nguyên nhân đầu tiên.']],
+    ['Primary metric tăng nhưng guardrail xấu đi, recommendation hợp lý là gì?', ['Không ship rộng ngay; phân tích trade-off, segment và mitigation','Ship ngay vì primary thắng','Bỏ guardrail khỏi readout','Declare inconclusive không giải thích'], 0, ['Đúng. Guardrail tồn tại để chặn quyết định hại business.','Sai. Primary không đủ.','Sai. Che guardrail là sai đạo đức dữ liệu.','Sai. Cần recommendation rõ.']],
+    ['Executive dashboard khác exploratory dashboard ở đâu?', ['Executive trả lời điều hành tổng hợp; exploratory hỗ trợ drill-down nguyên nhân','Executive có nhiều filter hơn','Exploratory không cần definition','Hai loại giống nhau'], 0, ['Đúng. Audience và decision khác nhau.','Sai. Executive thường ít filter hơn.','Sai. Exploratory vẫn cần definition.','Sai. Khác về mục tiêu.']],
+    ['Metric ownership giảm rủi ro nào?', ['Definition drift và tranh cãi source of truth','Tất cả bug code','Chi phí cloud luôn giảm','Dashboard tự đẹp'], 0, ['Đúng. Owner giúp kiểm soát thay đổi metric.','Sai. Vẫn cần tests và review code.','Sai. Cost cần quản trị riêng.','Sai. Design vẫn cần làm.']],
+    ['Experiment logging tối thiểu cần event nào?', ['Exposure, assignment, outcome events và timestamps đủ join','Chỉ outcome aggregate','Chỉ screenshot','Không cần event'], 0, ['Đúng. Thiếu exposure/assignment phá analysis population.','Sai. Aggregate không đủ audit.','Sai. Screenshot không phân tích được.','Sai. Experiment cần logging.']],
+    ['Portfolio artifact mạnh nhất khi có gì?', ['Business context, metric contract, SQL, dashboard decision, experiment memo và quality checks','Một ảnh chart duy nhất','File SQL không comment','README trống'], 0, ['Đúng. Bộ này chứng minh full data product thinking.','Sai. Ảnh chart thiếu engineering.','Sai. Comment giúp reviewer hiểu.','Sai. README trống làm mất context.']],
+    ['Nếu dashboard stale nhưng không có freshness indicator, rủi ro là gì?', ['Người dùng ra quyết định dựa trên dữ liệu cũ mà không biết','Dashboard nhanh hơn','Metric certified hơn','Không ảnh hưởng trust'], 0, ['Đúng. Đây là lỗi data product nghiêm trọng.','Sai. Nhanh nhưng sai context vẫn nguy hiểm.','Sai. Certification cần freshness rõ.','Sai. Trust bị ảnh hưởng mạnh.']],
+    ['Khi p-value significant nhưng lift rất nhỏ, nên làm gì?', ['Đánh giá practical significance, cost rollout và CI trước khi recommend','Ship vì p < 0.05 là đủ','Bỏ qua baseline','Kết luận treatment xấu'], 0, ['Đúng. Decision cần business impact.','Sai. p-value không đủ.','Sai. Baseline cần để tính absolute impact.','Sai. Significant nhỏ không nghĩa là xấu.']],
+    ['Tư duy Data Engineer trong KPI/dashboard là gì?', ['Thiết kế metric đáng tin từ source đến decision, có tests và ownership','Chỉ kéo thả chart','Chỉ viết query nhanh','Chỉ học tool BI'], 0, ['Đúng. Đây là khác biệt giữa chart-making và data product design.','Sai. Kéo thả là bề mặt.','Sai. Query nhanh nhưng sai definition vẫn hại.','Sai. Tool không thay tư duy.']]
+  ]
+];
+function codeBlock(title, code) {
+  return '<div class="cmd-block"><div class="cmd-header"><div class="cmd-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><span>'+title+'</span></div><div class="cmd-body"><pre>'+code+'</pre></div></div>';
+}
+function info(type, icon, text) { return '<div class="info-box '+type+'">'+icon+' <span>'+text+'</span></div>'; }
+function summary(items) { return '<div class="summary-grid">'+items.map(x=>'<div class="summary-item"><strong>'+x[0]+'</strong>'+x[1]+'</div>').join('')+'</div>'; }
+function quizHtml(idx) {
+  return quizBank[idx].map((q,i)=>{
+    const opts = q[1].map((o,j)=>'<div class="quiz-opt" onclick="answerQuiz(this, '+(j===q[2])+', &quot;'+q[3][j].replaceAll('"','&quot;')+'&quot;)">'+labels[j]+'. '+o+'</div>').join('');
+    return '<div class="quiz-item"><div class="quiz-q">'+(i+1)+'. '+q[0]+'</div><div class="quiz-options">'+opts+'</div><div class="quiz-explain"></div></div>';
+  }).join('');
+}
+function finalReviewQuizHtml() {
+  const bank = [
+    ['Tuần 22 khác bài học visualization thông thường ở điểm nào?', ['Tập trung data product, metric trust và decision quality','Chỉ tập trung màu sắc dashboard','Không cần SQL','Không cần business context'], 0, ['Đúng. Trọng tâm là metric đáng tin từ source đến decision.','Sai. Màu sắc là phần nhỏ.','Sai. SQL và modeling rất quan trọng.','Sai. Business context là nền tảng.']],
+    ['Khi KPI đã certified cần đổi logic, bước đúng là gì?', ['Mở PR, chạy tests, review với stakeholder rồi release note','Sửa trực tiếp trong BI production','Gửi Slack rồi quên','Tạo thêm KPI mới cùng tên'], 0, ['Đúng. Metric change cần review workflow và audit trail.','Sai. Sửa tay gây drift.','Sai. Slack không đủ governance.','Sai. Cùng tên khác logic phá trust.']],
+    ['Semantic Layer giúp dashboard bằng cách nào?', ['BI tool dùng cùng metric contract thay vì copy SQL rải rác','Tự vẽ chart đẹp hơn','Xóa nhu cầu data quality','Tự quyết định business'], 0, ['Đúng. Đây là source of truth cho metric.','Sai. Presentation vẫn do dashboard design.','Sai. Tests vẫn cần.','Sai. Business decision vẫn do team.']],
+    ['Dashboard as Code có lợi ích gì?', ['Version-control, review và rollback dashboard/query/metric config','Làm dashboard không cần user','Bỏ qua owner','Tăng số chart tự động'], 0, ['Đúng. Đây là tư duy engineering cho BI production.','Sai. Vẫn cần audience.','Sai. Owner càng cần.','Sai. Số chart không phải mục tiêu.']],
+    ['SRM fail trong experiment nên dẫn đến hành động nào?', ['Dừng đọc lift như kết quả đáng tin và điều tra assignment/exposure','Ship ngay vì có nhiều data','Bỏ control group','Đổi màu chart'], 0, ['Đúng. SRM là tín hiệu instrumentation hoặc allocation có vấn đề.','Sai. Nhiều data sai vẫn sai.','Sai. Control là baseline.','Sai. Màu không sửa bias.']],
+    ['Log exposure đúng nghĩa là gì?', ['Log khi user thực sự thấy component/render UI','Log khi backend tạo response dù UI chưa render','Log sau khi user convert','Không cần log'], 0, ['Đúng. Exposure phải đại diện cơ hội thật sự nhận treatment.','Sai. Log quá sớm làm bẩn denominator.','Sai. Sau convert gây bias.','Sai. Không có exposure thì analysis yếu.']],
+    ['Anomaly alert nên dùng khi nào?', ['Metric có pattern lịch sử và cần phát hiện lệch bất thường theo ngữ cảnh','Không có lịch sử nào','Dashboard không có KPI','Muốn thay metric owner'], 0, ['Đúng. Nó phù hợp seasonality và baseline theo ngày/tuần.','Sai. Cần baseline lịch sử.','Sai. Alert vẫn cần KPI.','Sai. Owner không thể thay bằng alert.']],
+    ['Artifact portfolio tốt phải có screenshot dashboard như thế nào?', ['Có annotation/callout giải thích KPI, guardrail, freshness và decision','Ảnh tối mờ không giải thích','Chỉ logo tool','Không cần README'], 0, ['Đúng. Screenshot annotated giúp reviewer hiểu tư duy thiết kế.','Sai. Ảnh mờ không có giá trị.','Sai. Logo tool không chứng minh năng lực.','Sai. README là entry point.']],
+    ['Nếu primary metric thắng nhưng guardrail support tickets tăng mạnh, nên làm gì?', ['Không rollout rộng ngay; điều tra nguyên nhân và mitigation','Ship ngay vì primary thắng','Ẩn guardrail','Kết luận dashboard sai'], 0, ['Đúng. Guardrail tồn tại để bảo vệ business health.','Sai. Primary không đủ.','Sai. Ẩn guardrail là sai.','Sai. Cần điều tra trước.']],
+    ['Portfolio Week22 nên chứng minh năng lực nào?', ['Kết nối business goal → metric → SQL/model → dashboard → experiment recommendation','Chỉ biết kéo thả chart','Chỉ thuộc p-value','Chỉ tạo folder nhiều file'], 0, ['Đúng. Đây là năng lực Analytics/Data Engineer có business context.','Sai. Kéo thả chưa đủ.','Sai. p-value chỉ là một phần.','Sai. File nhiều nhưng rỗng không có giá trị.']]
+  ];
+  return bank.map((q,i)=>{
+    const opts = q[1].map((o,j)=>'<div class="quiz-opt" onclick="answerQuiz(this, '+(j===q[2])+', &quot;'+q[3][j].replaceAll('"','&quot;')+'&quot;)">'+labels[j]+'. '+o+'</div>').join('');
+    return '<div class="quiz-item"><div class="quiz-q">'+(i+1)+'. '+q[0]+'</div><div class="quiz-options">'+opts+'</div><div class="quiz-explain"></div></div>';
+  }).join('');
+}
+function practice(title, body, solution) {
+  return '<div class="practice-task"><div class="practice-task-header">'+title+'</div><div class="practice-task-body">'+body+'<button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button><div class="solution-box">'+solution+'</div></div></div>';
+}
+const modules = [
+  {
+    subtitle:'Xây nền tảng tư duy: KPI không phải là số đẹp trên dashboard, mà là contract để ra quyết định đúng.',
+    sections:[
+      '<table><tr><th>Bước</th><th>Nội dung</th><th>Kết quả</th></tr><tr><td>1</td><td>Phân biệt measure, metric, KPI</td><td>Không nhầm raw count với business signal</td></tr><tr><td>2</td><td>Decision-first mindset</td><td>Biết bắt đầu từ câu hỏi business</td></tr><tr><td>3</td><td>Vanity vs actionable metrics</td><td>Tránh dashboard nhìn hay nhưng không hành động được</td></tr><tr><td>4</td><td>Vai trò của Data Engineer</td><td>Nối definition với dataset, model, freshness và trust</td></tr></table>',
+      '<ul><li>Giải thích được KPI, metric và measure bằng ví dụ revenue, retention, activation, churn, conversion, SLA.</li><li>Thiết kế flow <code>business question → metric → dataset → dashboard</code>.</li><li>Nhận diện dashboard fail vì metric không rõ definition.</li><li>Biết vì sao Data Engineer phải tham gia metric ownership, không chỉ build table.</li></ul>',
+      '<h3>KPI, metric và measure</h3><p><strong>Measure</strong> là số đo thô: số đơn hàng, số event, số tiền thanh toán. <strong>Metric</strong> là measure được đặt ngữ cảnh: conversion rate, D7 retention, SLA freshness. <strong>KPI</strong> là metric được chọn để theo dõi mục tiêu quan trọng và ra quyết định.</p><div class="callout-grid"><div class="mini-card"><strong>Measure</strong><code>orders_count</code>, <code>event_count</code>, <code>revenue_amount</code>.</div><div class="mini-card"><strong>Metric</strong>Checkout conversion = paid orders / checkout started.</div><div class="mini-card"><strong>KPI</strong>Monthly recurring revenue hoặc D30 retention nếu đây là mục tiêu chiến lược.</div><div class="mini-card"><strong>SLA metric</strong>Dashboard freshness before 08:00, completeness >= 99%.</div></div><h3>Vì sao dashboard fail</h3><p>Dashboard fail không phải vì thiếu chart. Nó fail khi người đọc không tin số, không hiểu định nghĩa, hoặc không biết sau khi nhìn số thì phải làm gì. Nếu Product tính activation là users hoàn tất onboarding trong 24 giờ, còn Growth tính trong 7 ngày, hai dashboard đều có thể đúng SQL nhưng sai governance.</p>'+info('warn','⚠️','Anti-pattern: xây dashboard từ dataset có sẵn rồi cố tìm insight. Data Engineer nên hỏi: quyết định nào sẽ được đưa ra, metric nào đại diện cho quyết định đó, và data model nào tính metric ổn định nhất.')+'<h3>Business question → metric → dataset → dashboard</h3>'+codeBlock('decision_mapping.md','Business question: Kênh acquisition nào tạo user có chất lượng?\nMetric: D7 activation rate by channel\nDataset: fact_user_activation_daily + dim_acquisition_channel\nDashboard: KPI card overall, trend 8 tuần, breakdown channel, drill-down campaign\nAction: tăng budget channel có activation cao, kiểm tra channel volume cao nhưng activation thấp')+'<h3>Vanity vs actionable</h3><p>Total registered users thường tăng mãi nên dễ làm người đọc vui nhưng ít chỉ ra hành động. D7 activation by channel actionable hơn vì có denominator, time window, owner và breakdown để ra quyết định.</p>',
+      quizHtml(0),
+      summary([['KPI','Metric gắn với mục tiêu và quyết định.'],['Metric','Số đo đã có ngữ cảnh, denominator, grain và time window.'],['Decision-first','Bắt đầu từ business question, không bắt đầu từ chart.'],['Trust','Definition, lineage và quality quyết định dashboard có được dùng không.'],['Actionability','Metric tốt chỉ ra hành động tiếp theo.'],['Vai trò DE','Thiết kế data model và contract để metric nhất quán.']]),
+      practice('KPI definition task','<p>Chọn một sản phẩm SaaS. Viết definition cho KPI <code>weekly activated accounts</code> gồm numerator, denominator, grain, filter, timezone và owner.</p>', '<p><strong>Lời giải mẫu:</strong> Numerator: accounts có ít nhất 3 active users và tạo ít nhất 1 project trong tuần. Denominator: accounts signup thành công trước cuối tuần đó. Grain: account-week. Filters: loại internal/test accounts, bot traffic, suspended accounts. Timezone: Asia/Saigon cho market VN hoặc UTC nếu global. Owner: Product Analytics + Data Platform đồng sở hữu; thay đổi phải qua metric review.</p>')+
+      practice('Dashboard critique task','<p>Một dashboard có 28 KPI cards, không có definition, không có freshness. Hãy chỉ ra 3 lỗi production và cách sửa.</p>', '<p>Giảm còn 5-7 KPI chính theo decision group; thêm tooltip definition/source/freshness; tách executive summary và operational drill-down; tạo certified metric layer thay vì copy SQL vào từng chart.</p>')
+    ]
+  },
+  {
+    subtitle:'Thiết kế metric tree cân bằng: North Star, supporting metrics, leading/lagging và guardrails theo domain.',
+    sections:[
+      '<table><tr><th>Khái niệm</th><th>Câu hỏi</th><th>Ví dụ</th></tr><tr><td>North Star</td><td>Giá trị cốt lõi nào tăng bền vững?</td><td>Weekly active teams completing key workflow</td></tr><tr><td>Supporting</td><td>Driver nào kéo North Star?</td><td>Activation, retention, frequency</td></tr><tr><td>Guardrail</td><td>Không được làm xấu điều gì?</td><td>Refund, latency, churn, fraud</td></tr></table>',
+      '<ul><li>Phân biệt North Star Metric với supporting metrics.</li><li>Thiết kế input/output metrics và leading/lagging indicators.</li><li>Dùng guardrails để tránh tối ưu một metric làm hại business health.</li><li>Áp dụng metric tree cho e-commerce, SaaS, marketplace và fintech.</li></ul>',
+      '<h3>North Star Metric</h3><p>North Star Metric là metric đại diện cho giá trị cốt lõi sản phẩm tạo ra cho người dùng và business. Với SaaS collaboration, revenue có thể quan trọng nhưng North Star tốt hơn có thể là <code>weekly active teams with 3+ collaborative actions</code>, vì nó gần user value và dự báo retention/revenue.</p><h3>Metric tree</h3>'+codeBlock('metric_tree.md','North Star: Weekly activated teams\n├── Acquisition: qualified signups\n├── Activation: teams completing setup within 7 days\n├── Engagement: collaborative actions per active team\n├── Retention: teams active in week 4 after signup\n└── Guardrails: support tickets per 100 teams, p95 page latency, churn, downgrade rate')+'<h3>Domain examples</h3><table><tr><th>Domain</th><th>North Star</th><th>Supporting</th><th>Guardrail</th></tr><tr><td>E-commerce</td><td>Weekly fulfilled orders from repeat buyers</td><td>checkout conversion, repeat purchase rate</td><td>refund rate, delivery SLA breach</td></tr><tr><td>SaaS</td><td>Weekly active teams completing core workflow</td><td>activation, seat expansion, feature adoption</td><td>churn, support tickets, latency</td></tr><tr><td>Marketplace</td><td>Successful matches per week</td><td>supply availability, demand conversion</td><td>cancellation, dispute, imbalance</td></tr><tr><td>Fintech</td><td>Monthly successful trusted transactions</td><td>KYC completion, transaction success</td><td>fraud, default, compliance breach</td></tr></table>'+info('warn','⚠️','Anti-pattern: tăng loan approval rate mà không theo dõi default/fraud; tăng notification CTR bằng spam làm churn tăng; tăng GMV bằng discount quá mức làm margin âm.')+'<h3>Input vs output, leading vs lagging</h3><p>Input metrics gần hành động team kiểm soát: onboarding completion, search result quality, successful payment authorization. Output metrics phản ánh kết quả cuối: revenue, retention, churn. Leading indicators phản ứng sớm, lagging indicators xác nhận business value sau.</p>',
+      quizHtml(1),
+      summary([['North Star','Một metric đại diện user value và business value bền vững.'],['Supporting','Giải thích driver phía sau North Star.'],['Input','Gần hành động mà team có thể tác động.'],['Output','Kết quả cuối, thường lagging hơn.'],['Guardrail','Giới hạn bảo vệ business health.'],['Metric tree','Bản đồ quan hệ từ mục tiêu đến driver và owner.']]),
+      practice('Metric tree design task','<p>Thiết kế metric tree cho marketplace giao đồ ăn: North Star, 4 supporting metrics và 3 guardrails.</p>', '<p>North Star: completed orders delivered on time per week. Supporting: restaurant availability rate, checkout conversion, courier acceptance rate, reorder rate. Guardrails: cancellation rate, delivery late rate, refund/complaint rate. Owner nên chia theo Product/Growth/Ops/Data.</p>')+
+      practice('Guardrail task','<p>Team Growth muốn tăng sign-up bằng khuyến mãi lớn. Hãy đề xuất guardrails.</p>', '<p>Guardrails: trial-to-paid conversion, refund/chargeback, CAC payback, abuse/fake account rate, support tickets per signup. Nếu sign-up tăng nhưng paid conversion giảm mạnh, không nên gọi campaign là thành công.</p>')
+    ]
+  },
+  {
+    subtitle:'Biến metric thành contract: definition, owner, certified metric, lineage, source of truth và data quality.',
+    sections:[
+      '<table><tr><th>Thành phần</th><th>Cần ghi rõ</th><th>Rủi ro nếu thiếu</th></tr><tr><td>Definition</td><td>Numerator, denominator, grain</td><td>Double count, lệch denominator</td></tr><tr><td>Rules</td><td>Filters, timezone, late data</td><td>Số đổi không giải thích được</td></tr><tr><td>Governance</td><td>Owner, certification, lineage</td><td>Mỗi team tính một kiểu</td></tr></table>',
+      '<ul><li>Viết metric definition document production-ready.</li><li>Hiểu tác động của grain, timezone, late-arriving data, bot/internal traffic exclusion.</li><li>Thiết kế ownership, certified metrics và Semantic Layer.</li><li>Nối source of truth từ data lineage đến dashboard.</li></ul>',
+      '<h3>Metric definition document</h3>'+codeBlock('metric_definitions.md','# Metric: D7 Activation Rate\nPurpose: Đo chất lượng user mới sau signup.\nNumerator: users signup trong cohort day D và hoàn tất activation_event trong 7 ngày.\nDenominator: eligible users signup thành công trong cohort day D.\nGrain: signup_cohort_date x acquisition_channel.\nFilters: exclude internal_users, test_accounts, known_bots, deleted accounts.\nTimezone: cohort date theo Asia/Saigon; event timestamps lưu UTC.\nLate data: dashboard D-1 là preliminary; final sau 48 giờ lookback.\nOwner: Product Analytics. Data owner: Analytics Engineering.\nCertified source: mart_user_activation_daily.\nLineage: raw_events → stg_events → int_user_activation → mart_user_activation_daily → dashboard.')+'<h3>Semantic Layer: metric contract dạng code</h3><p>Markdown definition giúp con người hiểu metric, nhưng production thường cần một <strong>Semantic Layer</strong>: nơi metric được định nghĩa một lần bằng code/config rồi được BI tool, notebook và API dùng lại. Các hệ như dbt Semantic Layer/MetricFlow hoặc Cube.js giải quyết vấn đề “same KPI calculated differently” bằng versioning, tests, owner và review workflow.</p>'+codeBlock('semantic_layer.yml','semantic_models:\n  - name: user_activation\n    model: ref(\'mart_user_activation_daily\')\n    defaults:\n      agg_time_dimension: signup_date\n    entities:\n      - name: user\n        type: primary\n        expr: user_id\n    dimensions:\n      - name: acquisition_channel\n        type: categorical\n      - name: signup_date\n        type: time\n        type_params:\n          time_granularity: day\n      - name: is_internal_user\n        type: categorical\n    measures:\n      - name: eligible_signups\n        agg: sum\n      - name: activated_users_d7\n        agg: sum\n\nmetrics:\n  - name: d7_activation_rate\n    type: ratio\n    label: D7 Activation Rate\n    type_params:\n      numerator: activated_users_d7\n      denominator: eligible_signups\n    filter: |\n      {{ Dimension(\'user_activation__is_internal_user\') }} = false')+'<h3>Numerator, denominator và grain</h3><p>Phần lớn KPI sai vì denominator mơ hồ hoặc grain sai. Nếu activation rate tính ở user-day nhưng dashboard join với campaign table many-to-many, numerator có thể bị nhân đôi. DE phải kiểm soát grain trước khi expose metric.</p>'+info('tip','✅','Certified metrics nên nằm trong semantic/model layer có tests, docs và owner. Dashboard chỉ consume metric đã certified, không copy logic tính KPI rải rác.')+'<h3>Stakeholder review workflow</h3><p>Khi đổi logic metric đã certified, đừng sửa thẳng trong dashboard production. Flow tốt hơn: Data Engineer mở Pull Request đổi YAML/SQL metric → CI chạy dbt tests, freshness tests và sample metric diff → Data Analyst/Product Owner review business meaning → merge → dashboard consume version mới → release note giải thích thay đổi số.</p><h3>Late-arriving data và freshness</h3><p>Event log, attribution, payment reconciliation thường đến trễ. Dashboard nên phân biệt số preliminary và final. Một rule production tốt: refresh hourly cho operational dashboard, nhưng KPI executive hôm qua chỉ final sau 48 giờ nếu late data historically đáng kể.</p><h3>Same KPI calculated differently</h3><p>Anti-pattern nguy hiểm nhất là Finance, Product và Sales đều có “Revenue” riêng: gross revenue, net revenue, recognized revenue. Không có definition thì mọi cuộc họp biến thành tranh luận con số thay vì quyết định.</p>',
+      quizHtml(2),
+      summary([['Definition','Ghi rõ numerator, denominator, grain, filters, timezone.'],['Owner','Có người chịu trách nhiệm business meaning và change control.'],['Certified','Metric đã được review, test và chấp nhận làm source of truth.'],['Lineage','Biết source, model và dashboard bị ảnh hưởng khi thay đổi.'],['Late data','Cần lookback, watermark và trạng thái preliminary/final.'],['Trust','Không có trust thì dashboard không tạo impact.']]),
+      practice('Semantic Layer YAML task','<p>Viết cấu hình YAML kiểu dbt Semantic Layer cho metric <code>D7 Activation Rate</code>. Yêu cầu có measure numerator, measure denominator, ratio metric, grain theo cohort date và filter loại internal users.</p>', codeBlock('semantic_layer.yml','semantic_models:\n  - name: user_activation\n    model: ref(\'mart_user_activation_daily\')\n    defaults:\n      agg_time_dimension: signup_date\n    entities:\n      - name: user\n        type: primary\n        expr: user_id\n    dimensions:\n      - name: signup_date\n        type: time\n        type_params:\n          time_granularity: day\n      - name: acquisition_channel\n        type: categorical\n      - name: is_internal_user\n        type: categorical\n    measures:\n      - name: activated_users_d7\n        agg: sum\n      - name: eligible_signups\n        agg: sum\n\nmetrics:\n  - name: d7_activation_rate\n    type: ratio\n    label: D7 Activation Rate\n    type_params:\n      numerator: activated_users_d7\n      denominator: eligible_signups\n    filter: |\n      {{ Dimension(\'user_activation__is_internal_user\') }} = false'))+
+      practice('Data quality check task','<p>Viết SQL kiểm tra duplicate exposure events theo experiment_id, user_id.</p>', codeBlock('data_quality_checks.sql','<span class="comment">-- Một user không nên có nhiều variant trong cùng experiment</span>\nSELECT experiment_id, user_id, COUNT(DISTINCT variant) AS variants\nFROM fact_experiment_exposure\nWHERE exposure_time >= CURRENT_DATE - INTERVAL \'30 days\'\nGROUP BY experiment_id, user_id\nHAVING COUNT(DISTINCT variant) > 1;'))
+    ]
+  },
+  {
+    subtitle:'Thiết kế dashboard theo audience và decision: executive summary, operational monitoring, exploratory analysis.',
+    sections:[
+      '<table><tr><th>Dashboard</th><th>User</th><th>Decision</th></tr><tr><td>Executive</td><td>Leadership</td><td>Business có ổn không, cần ưu tiên gì?</td></tr><tr><td>Operational</td><td>Ops/Data/Product on-call</td><td>Có incident không, xử lý ở đâu?</td></tr><tr><td>Exploratory</td><td>Analyst/Product</td><td>Nguyên nhân và segment nào tạo thay đổi?</td></tr></table>',
+      '<ul><li>Phân biệt executive, operational và exploratory dashboard.</li><li>Thiết kế layout hierarchy, KPI cards, trend, breakdown và drill-down.</li><li>Thêm freshness, annotation, alert threshold và anomaly detection để tăng trust.</li><li>Hiểu Dashboard as Code để dashboard không trở thành cấu hình thủ công khó kiểm soát.</li><li>Tránh anti-pattern một dashboard cho tất cả mọi người.</li></ul>',
+      '<h3>Dashboard users and decisions</h3><p>Dashboard tốt không hỏi “nên dùng chart gì?” trước. Nó hỏi “ai sẽ dùng, họ quyết định gì, họ cần độ trễ bao nhiêu, và nếu số xấu họ làm gì?”. Executive cần ít KPI và narrative. Operational cần threshold, freshness, alert. Exploratory cần filters và drill-down.</p><h3>Layout hierarchy</h3><ol><li>Header: scope, date range, freshness, owner.</li><li>KPI row: North Star, supporting, guardrail status.</li><li>Trend row: 8-12 tuần để thấy direction và seasonality.</li><li>Breakdown: channel, cohort, region, platform, plan.</li><li>Drill-down: link đến records/queries khi cần debug.</li></ol>'+codeBlock('dashboard_wireframe.md','Executive Dashboard\n[Freshness: updated 2026-05-16 08:05 UTC | Owner: Product Analytics]\n\nKPI Cards:\n- Weekly Activated Teams: 12,480 (+4.2% WoW, target +3%)\n- D7 Activation Rate: 38.4% (-1.1pp WoW)\n- Paid Conversion: 8.7% (+0.3pp WoW)\n- Guardrail: Support Tickets / 100 Teams = 4.8 (amber)\n\nCharts:\n1. North Star trend 12 weeks with launch annotations\n2. Activation funnel by acquisition channel\n3. Guardrail trend: latency, support tickets, churn\n4. Drill-down table: channels with high volume and low activation')+info('note','📌','Freshness indicator không phải chi tiết nhỏ. Nó cho biết người dùng có đang nhìn dữ liệu đủ mới để ra quyết định hôm nay không.')+'<h3>Alert threshold và anomaly detection</h3><p>Threshold tĩnh phù hợp khi business có ngưỡng rõ: payment success rate dưới 97% là incident. Nhưng nhiều KPI có seasonality. Khi revenue thứ Ba giảm 20% so với các thứ Ba gần nhất, anomaly detection có ích hơn threshold cứng vì nó so metric với baseline lịch sử cùng ngữ cảnh.</p>'+codeBlock('anomaly_alert.sql','<span class="comment">-- Alert nếu revenue hôm qua giảm hơn 20% so với trung bình cùng thứ trong 8 tuần trước</span>\nWITH daily AS (\n  SELECT order_date::date AS metric_date, SUM(net_revenue) AS revenue\n  FROM mart_orders_daily\n  WHERE order_date >= CURRENT_DATE - INTERVAL \'60 days\'\n  GROUP BY 1\n), baseline AS (\n  SELECT AVG(revenue) AS avg_same_weekday\n  FROM daily\n  WHERE EXTRACT(DOW FROM metric_date) = EXTRACT(DOW FROM CURRENT_DATE - INTERVAL \'1 day\')\n    AND metric_date < CURRENT_DATE - INTERVAL \'1 day\'\n), yesterday AS (\n  SELECT revenue\n  FROM daily\n  WHERE metric_date = CURRENT_DATE - INTERVAL \'1 day\'\n)\nSELECT\n  yesterday.revenue,\n  baseline.avg_same_weekday,\n  CASE WHEN yesterday.revenue < baseline.avg_same_weekday * 0.8 THEN \'ALERT\' ELSE \'OK\' END AS status\nFROM yesterday CROSS JOIN baseline;')+'<h3>Dashboard as Code / BI versioning</h3><p>Senior Analytics Engineering không coi dashboard production là cấu hình click tay không kiểm soát. Tối thiểu, query và metric definition phải vào Git; tốt hơn nữa là dashboard config hoặc exposure được version-control bằng LookML, Superset export, Metabase API export, dbt exposures hoặc tài liệu wireframe có review. Mục tiêu là biết ai đổi chart nào, đổi metric nào, và rollback được khi logic sai.</p><h3>Avoid chart clutter</h3><p>Không nhồi mọi dimension vào một dashboard. Nếu executive cần thấy “business health”, đừng bắt họ đọc 14 filters. Nếu ops cần xử lý incident, đừng chỉ cho họ monthly trend.</p>',
+      quizHtml(3),
+      summary([['Executive','Ít KPI, nhiều context, tập trung quyết định chiến lược.'],['Operational','Threshold, alert, freshness, drill-down cho hành động nhanh.'],['Exploratory','Filters và breakdown để phân tích nguyên nhân.'],['Hierarchy','KPI → trend → breakdown → detail.'],['Trust signals','Definition, owner, source, freshness, annotation.'],['Anti-pattern','Một dashboard cho mọi người thường không phục vụ ai tốt.']]),
+      practice('Dashboard critique task','<p>Dashboard executive có 20 filters, 15 line charts, không có target. Hãy viết redesign proposal.</p>', '<p>Giữ 5 KPI cards chính, thêm target và WoW/YoY change; chỉ giữ 3 charts: North Star trend, funnel, guardrail trend; chuyển filters phức tạp sang exploratory dashboard; thêm freshness, owner, annotation launch/outage.</p>')+
+      practice('Operational dashboard task','<p>Thiết kế operational dashboard cho payment success rate.</p>', '<p>KPI cards: success rate 15 phút, payment failures, p95 authorization latency, impacted users. Threshold: success rate < 97% red, latency > 2s amber. Breakdowns: provider, country, payment method, app version. Drill-down: recent failed transactions masked PII. Freshness: updated every 5 minutes.</p>')
+    ]
+  },
+  {
+    subtitle:'A/B testing từ góc nhìn DE: hypothesis, allocation, metric design, logging và interpretation căn bản.',
+    sections:[
+      '<table><tr><th>Thành phần</th><th>Câu hỏi</th><th>DE cần đảm bảo</th></tr><tr><td>Hypothesis</td><td>Thay đổi nào tạo effect nào?</td><td>Metric/event đo được cơ chế</td></tr><tr><td>Randomization</td><td>User vào group nào?</td><td>Assignment ổn định, không đổi variant</td></tr><tr><td>Logging</td><td>User có thấy treatment không?</td><td>Exposure, assignment, outcome events</td></tr></table>',
+      '<ul><li>Hiểu control vs treatment, randomization và allocation.</li><li>Chọn primary metric và guardrail metric trước khi chạy.</li><li>Giải thích p-value, confidence interval, statistical vs practical significance ở mức beginner.</li><li>Biết logging requirements để experiment phân tích được.</li></ul>',
+      '<h3>Experiment basics</h3><p>Experiment tốt bắt đầu bằng hypothesis rõ: nếu thay đổi onboarding checklist cho new users, D7 activation tăng vì user hiểu next action nhanh hơn. Control nhận trải nghiệm hiện tại. Treatment nhận thay đổi. Randomization giúp hai nhóm tương đương trước treatment.</p><h3>Randomization bằng hash salt</h3><p>Trong production, assignment thường dùng deterministic hash để cùng một user luôn nhận cùng một variant. Hãy dùng <code>experiment_id</code> làm salt khi hash <code>user_id</code>; nếu chỉ hash user_id, cùng một nhóm user có thể luôn rơi vào treatment trên nhiều experiments, tạo bias chéo.</p>'+codeBlock('experiment_assignment.sql','<span class="comment">-- Pseudocode SQL-style: dùng experiment_id làm salt để assignment độc lập giữa experiments</span>\nWITH candidates AS (\n  SELECT user_id, \'exp_onboarding_checklist_v2\' AS experiment_id\n  FROM dim_users\n  WHERE signup_date >= CURRENT_DATE - INTERVAL \'30 days\'\n    AND is_internal_user = FALSE\n), assigned AS (\n  SELECT\n    user_id,\n    experiment_id,\n    MOD(ABS(HASHTEXT(experiment_id || \':\' || user_id)), 100) AS bucket\n  FROM candidates\n)\nSELECT\n  user_id,\n  experiment_id,\n  CASE WHEN bucket < 50 THEN \'control\' ELSE \'treatment\' END AS variant\nFROM assigned;')+'<h3>Metric plan</h3><table><tr><th>Loại metric</th><th>Ví dụ</th><th>Lý do</th></tr><tr><td>Primary</td><td>D7 activation rate</td><td>Gắn trực tiếp hypothesis</td></tr><tr><td>Secondary</td><td>Checklist completion, project_created</td><td>Giải thích cơ chế</td></tr><tr><td>Guardrail</td><td>Support tickets, page latency, churn</td><td>Chặn tác động phụ</td></tr></table><h3>Sample size intuition</h3><p>Effect càng nhỏ, variance càng cao, baseline càng thấp thì cần sample càng lớn. Với conversion baseline 5%, muốn detect lift nhỏ 0.2 percentage point sẽ cần nhiều traffic hơn rất nhiều so với lift 2 percentage point.</p><h3>p-value và confidence interval</h3><p><strong>p-value</strong> không phải xác suất treatment đúng. Nó là xác suất thấy kết quả ít nhất cực đoan như dữ liệu quan sát nếu thật ra không có effect. <strong>Confidence interval</strong> giúp thấy uncertainty của lift. Một lift +1.0pp với CI [-0.2pp, +2.2pp] chưa chắc đáng ship.</p>'+codeBlock('experiment_logging.sql','<span class="comment">-- Events tối thiểu cho experiment analysis</span>\nCREATE TABLE fact_experiment_exposure (\n  experiment_id TEXT NOT NULL,\n  user_id TEXT NOT NULL,\n  variant TEXT NOT NULL,\n  exposure_time TIMESTAMP NOT NULL,\n  assignment_id TEXT NOT NULL,\n  exposure_surface TEXT NOT NULL,\n  PRIMARY KEY (experiment_id, user_id)\n);\n\nCREATE TABLE fact_activation_event (\n  user_id TEXT NOT NULL,\n  event_time TIMESTAMP NOT NULL,\n  activation_type TEXT NOT NULL\n);')+info('warn','⚠️','Log exposure khi user thực sự thấy component được render, không phải khi backend trả API. Nếu log quá sớm, denominator sẽ chứa user chưa bao giờ nhìn thấy treatment.')+info('warn','⚠️','Anti-pattern: peeking quá sớm. Nếu mỗi ngày nhìn p-value rồi declare winner khi vừa p < 0.05, false positive sẽ tăng mạnh.') ,
+      quizHtml(4),
+      summary([['Hypothesis','Nêu change, audience, metric và cơ chế kỳ vọng.'],['Control/Treatment','Baseline hiện tại và trải nghiệm mới.'],['Randomization','Giảm selection bias.'],['Primary metric','Predefine trước khi xem kết quả.'],['Guardrail','Theo dõi tác động phụ.'],['Logging','Exposure, assignment và outcome events là bắt buộc.']]),
+      practice('Experiment design task','<p>Thiết kế experiment cho e-commerce: thêm one-click checkout cho users đã lưu thẻ.</p>', '<p>Hypothesis: one-click checkout giảm friction nên paid conversion tăng. Population: logged-in users có saved payment. Allocation: 50/50 sau ramp 10% nếu risk thấp. Primary: checkout-to-paid conversion trong session. Secondary: time to purchase, cart abandonment. Guardrails: refund rate, payment failure, support tickets, fraud review rate. Logging: assignment, exposure, checkout_start, payment_success/failure, refund.</p>')+
+      practice('Data logging task','<p>Nêu 4 lỗi logging khiến experiment không đọc được.</p>', '<p>Không log exposure khi UI thực sự render; user đổi variant giữa sessions; outcome event không join được user_id/assignment_id; bot/internal traffic không excluded; timestamps mix timezone; event schema thay đổi giữa test.</p>')
+    ]
+  },
+  {
+    subtitle:'Đọc kết quả experiment như decision memo: lift, pitfalls, guardrails, recommendation và rollout plan.',
+    sections:[
+      '<table><tr><th>Readout</th><th>Nội dung</th><th>Câu hỏi</th></tr><tr><td>Executive summary</td><td>Ship / do not ship / iterate</td><td>Quyết định là gì?</td></tr><tr><td>Evidence</td><td>Lift, CI, p-value, guardrails</td><td>Độ tin cậy ra sao?</td></tr><tr><td>Risks</td><td>Seasonality, novelty, bugs</td><td>Có caveat nào?</td></tr></table>',
+      '<ul><li>Cấu trúc experiment readout có recommendation rõ.</li><li>Diễn giải lift bằng baseline, absolute impact và confidence interval.</li><li>Nhận diện segmentation pitfalls, novelty effects, seasonality, multiple testing.</li><li>Viết business recommendation và decision memo production-ready.</li></ul>',
+      '<h3>Readout structure</h3>'+codeBlock('experiment_readout.md','# Experiment Readout: Onboarding Checklist\nDecision: Iterate, chưa ship 100%.\nPrimary metric: D7 activation +1.4pp, CI [+0.2pp, +2.6pp], p = 0.03.\nBusiness impact: nếu giữ lift, khoảng +1,120 activated users/tháng.\nGuardrails: support tickets +18% ở new users, p95 onboarding latency không đổi.\nSRM check: PASS, control 50.1% vs treatment 49.9%.\nInterpretation: checklist giúp activation nhưng copy hiện tại gây confusion.\nRecommendation: ship to 25% traffic với revised copy, add help link, monitor support tickets daily.\nRisks: chạy 10 ngày, chưa bao phủ full monthly billing cycle; cần follow-up D30 retention.')+'<h3>How to interpret lift</h3><p>Lift tương đối 10% nghe lớn, nhưng nếu baseline 1% thì absolute lift chỉ 0.1 percentage point. Readout tốt luôn nêu baseline, absolute lift, relative lift, confidence interval và estimated business impact.</p><h3>SRM: Sample Ratio Mismatch</h3><p><strong>SRM</strong> xảy ra khi tỷ lệ users thực tế giữa control/treatment lệch đáng kể so với allocation kỳ vọng, ví dụ design 50/50 nhưng exposure nhận 62/38. Đây thường là dấu hiệu bug assignment, eligibility filter khác nhau, tracking bị chặn theo browser, hoặc treatment render fail. Nếu SRM fail, đừng đọc lift như kết quả đáng tin cho đến khi điều tra xong.</p>'+codeBlock('srm_check.sql','<span class="comment">-- Kiểm tra allocation 50/50 có bị lệch rõ không</span>\nSELECT\n  experiment_id,\n  variant,\n  COUNT(DISTINCT user_id) AS exposed_users,\n  ROUND(100.0 * COUNT(DISTINCT user_id) / SUM(COUNT(DISTINCT user_id)) OVER (PARTITION BY experiment_id), 2) AS pct\nFROM fact_experiment_exposure\nWHERE experiment_id = \'exp_onboarding_checklist_v2\'\nGROUP BY experiment_id, variant\nORDER BY variant;')+'<h3>Pitfalls</h3><ul><li><strong>Segmentation:</strong> càng chia nhỏ càng dễ tìm winner giả. Segment quan trọng nên predefine.</li><li><strong>Novelty:</strong> effect có thể giảm khi user hết tò mò.</li><li><strong>Seasonality:</strong> weekend, campaign, payday, holiday có thể làm sai interpretation.</li><li><strong>Instrumentation bugs:</strong> missing exposure events, duplicate assignments hoặc SRM phá kết quả.</li><li><strong>Multiple testing:</strong> nhiều metric và segment làm tăng false positive.</li></ul>'+info('warn','⚠️','Anti-pattern: gửi bảng số liệu không có recommendation. Người đọc cần biết nên ship, stop, iterate, ramp hay collect more data.')+'<h3>Decision memo mindset</h3><p>Data Engineer không cần thay Product quyết định, nhưng phải nói rõ dữ liệu hỗ trợ quyết định nào, rủi ro data nào còn tồn tại, và điều kiện nào cần theo dõi sau rollout.</p>',
+      quizHtml(5),
+      summary([['Readout','Bắt đầu bằng decision, không bắt đầu bằng raw tables.'],['Lift','Luôn đọc kèm baseline, CI và absolute impact.'],['Pitfalls','Segmentation, novelty, seasonality, multiple testing.'],['Instrumentation','Exposure và assignment events phải đáng tin.'],['Guardrails','Primary thắng nhưng guardrail xấu có thể không ship.'],['Memo','Recommendation, evidence, risks, rollout, follow-up.']]),
+      practice('Experiment readout task','<p>Primary metric conversion +3%, p=0.04; refund rate +12%, support tickets +9%. Viết recommendation.</p>', '<p>Không ship rộng ngay. Recommendation: pause full rollout, investigate refund reasons by SKU/channel, run revised treatment hoặc add guardrail mitigation. Primary lift có ý nghĩa nhưng guardrails xấu cho thấy conversion có thể đến từ buyer confusion hoặc low-quality purchases.</p>')+
+      practice('Pitfall diagnosis task','<p>Experiment notification thắng ở ngày 1-2 nhưng effect biến mất ngày 7. Giải thích.</p>', '<p>Khả năng novelty effect: user click vì notification mới lạ. Cần đọc time-series lift, retention/churn guardrails, và không quyết định chỉ từ early spike. Có thể ship nếu mục tiêu là short-term alert, nhưng không nếu mục tiêu là durable engagement.</p>')
+    ]
+  },
+  {
+    subtitle:'Đóng gói portfolio artifact week22_kpi_dashboard/ để recruiter thấy được tư duy data product end-to-end.',
+    sections:[
+      '<table><tr><th>File</th><th>Mục đích</th><th>Reviewer tìm gì?</th></tr><tr><td>metric_framework.md</td><td>North Star, tree, guardrails</td><td>Business thinking</td></tr><tr><td>dashboard_queries.sql</td><td>Query cho KPI/trend/breakdown</td><td>SQL production realism</td></tr><tr><td>experiment_readout.md</td><td>Kết quả và recommendation</td><td>Decision quality</td></tr></table>',
+      '<ul><li>Thiết kế artifact folder <code>week22_kpi_dashboard/</code> đầy đủ.</li><li>Viết README portfolio-ready: context, users, KPI framework, dashboard decisions, experiment design, quality checks, lessons learned.</li><li>Thêm screenshot dashboard có annotation/callout trực tiếp trong README.</li><li>Tạo dashboard implementation bằng Tableau Public, Metabase, Looker Studio hoặc static mockup.</li><li>Chứng minh kết nối giữa KPI, data model, SQL, dashboard và experiment.</li></ul>',
+      '<h3>Folder structure bắt buộc</h3>'+codeBlock('week22_kpi_dashboard/tree','week22_kpi_dashboard/\n├── metric_framework.md\n├── metric_definitions.md\n├── dashboard_wireframe.md\n├── dashboard_queries.sql\n├── experiment_design.md\n├── experiment_readout.md\n├── data_quality_checks.sql\n├── screenshots/\n│   ├── executive_dashboard_annotated.png\n│   └── exploratory_dashboard_filters.png\n└── README.md')+'<h3>README portfolio-ready</h3>'+codeBlock('README.md','# Week 22 KPI Dashboard\n\n## Business context\nSaaS collaboration product muốn tăng weekly activated teams mà không làm tăng support load.\n\n## Target users\nExecutive: xem business health mỗi tuần.\nProduct Manager: quyết định ưu tiên activation và retention.\nOperations/Data: theo dõi freshness, incidents và guardrails.\n\n## KPI framework\nNorth Star: weekly activated teams.\nSupporting metrics: signup quality, D7 activation, collaboration actions, D30 retention.\nGuardrails: support tickets per 100 teams, p95 latency, churn, downgrade rate.\n\n## Dashboard screenshots\n![Executive dashboard with annotations](screenshots/executive_dashboard_annotated.png)\nCallout 1: KPI cards show target, WoW change, freshness and owner.\nCallout 2: North Star trend includes launch and outage annotations.\nCallout 3: Guardrail panel shows support tickets and latency before rollout decision.\n\n## Dashboard decisions\nExecutive dashboard có 5 KPI cards, 12-week trend, activation funnel và guardrail panel.\nExploratory dashboard có filters theo channel, plan, region, signup cohort.\n\n## Experiment design\nOnboarding checklist A/B test, primary metric D7 activation, guardrails support tickets and latency.\n\n## Data quality checks\nFreshness, duplicate exposure, null user_id, bot/internal exclusion, denominator sanity, SRM check.\n\n## Lessons learned\nDashboard đáng tin cần metric contract, lineage, owner và recommendation, không chỉ visualization.')+'<h3>Believable SQL examples</h3>'+codeBlock('dashboard_queries.sql','<span class="comment">-- KPI card: weekly activated teams and WoW change</span>\nWITH weekly AS (\n  SELECT\n    DATE_TRUNC(\'week\', activity_date)::date AS week_start,\n    COUNT(DISTINCT account_id) FILTER (\n      WHERE active_users >= 3 AND collaborative_actions >= 5\n    ) AS weekly_activated_teams\n  FROM mart_account_activity_daily\n  WHERE activity_date >= CURRENT_DATE - INTERVAL \'16 weeks\'\n    AND is_internal_account = FALSE\n  GROUP BY 1\n), ranked AS (\n  SELECT *, LAG(weekly_activated_teams) OVER (ORDER BY week_start) AS prev_week\n  FROM weekly\n)\nSELECT\n  week_start,\n  weekly_activated_teams,\n  ROUND(100.0 * (weekly_activated_teams - prev_week) / NULLIF(prev_week, 0), 2) AS wow_pct\nFROM ranked\nORDER BY week_start;')+codeBlock('data_quality_checks.sql','<span class="comment">-- Freshness check cho dashboard executive</span>\nSELECT\n  MAX(activity_date) AS max_activity_date,\n  CASE\n    WHEN MAX(activity_date) >= CURRENT_DATE - INTERVAL \'1 day\' THEN \'PASS\'\n    ELSE \'FAIL\'\n  END AS freshness_status\nFROM mart_account_activity_daily;\n\n<span class="comment">-- Denominator sanity: activation denominator không được bằng 0 ở cohort có signup</span>\nSELECT signup_date, acquisition_channel\nFROM mart_user_activation_daily\nGROUP BY signup_date, acquisition_channel\nHAVING SUM(eligible_signups) = 0 AND SUM(raw_signups) > 0;')+info('tip','✅','Dashboard có thể làm bằng Tableau Public, Metabase, Looker Studio hoặc static mockup. Điểm portfolio nằm ở decision logic, metric contract, queries, screenshots có annotation và data quality, không nằm ở tool cụ thể.') ,
+      quizHtml(6),
+      summary([['Artifact','Một folder kể câu chuyện data product end-to-end.'],['README','Entry point cho recruiter và peer engineer.'],['Metric files','Framework và definitions tách rõ.'],['SQL','Believable, có time windows, filters, freshness.'],['Dashboard','Executive và exploratory/operational có audience riêng.'],['Quality','Checks chứng minh bạn quan tâm trust.']]),
+      practice('Portfolio assembly task','<p>Viết checklist commit cho artifact Week22.</p>', '<ul><li>README đọc được trong 3 phút.</li><li>Metric framework có North Star, supporting, guardrails.</li><li>Metric definitions có numerator/denominator/grain/filter/timezone/owner.</li><li>Queries chạy được trên sample/mart schema giả định rõ.</li><li>Dashboard wireframe có target user và decisions.</li><li>Experiment design và readout tách trước/sau.</li><li>Quality checks có freshness, duplication, denominator sanity.</li></ul>')+
+      practice('Dashboard implementation task','<p>Nếu chưa dùng Tableau/Metabase, hãy tạo static mockup portfolio. Cần những phần nào?</p>', '<p>Ảnh hoặc HTML mockup gồm executive summary, KPI cards, trend, funnel, guardrails, freshness, annotations. README phải embed screenshot và có callouts chỉ rõ: metric nào là North Star, guardrail nào chặn rollout, freshness ở đâu, và chart nào phục vụ decision nào. Static mockup vẫn mạnh nếu metric contract và SQL tốt.</p>')
+    ]
+  },
+  {
+    subtitle:'Ôn tập toàn bộ Week22 bằng quiz tương tác và mini test 20 câu có chấm điểm.',
+    sections:[
+      '<table><tr><th>Nhóm</th><th>Ôn lại</th><th>Mini test</th></tr><tr><td>KPI</td><td>KPI vs metric, North Star, guardrail</td><td>5 câu</td></tr><tr><td>Dashboard</td><td>Audience, layout, trust signals</td><td>5 câu</td></tr><tr><td>Experiment</td><td>Design, logging, readout</td><td>7 câu</td></tr><tr><td>Artifact</td><td>Portfolio folder và quality checks</td><td>3 câu</td></tr></table>',
+      '<ul><li>Tự kiểm tra năng lực phân biệt KPI, metric, measure.</li><li>Đọc được dashboard như decision product.</li><li>Thiết kế và diễn giải experiment cơ bản.</li><li>Biết tiêu chuẩn hoàn thành artifact Week22 trước khi sang tuần tiếp theo.</li></ul>',
+      '<h3>Exit criteria</h3><ul><li>Bạn có thể giải thích vì sao metric definition quan trọng hơn chart type.</li><li>Bạn có thể thiết kế metric tree có guardrails cho ít nhất 2 domain.</li><li>Bạn có thể viết một experiment design có hypothesis, allocation, primary và guardrail metrics.</li><li>Bạn có thể viết decision memo không chỉ báo cáo số.</li><li>Bạn có thể đóng gói <code>week22_kpi_dashboard/</code> đủ README, SQL, wireframe và quality checks.</li></ul>'+info('note','📌','Nếu mini test dưới 16/20, hãy quay lại module tương ứng. Tuần này là cầu nối giữa engineering và business impact nên không nên học lướt.'),
+      finalReviewQuizHtml(),
+      summary([['Mindset','Metric và dashboard là data product đáng tin.'],['KPI','Gắn mục tiêu, owner và quyết định.'],['Dashboard','Thiết kế theo audience và action.'],['Experiment','Cần design, logging, statistics intuition và guardrails.'],['Readout','Kết thúc bằng recommendation.'],['Portfolio','Artifact phải cho thấy engineering + business judgment.']]),
+      practice('Final practice package','<p>Hoàn thiện artifact <code>week22_kpi_dashboard/</code> và tự review bằng checklist.</p>', '<p>Pass khi người khác đọc README hiểu business context, mở metric_definitions thấy cách tính rõ, chạy dashboard_queries hiểu output, xem dashboard_wireframe biết quyết định, đọc experiment_readout thấy recommendation và caveats.</p>')+
+      '<h3>Mini Test Tổng Kết</h3><div id="final-test"></div><div class="test-actions"><button class="nav-btn primary" onclick="gradeFinalTest()">✅ Chấm điểm mini test</button><button class="nav-btn" onclick="resetFinalTest()">↻ Làm lại từ đầu</button></div><div class="test-result" id="final-test-result" style="display:none"></div>'
+    ]
+  }
+];
+const finalQuestions = [
+  ['KPI khác metric vì KPI phải có đặc điểm nào?', ['có màu đỏ','gắn mục tiêu và quyết định quan trọng','luôn là revenue','không cần owner'], 'B'],
+  ['Guardrail metric dùng để làm gì?', ['phát hiện tác động phụ','tối ưu bằng mọi giá','thay thế primary metric','xóa dashboard'], 'A'],
+  ['North Star Metric tốt nên phản ánh điều gì?', ['metric dễ kéo tăng nhất','số chart chính trong dashboard','user value và business value bền vững','tool BI đang dùng'], 'C'],
+  ['Metric definition không nên thiếu phần nào?', ['ảnh nền','logo','font','numerator, denominator, grain, filters, timezone, owner'], 'D'],
+  ['Semantic Layer giúp giải quyết vấn đề nào?', ['Định nghĩa metric một lần và dùng lại nhất quán','Tự chọn màu chart','Xóa nhu cầu tests','Thay thế business owner'], 'A'],
+  ['Dashboard executive nên ưu tiên điều gì?', ['mọi raw column','ít KPI quan trọng, trend, target, risk','nhiều filter nhất','không cần freshness'], 'B'],
+  ['Operational dashboard cần nhất điều gì?', ['headline marketing','chỉ monthly chart','threshold, freshness, alert, drill-down','không có owner'], 'C'],
+  ['Dashboard as Code có lợi ích chính nào?', ['Làm dashboard không cần stakeholder','Tăng số pie chart','Ẩn metric definition','Version-control, review và rollback dashboard config'], 'D'],
+  ['A/B test hypothesis tốt gồm những gì?', ['change, audience, metric, causal mechanism','màu dashboard','kết quả đã biết','20 primary metrics'], 'A'],
+  ['Vì sao dùng experiment_id làm hash salt?', ['Để p-value luôn nhỏ','Để assignment độc lập giữa experiments','Để bỏ exposure logging','Để treatment luôn nhiều user hơn'], 'B'],
+  ['Control group là gì?', ['treatment mới','nhóm không log','trải nghiệm baseline hiện tại','nhóm bot'], 'C'],
+  ['Primary metric nên được chọn khi nào?', ['sau khi thấy metric nào tăng','bởi BI tool','không cần chọn','trước khi xem kết quả'], 'D'],
+  ['p-value không phải là gì?', ['xác suất treatment đúng','một tín hiệu thống kê','cần đọc kèm CI','có thể bị misuse khi peeking'], 'A'],
+  ['Practical significance nghĩa là gì?', ['p-value nhỏ hơn 0.05','effect đủ lớn hoặc đáng giá để hành động','chart đẹp','sample nhỏ'], 'B'],
+  ['SRM fail trong experiment báo hiệu điều gì?', ['Dashboard thiếu màu','Primary metric tăng','Allocation/exposure thực tế lệch đáng nghi so với design','README thiếu screenshot'], 'C'],
+  ['Missing exposure events gây lỗi gì?', ['Dashboard đẹp hơn','Tăng trust','Không ảnh hưởng','Sai denominator experiment'], 'D'],
+  ['Experiment readout tốt bắt đầu bằng phần nào?', ['recommendation hoặc decision summary','raw SQL dài','màu chart','tên file'], 'A'],
+  ['Multiple testing risk xảy ra khi nào?', ['có one metric','thử quá nhiều metrics/segments rồi chọn kết quả đẹp','có owner','có README'], 'B'],
+  ['Artifact Week22 bắt buộc nên có những gì?', ['chỉ screenshot','chỉ CSV','metric framework, definitions, SQL, design/readout, quality checks, README','chỉ màu'], 'C'],
+  ['Screenshot dashboard trong README nên có gì?', ['ảnh mờ không giải thích','logo tool','không cần callout','annotation/callout cho KPI, guardrail, freshness và decision'], 'D']
+];
+function render() {
+  document.getElementById('nav').innerHTML = moduleTitles.map((m,i)=>'<div class="nav-item '+(i===0?'active':'')+'" onclick="showModule('+i+',this)"><span class="nav-number">'+m[0]+'</span>'+m[1]+'</div>').join('');
+  document.getElementById('main').innerHTML = modules.map((m,i)=>moduleHtml(i,m)).join('');
+  renderFinalTest();
+}
+function moduleHtml(i,m) {
+  const headers = ['1. Menu Tổng Thể','2. Mục Đích Module','3. Giải Thích Chi Tiết','4. Câu Hỏi Ôn Tập','5. Tổng Kết','6. Bài Tập Thực Hành'];
+  const icons = ['icon-purpose','icon-purpose','icon-detail','icon-quiz','icon-summary','icon-practice'];
+  const sections = headers.map((h,j)=>'<div class="section"><div class="section-header" onclick="toggleSection(this)"><div class="section-icon '+icons[j]+'">'+(j+1)+'</div>'+h+'<span class="section-toggle">▼</span></div><div class="section-content">'+m.sections[j]+'</div></div>').join('');
+  return '<div class="module '+(i===0?'active':'')+'" id="m'+i+'"><div class="module-header"><div class="module-tag">Tuần 22 · '+moduleTitles[i][0]+'</div><div class="module-title">'+moduleTitles[i][1]+'</div><div class="module-subtitle">'+m.subtitle+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+Math.round((i+1)/modules.length*100)+'%"></div></div></div>'+sections+navButtons(i)+'</div>';
+}
+function navButtons(i) {
+  const prev = i > 0 ? '<button class="nav-btn" onclick="goPrev('+i+')">← Module trước</button>' : '<span></span>';
+  const next = i < modules.length - 1 ? '<button class="nav-btn primary" onclick="goNext('+i+')">Module tiếp theo →</button>' : '<span></span>';
+  return '<div class="nav-buttons">'+prev+next+'</div>';
+}
+function renderFinalTest() {
+  const el = document.getElementById('final-test');
+  if (!el) return;
+  el.innerHTML = finalQuestions.map((q,i)=>'<div class="test-question" data-q="'+(i+1)+'" data-correct="'+q[2]+'"><div class="test-question-title">Q'+(i+1)+'. '+q[0]+'</div><div class="test-options">'+q[1].map((o,j)=>'<label class="test-option"><input type="radio" name="q'+(i+1)+'" value="'+labels[j]+'"> '+labels[j]+'. '+o+'</label>').join('')+'</div></div>').join('');
+}
+function showModule(idx, el) {
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  document.getElementById('m'+idx).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if (el) el.classList.add('active'); else document.querySelectorAll('.nav-item')[idx].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function goNext(idx) { showModule(idx + 1); }
+function goPrev(idx) { showModule(idx - 1); }
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const toggle = header.querySelector('.section-toggle');
+  const hidden = content.style.display === 'none';
+  content.style.display = hidden ? 'block' : 'none';
+  toggle.textContent = hidden ? '▼' : '▶';
+}
+function answerQuiz(el, correct, explanation) {
+  const item = el.closest('.quiz-item');
+  item.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('correct','wrong'));
+  el.classList.add(correct ? 'correct' : 'wrong');
+  const exp = item.querySelector('.quiz-explain');
+  exp.textContent = explanation;
+  exp.classList.add('show');
+}
+function toggleSolution(btn) {
+  const box = btn.nextElementSibling;
+  box.classList.toggle('show');
+  btn.textContent = box.classList.contains('show') ? 'Ẩn lời giải' : '💡 Xem lời giải';
+}
+function gradeFinalTest() {
+  const questions = document.querySelectorAll('#final-test .test-question');
+  let score = 0, unanswered = 0, wrong = [];
+  questions.forEach((q,idx)=>{
+    q.classList.remove('correct','wrong','unanswered');
+    const selected = q.querySelector('input[type="radio"]:checked');
+    const correct = q.dataset.correct;
+    if (!selected) { unanswered++; q.classList.add('unanswered'); wrong.push(idx+1); return; }
+    if (selected.value === correct) { score++; q.classList.add('correct'); } else { q.classList.add('wrong'); wrong.push(idx+1); }
+  });
+  let cls = score >= 16 ? 'good' : score >= 12 ? 'warn' : 'bad';
+  let guidance = score >= 19 ? 'Xuất sắc. Bạn đã sẵn sàng đưa artifact Week22 vào portfolio.' : score >= 16 ? 'Tốt. Hãy rà lại các câu sai trước khi sang module maintenance.' : score >= 12 ? 'Đạt nền tảng nhưng cần ôn lại metric definitions, dashboard audience và experiment readout.' : 'Chưa nên đi tiếp. Hãy làm lại W22.01-W22.06 và hoàn thiện practice.';
+  const result = document.getElementById('final-test-result');
+  result.style.display = 'block';
+  result.innerHTML = '<span class="score-chip '+cls+'">Điểm: '+score+'/'+questions.length+'</span><span class="score-chip">Chưa trả lời: '+unanswered+'</span><p>'+guidance+'</p>'+(wrong.length ? '<p>Câu cần xem lại: '+wrong.join(', ')+'</p>' : '<p>Không có câu sai.</p>');
+}
+function resetFinalTest() {
+  document.querySelectorAll('#final-test input[type="radio"]').forEach(i=>i.checked = false);
+  document.querySelectorAll('#final-test .test-question').forEach(q=>q.classList.remove('correct','wrong','unanswered'));
+  const result = document.getElementById('final-test-result');
+  result.style.display = 'none';
+  result.innerHTML = '';
+}
+render();
+</script>
+</body>
+</html>
