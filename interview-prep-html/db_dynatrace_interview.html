@@ -11,6 +11,21 @@
 <style>
 :root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--orange:#ffa657;--red:#f78166;--purple:#d2a8ff;--code:#0b1017;--shadow:0 18px 55px #0008}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.65}.hero{border-bottom:1px solid var(--border);background:linear-gradient(135deg,#0d1117 0%,#161b22 48%,#17261f 100%);padding:30px 24px 22px;position:sticky;top:0;z-index:10;backdrop-filter:blur(10px)}.hero-inner{max-width:1360px;margin:auto}.kicker{color:var(--green);font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em}.hero h1{margin:6px 0 8px;color:var(--purple);font-size:clamp(1.55rem,3vw,2.55rem);line-height:1.08}.hero p{margin:0;color:var(--muted);max-width:980px}.topbar{display:grid;grid-template-columns:minmax(220px,1fr) auto auto auto;gap:10px;margin-top:16px;align-items:center}.search{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none}.search:focus{border-color:var(--purple);box-shadow:0 0 0 3px #d2a8ff22}.chip,.btn{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:8px;padding:8px 11px;font-size:.8rem;font-weight:700;white-space:nowrap}.btn{cursor:pointer}.btn:hover{border-color:var(--purple);color:var(--purple)}.btn.primary{background:var(--purple);border-color:var(--purple);color:#111}.layout{display:grid;grid-template-columns:320px minmax(0,1fr);max-width:1360px;margin:auto}.sidebar{position:sticky;top:128px;height:calc(100vh - 128px);overflow:auto;background:var(--surface);border-right:1px solid var(--border);padding:14px 0}.side-title{padding:0 16px 10px;color:var(--muted);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em}.nav-link{display:grid;grid-template-columns:1fr auto;width:100%;gap:8px;text-align:left;border:0;border-left:3px solid transparent;background:transparent;color:var(--muted);padding:9px 16px;cursor:pointer;font-size:.84rem;line-height:1.35}.nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--purple);border-left-color:var(--purple)}.nav-meta{font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--muted)}.main{padding:22px 28px 60px;min-width:0}.dashboard{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.stat{border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:13px}.stat span{color:var(--muted);font-size:.8rem}.stat b{display:block;color:var(--green);font-size:1.25rem}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.topic{border:1px solid var(--border);border-radius:10px;background:var(--surface);overflow:hidden;margin-bottom:16px;scroll-margin-top:150px}.topic-head{width:100%;border:0;background:var(--surface);color:var(--text);padding:17px 18px;text-align:left;display:flex;justify-content:space-between;gap:14px;cursor:pointer}.topic h2{margin:0;color:var(--purple);font-size:1.06rem}.topic p{margin:4px 0 0;color:var(--muted);font-size:.86rem}.topic-body{max-height:0;overflow:hidden;padding:0 14px;transition:max-height .22s ease,padding .22s ease}.topic.open .topic-body{padding:0 14px 14px}.question{border:1px solid var(--border);border-radius:8px;background:#0d111755;margin:10px 0;overflow:hidden;scroll-margin-top:150px}.question.open{border-color:#58a6ff80}.q-head{width:100%;border:0;background:transparent;color:var(--text);padding:13px;display:grid;grid-template-columns:auto 1fr auto auto auto;gap:9px;align-items:center;text-align:left;cursor:pointer}.qid{font-family:"JetBrains Mono",monospace;color:var(--accent);font-weight:800}.q-title{font-weight:750}.tag{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:.7rem;font-weight:800;color:var(--muted)}.oracle{color:#ff8f70;border-color:#ff8f7066;background:#f7816614}.postgres{color:#7db7ff;border-color:#58a6ff66;background:#1f6feb18}.both{color:#7ee787;border-color:#3fb95066;background:#2ea04318}.easy{color:#7ee787}.medium{color:#ffa657}.hard{color:#ff8f70}.q-body{max-height:0;overflow:hidden;padding:0 14px;transition:max-height .22s ease,padding .22s ease}.question.open .q-body{padding:0 14px 15px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{border:1px solid var(--border);border-radius:8px;background:var(--surface2);padding:13px;margin:12px 0}.card h3{margin:0 0 7px;color:var(--purple);font-size:.92rem}.card p,.card li{font-size:.9rem}.card p{margin:0}.tip{border-color:#3fb95080;background:#2ea04312}.bank{border-color:#ffa65780;background:#d2940012}.warn{border-color:#f7816680;background:#f7816612}.code-wrap{position:relative;margin:12px 0}.copy{position:absolute;right:8px;top:8px;border:1px solid var(--border);background:#21262dcc;color:var(--text);border-radius:6px;padding:5px 8px;font-size:.72rem;font-weight:800;cursor:pointer;z-index:2}.copy:hover{border-color:var(--green);color:var(--green)}pre{margin:0;overflow:auto;border:1px solid var(--border);border-radius:8px;background:var(--code)!important;padding:38px 12px 12px;font-family:"JetBrains Mono",Consolas,monospace;font-size:.82rem;line-height:1.55}code{font-family:"JetBrains Mono",Consolas,monospace}.inline-code{background:#0d1117;border:1px solid var(--border);border-radius:4px;padding:1px 5px}.hide{display:none!important}.small{font-size:.8rem;color:var(--muted)}.progress{height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-top:8px}.progress div{height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--green));transition:width .2s}.done{width:18px;height:18px;accent-color:var(--green)}@media(max-width:940px){.hero{position:relative}.topbar{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.sidebar{position:sticky;top:0;z-index:8;height:auto;max-height:230px;border-right:0;border-bottom:1px solid var(--border)}.dashboard{grid-template-columns:1fr 1fr}.main{padding:16px}.grid2{grid-template-columns:1fr}.topic,.question{scroll-margin-top:14px}.q-head{grid-template-columns:auto 1fr auto}.q-head .tag:nth-of-type(2){display:none}}@media(max-width:560px){.dashboard{grid-template-columns:1fr}.hero{padding:22px 16px}.main{padding:12px}.chip{white-space:normal}.q-head{padding:11px}.tag.oracle,.tag.postgres,.tag.both{display:none}}
+.tab-container{margin-top:20px;display:flex;gap:12px;border-bottom:1px solid var(--border);padding-bottom:0}
+.tab-btn{background:transparent;border:0;border-bottom:3px solid transparent;color:var(--muted);font-size:1.05rem;font-weight:700;padding:10px 16px;cursor:pointer;transition:0.2s;font-family:Inter,sans-serif;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--purple);border-bottom:3px solid var(--purple);}
+#casestudy-view{display:none;padding:30px 24px;max-width:1100px;margin:auto;}
+#casestudy-view.active{display:block;}
+#qa-view.hidden{display:none;}
+.cs-card{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:24px 28px;margin-bottom:24px;}
+.cs-card h2{margin:0 0 16px;color:var(--green);font-size:1.35rem;border-bottom:1px solid var(--border);padding-bottom:12px;}
+.cs-card h3{color:var(--accent);font-size:1.1rem;margin:20px 0 10px;}
+.cs-card p, .cs-card li{font-size:0.95rem;line-height:1.65;color:var(--text);}
+.cs-card ul{padding-left:22px;}
+.cs-highlight{background:#2ea04318;border-left:4px solid var(--green);padding:14px 18px;border-radius:0 8px 8px 0;margin:18px 0;}
+.cs-highlight p{margin:0;color:#7ee787;}
+.cs-card pre{margin:16px 0;}
 </style>
 </head>
 <body>
@@ -25,8 +40,13 @@
       <span class="chip">Accordion + copy code</span>
       <span class="chip">Progress lưu local</span>
     </div>
+    <div class="tab-container">
+      <button class="tab-btn active" id="tab-qa" onclick="switchTab('qa')">📌 Bộ 100 Câu Hỏi</button>
+      <button class="tab-btn" id="tab-cs" onclick="switchTab('cs')">🔥 Case Study Thực Chiến</button>
+    </div>
   </div>
 </header>
+<div id="qa-view">
 <div class="layout">
   <aside class="sidebar"><div class="side-title">Chủ đề</div><div id="nav"></div></aside>
   <main class="main">
@@ -44,6 +64,133 @@
     <div id="topics"></div>
   </main>
 </div>
+</div>
+<!-- START CASE STUDY VIEW -->
+<div id="casestudy-view">
+  
+  <div class="cs-card">
+    <h2>1. Kịch Bản Thiết Kế ERD & Bảng Biểu (System Design)</h2>
+    <p>Phân hệ lưu trữ giao dịch và xử lý cảnh báo rửa tiền (AML) với 4 bảng cốt lõi:</p>
+    <ul>
+      <li><strong>CUSTOMER (1) — (N) ACCOUNT:</strong> Khách hàng có nhiều tài khoản.</li>
+      <li><strong>ACCOUNT (1) — (N) TRANSACTION:</strong> Tài khoản phát sinh nhiều giao dịch.</li>
+      <li><strong>TRANSACTION (1) — (0..N) AML_ALERT:</strong> Giao dịch sinh ra cảnh báo rủi ro.</li>
+    </ul>
+    
+    <h3>Thiết kế chi tiết cấu trúc (Oracle 19c DDL)</h3>
+    <div class="code-wrap">
+      <button class="copy" onclick="copyCode(this)">Copy code</button>
+      <pre><code class="language-sql">-- 1. BẢNG DANH MỤC KHÁCH HÀNG
+CREATE TABLE CUSTOMER (
+    CUSTOMER_ID   NUMBER(19,0) NOT NULL,
+    FULL_NAME     VARCHAR2(150) NOT NULL,
+    ID_CARD       VARCHAR2(256) NOT NULL, -- Sẽ được Encrypt bằng DBMS_CRYPTO (hoặc pgcrypto trong Postgres)
+    PHONE         VARCHAR2(256),          
+    STATUS        VARCHAR2(20) DEFAULT 'ACTIVE',
+    CREATED_AT    TIMESTAMP DEFAULT SYSTIMESTAMP,
+    CONSTRAINT PK_CUSTOMER PRIMARY KEY (CUSTOMER_ID)
+);
+
+-- 2. BẢNG TÀI KHOẢN NGÂN HÀNG
+CREATE TABLE ACCOUNT (
+    ACCOUNT_NO    VARCHAR2(20) NOT NULL,
+    CUSTOMER_ID   NUMBER(19,0) NOT NULL,
+    ACCT_TYPE     VARCHAR2(10) NOT NULL,
+    BALANCE       NUMBER(18,2) DEFAULT 0.00, -- Tuyệt đối không dùng FLOAT để tránh sai số
+    CURRENCY      VARCHAR2(3) DEFAULT 'VND',
+    STATUS        VARCHAR2(20) DEFAULT 'OPEN',
+    CREATED_AT    TIMESTAMP DEFAULT SYSTIMESTAMP,
+    CONSTRAINT PK_ACCOUNT PRIMARY KEY (ACCOUNT_NO),
+    CONSTRAINT FK_ACCOUNT_CUSTOMER FOREIGN KEY (CUSTOMER_ID) REFERENCES CUSTOMER(CUSTOMER_ID)
+);</code></pre>
+    </div>
+    <div class="cs-highlight">
+      <p>💡 <strong>Điểm Specialist cần nhấn mạnh:</strong><br/>
+      - <strong>Kiểu dữ liệu:</strong> Số tiền luôn dùng <code>NUMBER(18,2)</code> (hoặc <code>DECIMAL</code> trong Postgres), không bao giờ dùng FLOAT.<br/>
+      - <strong>Bảo mật:</strong> PII (ID_CARD, PHONE) mã hóa AES256 từ vùng ODS (bằng <code>DBMS_CRYPTO</code> hoặc <code>pgcrypto</code>) theo luật An toàn thông tin.</p>
+    </div>
+  </div>
+
+  <div class="cs-card">
+    <h2>2. Kịch Bản Đánh Index & Partitioning (Bảng Tỷ Dòng)</h2>
+    <p>Đối với bảng TRANSACTION lên tới trăm triệu dòng mỗi tháng, quy hoạch vật lý là bắt buộc.</p>
+    
+    <div class="code-wrap">
+      <button class="copy" onclick="copyCode(this)">Copy code</button>
+      <pre><code class="language-sql">-- 3. BẢNG GIAO DỊCH (TỶ DÒNG) - Bỏ Physical Foreign Key để tối ưu INSERT
+CREATE TABLE TRANSACTION (
+    TXN_ID         NUMBER(19,0) NOT NULL,
+    ACCOUNT_NO     VARCHAR2(20) NOT NULL,
+    TXN_TYPE       VARCHAR2(10) NOT NULL,
+    AMOUNT         NUMBER(18,2) NOT NULL,
+    TXN_DATE       DATE NOT NULL,         -- Khóa phân vùng (Partition Key)
+    DESCRIPTION    VARCHAR2(250),
+    CHANNEL        VARCHAR2(20)
+)
+PARTITION BY RANGE (TXN_DATE) (
+    PARTITION SUB_TXN_2026_M04 VALUES LESS THAN (TO_DATE('2026-05-01', 'YYYY-MM-DD')),
+    PARTITION SUB_TXN_2026_M05 VALUES LESS THAN (TO_DATE('2026-06-01', 'YYYY-MM-DD')),
+    PARTITION SUB_TXN_DEFAULT VALUES LESS THAN (MAXVALUE)
+);
+
+-- TẠO LOCAL INDEX
+CREATE INDEX IX_TXN_ACCT_DATE ON TRANSACTION (ACCOUNT_NO, TXN_DATE) LOCAL;
+
+-- 4. BẢNG CẢNH BÁO AML (HỆ THỐNG NGHIỆP VỤ)
+CREATE TABLE AML_ALERT (
+    ALERT_ID      NUMBER(19,0) NOT NULL,
+    TXN_ID        NUMBER(19,0) NOT NULL,
+    RULE_CODE     VARCHAR2(30) NOT NULL, -- Ví dụ: R01_HIGH_VOLUME_CASH
+    RISK_LEVEL    VARCHAR2(10),          -- HIGH, MEDIUM, LOW
+    ALERT_DATE    TIMESTAMP DEFAULT SYSTIMESTAMP,
+    STATUS        VARCHAR2(20) DEFAULT 'NEW', -- NEW, INVESTIGATING, CLOSED
+    CONSTRAINT PK_AML_ALERT PRIMARY KEY (ALERT_ID)
+);</code></pre>
+    </div>
+    
+    <h3>Chiến lược giải thích với Khách hàng:</h3>
+    <ul>
+      <li><strong>Partition Pruning:</strong> Truy vấn theo tháng (<code>TXN_DATE</code>) sẽ chỉ quét đúng partition của tháng đó, tốc độ tăng gấp hàng trăm lần.</li>
+      <li><strong>Data Purging an toàn:</strong> Khi cần dọn data 5 năm trước, thay vì dùng lệnh <code>DELETE</code> gây treo DB (tốn Undo/WAL), chỉ cần dùng <code>ALTER TABLE TRANSACTION DROP PARTITION</code> (chạy mất 0.5s).</li>
+      <li><strong>Local Index:</strong> Khách hàng thường tra cứu lịch sử của 1 tài khoản trong 1 tháng. Dùng Local Index để khi Drop partition, các index khác vẫn <code>USABLE</code>.</li>
+      <li><strong>Bỏ Physical FK:</strong> Đề xuất không tạo Foreign Key trỏ về bảng ACCOUNT để tối đa tốc độ <code>INSERT</code> realtime. Việc check tính toàn vẹn đưa lên tầng Application hoặc ETL.</li>
+    </ul>
+  </div>
+
+  <div class="cs-card">
+    <h2>3. Công Việc Hằng Ngày (Daily Tasks & Troubleshooting)</h2>
+    <p>Trả lời mạch lạc theo quy trình 3 giai đoạn của DBA/Specialist:</p>
+    
+    <h3>Ca sáng (08h00 - 09h30): Health Check</h3>
+    <ul>
+      <li>Kiểm tra Dashboard <strong>Grafana (Prometheus exporter) / Dynatrace</strong>: CPU, RAM, IOPS, Active Sessions, Buffer Hit Ratio (> 95%).</li>
+      <li>Kiểm tra trạng thái đồng bộ HA: Oracle Data Guard (Apply Lag) hoặc PostgreSQL Replication Slot xem có bị lag không.</li>
+      <li>Check các Batch Job ETL đêm qua xem có job nào <code>FAIL</code> hoặc Long-running không.</li>
+    </ul>
+
+    <h3>Ca ngày (09h30 - 16h30): Performance Tuning</h3>
+    <ul>
+      <li><strong>Bắt Slow Query:</strong> Dùng <strong>AWR Report</strong> (Oracle) hoặc <strong>pg_stat_statements</strong> (PostgreSQL).</li>
+      <li>Dùng <code>EXPLAIN PLAN</code> / <code>EXPLAIN ANALYZE</code> để xem câu lệnh bị <em>Full Table Scan</em> hay Optimizer tính sai <em>Cardinality</em> do thống kê cũ (Stale stats).</li>
+      <li>Phối hợp Dev review SQL trước khi deploy lên UAT/PROD.</li>
+    </ul>
+
+    <h3>Cuối ngày / Cuối tuần: Bảo trì (Maintenance)</h3>
+    <ul>
+      <li>Theo dõi dung lượng Tablespace (Capacity Planning).</li>
+      <li>Chạy script thu gom rác (<code>VACUUM</code> trên PostgreSQL) hoặc cập nhật thống kê (<code>DBMS_STATS.GATHER_SCHEMA_STATS</code> trên Oracle) vào ban đêm.</li>
+    </ul>
+    
+    <div class="cs-highlight">
+      <p>🔥 <strong>Vũ khí bí mật - Quy trình xử lý sự cố (Treo DB):</strong><br/>
+      1. <strong>Tìm Root Cause:</strong> Không đoán mò. Check Wait Events bằng <code>V$SESSION_WAIT / ASH</code> (Oracle) hoặc <code>pg_stat_activity / pg_locks</code> (Postgres) xem Session nào đang gây <code>row lock contention</code>.<br/>
+      2. <strong>Workaround khẩn cấp:</strong> Xin phê duyệt <strong>KILL SESSION</strong> gây nghẽn luồng giao dịch.<br/>
+      3. <strong>Permanent Fix:</strong> Mang câu SQL về Test mổ xẻ Plan, thêm Index hoặc chỉnh Partition để dứt điểm.</p>
+    </div>
+  </div>
+
+</div>
+<!-- END CASE STUDY VIEW -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
@@ -214,6 +361,21 @@ document.getElementById("expandVisible").onclick=()=>document.querySelectorAll("
 document.getElementById("collapseAll").onclick=()=>document.querySelectorAll(".question.open").forEach(q=>setExpanded(q,q.querySelector(".q-body"),false));
 document.getElementById("resetProgress").onclick=()=>{if(confirm("Reset toàn bộ progress?")){state={};localStorage.removeItem(STORE);document.querySelectorAll(".done").forEach(x=>x.checked=false);updateProgress()}};
 window.addEventListener("resize",refreshHeights);render();
+function switchTab(tab){
+  if(tab==='qa'){
+    document.getElementById('tab-qa').classList.add('active');
+    document.getElementById('tab-cs').classList.remove('active');
+    document.getElementById('qa-view').classList.remove('hidden');
+    document.getElementById('casestudy-view').classList.remove('active');
+  } else {
+    document.getElementById('tab-qa').classList.remove('active');
+    document.getElementById('tab-cs').classList.add('active');
+    document.getElementById('qa-view').classList.add('hidden');
+    document.getElementById('casestudy-view').classList.add('active');
+    // Highlight syntax in case study view if not done yet
+    document.querySelectorAll('#casestudy-view pre code').forEach(x=>hljs.highlightElement(x));
+  }
+}
 </script>
 </body>
 </html>
