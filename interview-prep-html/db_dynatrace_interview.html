@@ -189,6 +189,31 @@ CREATE TABLE AML_ALERT (
     </div>
   </div>
 
+  <div class="cs-card">
+    <h2>4. Kịch Bản Data Architecture & Migration (Corporate Banking)</h2>
+    <p>Khi được hỏi về xây dựng hệ thống mới (Migration), ứng viên Data Architecture tuyệt đối không trả lời theo kiểu "Tắt server cũ, chép data, bật server mới" (Big Bang). Hệ thống Corporate Banking (Khách hàng Doanh nghiệp) với hàng trăm Entity phức tạp (Thư tín dụng L/C, Tài trợ thương mại, Giải ngân khoản vay) yêu cầu cách tiếp cận Migration an toàn, Multi-Phase.</p>
+    
+    <h3>1. Chiến lược Migration: Strangler Fig Pattern & Parallel Run</h3>
+    <ul>
+      <li><strong>Strangler Fig Pattern:</strong> Không đập bỏ toàn bộ Core Legacy cùng lúc. Chia nhỏ từng domain (Ví dụ: Cắt riêng Module Tiền gửi có kỳ hạn ra trước). Lớp API Gateway sẽ làm nhiệm vụ Router: Request cũ đi vào DB Oracle cũ, Request mới vào DB PostgreSQL mới.</li>
+      <li><strong>Change Data Capture (CDC):</strong> Dùng Kafka Connect + Debezium (hoặc Oracle GoldenGate) để đồng bộ (Sync) dữ liệu 2 chiều real-time giữa DB cũ và DB mới. Mục đích: Nếu hệ thống mới có lỗi nghiêm trọng, ta có thể Fallback (quay xe) về hệ thống cũ ngay lập tức mà không bị thất thoát giao dịch.</li>
+      <li><strong>Parallel Run & Reconciliation (Đối soát):</strong> Chạy ngầm cả hai hệ thống trong 1-3 tháng. Thiết kế các Batch Job (ETL) chạy cuối ngày để đối chiếu Tổng tài sản, Số dư tài khoản giữa Core cũ và Core mới. Nếu sai số = 0 trong 30 ngày liên tục mới được Sign-off để Cut-over hoàn toàn.</li>
+    </ul>
+
+    <h3>2. Thiết kế Kiến trúc Dữ liệu mới (Microservices Data Architecture)</h3>
+    <ul>
+      <li><strong>Database-per-service (Tách DB):</strong> Phá vỡ DB Monolithic khổng lồ. Domain Khách hàng (CIF) quản lý bởi 1 DB chuẩn hóa (Master Data Management). Domain Tín dụng (Lending) sở hữu DB riêng. Giải quyết triệt để vấn đề "Một bảng chết kéo theo toàn hệ thống chết".</li>
+      <li><strong>CQRS & Tách biệt OLTP/OLAP:</strong> Database Core chỉ tập trung xử lý Transaction (OLTP) với tốc độ cao. Dữ liệu ngay lập tức được stream (qua Kafka) về một Data Lake / Data Warehouse (như ClickHouse, Hadoop, hoặc Greenplum) để chạy báo cáo cuối ngày (OLAP). Tránh tình trạng sếp kéo báo cáo làm treo DB giao dịch.</li>
+      <li><strong>Event-Driven & SAGA Pattern:</strong> Trong kiến trúc mới không thể <code>JOIN</code> 2 bảng ở 2 DB khác nhau. Data Architect phải thiết kế cơ chế giao tiếp bằng Event. Để đảm bảo tính toàn vẹn (ACID), thay vì dùng Two-Phase Commit (2PC) rất chậm, phải áp dụng <strong>SAGA Pattern</strong> (nếu service B lỗi thì gọi API báo service A rollback lại tiền).</li>
+    </ul>
+    
+    <div class="cs-highlight">
+      <p>💡 <strong>Điểm Data Architect cần "Đóng đinh" hội đồng:</strong><br/>
+      - "Thưa anh/chị, Migration không phải là bài toán Copy SQL Data, mà cốt lõi là bài toán <strong>Đối soát (Reconciliation)</strong> và <strong>Fallback Plan (Kế hoạch lùi)</strong>."<br/>
+      - "Xây DB Microservices không khó ở việc tạo bảng, mà khó ở việc <strong>quản trị Master Data (MDM)</strong> để tránh dữ liệu rác, và đảm bảo <strong>Eventual Consistency (Nhất quán cuối)</strong> khi chia tách dữ liệu."</p>
+    </div>
+  </div>
+
 </div>
 <!-- END CASE STUDY VIEW -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
