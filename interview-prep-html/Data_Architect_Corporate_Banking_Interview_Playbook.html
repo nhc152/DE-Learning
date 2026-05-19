@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Architect Interview Playbook - Corporate Banking Migration</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #151d33;
+      --text: #e9eefb;
+      --muted: #aab6d3;
+      --line: rgba(255,255,255,0.12);
+      --accent: #4da3ff;
+      --ok: #31c48d;
+      --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(180deg, #0a0f1d 0%, #0f172b 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 20px 70px; }
+    .hero { margin-bottom: 24px; }
+    .badge {
+      display: inline-block;
+      border: 1px solid rgba(77,163,255,0.5);
+      color: #8cc1ff;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    h1 { margin: 12px 0 8px; font-size: 30px; }
+    .sub { color: var(--muted); max-width: 900px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    h3 { margin: 0 0 8px; font-size: 15px; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 4px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border: 1px solid var(--line); padding: 10px; vertical-align: top; }
+    th { text-align: left; color: #bcd7ff; background: rgba(255,255,255,0.02); }
+    code, pre {
+      font-family: Consolas, "Courier New", monospace;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+    }
+    code { padding: 1px 5px; }
+    pre {
+      padding: 12px;
+      white-space: pre-wrap;
+      overflow: auto;
+      margin: 0;
+      font-size: 12px;
+    }
+    .kpi { color: #95f6ca; font-weight: 700; }
+    .warn { color: #ffd28a; }
+    .ok { color: #95f6ca; }
+    .section { margin-top: 18px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <span class="badge">Interview Pack</span>
+      <h1>Data Architect - Corporate Banking Migration</h1>
+      <div class="sub">
+        Focus for India interview panel: framework-first thinking, risk governance, SQL/DB fundamentals, ERD clarity,
+        and execution confidence from assessment to cutover and rollback.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>1) Requirement Interpretation (Your JD vs Interview Expectation)</h2>
+      <table>
+        <thead>
+          <tr><th>Requirement</th><th>What it really means</th><th>What to show in interview</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>10+ years enterprise architecture</td><td>Lead strategy and standards, not only delivery</td><td>Present data vision, target-state architecture, and governance model</td></tr>
+          <tr><td>Oracle/Exadata/Postgres depth</td><td>Performance at scale and platform trade-offs</td><td>Partitioning, indexing, CDC, execution plan tuning, storage strategy</td></tr>
+          <tr><td>Data modernization and hybrid cloud</td><td>Controlled migration with minimal business disruption</td><td>Phased migration roadmap, domain wave plan, security and compliance controls</td></tr>
+          <tr><td>Metadata-driven accelerator</td><td>Reusable framework beyond one project</td><td>Control tables, dynamic SQL, restartability, audit logs</td></tr>
+          <tr><td>Data reconciliation framework</td><td>Financial correctness and auditability</td><td>3-layer checks: row count, totals, checksum + exception process</td></tr>
+          <tr><td>Self-service reporting</td><td>Governed data products for business teams</td><td>Semantic model, certified KPI catalog, role-based access</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section grid">
+      <div class="card">
+        <h2>2) Architect Mindset (keywords India panel likes)</h2>
+        <ul>
+          <li><b>Methodology over scripts:</b> discovery, design, build, rehearsal, cutover, hypercare.</li>
+          <li><b>Design for failure:</b> checkpoint, restart, idempotent jobs, rollback gates.</li>
+          <li><b>Data quality first:</b> reject dirty data into quarantine, do not contaminate target core.</li>
+          <li><b>Reconciliation is non-negotiable:</b> ETL success is not migration success.</li>
+          <li><b>Governance and control:</b> lineage, ownership, maker-checker approvals, auditable logs.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>3) Delivery Storyline (2-minute summary)</h2>
+        <ul>
+          <li>Started with source profiling and critical data element inventory.</li>
+          <li>Designed metadata-driven migration engine and reconciliation framework.</li>
+          <li>Executed dry-runs, tuned bottlenecks, reduced cutover window iteratively.</li>
+          <li>Prepared minute-by-minute runbook and objective rollback criteria.</li>
+          <li>Go-live decision based on data parity + business sign-off + operational SLA.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4) ERD Blueprint for Corporate Banking (example)</h2>
+      <pre>CUSTOMER (customer_id PK, segment, kyc_status)
+  1 - N ACCOUNT (account_id PK, customer_id FK, product_id FK, branch_id FK, status, currency)
+  1 - N KYC_PROFILE (kyc_id PK, customer_id FK, risk_rating, review_date)
+
+ACCOUNT (account_id PK)
+  1 - N TXN (txn_id PK, account_id FK, txn_ts, value_date, amount, dr_cr_flag, channel_code)
+  1 - N ACCOUNT_BALANCE_DAILY (account_id FK, balance_date, closing_balance)
+
+PRODUCT (product_id PK) 1 - N ACCOUNT
+BRANCH  (branch_id PK)  1 - N ACCOUNT
+
+Integrity Rules:
+1) TXN.amount is NUMBER(18,2) and not null
+2) ACCOUNT_BALANCE_DAILY unique(account_id, balance_date)
+3) FK constraints validate after bulk load
+4) No orphan account/customer records</pre>
+    </div>
+
+    <div class="section grid">
+      <div class="card">
+        <h2>5) Sample SQL/DDL for Interview Whiteboard</h2>
+        <h3>Table design</h3>
+        <pre>CREATE TABLE txn (
+  txn_id        VARCHAR2(40) PRIMARY KEY,
+  account_id    VARCHAR2(30) NOT NULL,
+  txn_ts        TIMESTAMP NOT NULL,
+  value_date    DATE NOT NULL,
+  amount        NUMBER(18,2) NOT NULL,
+  dr_cr_flag    CHAR(1) NOT NULL CHECK (dr_cr_flag IN ('D','C')),
+  channel_code  VARCHAR2(10),
+  CONSTRAINT fk_txn_account FOREIGN KEY (account_id)
+    REFERENCES account(account_id)
+);</pre>
+        <h3>Performance examples</h3>
+        <pre>-- Range partition for large transaction table
+PARTITION BY RANGE (value_date)
+
+-- Useful local index pattern
+CREATE INDEX idx_txn_acc_date ON txn(account_id, value_date);</pre>
+      </div>
+      <div class="card">
+        <h2>6) Reconciliation SQL (3-layer)</h2>
+        <pre>-- Layer 1: row count parity
+SELECT COUNT(*) FROM src.txn WHERE value_date = :biz_date;
+SELECT COUNT(*) FROM tgt.txn WHERE value_date = :biz_date;
+
+-- Layer 2: financial parity
+SELECT SUM(amount) FROM src.txn WHERE value_date = :biz_date;
+SELECT SUM(amount) FROM tgt.txn WHERE value_date = :biz_date;
+
+-- Layer 3: checksum parity
+SELECT STANDARD_HASH(
+  account_id || '|' || TO_CHAR(value_date,'YYYYMMDD') || '|' || TO_CHAR(amount),
+  'SHA256'
+) AS row_hash
+FROM src.txn
+WHERE value_date = :biz_date;</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>7) Metadata-Driven Migration Framework (design)</h2>
+      <table>
+        <thead>
+          <tr><th>Control table</th><th>Core columns</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>META_TABLE_CONFIG</code></td><td>source_table, target_table, load_mode, priority</td><td>Execution config by table</td></tr>
+          <tr><td><code>META_COLUMN_MAPPING</code></td><td>source_col, target_col, transform_expr</td><td>Dynamic mapping and transformation</td></tr>
+          <tr><td><code>BATCH_CONTROL</code></td><td>run_id, table_name, checkpoint, status, watermark</td><td>Restartability and audit trail</td></tr>
+          <tr><td><code>RECON_RULE</code></td><td>table_name, rule_type, threshold, severity</td><td>Declarative quality controls</td></tr>
+          <tr><td><code>RECON_RESULT</code></td><td>run_id, table_name, result, diff_count, approver</td><td>Go/no-go evidence</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>8) Responsibilities by Phase</h2>
+      <table>
+        <thead>
+          <tr><th>Phase</th><th>What you must deliver</th><th>Success metric</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Discovery</td><td>Data profiling, CDE inventory, domain risk map</td><td>Known data quality baseline and remediation plan</td></tr>
+          <tr><td>Design</td><td>Target model, mapping spec, NFRs, security architecture</td><td>Signed architecture and migration approach</td></tr>
+          <tr><td>Build + Dry run</td><td>Framework implementation, CDC, reconciliation, tuning</td><td>Stable rehearsal with predictable runtime</td></tr>
+          <tr><td>Cutover</td><td>Runbook by minute, go/no-go gates, rollback path</td><td><span class="kpi">Minimum downtime + zero financial mismatch</span></td></tr>
+          <tr><td>Hypercare</td><td>SLA monitoring, defect triage, sign-off closure</td><td>Operational stability and closure report</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section grid">
+      <div class="card">
+        <h2>9) High-Probability Questions</h2>
+        <ul>
+          <li>How do you guarantee data integrity during migration?</li>
+          <li>How do you migrate billion-row tables with near-zero downtime?</li>
+          <li>How do you design metadata-driven accelerators?</li>
+          <li>How do you define go/no-go and rollback criteria?</li>
+          <li>How do you tune Oracle/Exadata for heavy loads?</li>
+          <li>How do you secure PII in non-prod environments?</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>10) Answer Pattern (STAR + Framework)</h2>
+        <ul>
+          <li><b>Situation:</b> legacy core banking constraints, strict cutover window.</li>
+          <li><b>Task:</b> migrate complete data with financial parity and low downtime.</li>
+          <li><b>Action:</b> phased load + CDC + metadata framework + reconciliation gates.</li>
+          <li><b>Result:</b> cutover within SLA, no critical mismatch, business sign-off.</li>
+          <li><b>Risk control:</b> checkpoint restart and rollback plan validated in dry-run.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>11) Practical 7-day Preparation Checklist</h2>
+      <ul>
+        <li>Day 1: Rehearse 2-minute architecture story and 10-minute project deep dive.</li>
+        <li>Day 2: Practice ERD drawing for customer-account-transaction domain.</li>
+        <li>Day 3: Practice SQL for joins, aggregation, reconciliation, and performance tuning.</li>
+        <li>Day 4: Prepare cutover runbook sample with rollback decision matrix.</li>
+        <li>Day 5: Prepare metadata table design and orchestration flow explanation.</li>
+        <li>Day 6: Practice governance, masking, lineage, and audit controls discussion.</li>
+        <li>Day 7: Mock interview with 5 scenario questions and concise answers.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>12) What to Emphasize from Your Existing AMOS Experience</h2>
+      <ul>
+        <li>Real production migration experience with rehearsal-based improvement loop.</li>
+        <li>Cutover window optimization using phased strategy and checkpointing.</li>
+        <li>Operational logging and auditable migration execution pattern.</li>
+        <li>Concrete lessons learned: formal reconciliation, explicit rollback criteria, vendor SLA governance.</li>
+      </ul>
+      <p class="sub">
+        Position your AMOS project as the practical backbone, then extend it to banking-grade controls:
+        stronger reconciliation, stricter governance, and higher resilience requirements.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

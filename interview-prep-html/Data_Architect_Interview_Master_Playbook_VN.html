@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cẩm nang Phỏng vấn Data Architect - Corporate Banking Migration</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.6);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #ef4444;
+      --border-color: rgba(255, 255, 255, 0.1);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+      color: var(--text-main);
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    .card h2 {
+      color: var(--accent);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-top: 0;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card h3 {
+      color: var(--text-main);
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px 6px;
+      border-radius: 4px;
+      color: #fbbf24;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #050b14;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Courier New', monospace;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 10px; }
+    .highlight { color: var(--accent); font-weight: 600; }
+    .keyword { color: var(--success); font-weight: 600; }
+    .alert {
+      background: rgba(234, 179, 8, 0.1);
+      border-left: 4px solid var(--warning);
+      padding: 12px 16px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      margin: 4px 4px 4px 0;
+    }
+    .qa-box {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .qa-q { font-weight: 700; color: var(--warning); font-size: 1.1rem; margin-bottom: 10px; }
+    .qa-a { color: var(--text-main); }
+    .qa-a strong { color: var(--accent); }
+    
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      h1 { font-size: 2rem; }
+    }
+  </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+  </script>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Tài Liệu Ôn Tập Phỏng Vấn Data Architect</h1>
+    <div class="subtitle">Dự án Migration Corporate Banking (Thực chiến với Team Ấn Độ)</div>
+  </header>
+
+  <!-- Phần 1: Phân tích JD -->
+  <div class="card">
+    <h2>🎯 1. Giải mã Yêu cầu Công việc (Job Description)</h2>
+    <p>Đối với team Ấn Độ, họ không chỉ tìm một kỹ sư biết code, họ tìm một <strong>Kiến trúc sư hệ thống (Architect)</strong> có khả năng quản trị rủi ro và xây dựng quy trình.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Yêu cầu từ JD</th>
+          <th>Mindset ẩn bên trong</th>
+          <th>Điều cần chứng minh trong phỏng vấn</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>10+ yrs Enterprise Data Architecture</td>
+          <td>Khả năng hoạch định chiến lược và chuẩn hóa.</td>
+          <td>Tầm nhìn dữ liệu (Data Vision), mô hình quản trị (Governance).</td>
+        </tr>
+        <tr>
+          <td>Oracle Exadata & PostgreSQL</td>
+          <td>Hiểu sâu về tối ưu hóa cơ sở dữ liệu lớn.</td>
+          <td>Kỹ thuật Partitioning, Indexing, Execution Plan, CDC.</td>
+        </tr>
+        <tr>
+          <td>Data Modernization, Migration, ETL</td>
+          <td>Di cư dữ liệu an toàn, không làm gián đoạn kinh doanh.</td>
+          <td>Chiến lược Phase-by-phase, Zero-Downtime, Cutover Plan.</td>
+        </tr>
+        <tr>
+          <td>Big Data (PySpark), Abinitio, Atlan, Collibra</td>
+          <td>Xử lý song song dữ liệu lớn & Quản trị siêu dữ liệu.</td>
+          <td>Khả năng tích hợp Data Catalog (Atlan/Collibra) và tối ưu Spark Jobs.</td>
+        </tr>
+        <tr>
+          <td>Metadata-driven Accelerators & Reconciliation</td>
+          <td>Tự động hóa thay vì code tay. Tính chính xác tuyệt đối.</td>
+          <td>Thiết kế bảng cấu hình Control Table, Đối soát 3 lớp (Row, Amount, Checksum).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Phần 2: Tư duy Cốt lõi -->
+  <div class="grid-2">
+    <div class="card">
+      <h2>🧠 2. Bốn "Mindset" Ăn Điểm Team Ấn Độ</h2>
+      <p>Khi phỏng vấn, hãy lồng ghép 4 từ khóa này vào câu trả lời để chứng tỏ bạn là một Architect thực thụ:</p>
+      <ul>
+        <li><span class="keyword">"Garbage in, Garbage out":</span> Tôi không bao giờ tin dữ liệu nguồn. Dữ liệu lỗi phải nằm lại vùng Staging/Quarantine, tuyệt đối không đẩy rác vào Core mới.</li>
+        <li><span class="keyword">Metadata-Driven over Hard-coding:</span> Nếu có 1000 bảng, tôi không viết 1000 script. Tôi thiết kế 1 Framework chạy bằng bảng cấu hình (Control Schema) để tự động sinh lệnh SQL.</li>
+        <li><span class="keyword">Design for Failure:</span> Migration Terabytes dữ liệu chắc chắn sẽ có lúc đứt cáp, lock DB. Hệ thống phải có <strong>Checkpoint/Restartability</strong> (lỗi ở đâu, bật lại chạy tiếp ở đó).</li>
+        <li><span class="keyword">Reconciliation is Non-negotiable:</span> Script chạy <code>Success</code> không có ý nghĩa. Thành công là khi đối soát độc lập chứng minh 100% khớp nhau về số dòng và giá trị tài chính.</li>
+      </ul>
+    </div>
+
+    <!-- Phần 3: Bốn Giai đoạn -->
+    <div class="card">
+      <h2>🚀 3. Quy trình Migration 4 Phase Chuẩn Doanh nghiệp</h2>
+      <ul>
+        <li><strong>Phase 1: Discovery & Assessment (Khảo sát):</strong> Phân tích Data Profiling, đánh giá chất lượng nguồn. Mapping & Gap Analysis. Tính toán Volume/Capacity.</li>
+        <li><strong>Phase 2: Migration Architecture Design (Thiết kế):</strong> Quyết định chiến lược (Trickle vs Big Bang). Thiết kế Staging/Landing Zone. Xây dựng Data Reconciliation Framework.</li>
+        <li><strong>Phase 3: Execution & Dry-run (Chạy thử):</strong> Code Metadata-driven Pipeline bằng PySpark/Oracle PL/SQL. Tổ chức Dry-run trên môi trường Staging để đo đạc Execution Time Window và Performance Tuning.</li>
+        <li><strong>Phase 4: Cutover & Go-Live (Di cư thật):</strong> Chuẩn bị Runbook theo từng phút. Kích hoạt Checksum cuối. Có sẵn kịch bản quay đầu (Rollback Strategy) nếu gặp sự cố nghiêm trọng.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Phần Mới: Nâng cấp AMOS -->
+  <div class="card">
+    <h2>🌟 Phần Đặc biệt: Nâng cấp dự án AMOS lên chuẩn Corporate Banking</h2>
+    <p>Sử dụng kinh nghiệm AMOS 36 triệu records làm nền tảng, nhưng thay đổi cách kể chuyện để phù hợp với Architect Ngân hàng:</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kinh nghiệm thực tế (AMOS / DBA)</th>
+          <th>Nâng cấp lên chuẩn Architect (Ngân hàng)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Viết script <code>export_amasis.sh</code> và <code>frpcr.sql</code> cho từng bảng.</td>
+          <td><span class="highlight">Metadata-Driven:</span> Xây dựng <strong>Control Schema</strong> để tự động hóa sinh lệnh (Dynamic PySpark/PLSQL) thay vì hardcode hàng nghìn bảng.</td>
+        </tr>
+        <tr>
+          <td>Đối soát bằng cách đếm dòng <code>wc -l</code> qua file CSV.</td>
+          <td><span class="highlight">3-Layer Reconciliation:</span> Đếm dòng (Row-count) + Đối soát tài chính (Sum Amount) + Băm dữ liệu (Data Hash/Checksum).</td>
+        </tr>
+        <tr>
+          <td>Freeze (đóng băng) hệ thống cũ để chạy Cutover 9.9M records.</td>
+          <td><span class="highlight">Zero-Downtime CDC:</span> Dùng công cụ CDC (như Oracle GoldenGate) để đồng bộ realtime, giảm downtime từ vài chục giờ xuống dưới 5 phút.</td>
+        </tr>
+        <tr>
+          <td>Chuyển nguyên xi dữ liệu từ SDB (Raw) sang MDB (Curated).</td>
+          <td><span class="highlight">Data Masking:</span> Áp dụng che giấu dữ liệu (PII) cho số tài khoản, số thẻ tín dụng trước khi ném vào vùng UAT/Test.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Phần Mới: Whiteboard Practice -->
+  <div class="card">
+    <h2>✍️ Thực hành Vẽ Kiến trúc (Whiteboard Interview Practice)</h2>
+    <p>Team Ấn Độ thường yêu cầu bạn share màn hình và vẽ kiến trúc. Hãy tập vẽ sơ đồ <strong>Topology Migration</strong> sau đây và giải thích theo 5 bước:</p>
+    
+    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; margin-top: 15px; border: 1px solid var(--border-color); overflow-x: auto;">
+      <div class="mermaid">
+        flowchart LR
+            subgraph Source [Hệ thống Legacy]
+                DB1[(Legacy Core\nOracle/AS400)]
+            end
+
+            subgraph Integration [Tầng Di cư & Xử lý]
+                direction TB
+                CDC[CDC / Oracle GoldenGate\nReal-time Delta]
+                Bulk[Bulk Load / ETL\nHistorical Data]
+            end
+
+            subgraph Landing [Landing / Staging Zone]
+                SDB[(Raw Schema\n+ Data Masking)]
+            end
+
+            subgraph Curated [Curated Zone]
+                MDB[(Standardized Schema\nReady for Target)]
+            end
+
+            subgraph Target [Hệ thống Đích]
+                DB2[(Target Core\nExadata/Postgres)]
+            end
+
+            subgraph Control [Quản trị Kiến trúc]
+                Meta[(Metadata Config)]
+                Recon[(Reconciliation Engine)]
+            end
+
+            DB1 -- 1. Lịch sử (Bulk) --> Bulk
+            DB1 -- 2. Realtime (Delta) --> CDC
+            Bulk --> SDB
+            CDC --> SDB
+            SDB -- 3. Clean/Transform --> MDB
+            MDB -- 4. Load --> DB2
+            
+            Meta -. Điều khiển .-> Bulk
+            Meta -. Điều khiển .-> CDC
+            DB1 -. 5. Đối soát 3 lớp .- Recon
+            DB2 -. 5. Đối soát 3 lớp .- Recon
+            
+            style DB1 fill:#ef4444,stroke:#333,stroke-width:2px,color:#fff
+            style DB2 fill:#34d399,stroke:#333,stroke-width:2px,color:#000
+            style Meta fill:#f59e0b,stroke:#333,stroke-width:2px,color:#000
+            style Recon fill:#38bdf8,stroke:#333,stroke-width:2px,color:#000
+      </div>
+    </div>
+    
+    <h3 style="margin-top:20px;">Cách trình bày 5 Bước khi vẽ (Nói bằng tiếng Anh):</h3>
+    <ul style="color: var(--text-muted); line-height: 1.8;">
+      <li><strong>Step 1: Topology Design:</strong> "I separate the flow into 3 layers: Source, Staging (with Masking for PII), and Target Core."</li>
+      <li><strong>Step 2: Metadata-driven Framework:</strong> "I don't hardcode. The ETL engine is driven by a <code>Metadata Config</code> schema (the yellow box)."</li>
+      <li><strong>Step 3: Zero-Downtime Strategy:</strong> "I use 2 pipelines. Bulk Load for history, and CDC (GoldenGate/Debezium) for real-time transactions."</li>
+      <li><strong>Step 4: Transformation:</strong> "Data moves from Raw (SDB) to Curated (MDB) with strict constraints."</li>
+      <li><strong>Step 5: Reconciliation:</strong> "Finally, the <code>Reconciliation Engine</code> (blue box) independently compares Source and Target using Row-count, Amount, and Checksum."</li>
+    </ul>
+  </div>
+
+  <!-- Phần 4: Thiết kế DB & SQL -->
+  <div class="card">
+    <h2>🛠 4. Thiết Kế Database Thực Chiến (Whiteboard / Technical Design)</h2>
+    <p>Interviewer rất hay yêu cầu bạn thiết kế cấu trúc lưu trữ và đối soát.</p>
+    
+    <h3>A. Thiết kế bảng Metadata (Dùng để chạy Tự động - Framework)</h3>
+    <p>Thay vì hardcode, bạn tạo 1 Schema điều khiển tên là <code>MIGRATION_CTRL</code>:</p>
+    <pre>
+CREATE TABLE migration_metadata_config (
+    table_id          NUMBER PRIMARY KEY,
+    source_table      VARCHAR2(100),
+    target_table      VARCHAR2(100),
+    load_strategy     VARCHAR2(50),  -- Ví dụ: 'TRUNCATE_LOAD', 'CDC_UPSERT'
+    partition_key     VARCHAR2(50),
+    is_active         CHAR(1) DEFAULT 'Y'
+);
+
+CREATE TABLE migration_batch_control (
+    batch_id          NUMBER PRIMARY KEY,
+    table_id          NUMBER REFERENCES migration_metadata_config(table_id),
+    start_time        TIMESTAMP,
+    end_time          TIMESTAMP,
+    status            VARCHAR2(20),  -- 'RUNNING', 'FAILED', 'COMPLETED'
+    rows_processed    NUMBER,
+    checkpoint_val    VARCHAR2(100)  -- Dùng để Restartability
+);</pre>
+
+    <h3>B. SQL Đối Soát 3 Lớp (Data Reconciliation)</h3>
+    <pre>
+-- Lớp 1: Row-Count Balance (Đếm dòng)
+SELECT COUNT(*) FROM source.txn_table WHERE value_date = :biz_date;
+SELECT COUNT(*) FROM target.txn_table WHERE value_date = :biz_date;
+
+-- Lớp 2: Financial Numeric Aggregation (Tổng số tiền)
+SELECT SUM(amount) FROM source.txn_table WHERE value_date = :biz_date;
+SELECT SUM(amount) FROM target.txn_table WHERE value_date = :biz_date;
+
+-- Lớp 3: Data Hash/Checksum (Kiểm tra lệch data)
+-- Dùng hàm HASH mã hóa nối chuỗi các cột quan trọng
+SELECT DBMS_CRYPTO.HASH(
+    UTL_I18N.STRING_TO_RAW(account_id || '|' || amount || '|' || currency, 'AL32UTF8'), 
+    2 -- HASH_MD5
+) AS row_hash
+FROM source.txn_table;</pre>
+  </div>
+
+  <!-- Phần 5: Kịch bản Phỏng vấn -->
+  <div class="card">
+    <h2>🗣 5. Kịch Bản Hỏi - Đáp (Scenario-based Q&A)</h2>
+
+    <div class="qa-box">
+      <div class="qa-q">Q1: "Làm sao anh đảm bảo dữ liệu di cư sang hệ thống mới chính xác 100% không bị mất mát?"</div>
+      <div class="qa-a">
+        <strong>Tư duy trả lời:</strong> Trình bày Framework đối soát 3 lớp (3-Layer Reconciliation Framework).<br><br>
+        "To ensure 100% data integrity, I design an independent 3-Layer Data Reconciliation Framework. <br>
+        - <strong>Level 1 (Row-count):</strong> Validate total records between Source and Target.<br>
+        - <strong>Level 2 (Financial Aggregation):</strong> Compare SUM(AMOUNT) to ensure not a single cent is lost.<br>
+        - <strong>Level 3 (Data Hash/Checksum):</strong> For critical tables like CUSTOMER or TRANSACTION, I generate a SHA-256 or MD5 hash on core columns in both databases. If the hashes match, the data is perfectly identical without any silent corruption."
+      </div>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-q">Q2: "Hệ thống Core Banking chạy 24/7, nếu anh migrate bảng Transaction hàng tỷ dòng, anh xử lý bài toán Downtime thế nào?"</div>
+      <div class="qa-a">
+        <strong>Tư duy trả lời:</strong> Kết hợp Bulk Load lịch sử + CDC (Zero-Downtime Migration).<br><br>
+        "For a 24/7 Core Banking system, Big Bang is impossible. I propose a <strong>Hybrid Strategy using Historical Load combined with CDC (Change Data Capture)</strong>.<br>
+        - <strong>Phase 1 (Historical Load):</strong> I migrate historical data (e.g., 5 years back) weeks before Go-Live using Direct Path Insert (APPEND hint in Oracle Exadata) during off-peak hours to minimize performance impact.<br>
+        - <strong>Phase 2 (Delta Load via CDC):</strong> For live transactions, I configure CDC tools like Oracle GoldenGate or Debezium for Postgres to replicate INSERT/UPDATE directly from Redo Logs/WAL. <br>
+        - On Cutover day, the two systems are fully synced, and we only need a 5-minute window to switch traffic from legacy to target."
+      </div>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-q">Q3: "Hãy giải thích cách anh thiết kế một Metadata-driven Migration Framework?"</div>
+      <div class="qa-a">
+        <strong>Tư duy trả lời:</strong> Tách biệt logic và cấu hình.<br><br>
+        "Instead of hard-coding 100 scripts for 100 tables, I decouple the migration logic using a <strong>Control Schema</strong>. I create tables like <code>MIGRATION_METADATA_CONFIG</code> storing Source_Table, Target_Table, and Mapping_Logic. <br>
+        Then, I write a Master PySpark Pipeline or a Master Stored Procedure that reads this config table and dynamically generates SQL statements using <code>EXECUTE IMMEDIATE</code>. If the business adds 50 new tables, we don't write new code; we just insert 50 rows into the control table."
+      </div>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-q">Q4: "Khi đưa dữ liệu lên môi trường Test (UAT), anh xử lý vấn đề bảo mật dữ liệu nhạy cảm (PII) thế nào?"</div>
+      <div class="qa-a">
+        <strong>Tư duy trả lời:</strong> Thể hiện tư duy Data Governance, Data Masking.<br><br>
+        "Security is critical in banking. I implement <strong>Data Masking and Obfuscation</strong> for all non-prod environments. During the migration to Staging/UAT, I use tools or native functions like <code>DBMS_CRYPTO</code> in Oracle to mask PII data (e.g., masking the last 4 digits of a credit card or scrambling names). This ensures we comply with data privacy regulations while testers still have production-like data shapes to work with."
+      </div>
+    </div>
+  </div>
+
+  <!-- Phần 6: Mẹo Giao tiếp -->
+  <div class="card">
+    <h2>💡 6. Từ Khóa & Mẹo "Ghi Điểm" Tuyệt Đối</h2>
+    <div class="grid-2">
+      <div>
+        <h3>Thuật ngữ (Buzzwords) phải dùng:</h3>
+        <span class="badge">Methodology</span>
+        <span class="badge">Framework</span>
+        <span class="badge">Governance</span>
+        <span class="badge">Mitigation</span>
+        <span class="badge">Risk Management</span>
+        <span class="badge">Decoupling</span>
+        <span class="badge">Scalability</span>
+        <span class="badge">Best Practices</span>
+        <span class="badge">Zero Downtime</span>
+        <span class="badge">Data Lineage</span>
+      </div>
+      <div>
+        <h3>Chiến thuật tâm lý:</h3>
+        <p>✔️ <strong>Nói về rủi ro trước khi họ hỏi:</strong> "One of the biggest risks in this phase is... and my mitigation plan is..."</p>
+        <p>✔️ <strong>Sử dụng cấu trúc STAR:</strong> Situation (Tình huống) &rarr; Task (Nhiệm vụ) &rarr; Action (Hành động kiến trúc) &rarr; Result (Kết quả).</p>
+        <p>✔️ <strong>Tự tin về Rollback:</strong> Kiến trúc sư xịn là người thiết kế sẵn nút "Quay đầu" (Rollback) mà không sợ hãi.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
