@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMOS Data Migration — Tổng hợp dự án</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --text2: #9aa3b5;
+    --text3: #5f6880;
+    --accent: #4f8ef7;
+    --accent2: #2563eb;
+    --green: #22c55e;
+    --green2: #15803d;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --teal: #14b8a6;
+    --purple: #a78bfa;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 15px;
+  }
+
+  /* HEADER */
+  .hero {
+    background: linear-gradient(135deg, #0f1117 0%, #1a2540 60%, #0f1117 100%);
+    border-bottom: 1px solid var(--border2);
+    padding: 48px 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 70% 50%, rgba(79,142,247,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(79,142,247,0.15); border: 1px solid rgba(79,142,247,0.3);
+    color: #93c5fd; font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+    padding: 4px 12px; border-radius: 20px; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .hero p { color: var(--text2); font-size: 15px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 24px; margin-top: 20px; flex-wrap: wrap; }
+  .hero-meta span { color: var(--text3); font-size: 13px; }
+  .hero-meta strong { color: var(--text2); }
+
+  /* LAYOUT */
+  .container { max-width: 1000px; margin: 0 auto; padding: 40px 40px 80px; }
+  .section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h2 { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+
+  /* PIPELINE FLOW */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .pipe-step {
+    padding: 20px 14px;
+    border-right: 1px solid var(--border);
+    position: relative;
+    text-align: center;
+  }
+  .pipe-step:last-child { border-right: none; }
+  .pipe-step::after {
+    content: '→';
+    position: absolute; right: -10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3); font-size: 16px; z-index: 2;
+    background: var(--bg2); padding: 0 2px;
+  }
+  .pipe-step:last-child::after { display: none; }
+  .pipe-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; margin: 0 auto 10px;
+  }
+  .pipe-label { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .pipe-sub { font-size: 11px; color: var(--text3); line-height: 1.4; }
+  .pipe-time { font-size: 11px; color: var(--amber); font-weight: 600; margin-top: 6px; }
+  .pi-as400 { background: rgba(167,139,250,0.15); }
+  .pi-csv { background: rgba(79,142,247,0.15); }
+  .pi-sdb { background: rgba(20,184,166,0.15); }
+  .pi-mdb { background: rgba(34,197,94,0.15); }
+  .pi-amos { background: rgba(245,158,11,0.15); }
+
+  /* METRICS GRID */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .metric-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 16px;
+  }
+  .metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .metric-val { font-size: 22px; font-weight: 700; color: #fff; }
+  .metric-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+  .metric-delta { font-size: 12px; font-weight: 600; }
+  .delta-good { color: var(--green); }
+  .delta-bad { color: var(--red); }
+
+  /* COMPARISON TABLE */
+  .compare-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    background: var(--bg3); color: var(--text2);
+    padding: 10px 14px; text-align: left; font-weight: 600;
+    border-bottom: 1px solid var(--border2);
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-num { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .td-good { color: var(--green); font-weight: 600; }
+  .td-neutral { color: var(--text2); }
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+  }
+  .tag-blue { background: rgba(79,142,247,0.15); color: #93c5fd; }
+  .tag-green { background: rgba(34,197,94,0.15); color: #86efac; }
+  .tag-amber { background: rgba(245,158,11,0.15); color: #fcd34d; }
+  .tag-red { background: rgba(239,68,68,0.15); color: #fca5a5; }
+  .tag-teal { background: rgba(20,184,166,0.15); color: #5eead4; }
+  .tag-purple { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+  }
+  .card h3 { color: var(--text); font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 8px; }
+  .step {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px; background: var(--bg3); border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
+  }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .step-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .step-code {
+    margin-top: 6px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 4px; padding: 6px 10px; font-family: 'Cascadia Code','Consolas',monospace;
+    font-size: 11px; color: #7dd3fc; line-height: 1.6;
+  }
+
+  /* PHASE TIMELINE */
+  .timeline { display: flex; flex-direction: column; gap: 12px; }
+  .timeline-item {
+    display: grid; grid-template-columns: 120px 1fr;
+    gap: 16px; align-items: start;
+  }
+  .timeline-date { font-size: 12px; color: var(--text3); font-weight: 600; padding-top: 3px; text-align: right; }
+  .timeline-body {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    border-left: 3px solid var(--border2);
+  }
+  .timeline-body.active { border-left-color: var(--accent); }
+  .timeline-body.done { border-left-color: var(--green2); }
+  .timeline-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .timeline-desc { font-size: 12px; color: var(--text2); }
+
+  /* ISSUES */
+  .issue-list { display: flex; flex-direction: column; gap: 10px; }
+  .issue {
+    padding: 12px 14px; border-radius: var(--radius-sm);
+    border-left: 3px solid; font-size: 13px;
+  }
+  .issue.warn { background: rgba(245,158,11,0.08); border-color: var(--amber); color: #fcd34d; }
+  .issue.danger { background: rgba(239,68,68,0.08); border-color: var(--red); color: #fca5a5; }
+  .issue.success { background: rgba(34,197,94,0.08); border-color: var(--green); color: #86efac; }
+  .issue .issue-title { font-weight: 600; margin-bottom: 3px; }
+  .issue .issue-body { color: rgba(255,255,255,0.55); font-size: 12px; }
+
+  /* ARCH MAPPING */
+  .arch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .arch-item {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px;
+  }
+  .arch-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .arch-val { font-size: 13px; color: var(--text); font-weight: 500; }
+  .arch-arch { font-size: 12px; color: var(--accent); margin-top: 4px; }
+
+  /* INTERVIEW SECTION */
+  .interview-box {
+    background: linear-gradient(135deg, rgba(79,142,247,0.08) 0%, rgba(20,184,166,0.05) 100%);
+    border: 1px solid rgba(79,142,247,0.2);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 16px;
+  }
+  .interview-box h3 { color: #93c5fd; font-size: 14px; margin-bottom: 10px; }
+  .interview-box p { font-size: 13px; color: var(--text2); line-height: 1.7; }
+  .interview-box blockquote {
+    background: rgba(0,0,0,0.3); border-left: 3px solid var(--accent);
+    margin: 12px 0 0; padding: 12px 16px; border-radius: 0 6px 6px 0;
+    font-size: 13px; color: var(--text); font-style: italic; line-height: 1.7;
+  }
+
+  /* SCHEMA LEGEND */
+  .schema-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .schema-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    border: 1px solid;
+  }
+  .schema-sdb { background: rgba(20,184,166,0.1); border-color: rgba(20,184,166,0.3); color: #5eead4; }
+  .schema-mdb { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: #86efac; }
+  .schema-mnt { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.3); color: #c4b5fd; }
+
+  /* TOOL LIST */
+  .tool-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .tool-item {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px; text-align: center;
+  }
+  .tool-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .tool-role { font-size: 11px; color: var(--text3); }
+
+  /* PROC CODE */
+  .proc-code {
+    background: #0a0e17; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px; margin-top: 12px;
+    font-family: 'Cascadia Code','Consolas',monospace; font-size: 12px;
+    line-height: 1.7; overflow-x: auto;
+  }
+  .kw { color: #7dd3fc; }
+  .fn { color: #a78bfa; }
+  .cm { color: #4a5568; font-style: italic; }
+  .str { color: #86efac; }
+  .var { color: #fcd34d; }
+
+  @media (max-width: 700px) {
+    .container { padding: 24px 20px 60px; }
+    .hero { padding: 32px 20px 24px; }
+    .pipeline { grid-template-columns: 1fr; }
+    .pipe-step { border-right: none; border-bottom: 1px solid var(--border); }
+    .pipe-step::after { content: '↓'; right: 50%; top: auto; bottom: -14px; transform: translateX(50%); }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .two-col, .arch-grid, .tool-grid { grid-template-columns: 1fr; }
+    .timeline-item { grid-template-columns: 80px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📋 Tài liệu phỏng vấn</div>
+  <h1>AMOS Data Migration — VAECO</h1>
+  <p>Dự án chuyển đổi dữ liệu từ AMASIS (IBM AS400) sang AMOS Application, thực hiện bởi NGS team tại Vietnam Airlines Engineering Company</p>
+  <div class="hero-meta">
+    <span><strong>Client:</strong> VAECO (Vietnam Airlines)</span>
+    <span><strong>Vendor:</strong> Swiss AviationSoftware (KUS)</span>
+    <span><strong>Báo cáo:</strong> Mar 10, 2024 — Rehearsal 1</span>
+    <span><strong>Tổng records:</strong> ~36 triệu</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- PIPELINE -->
+  <div class="section">
+    <div class="section-title">Kiến trúc pipeline migration</div>
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-icon pi-as400">🖥️</div>
+        <div class="pipe-label">AMASIS</div>
+        <div class="pipe-sub">IBM AS400<br>88 tables</div>
+        <div class="pipe-time">Source system</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon pi-csv">📄</div>
+        <div class="pipe-label">CSV Files</div>
+        <div class="pipe-sub">isql + shell scripts<br>parallel (3 jobs)</div>
+        <div class="pipe-time">2h30 extract</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon pi-sdb">🗄️</div>
+        <div class="pipe-label">SDB Schema</div>
+        <div class="pipe-sub">Staging — raw<br>SQL*Loader</div>
+        <div class="pipe-time">0h30 + gather stats</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon pi-mdb">✅</div>
+        <div class="pipe-label">MDB Schema</div>
+        <div class="pipe-sub">Curated — cleaned<br>Oracle Stored Proc</div>
+        <div class="pipe-time">21 phút transform</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon pi-amos">✈️</div>
+        <div class="pipe-label">AMOS App</div>
+        <div class="pipe-sub">TXT → application<br>import</div>
+        <div class="pipe-time">44h02 import</div>
+      </div>
+    </div>
+
+    <!-- SCHEMA LEGEND -->
+    <div class="schema-row">
+      <div class="schema-pill schema-sdb">SDB — Raw data (chưa format đúng)</div>
+      <div class="schema-pill schema-mdb">MDB — Correct data, sẵn sàng load AMOS</div>
+      <div class="schema-pill schema-mnt">MNT — Monitoring / logging schema</div>
+    </div>
+  </div>
+
+  <!-- KEY METRICS -->
+  <div class="section">
+    <div class="section-title">Số liệu thực tế — Rehearsal 1 (Lần 6)</div>
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">Tổng records (3 giai đoạn)</div>
+        <div class="metric-val">35.9M</div>
+        <div class="metric-sub">Preload 1 + Preload 2 + Cutover</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Records Cutover phase</div>
+        <div class="metric-val">9.9M</div>
+        <div class="metric-delta delta-good">↓ 17K so với lần 5</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Tổng thời gian Cutover</div>
+        <div class="metric-val">~48h17</div>
+        <div class="metric-delta delta-good">↓ so với lần 5 (56h34)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Mục tiêu Go-live</div>
+        <div class="metric-val">60h</div>
+        <div class="metric-sub">Rehearsal 2 target: 48h</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SO SÁNH LẦN 5 vs REHEARSAL 1 -->
+  <div class="section">
+    <div class="section-title">So sánh hiệu suất — Lần 5 vs Rehearsal 1</div>
+    <div class="compare-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Giai đoạn</th>
+            <th>Lần 5 (5TH)</th>
+            <th>Rehearsal 1</th>
+            <th>Cải thiện</th>
+            <th>Ghi chú</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AMASIS → Staging (extract)</td>
+            <td class="td-num">2h30</td>
+            <td class="td-num">2h30</td>
+            <td class="td-neutral">—</td>
+            <td class="td-neutral">Giới hạn AS400 bandwidth</td>
+          </tr>
+          <tr>
+            <td>Gather Statistics</td>
+            <td class="td-num">~30 phút</td>
+            <td class="td-num">~30 phút</td>
+            <td class="td-neutral">—</td>
+            <td class="td-neutral">Bắt buộc sau SQL*Loader</td>
+          </tr>
+          <tr>
+            <td>Fix null date (01/01/0001 → NULL)</td>
+            <td class="td-num">1h00</td>
+            <td class="td-num">1h00</td>
+            <td class="td-neutral">—</td>
+            <td class="td-neutral">AMASIS quirk, đã tích hợp pipeline</td>
+          </tr>
+          <tr>
+            <td><strong>Tổng AMASIS → SDB</strong></td>
+            <td class="td-num">4h30</td>
+            <td class="td-num" style="color:var(--green)">4h00</td>
+            <td class="td-good">↓ 30 phút (-11%)</td>
+            <td class="td-neutral">Tối ưu shell scripts</td>
+          </tr>
+          <tr>
+            <td>Transform + Extract X-Files (SDB→MDB→TXT)</td>
+            <td class="td-num">0h19 + 0h06</td>
+            <td class="td-num" style="color:var(--green)">0h15 + 0h06</td>
+            <td class="td-good">↓ 4 phút</td>
+            <td class="td-neutral">Stored Proc tối ưu</td>
+          </tr>
+          <tr>
+            <td>Import TXT → AMOS Application</td>
+            <td class="td-num">51h39</td>
+            <td class="td-num" style="color:var(--green)">44h02</td>
+            <td class="td-good">↓ 7h37 (-15%)</td>
+            <td class="td-neutral">Bottleneck chính — ngoài tầm kiểm soát NGS</td>
+          </tr>
+          <tr>
+            <td>Post migration</td>
+            <td class="td-num">7h30</td>
+            <td class="td-num">8h30</td>
+            <td class="delta-bad">↑ 1h</td>
+            <td class="td-neutral">Tăng do xử lý thêm</td>
+          </tr>
+          <tr>
+            <td><strong>Tổng Cutover (Rehearsal1 only)</strong></td>
+            <td class="td-num">48h24 / 56h34</td>
+            <td class="td-num" style="color:var(--green)">47h13 / 24h08</td>
+            <td class="td-good">Đạt mục tiêu &lt; 60h</td>
+            <td class="td-neutral">2 track measurement</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BƯỚC THỰC HIỆN CHI TIẾT -->
+  <div class="section">
+    <div class="section-title">Quy trình chi tiết từng phase</div>
+    <div class="two-col">
+
+      <!-- Phase 1: AMASIS → SDB -->
+      <div class="card">
+        <h3>Phase 1 — AMASIS → SDB (Staging)</h3>
+        <div class="steps">
+          <div class="step" style="border-left-color: var(--purple)">
+            <div class="step-num" style="background:rgba(167,139,250,0.2); color:var(--purple)">1</div>
+            <div class="step-content">
+              <div class="step-title">Config .sql và .ctl per table</div>
+              <div class="step-desc">Chạy trên Toad: <code>select * from SDB.AMASIS_SQL where TABLE_NAME='FRPCR'</code> → paste vào frpcr.sql. Tương tự với AMASIS_DATATYPE → control.ctl</div>
+            </div>
+          </div>
+          <div class="step" style="border-left-color: var(--accent)">
+            <div class="step-num" style="background:rgba(79,142,247,0.2); color:var(--accent)">2</div>
+            <div class="step-content">
+              <div class="step-title">Extract từ AS400 → CSV</div>
+              <div class="step-code">isql AS400 VAECOIT Vae@it -b -d, -c &lt; frpcr.sql &gt; frpcr.csv<br>cat frpcr.csv | wc -l</div>
+            </div>
+          </div>
+          <div class="step" style="border-left-color: var(--teal)">
+            <div class="step-num" style="background:rgba(20,184,166,0.2); color:var(--teal)">3</div>
+            <div class="step-content">
+              <div class="step-title">Load CSV → SDB (SQL*Loader)</div>
+              <div class="step-code">sqlldr control=control.ctl log=track.log</div>
+            </div>
+          </div>
+          <div class="step" style="border-left-color: var(--amber)">
+            <div class="step-num" style="background:rgba(245,158,11,0.2); color:var(--amber)">4</div>
+            <div class="step-content">
+              <div class="step-title">Parallel run cho toàn bộ 88 tables</div>
+              <div class="step-code">nohup ./export_amasis1.sh &amp;<br>nohup ./export_amasis2.sh &amp;<br>nohup ./export_amasis3.sh &amp;</div>
+            </div>
+          </div>
+          <div class="step" style="border-left-color: var(--green)">
+            <div class="step-num" style="background:rgba(34,197,94,0.2); color:var(--green)">5</div>
+            <div class="step-content">
+              <div class="step-title">Gather Statistics + Fix null date</div>
+              <div class="step-desc">Gather stats để Oracle optimizer cập nhật. Chạy procedure xử lý date = 01/01/0001 → NULL theo <code>SDB.CONGNH_COLUMN_NAME_DATE_ISNULL</code></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2: SDB → MDB → TXT -->
+      <div class="card">
+        <h3>Phase 2 — SDB → MDB → TXT Files</h3>
+        <div class="steps">
+          <div class="step" style="border-left-color: var(--purple)">
+            <div class="step-num" style="background:rgba(167,139,250,0.2); color:var(--purple)">1</div>
+            <div class="step-content">
+              <div class="step-title">Tạo Stored Procedure per X-file</div>
+              <div class="step-desc">Mỗi X-file có 1 procedure: Truncate MDB table → Log start_time → INSERT SELECT DISTINCT từ SDB → Log end_time + row count</div>
+            </div>
+          </div>
+          <div class="step" style="border-left-color: var(--accent)">
+            <div class="step-num" style="background:rgba(79,142,247,0.2); color:var(--accent)">2</div>
+            <div class="step-content">
+              <div class="step-title">Master procedure gọi tất cả</div>
+              <div class="step-desc"><code>MDB.TRANSFROM_BASIC_00_ALL_JOB_CUTOVER</code> — gọi tuần tự từng procedure con (XCURRHIST, XMEASURE, XCOSTCENTER...)</div>
+            </div>
+          </div>
+          <div class="step" style="border-left-color: var(--teal)">
+            <div class="step-num" style="background:rgba(20,184,166,0.2); color:var(--teal)">3</div>
+            <div class="step-content">
+              <div class="step-title">Chạy trên Oracle server</div>
+              <div class="step-code">SET SERVEROUTPUT ON<br>BEGIN<br>  MDB.TRANSFROM_BASIC_00_ALL_JOB_CUTOVER;<br>END;<br>/</div>
+            </div>
+          </div>
+          <div class="step" style="border-left-color: var(--amber)">
+            <div class="step-num" style="background:rgba(245,158,11,0.2); color:var(--amber)">4</div>
+            <div class="step-content">
+              <div class="step-title">Export MDB → TXT files</div>
+              <div class="step-code">cd /arch/load_txt_file/<br>sqlplus mdb/mdb @00_export_x_files_test.sql</div>
+            </div>
+          </div>
+          <div class="step" style="border-left-color: var(--green)">
+            <div class="step-num" style="background:rgba(34,197,94,0.2); color:var(--green)">5</div>
+            <div class="step-content">
+              <div class="step-title">Monitor tiến độ</div>
+              <div class="step-desc">Kiểm tra qua <code>MNT.XTABLE_EXPORT_STATS</code> và <code>MNT.XFILE_EXPORT_STATS</code> để xem NUM_ROWS, START_TIME, END_TIME từng table</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORED PROC PATTERN -->
+  <div class="section">
+    <div class="section-title">Pattern Stored Procedure — logging architecture</div>
+    <div class="card">
+      <h3>Cấu trúc procedure chuẩn (SDB → MDB)</h3>
+      <div class="proc-code">
+<span class="kw">CREATE OR REPLACE PROCEDURE</span> <span class="fn">MDB.TRANSFROM_BASIC_03_XMEASURE</span> <span class="kw">AS</span><br>
+&nbsp;&nbsp;<span class="var">v_insert_count</span>  <span class="kw">NUMBER</span> := 0;<br>
+&nbsp;&nbsp;<span class="var">V_error_message</span> <span class="kw">VARCHAR2</span>(500);<br>
+<span class="kw">BEGIN</span><br>
+&nbsp;&nbsp;<span class="cm">-- 1. Truncate target table (Truncate &amp; Load pattern)</span><br>
+&nbsp;&nbsp;<span class="kw">EXECUTE IMMEDIATE</span> <span class="str">'TRUNCATE TABLE MDB.XMEASURE'</span>;<br><br>
+&nbsp;&nbsp;<span class="cm">-- 2. Log start time vào MNT schema</span><br>
+&nbsp;&nbsp;<span class="kw">DELETE</span> MNT.XTABLE_EXPORT_STATS <span class="kw">WHERE</span> XTABLE=<span class="str">'XMEASURE'</span>;<br>
+&nbsp;&nbsp;<span class="kw">INSERT INTO</span> MNT.XTABLE_EXPORT_STATS (XTABLE, NUM_ROWS, START_TIME)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">VALUES</span> (<span class="str">'XMEASURE'</span>, <span class="var">v_insert_count</span>, <span class="fn">sysdate</span>);<br>
+&nbsp;&nbsp;<span class="kw">COMMIT</span>;<br><br>
+&nbsp;&nbsp;<span class="cm">-- 3. Transform: INSERT SELECT DISTINCT từ SDB</span><br>
+&nbsp;&nbsp;<span class="kw">INSERT INTO</span> MDB.XMEASURE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">SELECT DISTINCT</span> * <span class="kw">FROM</span> SDB.XMEASURE;<br>
+&nbsp;&nbsp;<span class="kw">COMMIT</span>;<br><br>
+&nbsp;&nbsp;<span class="cm">-- 4. Đếm row + log end time</span><br>
+&nbsp;&nbsp;<span class="kw">SELECT COUNT</span>(*) <span class="kw">INTO</span> <span class="var">v_insert_count</span> <span class="kw">FROM</span> MDB.XMEASURE;<br>
+&nbsp;&nbsp;<span class="kw">UPDATE</span> MNT.XTABLE_EXPORT_STATS<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">SET</span> NUM_ROWS=<span class="var">v_insert_count</span>, END_TIME=<span class="fn">sysdate</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">WHERE</span> XTABLE=<span class="str">'XMEASURE'</span>;<br>
+&nbsp;&nbsp;<span class="kw">COMMIT</span>;<br><br>
+<span class="kw">EXCEPTION WHEN OTHERS THEN</span><br>
+&nbsp;&nbsp;<span class="var">V_error_message</span> := <span class="fn">SQLERRM</span>;<br>
+&nbsp;&nbsp;<span class="fn">DBMS_OUTPUT.PUT_LINE</span>(<span class="str">'Error: '</span> || <span class="var">V_error_message</span>);<br>
+<span class="kw">END</span>;<br>/
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+        <div style="background:var(--bg3); border-radius:6px; padding:12px;">
+          <div style="font-size:11px; color:var(--text3); margin-bottom:6px; text-transform:uppercase;">Pattern tương đồng AML</div>
+          <div style="font-size:12px; color:var(--text2); line-height:1.6;">Giống ETL_BATCH_LOG + ETL_STEP_LOG trong dự án AML: cùng pattern 2-layer logging, Truncate &amp; Load, track start/end time per table</div>
+        </div>
+        <div style="background:var(--bg3); border-radius:6px; padding:12px;">
+          <div style="font-size:11px; color:var(--text3); margin-bottom:6px; text-transform:uppercase;">Data quality xử lý</div>
+          <div style="font-size:12px; color:var(--text2); line-height:1.6;">Null date từ AMASIS = 01/01/0001 → procedure riêng sau load để convert về NULL. Đây là data quality fix tích hợp vào pipeline.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="section">
+    <div class="section-title">Timeline dự án</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-date">Trước Feb 2024</div>
+        <div class="timeline-body done">
+          <div class="timeline-title">Lần 1–4: Data transfer ban đầu</div>
+          <div class="timeline-desc">Các lần transfer thử nghiệm, xây dựng và hoàn thiện pipeline</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Lần 5 (5TH)</div>
+        <div class="timeline-body done">
+          <div class="timeline-title">Transfer lần 5 — Baseline</div>
+          <div class="timeline-desc">26.1M records (Preload) + 9.9M records (Cutover). Tổng thời gian ~48–56h. Vẫn chưa đạt target 60h một cách thoải mái.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">19–28/02/2024</div>
+        <div class="timeline-body active">
+          <div class="timeline-title">Rehearsal 1 (Lần 6) — <span class="tag tag-green">HOÀN THÀNH</span></div>
+          <div class="timeline-desc">Mục tiêu: ≤60h cutover. Thực tế đạt ~47–48h. Cải thiện: AMASIS→SDB -30 phút, Import AMOS -7h37. Patch upgrade version 23.12 hoàn thành. Còn tồn đọng: data AMASIS chưa chính xác, KUS cung cấp scripts muộn.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">18–29/03/2024</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Rehearsal 2 (Lần 7) — <span class="tag tag-amber">CHUẨN BỊ</span></div>
+          <div class="timeline-desc">Mục tiêu: Cutover ≤48h + 12h buffer cho KUS cập nhật data. KUS sửa lại scripts Order data, rà soát lỗi Rehearsal 1. Cập nhật toàn bộ procedures.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">Go-Live</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Production Cutover — <span class="tag tag-blue">PLANNED</span></div>
+          <div class="timeline-desc">Sau khi Rehearsal 2 đạt target. Total downtime window: 60h (48h migration + 12h buffer)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-PHASE CUTOVER -->
+  <div class="section">
+    <div class="section-title">Chiến lược 3-phase cutover</div>
+    <div class="card">
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:16px;">
+        <div style="background:var(--bg3); border-radius:8px; padding:14px; border-top: 3px solid var(--accent)">
+          <div style="font-size:11px; color:var(--text3); margin-bottom:6px; text-transform:uppercase;">Preload Cutover 1</div>
+          <div style="font-size:20px; font-weight:700; color:#fff; margin-bottom:4px;">~13M</div>
+          <div style="font-size:12px; color:var(--text2)">Dữ liệu ít thay đổi. Chạy trước, không cần freeze hệ thống.</div>
+        </div>
+        <div style="background:var(--bg3); border-radius:8px; padding:14px; border-top: 3px solid var(--teal)">
+          <div style="font-size:11px; color:var(--text3); margin-bottom:6px; text-transform:uppercase;">Preload Cutover 2</div>
+          <div style="font-size:20px; font-weight:700; color:#fff; margin-bottom:4px;">~13M</div>
+          <div style="font-size:12px; color:var(--text2)">Tiếp tục load dữ liệu historical. Hệ thống vẫn hoạt động.</div>
+        </div>
+        <div style="background:var(--bg3); border-radius:8px; padding:14px; border-top: 3px solid var(--amber)">
+          <div style="font-size:11px; color:var(--text3); margin-bottom:6px; text-transform:uppercase;">Cutover (chính)</div>
+          <div style="font-size:20px; font-weight:700; color:#fff; margin-bottom:4px;">9.9M</div>
+          <div style="font-size:12px; color:var(--text2)">Freeze AMASIS. Transfer delta + recent data. Downtime bắt đầu đây.</div>
+        </div>
+      </div>
+      <div style="background:rgba(79,142,247,0.08); border:1px solid rgba(79,142,247,0.2); border-radius:8px; padding:14px;">
+        <div style="font-size:12px; color:#93c5fd; font-weight:600; margin-bottom:6px;">Tại sao chiến lược này hiệu quả?</div>
+        <div style="font-size:13px; color:var(--text2); line-height:1.7;">Bằng cách preload 26M records trước, cutover phase chỉ còn xử lý ~9.9M records (dữ liệu gần đây, thường xuyên thay đổi nhất). Downtime thực tế của VAECO chỉ bắt đầu từ Cutover phase, không phải từ đầu pipeline → tối thiểu hóa gián đoạn vận hành hàng không.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLS & TECH -->
+  <div class="section">
+    <div class="section-title">Công cụ và công nghệ</div>
+    <div class="tool-grid">
+      <div class="tool-item">
+        <div class="tool-name">Oracle 19c</div>
+        <div class="tool-role">Target DB — SDB/MDB/MNT schemas</div>
+      </div>
+      <div class="tool-item">
+        <div class="tool-name">SQL*Loader</div>
+        <div class="tool-role">Load CSV → SDB (sqlldr)</div>
+      </div>
+      <div class="tool-item">
+        <div class="tool-name">isql (ODBC)</div>
+        <div class="tool-role">Extract từ IBM AS400</div>
+      </div>
+      <div class="tool-item">
+        <div class="tool-name">Toad</div>
+        <div class="tool-role">Dev/run Stored Procedures</div>
+      </div>
+      <div class="tool-item">
+        <div class="tool-name">Talend</div>
+        <div class="tool-role">Load Excel data → SDB</div>
+      </div>
+      <div class="tool-item">
+        <div class="tool-name">Shell Scripts</div>
+        <div class="tool-role">Orchestration, parallel jobs</div>
+      </div>
+      <div class="tool-item">
+        <div class="tool-name">Xshell / Bitvise</div>
+        <div class="tool-role">SSH client → Staging server</div>
+      </div>
+      <div class="tool-item">
+        <div class="tool-name">nohup &amp;</div>
+        <div class="tool-role">Background parallel execution</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ISSUES -->
+  <div class="section">
+    <div class="section-title">Vấn đề tồn đọng và bài học</div>
+    <div class="issue-list">
+      <div class="issue warn">
+        <div class="issue-title">⚠️ Data quality từ source system (AMASIS)</div>
+        <div class="issue-body">Dữ liệu trên AMASIS chưa chính xác, team VAECO cần tiếp tục chỉnh sửa thủ công. Null date bị export thành 01/01/0001 — phải xử lý post-load. Đây là ví dụ điển hình về việc cần assessment kỹ source system trước khi thiết kế pipeline.</div>
+      </div>
+      <div class="issue danger">
+        <div class="issue-title">🔴 Phụ thuộc bên thứ 3 (KUS cung cấp scripts muộn)</div>
+        <div class="issue-body">KUS (Swiss AviationSoftware) cung cấp scripts muộn ảnh hưởng timeline. Trong Rehearsal 2, đã yêu cầu KUS sửa scripts và kiểm tra data trước ngày 18/03. Bài học: phải có SLA rõ ràng với vendor và buffer time trong cutover plan.</div>
+      </div>
+      <div class="issue danger">
+        <div class="issue-title">🔴 Bottleneck: Import TXT → AMOS (44h/48h tổng thời gian)</div>
+        <div class="issue-body">Import vào AMOS application chiếm ~91% tổng cutover time — đây là giới hạn của application, ngoài tầm kiểm soát của NGS team. Toàn bộ tối ưu của NGS team chỉ tác động được vào 4h đầu (extract + transform).</div>
+      </div>
+      <div class="issue success">
+        <div class="issue-title">✅ Null date handling đã tích hợp vào pipeline</div>
+        <div class="issue-body">Thay vì xử lý thủ công, đã viết procedure và tích hợp cố định vào pipeline (~1h). Đây là ví dụ của data quality fix có tính tái sử dụng — mỗi rehearsal đều chạy tự động.</div>
+      </div>
+      <div class="issue success">
+        <div class="issue-title">✅ Parallel processing giảm extract time</div>
+        <div class="issue-body">Chia 88 tables thành 3 shell script chạy song song (export_amasis1/2/3.sh). Kết hợp với Gather Statistics sau load để Oracle optimizer hoạt động đúng.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAPPING SANG ARCHITECT -->
+  <div class="section">
+    <div class="section-title">Mapping kinh nghiệm → ngôn ngữ Data Architect</div>
+    <div class="arch-grid">
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">SDB Schema (raw data)</div>
+        <div class="arch-arch">→ Landing Zone / Raw Layer</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">MDB Schema (cleaned)</div>
+        <div class="arch-arch">→ Curated / Conformed Layer</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">88 tables inventory</div>
+        <div class="arch-arch">→ Source System Assessment</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">XTABLE_EXPORT_STATS</div>
+        <div class="arch-arch">→ Data Lineage & Audit Trail</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">01/01/0001 → NULL fix</div>
+        <div class="arch-arch">→ Data Quality / Anomaly Handling</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">Gather Statistics post-load</div>
+        <div class="arch-arch">→ Post-Load Optimization</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">nohup ./export_amasis1/2/3 &amp;</div>
+        <div class="arch-arch">→ Parallel Processing Pattern</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">ALL_JOB_CUTOVER procedure</div>
+        <div class="arch-arch">→ Orchestration / Master Job</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">Preload 1 + 2 + Cutover</div>
+        <div class="arch-arch">→ Phased Cutover Pattern</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">.sql + .ctl config per table</div>
+        <div class="arch-arch">→ Mapping Document / Transform Rules</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">wc -l row count validation</div>
+        <div class="arch-arch">→ Reconciliation (cơ bản)</div>
+      </div>
+      <div class="arch-item">
+        <div class="arch-label">Bạn đã làm</div>
+        <div class="arch-val">Rehearsal 1/2 trước Go-live</div>
+        <div class="arch-arch">→ Migration Rehearsal / Dry Run</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CÂU TRẢ LỜI MẪU -->
+  <div class="section">
+    <div class="section-title">Câu trả lời mẫu phỏng vấn</div>
+
+    <div class="interview-box">
+      <h3>📌 "Kể về một dự án migration bạn đã làm"</h3>
+      <blockquote>
+        "Tôi tham gia dự án migrate dữ liệu từ hệ thống AMASIS trên IBM AS400 sang AMOS aviation maintenance application tại VAECO — Vietnam Airlines Engineering Company, do NGS thực hiện cho đối tác Swiss AviationSoftware. Đây là migration lớn với tổng khoảng 36 triệu records, thực hiện qua nhiều rehearsal trước khi Go-live production.
+        <br><br>
+        Architecture tôi thiết kế gồm 3 layer rõ ràng: AMASIS extract xuống Staging DB dạng raw (SDB schema) qua CSV trung gian dùng SQL*Loader, transform và clean sang MDB schema bằng Oracle Stored Procedures, rồi export TXT files để AMOS application import. Mỗi layer có logging riêng qua bảng XTABLE_EXPORT_STATS ghi lại row count, start/end time từng table.
+        <br><br>
+        Thách thức lớn nhất là tối ưu cutover window xuống dưới 60 tiếng — vì đây là production system của hãng hàng không. Chiến lược tôi áp dụng là phased cutover 3 giai đoạn: preload 26 triệu records historical trước khi freeze, cutover phase chỉ còn xử lý 9.9 triệu records gần đây nhất. Sau Rehearsal 1, tôi đạt được 47 tiếng so với mục tiêu 60 tiếng.
+        <br><br>
+        Một bài học quan trọng là data quality của source system — AMASIS export null date thành 01/01/0001. Thay vì xử lý thủ công, tôi đã build procedure fix và tích hợp cố định vào pipeline, tiết kiệm ~1 tiếng mỗi lần chạy và tránh lỗi lặp lại."
+      </blockquote>
+    </div>
+
+    <div class="interview-box">
+      <h3>📌 "Bạn xử lý rollback plan thế nào?" (câu hỏi khó)</h3>
+      <blockquote>
+        "Trong dự án AMOS, chúng tôi thực hiện nhiều rehearsal trước Go-live chính xác vì lý do này — mỗi rehearsal là cơ hội để test cả forward và rollback path. Về mặt kỹ thuật, SDB schema giữ nguyên raw data từ AMASIS cho đến khi cutover được xác nhận thành công, vì vậy nếu có vấn đề ở bất kỳ giai đoạn nào, chúng tôi có thể re-run từ checkpoint. AMASIS vẫn là system of record cho đến khi Go-live được approval — đây là nguyên tắc quan trọng nhất: không bao giờ decommission source system trước khi migration được validate đầy đủ."
+      </blockquote>
+    </div>
+
+    <div class="interview-box">
+      <h3>📌 "Làm sao validate dữ liệu sau migration?"</h3>
+      <blockquote>
+        "Chúng tôi có hai lớp validation: đầu tiên là row count check sau mỗi step dùng wc -l và COUNT(*) từ XTABLE_EXPORT_STATS, so sánh với row count từ source. Thứ hai là business rule validation — VAECO team kiểm tra dữ liệu nghiệp vụ trực tiếp trên MIG2 environment trước khi confirm cutover. Nhìn lại thì đây là điểm cần cải thiện — nếu làm lại tôi sẽ bổ sung checksum validation và automated reconciliation report thay vì chỉ row count."
+      </blockquote>
+    </div>
+  </div>
+
+  <!-- ĐIỂM CẦN BỔ SUNG -->
+  <div class="section">
+    <div class="section-title">Gap analysis — cần bổ sung cho level Architect</div>
+    <div class="two-col">
+      <div class="card">
+        <h3 style="color:var(--amber)">⚠️ Điểm cần cải thiện trong dự án này</h3>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+          <div style="font-size:13px; padding:8px 12px; background:rgba(245,158,11,0.06); border-radius:6px; border-left:3px solid var(--amber)">
+            <strong>Reconciliation</strong> — chỉ dùng wc -l (row count). Nên có checksum + business total validation (SUM của amount, balance...)
+          </div>
+          <div style="font-size:13px; padding:8px 12px; background:rgba(245,158,11,0.06); border-radius:6px; border-left:3px solid var(--amber)">
+            <strong>Rollback plan</strong> — implicit (dựa vào SDB còn đó). Nên document rõ: ai approve rollback, rollback trong bao lâu, criteria để trigger
+          </div>
+          <div style="font-size:13px; padding:8px 12px; background:rgba(245,158,11,0.06); border-radius:6px; border-left:3px solid var(--amber)">
+            <strong>Formal cutover runbook</strong> — cần có step-by-step với người phụ trách từng bước, expected time, go/no-go criteria
+          </div>
+          <div style="font-size:13px; padding:8px 12px; background:rgba(245,158,11,0.06); border-radius:6px; border-left:3px solid var(--amber)">
+            <strong>Vendor dependency management</strong> — KUS cung cấp scripts muộn là risk thực tế. Cần SLA contract + buffer time chính thức
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--green)">✅ Điểm mạnh cần nhấn trong phỏng vấn</h3>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+          <div style="font-size:13px; padding:8px 12px; background:rgba(34,197,94,0.06); border-radius:6px; border-left:3px solid var(--green)">
+            <strong>Production experience thực chiến</strong> — aviation MRO system, không phải lab exercise
+          </div>
+          <div style="font-size:13px; padding:8px 12px; background:rgba(34,197,94,0.06); border-radius:6px; border-left:3px solid var(--green)">
+            <strong>36M records, nhiều rehearsal</strong> — có số liệu cụ thể, measurable improvements
+          </div>
+          <div style="font-size:13px; padding:8px 12px; background:rgba(34,197,94,0.06); border-radius:6px; border-left:3px solid var(--green)">
+            <strong>3-layer architecture tự thiết kế</strong> — SDB/MDB/MNT, có rationale rõ ràng
+          </div>
+          <div style="font-size:13px; padding:8px 12px; background:rgba(34,197,94,0.06); border-radius:6px; border-left:3px solid var(--green)">
+            <strong>Data quality handling</strong> — null date fix integrated vào pipeline, không để manual
+          </div>
+          <div style="font-size:13px; padding:8px 12px; background:rgba(34,197,94,0.06); border-radius:6px; border-left:3px solid var(--green)">
+            <strong>Phased cutover strategy</strong> — giảm downtime từ 36M → 9.9M trong cutover window
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid var(--border); padding-top:24px; color:var(--text3); font-size:12px; text-align:center;">
+    Tổng hợp từ: Document_for_data_transfer_from_AMASIS_DB_to_AMOS_App.docx + VAECO_DM_Progress_Mar_10_2024.pptx
+  </div>
+
+</div>
+</body>
+</html>
