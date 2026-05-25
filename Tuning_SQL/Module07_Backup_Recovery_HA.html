@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 07 — Backup, Recovery & High Availability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+    --accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;--accent4:#d2a8ff;--accent5:#ffa657;
+    --text:#e6edf3;--text-muted:#8b949e;--code-bg:#0d1117;--highlight:#388bfd26;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+  .hero{background:linear-gradient(135deg,#0d1117 0%,#161b22 40%,#1a2a1e 100%);border-bottom:2px solid var(--accent4);padding:40px 24px 30px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#6e40c922,transparent 70%);pointer-events:none}
+  .hero h1{font-size:2rem;font-weight:800;color:var(--accent4);letter-spacing:-0.5px}
+  .hero p{color:var(--text-muted);margin-top:8px;font-size:.95rem}
+  .badge-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .badge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;border:1px solid}
+  .badge-blue{color:var(--accent);border-color:var(--accent);background:#1f6feb1a}
+  .badge-green{color:var(--accent2);border-color:var(--accent2);background:#2ea04326}
+  .badge-orange{color:var(--accent5);border-color:var(--accent5);background:#d2940026}
+  .badge-purple{color:var(--accent4);border-color:var(--accent4);background:#6e40c926}
+  .container{display:flex;min-height:calc(100vh - 160px)}
+  .sidebar{width:290px;min-width:290px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .sidebar-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:0 16px 12px}
+  .level-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 16px 4px;color:var(--accent4)}
+  .nav-item{display:block;padding:7px 16px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-left:3px solid transparent;transition:all .15s}
+  .nav-item:hover{color:var(--text);background:var(--surface2)}
+  .nav-item.active{color:var(--accent4);border-left-color:var(--accent4);background:#6e40c915;font-weight:600}
+  .nav-number{display:inline-block;width:44px;font-size:.7rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .main{flex:1;padding:32px 40px;max-width:980px}
+  .module{display:none}.module.active{display:block}
+  .module-header{border:1px solid var(--border);border-radius:12px;padding:24px 28px;background:var(--surface);margin-bottom:24px;position:relative;overflow:hidden}
+  .module-header::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent4)}
+  .module-tag{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent4);margin-bottom:8px}
+  .module-title{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+  .module-subtitle{color:var(--text-muted);font-size:.9rem}
+  .section{margin-bottom:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .section-header{padding:14px 20px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--surface2);border-bottom:1px solid var(--border);user-select:none}
+  .section-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .icon-purpose{background:#1f6feb33}.icon-detail{background:#2ea04326}.icon-quiz{background:#d2940026}.icon-summary{background:#6e40c926}.icon-practice{background:#f7816626}
+  .section-content{padding:20px;background:var(--surface)}
+  .section-toggle{margin-left:auto;color:var(--text-muted);font-size:12px}
+  h3{font-size:1rem;font-weight:700;color:var(--accent4);margin:18px 0 10px}
+  h3:first-child{margin-top:0} h3.blue{color:var(--accent)} h3.green{color:var(--accent2)} h3.orange{color:var(--accent5)} h3.red{color:var(--accent3)}
+  p{margin-bottom:12px;color:var(--text);font-size:.88rem}
+  ul,ol{padding-left:20px;margin-bottom:12px} li{font-size:.88rem;margin-bottom:5px}
+  strong{color:var(--text)}
+  .cmd-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden}
+  .cmd-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .cmd-body{padding:14px}
+  pre{font-family:'JetBrains Mono','Courier New','Consolas',monospace;font-size:.82rem;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--text)}
+  .kw{color:#ff7b72}.kw2{color:var(--accent)}.str{color:var(--accent5)}.fn{color:var(--accent4)}.num{color:#79c0ff}.comment{color:var(--text-muted)}
+  .db-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.68rem;font-weight:700;letter-spacing:.5px;margin-bottom:6px;margin-right:4px}
+  .db-pg{background:#4169e122;color:#4d9de0;border:1px solid #4169e155}.db-my{background:#f0931322;color:#f09313;border:1px solid #f0931355}.db-oracle{background:#cc000022;color:#f97316;border:1px solid #cc000055}
+  code{font-family:'JetBrains Mono',monospace;background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.82rem;color:var(--accent4)}
+  .quiz-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+  .quiz-q{font-weight:600;font-size:.88rem;margin-bottom:10px}.quiz-q::before{content:'Q';display:inline-block;width:22px;height:22px;background:var(--accent4);color:#000;border-radius:50%;font-size:.7rem;font-weight:800;text-align:center;line-height:22px;margin-right:8px}
+  .quiz-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .quiz-opt{padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.84rem;transition:all .15s;background:var(--bg)}
+  .quiz-opt:hover{border-color:var(--accent4);color:var(--accent4)}.quiz-opt.correct{border-color:var(--accent2);color:var(--accent2);background:#2ea04310}.quiz-opt.wrong{border-color:var(--accent3);color:var(--accent3);background:#f7816610}
+  .quiz-explain{font-size:.82rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;margin-top:8px;display:none}.quiz-explain.show{display:block}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.summary-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.82rem}.summary-item strong{color:var(--accent4);display:block;margin-bottom:4px}
+  .practice-task{background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}.practice-task-header{padding:12px 16px;background:#6e40c915;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem;color:var(--accent4)}.practice-task-body{padding:16px}
+  .solution-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:.8rem;cursor:pointer;color:var(--accent2);margin-top:10px;transition:all .15s}.solution-toggle:hover{background:var(--surface2)}
+  .solution-box{margin-top:10px;display:none;border-top:1px solid var(--border);padding-top:12px}.solution-box.show{display:block}
+  .info-box{border-radius:8px;padding:14px 16px;margin:12px 0;font-size:.84rem;border:1px solid;display:flex;gap:10px}.info-box.tip{border-color:var(--accent2);background:#2ea04310;color:var(--accent2)}.info-box.warn{border-color:var(--accent5);background:#d2940015;color:var(--accent5)}.info-box.note{border-color:var(--accent4);background:#6e40c915;color:var(--accent4)}.info-box.danger{border-color:var(--accent3);background:#f7816610;color:var(--accent3)}.info-box span{color:var(--text)}
+  .progress-bar{background:var(--surface2);border-radius:4px;height:4px;margin:16px 0;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent4),var(--accent2));border-radius:4px;width:0;transition:width .2s}
+  .nav-buttons{display:flex;gap:12px;margin-top:32px;justify-content:space-between}.nav-btn{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}.nav-btn:hover{border-color:var(--accent4);color:var(--accent4)}.nav-btn.primary{background:var(--accent4);color:#000;border-color:var(--accent4)}.nav-btn.primary:hover{background:#e2c0ff}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.83rem} th{background:var(--surface2);padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent4)} td{padding:8px 12px;border:1px solid var(--border)} tr:nth-child(even) td{background:#ffffff05}
+  .mental-model{border-left:4px solid var(--accent);background:#1f6feb1a;padding:12px 14px;border-radius:6px;margin:12px 0;font-size:.88rem}
+  .checklist-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}.check-box{width:16px;height:16px;border:1px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:.25rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}.check-box.checked{background:var(--accent2);border-color:var(--accent2)}.check-box.checked::after{content:'✓';font-size:10px;color:#000;font-weight:600}.progress-text{font-size:.8rem;color:var(--text-muted);margin-bottom:8px}
+  @media(max-width:768px){.sidebar{display:none}.main{padding:16px}.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Module 07 — Backup, Recovery & High Availability</h1>
+  <p>Thiết kế khôi phục sự cố, PITR, replication, failover và DR drill để database sống sót khi production gặp lỗi thật.</p>
+  <div class="badge-row">
+    <span class="badge badge-purple">DBA Reliability</span>
+    <span class="badge badge-green">~5–7 ngày</span>
+    <span class="badge badge-blue">Recovery & HA</span>
+    <span class="badge badge-orange">PostgreSQL · MySQL · Oracle</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Module Navigation</div>
+    <div class="level-label">MODULE 07 · BACKUP & HA</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">S0</span>Tổng quan & Mục tiêu</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">S1</span>RPO/RTO & Strategy</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">S2</span>PITR Fundamentals</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">S3</span>PostgreSQL Recovery</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">S4</span>MySQL Recovery</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">S5</span>Oracle RMAN/Data Guard</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">S6</span>Failover & DR Drill</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">S7</span>Interview Prep</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">S8</span>Checklist & Tổng kết</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="s0">
+      <div class="module-header">
+        <div class="module-tag">S0 · Orientation</div>
+        <div class="module-title">Tổng quan & Mục tiêu Module 07</div>
+        <div class="module-subtitle">Module 6 đã nói backup/monitoring cơ bản. Module 7 đi sâu vào khôi phục thật: mất primary, xóa nhầm dữ liệu, corrupt storage, failover và DR drill.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">M</span>Roadmap 9 sections của module<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Section</th><th>Tên section</th><th>Trọng tâm</th></tr></thead>
+            <tbody>
+              <tr><td>S0</td><td>Tổng quan & Mục tiêu</td><td>Recovery/HA giải quyết vấn đề gì</td></tr>
+              <tr><td>S1</td><td>RPO/RTO & Strategy</td><td>Định nghĩa mục tiêu khôi phục</td></tr>
+              <tr><td>S2</td><td>PITR Fundamentals</td><td>Base backup + log để khôi phục theo thời điểm</td></tr>
+              <tr><td>S3</td><td>PostgreSQL Recovery</td><td>WAL archive, base backup, promote</td></tr>
+              <tr><td>S4</td><td>MySQL Recovery</td><td>Binlog, GTID, replica promotion</td></tr>
+              <tr><td>S5</td><td>Oracle RMAN/Data Guard</td><td>RMAN, archived redo, switchover/failover</td></tr>
+              <tr><td>S6</td><td>Failover & DR Drill</td><td>Runbook và kiểm chứng định kỳ</td></tr>
+              <tr><td>S7</td><td>Interview Prep</td><td>Câu hỏi DBA reliability</td></tr>
+              <tr><td>S8</td><td>Checklist & Tổng kết</td><td>Production readiness</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-purpose">R</span>Recovery & HA giải quyết vấn đề gì?<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <h3 class="blue">Backup là dữ liệu, recovery là năng lực</h3>
+          <p>Hệ thống production không chỉ cần bản sao dữ liệu. Nó cần quy trình khôi phục đã được diễn tập, có người chịu trách nhiệm, có thời gian đo được và có tiêu chí xác nhận dữ liệu đúng.</p>
+          <div class="mental-model"><strong>Mental model:</strong> Backup là dù. Restore drill là lần bạn mở dù trước khi nhảy. HA là có máy bay thứ hai khi máy bay đầu gặp lỗi.</div>
+          <h3 class="orange">Các sự cố module này phải xử lý được</h3>
+          <ul>
+            <li>Developer xóa nhầm dữ liệu lúc 10:15.</li>
+            <li>Primary database mất disk hoặc node chết.</li>
+            <li>Replica lag quá xa hoặc replication bị broken.</li>
+            <li>Backup có nhưng restore mất lâu hơn SLA.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" disabled>← Trước</button><button class="nav-btn primary" onclick="nextModule()">Bắt đầu →</button></div>
+    </div>
+
+    <div class="module" id="s1">
+      <div class="module-header">
+        <div class="module-tag">S1 · Strategy</div>
+        <div class="module-title">RPO, RTO & Backup Strategy</div>
+        <div class="module-subtitle">Không thể thiết kế backup nếu chưa biết được phép mất bao nhiêu dữ liệu và phải khôi phục trong bao lâu.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">S</span>RPO/RTO là contract nghiệp vụ<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Khái niệm</th><th>Câu hỏi</th><th>Ảnh hưởng thiết kế</th></tr></thead>
+            <tbody>
+              <tr><td>RPO</td><td>Được mất tối đa bao nhiêu dữ liệu?</td><td>Tần suất backup/log shipping/sync replication</td></tr>
+              <tr><td>RTO</td><td>Phải online lại trong bao lâu?</td><td>Restore automation, standby, failover runbook</td></tr>
+              <tr><td>Retention</td><td>Giữ backup bao lâu?</td><td>Storage, compliance, restore window</td></tr>
+              <tr><td>Failure domain</td><td>Backup có sống nếu region/storage chết?</td><td>Offsite/cross-region copy</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box warn">⚠️ <span><strong>Rule:</strong> RPO/RTO phải được business chấp nhận. DBA không tự đoán “mất 1 giờ dữ liệu chắc ổn”.</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">B</span>Backup matrix<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Loại backup</th><th>Ưu điểm</th><th>Nhược điểm</th><th>Khi dùng</th></tr></thead>
+            <tbody>
+              <tr><td>Logical dump</td><td>Dễ đọc, restore object-level</td><td>Chậm với DB lớn, không đủ PITR một mình</td><td>DB nhỏ, export/import, schema backup</td></tr>
+              <tr><td>Physical backup</td><td>Nhanh hơn với DB lớn</td><td>Phụ thuộc version/storage format</td><td>Production lớn</td></tr>
+              <tr><td>Log archive</td><td>Cho phép PITR</td><td>Cần quản lý liên tục</td><td>RPO thấp</td></tr>
+              <tr><td>Replica</td><td>Failover nhanh</td><td>Không thay backup; lỗi logic có thể replicate</td><td>HA/read scaling</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s2">
+      <div class="module-header">
+        <div class="module-tag">S2 · PITR</div>
+        <div class="module-title">Point-in-Time Recovery Fundamentals</div>
+        <div class="module-subtitle">PITR dùng base backup cộng transaction logs để khôi phục database tới một thời điểm trước lỗi.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">P</span>PITR flow<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>pitr-flow.txt</span></div>
+            <div class="cmd-body">
+<pre><span class="kw2">Base backup lúc 00:00</span>
+    │
+    ├─ WAL / binlog / archived redo từ 00:00 đến hiện tại
+    │
+    ├─ Sự cố xóa nhầm lúc 10:15
+    │
+    ▼
+<span class="kw2">Restore base backup</span>
+    │
+    ▼
+<span class="kw2">Replay logs đến 10:14:59</span>
+    │
+    ▼
+<span class="kw2">Verify dữ liệu → cutover</span></pre>
+            </div>
+          </div>
+          <div class="info-box danger">🚨 <span><strong>Lưu ý:</strong> PITR yêu cầu log archive liên tục. Base backup không có WAL/binlog/archived redo thì chỉ khôi phục được tới thời điểm backup.</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">V</span>Verify sau restore<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <ol>
+            <li>Kiểm tra database mở được và đúng target timestamp.</li>
+            <li>Kiểm tra object count, row count, checksum nghiệp vụ quan trọng.</li>
+            <li>Kiểm tra user/role/extension/procedure/job.</li>
+            <li>Chạy smoke test app với database restored.</li>
+            <li>Ghi lại thời gian restore thực tế so với RTO.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s3">
+      <div class="module-header">
+        <div class="module-tag">S3 · PostgreSQL</div>
+        <div class="module-title">PostgreSQL WAL, Base Backup & Promotion</div>
+        <div class="module-subtitle">PostgreSQL PITR dựa trên base backup và WAL archive. Replica promotion cần runbook rõ để tránh split brain.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">W</span>WAL archive & base backup<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>postgres-backup.conf</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="comment">-- postgresql.conf</span>
+wal_level = replica
+archive_mode = on
+archive_command = <span class="str">'test ! -f /archive/%f &amp;&amp; cp %p /archive/%f'</span>
+
+<span class="comment">-- base backup</span>
+pg_basebackup -h primary -D /backup/base_20260525 -Fp -Xs -P
+
+<span class="comment">-- restore command trong recovery config</span>
+restore_command = <span class="str">'cp /archive/%f %p'</span>
+recovery_target_time = <span class="str">'2026-05-25 10:14:59+07'</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">R</span>Replication & promote<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>postgres-replication.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">SELECT</span> application_name, state, sync_state,
+       pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn) <span class="kw">AS</span> bytes_lag
+<span class="kw">FROM</span> pg_stat_replication;
+
+<span class="comment">-- promote standby</span>
+pg_ctl promote -D /var/lib/postgresql/data
+
+<span class="comment">-- hoặc SQL</span>
+<span class="kw">SELECT</span> pg_promote();</pre>
+            </div>
+          </div>
+          <div class="info-box warn">⚠️ <span><strong>Failover rule:</strong> Trước khi promote replica, phải đảm bảo primary cũ không còn nhận write, nếu không có nguy cơ split brain.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s4">
+      <div class="module-header">
+        <div class="module-tag">S4 · MySQL</div>
+        <div class="module-title">MySQL Binlog, GTID & Replica Promotion</div>
+        <div class="module-subtitle">MySQL recovery dựa vào full backup cộng binary logs. GTID giúp failover/replication quản lý vị trí transaction rõ hơn.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">B</span>Binary log & PITR<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>mysql-pitr.txt</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-my">MySQL</span>
+<span class="comment">-- my.cnf</span>
+log_bin = mysql-bin
+server_id = 1
+gtid_mode = ON
+enforce_gtid_consistency = ON
+
+<span class="comment">-- logical backup consistent cho InnoDB</span>
+mysqldump --single-transaction --routines --triggers --master-data=2 appdb &gt; appdb.sql
+
+<span class="comment">-- replay binlog đến trước thời điểm lỗi</span>
+mysqlbinlog --stop-datetime=<span class="str">'2026-05-25 10:14:59'</span> mysql-bin.000123 | mysql appdb</pre>
+            </div>
+          </div>
+          <div class="info-box note">📌 <span><strong>MySQL:</strong> Với DB lớn, dùng physical backup tool như MySQL Enterprise Backup, Percona XtraBackup hoặc snapshot storage thay vì chỉ mysqldump.</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">F</span>Replica promotion<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>mysql-failover.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-my">MySQL</span>
+<span class="kw">SHOW REPLICA STATUS</span>\G
+
+<span class="comment">-- Trên replica được promote</span>
+<span class="kw">STOP REPLICA</span>;
+<span class="kw">RESET REPLICA ALL</span>;
+<span class="kw">SET GLOBAL</span> read_only = <span class="num">0</span>;
+<span class="kw">SET GLOBAL</span> super_read_only = <span class="num">0</span>;
+
+<span class="comment">-- Các replica khác trỏ sang primary mới bằng GTID</span>
+<span class="kw">CHANGE REPLICATION SOURCE TO</span>
+  SOURCE_HOST = <span class="str">'new-primary'</span>,
+  SOURCE_AUTO_POSITION = <span class="num">1</span>;</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s5">
+      <div class="module-header">
+        <div class="module-tag">S5 · Oracle</div>
+        <div class="module-title">Oracle RMAN, Archived Redo & Data Guard</div>
+        <div class="module-subtitle">Oracle có bộ công cụ recovery rất mạnh: RMAN cho backup/recovery, archived redo cho PITR, Data Guard cho HA/DR.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">R</span>RMAN backup & recovery<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>oracle-rman.rman</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-oracle">Oracle RMAN</span>
+RMAN&gt; CONFIGURE CONTROLFILE AUTOBACKUP ON;
+RMAN&gt; BACKUP DATABASE PLUS ARCHIVELOG;
+
+<span class="comment">-- PITR / incomplete recovery ví dụ</span>
+RMAN&gt; RUN {
+  SET UNTIL TIME <span class="str">"TO_DATE('2026-05-25 10:14:59','YYYY-MM-DD HH24:MI:SS')"</span>;
+  RESTORE DATABASE;
+  RECOVER DATABASE;
+}
+
+SQL&gt; ALTER DATABASE OPEN RESETLOGS;</pre>
+            </div>
+          </div>
+          <div class="info-box danger">🚨 <span><strong>RESETLOGS:</strong> Đây là mốc incarnation mới. Runbook phải ghi rõ backup ngay sau incomplete recovery.</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">D</span>Data Guard switchover/failover<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>oracle-dataguard.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-oracle">Oracle Data Guard</span>
+<span class="kw">SELECT</span> name, value, unit
+<span class="kw">FROM</span> v$dataguard_stats;
+
+<span class="kw">SELECT</span> process, status, thread#, sequence#
+<span class="kw">FROM</span> v$managed_standby;
+
+<span class="comment">-- Switchover planned maintenance</span>
+DGMGRL&gt; SWITCHOVER TO standby_db;
+
+<span class="comment">-- Failover khi primary mất</span>
+DGMGRL&gt; FAILOVER TO standby_db;</pre>
+            </div>
+          </div>
+          <div class="info-box note">📌 <span><strong>Switchover vs Failover:</strong> Switchover là chuyển vai trò có kế hoạch, ít mất dữ liệu. Failover là phản ứng khi primary lỗi, cần đánh giá data loss theo protection mode/lag.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s6">
+      <div class="module-header">
+        <div class="module-tag">S6 · DR Runbooks</div>
+        <div class="module-title">Failover, Switchover & DR Drill</div>
+        <div class="module-subtitle">High availability không phải chỉ có replica. Nó cần runbook, quyền thao tác, DNS/app cutover, verification và postmortem.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-practice">D</span>Failover runbook tối thiểu<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <ol>
+            <li>Xác nhận sự cố primary: network, disk, process, monitoring, app errors.</li>
+            <li>Freeze writes hoặc đảm bảo primary cũ không thể nhận write.</li>
+            <li>Chọn replica tốt nhất: lag thấp nhất, dữ liệu đầy đủ nhất.</li>
+            <li>Promote replica / Data Guard failover.</li>
+            <li>Chuyển application connection/DNS/secret sang primary mới.</li>
+            <li>Verify writes, critical reads, background jobs, replication mới.</li>
+            <li>Ghi timeline, RPO/RTO thực tế, action items.</li>
+          </ol>
+          <div class="info-box warn">⚠️ <span><strong>Split brain là thảm họa:</strong> Không bao giờ để primary cũ và primary mới cùng nhận write.</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">E</span>Error catalog — Recovery mistakes<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Lỗi</th><th>Hậu quả</th><th>Phòng tránh</th></tr></thead>
+            <tbody>
+              <tr><td>Backup chưa từng restore</td><td>Không biết backup dùng được không</td><td>Restore drill định kỳ</td></tr>
+              <tr><td>Không archive logs</td><td>Không PITR được</td><td>Giám sát WAL/binlog/archived redo</td></tr>
+              <tr><td>Promote replica khi primary cũ còn sống</td><td>Split brain</td><td>Fencing/STONITH/quy trình freeze writes</td></tr>
+              <tr><td>Không đo restore time</td><td>RTO chỉ là giả định</td><td>DR drill có bấm giờ</td></tr>
+              <tr><td>Không verify dữ liệu sau restore</td><td>Khôi phục sai mà không biết</td><td>Checksum, row count, business smoke test</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s7">
+      <div class="module-header">
+        <div class="module-tag">S7 · Interview Prep</div>
+        <div class="module-title">Interview Prep — Backup, Recovery & HA</div>
+        <div class="module-subtitle">Phần này kiểm tra bạn có thể bảo vệ dữ liệu production khi sự cố xảy ra thật hay không.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-quiz">Q</span>Quick quiz<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="quiz-item">
+            <div class="quiz-q">RPO trả lời câu hỏi nào?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. RPO là lượng dữ liệu tối đa có thể mất khi sự cố xảy ra.')">A. Được mất tối đa bao nhiêu dữ liệu</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Đó là RTO.')">B. Khôi phục trong bao lâu</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Đây là retention, không phải RPO.')">C. Giữ backup bao lâu</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+          <div class="quiz-item">
+            <div class="quiz-q">Vì sao replica không thay thế backup?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Replica giúp HA/read scaling nhưng không tự bảo vệ lỗi logic.')">A. Vì replica luôn chậm hơn</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. DROP/DELETE nhầm có thể replicate sang replica; backup/PITR vẫn cần để quay về trước lỗi.')">B. Vì lỗi logic có thể replicate sang replica</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Replica có thể dùng để đọc nhưng vẫn không thay backup.')">C. Vì replica không thể đọc được</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">S</span>Senior answer templates<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <h3 class="blue">Q1: Bạn thiết kế backup strategy thế nào?</h3>
+          <p>Tôi bắt đầu từ RPO/RTO và retention. Sau đó chọn physical backup cho database lớn, logical backup nếu cần object-level restore, log archiving để PITR, offsite/cross-region copy, encryption và restore drill định kỳ. Tôi không coi backup là đạt nếu chưa restore và verify dữ liệu.</p>
+          <h3 class="green">Q2: Khi primary chết, bạn failover thế nào?</h3>
+          <p>Tôi xác nhận sự cố, đảm bảo primary cũ không còn nhận write, chọn replica có lag thấp nhất, promote, chuyển app/DNS/connection string, verify read/write và thiết lập replication mới. Sau đó ghi lại RPO/RTO thực tế và làm postmortem.</p>
+          <h3 class="orange">Q3: PITR xử lý xóa nhầm dữ liệu ra sao?</h3>
+          <p>Tôi restore base backup vào môi trường riêng, replay logs đến thời điểm ngay trước lệnh xóa, verify dữ liệu cần lấy lại, rồi chọn chiến lược: cutover toàn database hoặc trích xuất dữ liệu bị xóa để import lại production, tùy phạm vi lỗi và downtime cho phép.</p>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s8">
+      <div class="module-header">
+        <div class="module-tag">S8 · Summary</div>
+        <div class="module-title">Checklist & Tổng kết Module 07</div>
+        <div class="module-subtitle">Hoàn thành checklist này trước khi chuyển sang Security, Governance & Production Readiness.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">S</span>Summary — Điểm chốt cần nhớ<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>RPO/RTO là hợp đồng</strong>Không có mục tiêu thì không thể thiết kế recovery đúng.</div>
+            <div class="summary-item"><strong>PITR cần logs</strong>Base backup + WAL/binlog/archived redo mới khôi phục theo thời điểm.</div>
+            <div class="summary-item"><strong>Replica không thay backup</strong>Lỗi logic có thể replicate rất nhanh.</div>
+            <div class="summary-item"><strong>Failover cần fencing</strong>Tránh split brain bằng cách đảm bảo primary cũ không nhận write.</div>
+            <div class="summary-item"><strong>Restore drill là bắt buộc</strong>Không restore thử thì backup chỉ là niềm tin.</div>
+            <div class="summary-item"><strong>Verify dữ liệu sau restore</strong>Restore xong phải kiểm tra business invariants.</div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-practice">D</span>Definition of Done<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="progress-text">Progress: <span id="progressPct">0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Giải thích được RPO, RTO, retention và failure domain.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Thiết kế được chiến lược base backup + log archive cho PITR.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Hiểu PostgreSQL WAL archive, base backup và promote standby.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Hiểu MySQL binlog, GTID và replica promotion.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Dùng được Oracle RMAN và hiểu Data Guard switchover/failover.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Viết được failover runbook tối thiểu và restore verification checklist.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Trả lời được 3 câu senior answer trong Interview Prep.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn" disabled>Hoàn thành</button></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let currentModule = 0;
+const totalModules = 9;
+function showModule(index, navEl){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  const target=document.getElementById('s'+index);
+  if(target){target.classList.add('active');currentModule=index;window.scrollTo({top:0,behavior:'smooth'});}
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(navEl){navEl.classList.add('active');}
+  else{
+    const items=document.querySelectorAll('.nav-item');
+    if(items[index])items[index].classList.add('active');
+  }
+}
+function nextModule(){if(currentModule<totalModules-1)showModule(currentModule+1);}
+function prevModule(){if(currentModule>0)showModule(currentModule-1);}
+function toggleSection(header){
+  const content=header.nextElementSibling;
+  const toggle=header.querySelector('.section-toggle');
+  const hidden=content.style.display==='none';
+  content.style.display=hidden?'block':'none';
+  if(toggle)toggle.textContent=hidden?'▼':'▶';
+}
+function answerQuiz(opt,isCorrect,msg){
+  const item=opt.closest('.quiz-item');
+  item.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('correct','wrong'));
+  opt.classList.add(isCorrect?'correct':'wrong');
+  if(!isCorrect){
+    item.querySelectorAll('.quiz-opt').forEach(o=>{
+      const oc=o.getAttribute('onclick')||'';
+      if(oc.includes('true'))o.classList.add('correct');
+    });
+  }
+  const ex=item.querySelector('.quiz-explain');
+  ex.textContent=msg;
+  ex.classList.add('show');
+}
+function toggleCheck(box){box.classList.toggle('checked');updateProgress();}
+function updateProgress(){
+  const boxes=document.querySelectorAll('.check-box');
+  const checked=document.querySelectorAll('.check-box.checked');
+  const pct=boxes.length===0?0:Math.round(checked.length/boxes.length*100);
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('progressFill').style.width=pct+'%';
+}
+updateProgress();
+</script>
+</body>
+</html>

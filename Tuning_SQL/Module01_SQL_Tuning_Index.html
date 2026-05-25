@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 01 — Database Indexing & SQL Tuning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+    --accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;--accent4:#d2a8ff;--accent5:#ffa657;
+    --text:#e6edf3;--text-muted:#8b949e;--code-bg:#0d1117;--highlight:#388bfd26;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+  .hero{background:linear-gradient(135deg,#0d1117 0%,#161b22 40%,#1a2a1e 100%);border-bottom:2px solid var(--accent4);padding:40px 24px 30px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#6e40c922,transparent 70%);pointer-events:none}
+  .hero h1{font-size:2rem;font-weight:800;color:var(--accent4);letter-spacing:-0.5px}
+  .hero p{color:var(--text-muted);margin-top:8px;font-size:.95rem}
+  .badge-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .badge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;border:1px solid}
+  .badge-blue{color:var(--accent);border-color:var(--accent);background:#1f6feb1a}
+  .badge-green{color:var(--accent2);border-color:var(--accent2);background:#2ea04326}
+  .badge-orange{color:var(--accent5);border-color:var(--accent5);background:#d2940026}
+  .badge-purple{color:var(--accent4);border-color:var(--accent4);background:#6e40c926}
+  .badge-red{color:var(--accent3);border-color:var(--accent3);background:#f7816620}
+  .container{display:flex;min-height:calc(100vh - 160px)}
+  .sidebar{width:290px;min-width:290px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .sidebar-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:0 16px 12px}
+  .level-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 16px 4px;color:var(--accent4)}
+  .nav-item{display:block;padding:7px 16px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-left:3px solid transparent;transition:all .15s}
+  .nav-item:hover{color:var(--text);background:var(--surface2)}
+  .nav-item.active{color:var(--accent4);border-left-color:var(--accent4);background:#6e40c915;font-weight:600}
+  .nav-number{display:inline-block;width:44px;font-size:.7rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .main{flex:1;padding:32px 40px;max-width:980px}
+  .module{display:none}
+  .module.active{display:block}
+  .module-header{border:1px solid var(--border);border-radius:12px;padding:24px 28px;background:var(--surface);margin-bottom:24px;position:relative;overflow:hidden}
+  .module-header::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent4)}
+  .module-tag{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent4);margin-bottom:8px}
+  .module-title{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+  .module-subtitle{color:var(--text-muted);font-size:.9rem}
+  .section{margin-bottom:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .section-header{padding:14px 20px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--surface2);border-bottom:1px solid var(--border);user-select:none}
+  .section-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .icon-purpose{background:#1f6feb33}
+  .icon-detail{background:#2ea04326}
+  .icon-quiz{background:#d2940026}
+  .icon-summary{background:#6e40c926}
+  .icon-practice{background:#f7816626}
+  .section-content{padding:20px;background:var(--surface)}
+  .section-toggle{margin-left:auto;color:var(--text-muted);font-size:12px}
+  h3{font-size:1rem;font-weight:700;color:var(--accent4);margin:18px 0 10px}
+  h3:first-child{margin-top:0}
+  h3.blue{color:var(--accent)}
+  h3.green{color:var(--accent2)}
+  h3.orange{color:var(--accent5)}
+  h3.red{color:var(--accent3)}
+  p{margin-bottom:12px;color:var(--text);font-size:.88rem}
+  ul,ol{padding-left:20px;margin-bottom:12px}
+  li{font-size:.88rem;margin-bottom:5px}
+  strong{color:var(--text)}
+  .cmd-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden}
+  .cmd-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .cmd-body{padding:14px}
+  pre{font-family:'JetBrains Mono','Courier New','Consolas',monospace;font-size:.82rem;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--text)}
+  .kw{color:#ff7b72}.kw2{color:var(--accent)}.str{color:var(--accent5)}.fn{color:var(--accent4)}.num{color:#79c0ff}.comment{color:var(--text-muted)}
+  .db-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.68rem;font-weight:700;letter-spacing:.5px;margin-bottom:6px;margin-right:4px}
+  .db-pg{background:#4169e122;color:#4d9de0;border:1px solid #4169e155}
+  .db-my{background:#f0931322;color:#f09313;border:1px solid #f0931355}
+  .db-oracle{background:#cc000022;color:#f97316;border:1px solid #cc000055}
+  code{font-family:'JetBrains Mono',monospace;background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.82rem;color:var(--accent4)}
+  .quiz-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+  .quiz-q{font-weight:600;font-size:.88rem;margin-bottom:10px}
+  .quiz-q::before{content:'Q';display:inline-block;width:22px;height:22px;background:var(--accent4);color:#000;border-radius:50%;font-size:.7rem;font-weight:800;text-align:center;line-height:22px;margin-right:8px}
+  .quiz-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .quiz-opt{padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.84rem;transition:all .15s;background:var(--bg)}
+  .quiz-opt:hover{border-color:var(--accent4);color:var(--accent4)}
+  .quiz-opt.correct{border-color:var(--accent2);color:var(--accent2);background:#2ea04310}
+  .quiz-opt.wrong{border-color:var(--accent3);color:var(--accent3);background:#f7816610}
+  .quiz-explain{font-size:.82rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;margin-top:8px;display:none}
+  .quiz-explain.show{display:block}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .summary-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.82rem}
+  .summary-item strong{color:var(--accent4);display:block;margin-bottom:4px}
+  .practice-task{background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}
+  .practice-task-header{padding:12px 16px;background:#6e40c915;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem;color:var(--accent4)}
+  .practice-task-body{padding:16px}
+  .solution-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:.8rem;cursor:pointer;color:var(--accent2);margin-top:10px;transition:all .15s}
+  .solution-toggle:hover{background:var(--surface2)}
+  .solution-box{margin-top:10px;display:none;border-top:1px solid var(--border);padding-top:12px}
+  .solution-box.show{display:block}
+  .info-box{border-radius:8px;padding:14px 16px;margin:12px 0;font-size:.84rem;border:1px solid;display:flex;gap:10px}
+  .info-box.tip{border-color:var(--accent2);background:#2ea04310;color:var(--accent2)}
+  .info-box.warn{border-color:var(--accent5);background:#d2940015;color:var(--accent5)}
+  .info-box.note{border-color:var(--accent4);background:#6e40c915;color:var(--accent4)}
+  .info-box.danger{border-color:var(--accent3);background:#f7816610;color:var(--accent3)}
+  .info-box span{color:var(--text)}
+  .progress-bar{background:var(--surface2);border-radius:4px;height:4px;margin:16px 0;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent4),var(--accent2));border-radius:4px;width:0;transition:width .2s}
+  .nav-buttons{display:flex;gap:12px;margin-top:32px;justify-content:space-between}
+  .nav-btn{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}
+  .nav-btn:hover{border-color:var(--accent4);color:var(--accent4)}
+  .nav-btn.primary{background:var(--accent4);color:#000;border-color:var(--accent4)}
+  .nav-btn.primary:hover{background:#e2c0ff}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.83rem}
+  th{background:var(--surface2);padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent4)}
+  td{padding:8px 12px;border:1px solid var(--border)}
+  tr:nth-child(even) td{background:#ffffff05}
+  .checklist-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .check-box{width:16px;height:16px;border:1px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:.25rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+  .check-box.checked{background:var(--accent2);border-color:var(--accent2)}
+  .check-box.checked::after{content:'✓';font-size:10px;color:#000;font-weight:600}
+  .progress-text{font-size:.8rem;color:var(--text-muted);margin-bottom:8px}
+  .mental-model{border-left:4px solid var(--accent);background:#1f6feb1a;padding:12px 14px;border-radius:6px;margin:12px 0;font-size:.88rem}
+  .tab-group{display:flex;gap:0;margin-bottom:0;border-bottom:1px solid var(--border)}
+  .tab{padding:8px 18px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--accent4);border-bottom-color:var(--accent4);font-weight:600}
+  .tab-content{display:none;padding-top:16px}
+  .tab-content.active{display:block}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0}
+  .compare-card{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .compare-card-header{padding:8px 12px;font-weight:700;font-size:.78rem;text-align:center}
+  .compare-card-header.pg{background:#4169e133;color:#4d9de0}
+  .compare-card-header.my{background:#f0931333;color:#f09313}
+  .compare-card-header.ora{background:#cc000033;color:#f97316}
+  .compare-card-body{padding:10px 12px;font-size:.78rem;color:var(--text-muted)}
+  .compare-card-body li{margin-bottom:4px}
+  @media(max-width:768px){.sidebar{display:none}.main{padding:16px}.summary-grid{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Module 01 — Database Indexing & SQL Tuning</h1>
+  <p>Nắm vững Index từ gốc rễ để query không bao giờ chậm lại — áp dụng cho PostgreSQL, MySQL và Oracle.</p>
+  <div class="badge-row">
+    <span class="badge badge-purple">Junior → Senior</span>
+    <span class="badge badge-green">~5–7 ngày</span>
+    <span class="badge badge-blue">Database Performance</span>
+    <span class="badge badge-orange">PostgreSQL · MySQL · Oracle</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Module Navigation</div>
+    <div class="level-label">MODULE 01 · SQL TUNING & INDEX</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">S0</span>Tổng quan & Mục tiêu</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">S1</span>Lý thuyết nền</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">S2</span>4 Nguyên tắc vàng</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">S3</span>Index với từng SQL Op</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">S4</span>Thực hành & Debug</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">S5</span>Kỹ thuật nâng cao</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">S6</span>Lỗi thường gặp</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">S7</span>Interview Prep</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">S8</span>Checklist & Tổng kết</div>
+  </nav>
+
+  <main class="main">
+
+<!-- ═══════════════════════════════════════════════════════
+     S0 · ORIENTATION
+════════════════════════════════════════════════════════ -->
+<div class="module active" id="s0">
+  <div class="module-header">
+    <div class="module-tag">S0 · Orientation</div>
+    <div class="module-title">Tổng quan & Mục tiêu Module 01</div>
+    <div class="module-subtitle">Tại sao query chạy ngon ở local nhưng chậm kinh khủng trên production? — Câu trả lời gần như luôn liên quan đến Index.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-summary">🧭</span>
+      Roadmap 9 sections
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>Section</th><th>Tên section</th><th>Thời gian ước tính</th></tr></thead>
+        <tbody>
+          <tr><td>S0</td><td>Tổng quan & Mục tiêu</td><td>30–45 phút</td></tr>
+          <tr><td>S1</td><td>Lý thuyết nền — B+Tree, Heap vs Clustered, lưu trữ</td><td>3–4 giờ</td></tr>
+          <tr><td>S2</td><td>4 Nguyên tắc vàng khi dùng Index</td><td>3–4 giờ</td></tr>
+          <tr><td>S3</td><td>Index với từng SQL Operation</td><td>4–5 giờ</td></tr>
+          <tr><td>S4</td><td>Thực hành & Debug với EXPLAIN</td><td>1–2 ngày</td></tr>
+          <tr><td>S5</td><td>Kỹ thuật nâng cao (Partial, Functional, JSON...)</td><td>4–5 giờ</td></tr>
+          <tr><td>S6</td><td>Lỗi thường gặp & Cách fix</td><td>2–3 giờ</td></tr>
+          <tr><td>S7</td><td>Interview Prep</td><td>2–3 giờ</td></tr>
+          <tr><td>S8</td><td>Checklist & Tổng kết</td><td>1 giờ</td></tr>
+        </tbody>
+      </table>
+      <div class="info-box note">📌 <span><strong>Phạm vi Module 01:</strong> Nội dung gốc bám theo ebook về Database Indexing. Các đoạn PostgreSQL/MySQL là phần lõi; các đoạn Oracle như IOT, Bitmap Index, Skip Scan, AUTOTRACE và DBMS_XPLAN là phần mở rộng thêm cho lộ trình DBA.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-purpose">🎯</span>
+      Index giải quyết vấn đề gì?
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Vấn đề gốc rễ: Full Table Scan</h3>
+      <p>Không có index, mọi query đều phải đọc toàn bộ bảng từ đầu đến cuối. Với vài trăm row thì ổn, nhưng với vài triệu row — mỗi query có thể mất hàng giây hoặc hàng chục giây.</p>
+      <div class="info-box warn">⚠️ <span><strong>Hiểu lầm phổ biến nhất:</strong> "Có index là query nhanh." — Sai! Có index nhưng index không được dùng, hoặc index không đủ tốt, query vẫn chậm như thường.</span></div>
+
+      <h3 class="green">Index là gì (theo cách đơn giản nhất)?</h3>
+      <p>Index là một <strong>sorted list</strong> + <strong>bảng tóm tắt phân cấp</strong> (B+Tree). Giống như mục lục từ điển — bạn không cần đọc từ trang 1, chỉ cần nhảy thẳng đến đúng vị trí.</p>
+      <div class="mental-model">💡 <strong>Mental model:</strong> Index = mục lục từ điển. Càng nhiều bảng có 10 triệu row, B+Tree chỉ cần 3–4 bước nhảy để tìm ra kết quả.</div>
+
+      <h3 class="orange">Tại sao cần học kỹ?</h3>
+      <ul>
+        <li>Index sai thứ tự cột → không được dùng (Nguyên tắc phễu)</li>
+        <li>Range condition đặt sai vị trí → scan dư hàng triệu row</li>
+        <li>Function trên cột → index vô dụng hoàn toàn</li>
+        <li>Database đôi khi bỏ qua index của bạn — và đôi khi nó đúng!</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🔁</span>
+      Flow: Query đi qua index như thế nào
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>query-execution-flow.txt</span></div>
+        <div class="cmd-body">
+<pre><span class="kw2">SQL Query đến database</span>
+        │
+        ▼
+<span class="fn">PARSE</span> — Kiểm tra cú pháp
+        │
+        ▼
+<span class="fn">PLAN (Initial)</span> — Tạo plan cơ bản: Full Table Scan
+        │
+        ▼
+<span class="fn">OPTIMIZE</span> — Kiểm tra: có index nào tốt hơn không?
+        │         (dùng statistics & cost model)
+        ▼
+<span class="kw">EXECUTE</span> — Chạy plan tốt nhất
+        │
+        ├── <span class="str">Có index phù hợp</span> → B+Tree lookup (nhanh)
+        │       ├─ Bước 1: Tìm matching entries trong index
+        │       ├─ Bước 2: Load rows từ table (random I/O)
+        │       └─ Bước 3: Filter thêm điều kiện ngoài index
+        │
+        └── <span class="accent3">Không có / không dùng index</span> → Full scan (chậm)</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-practice">✅</span>
+      Exit criteria: "Bạn đã nắm module này khi..."
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>Giải thích được B+Tree bằng lời mà không cần vẽ sơ đồ</li>
+        <li>Tạo đúng composite index cho bất kỳ query WHERE + ORDER BY nào</li>
+        <li>Đọc được output EXPLAIN/EXPLAIN ANALYZE/AUTOTRACE và biết query đang dùng index nào</li>
+        <li>Biết khi nào database sẽ bỏ qua index (full scan nhanh hơn) và không lo lắng về điều đó</li>
+        <li>Áp dụng được sự khác biệt giữa PostgreSQL, MySQL và Oracle khi thiết kế index</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S1 · FOUNDATION THEORY
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s1">
+  <div class="module-header">
+    <div class="module-tag">S1 · Foundation Theory</div>
+    <div class="module-title">Lý thuyết nền — B+Tree & Cơ chế lưu trữ</div>
+    <div class="module-subtitle">WHY trước HOW: hiểu cơ chế lưu trữ để ra quyết định index đúng từ đầu.</div>
+  </div>
+
+  <!-- Beginner -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📘</span>
+      B+Tree Index — Beginner Level
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Hai điều cốt lõi cần nhớ</h3>
+      <p><strong>1) Index = sorted list + bảng tóm tắt phân cấp.</strong> Leaf nodes (tầng dưới) chứa giá trị đã sorted. Internal nodes (tầng trên) là "gáy sách" giúp nhảy nhanh.</p>
+      <p><strong>2) Database tự quản lý index hoàn toàn.</strong> INSERT/UPDATE/DELETE đều tự cập nhật index. Càng nhiều index → write càng chậm hơn một chút.</p>
+      <div class="mental-model">💡 <strong>Mental model:</strong> Tìm "performance" trong từ điển 2000 trang: nhìn gáy sách → lật đến P → scan đến PE → tìm. 3 bước thay vì 2000 trang. Đó là B+Tree.</div>
+
+      <h3 class="green">Trade-off cần hiểu ngay từ đầu</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>index-tradeoff.txt</span></div>
+        <div class="cmd-body">
+<pre><span class="comment">-- Bảng users có 5 index:</span>
+<span class="kw">INSERT</span> 1 row  → cập nhật <span class="num">5</span> index  (<span class="str">chậm hơn 5x so với 0 index</span>)
+<span class="kw">UPDATE</span> email  → cập nhật <span class="num">2</span> index  (chỉ index có cột email)
+<span class="kw">UPDATE</span> bio    → cập nhật <span class="num">0</span> index  (bio không trong index nào)
+<span class="kw">DELETE</span> 1 row  → xóa khỏi <span class="num">5</span> index
+
+<span class="comment">-- Thực tế: read:write = 90:10, nên 3–7 index/bảng là hợp lý</span>
+<span class="comment">-- Hơn 10 index mà write chậm → review lại</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Intermediate: Heap vs Clustered -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📗</span>
+      Heap Table vs Clustered Index — Intermediate Level
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Hai cách lưu trữ hoàn toàn khác nhau</h3>
+
+      <div class="tab-group" id="tab-storage">
+        <div class="tab active" onclick="switchTab('tab-storage','tab-pg')">🐘 PostgreSQL (Heap)</div>
+        <div class="tab" onclick="switchTab('tab-storage','tab-my')">🐬 MySQL/InnoDB (Clustered)</div>
+        <div class="tab" onclick="switchTab('tab-storage','tab-ora')">🔶 Oracle (IOT)</div>
+      </div>
+
+      <div class="tab-content active" id="tab-pg">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <p><strong>Heap Table:</strong> Dữ liệu append vào cuối file, không quan tâm thứ tự PK. Mọi index (kể cả PK) đều trỏ đến <strong>physical location (ctid)</strong> của row.</p>
+        <div class="cmd-block">
+          <div class="cmd-header"><span>● ● ●</span><span>postgresql-heap.txt</span></div>
+          <div class="cmd-body">
+<pre><span class="comment">── INDEX (email) ──         ── TABLE (heap) ──</span>
+<span class="kw2">alice@... → ctid (5,2)</span> ───→ Page 5: [alice, 28, ...]
+<span class="kw2">bob@...   → ctid (2,1)</span> ───→ Page 2: [bob, 35, ...]
+
+<span class="comment">-- PK index hoạt động y hệt: chỉ thêm UNIQUE constraint</span>
+<span class="comment">-- PK lookup = Secondary index lookup = 2 bước (index → heap)</span>
+<span class="comment">-- Insert PK random (UUIDv4): ít bị ảnh hưởng hơn MySQL vì heap append</span>
+<span class="comment">-- Nhưng PK/secondary index vẫn bị random insert; bảng lớn/write nhiều nên cân nhắc UUIDv7/ULID</span></pre>
+          </div>
+        </div>
+        <div class="info-box tip">✅ <span><strong>Lợi thế:</strong> Insert UUIDv4 thường nhẹ hơn MySQL vì data heap append, nhưng index vẫn phải cập nhật theo thứ tự random. Với workload ghi nhiều, ưu tiên key tăng dần hoặc gần tăng dần như UUIDv7/ULID.</span></div>
+      </div>
+
+      <div class="tab-content" id="tab-my">
+        <span class="db-tag db-my">MySQL / InnoDB</span>
+        <p><strong>Clustered Index:</strong> PK <em>chính là</em> bảng. Dữ liệu lưu ngay trong leaf node của PK index, sắp xếp theo thứ tự PK. Không có heap riêng.</p>
+        <div class="cmd-block">
+          <div class="cmd-header"><span>● ● ●</span><span>mysql-clustered.txt</span></div>
+          <div class="cmd-body">
+<pre><span class="comment">── PRIMARY KEY INDEX = TABLE ──</span>
+PK=1 → [alice, alice@..., 28, ...]  <span class="comment">← data nằm ngay đây!</span>
+PK=2 → [bob,   bob@...,   35, ...]
+PK=3 → [charlie, ...]
+
+<span class="comment">── SECONDARY INDEX (email) ──</span>
+<span class="kw2">alice@... → PK=1</span>  <span class="comment">← trỏ đến PK, không phải vị trí vật lý</span>
+<span class="kw2">bob@...   → PK=2</span>
+
+<span class="comment">-- Secondary index lookup = 2 bước: sec.index → PK index</span>
+<span class="comment">-- PK lookup = 1 bước: PK index có data ngay!</span>
+<span class="comment">-- UUIDv4 làm PK: chậm hơn 3–10x vì insert vào vị trí random trong sorted tree</span></pre>
+          </div>
+        </div>
+        <div class="info-box danger">🚨 <span><strong>Hệ quả với MySQL:</strong> PK value được COPY vào mọi secondary index. PK = CHAR(36) UUID → mỗi secondary index entry nặng hơn 28 bytes so với BIGINT. Với 1M row, 5 secondary index → chênh 90MB chỉ vì chọn sai PK type!</span></div>
+      </div>
+
+      <div class="tab-content" id="tab-ora">
+        <span class="db-tag db-oracle">Oracle</span>
+        <p><strong>Heap Table (mặc định):</strong> Oracle mặc định dùng Heap Table tương tự PostgreSQL. Dữ liệu lưu theo ROWID (địa chỉ vật lý: file#.block#.row#).</p>
+        <p><strong>Index-Organized Table (IOT):</strong> Tương đương Clustered Index của MySQL — toàn bộ dữ liệu lưu trong B+Tree theo thứ tự PK. Phải khai báo tường minh.</p>
+        <div class="cmd-block">
+          <div class="cmd-header"><span>● ● ●</span><span>oracle-storage.sql</span></div>
+          <div class="cmd-body">
+<pre><span class="comment">-- Oracle mặc định: Heap Table</span>
+<span class="kw">CREATE TABLE</span> employees (
+  emp_id   <span class="fn">NUMBER</span> <span class="kw">PRIMARY KEY</span>,
+  name     <span class="fn">VARCHAR2</span>(<span class="num">100</span>),
+  dept_id  <span class="fn">NUMBER</span>
+);
+<span class="comment">-- Index trỏ đến ROWID (vật lý: file#.block#.row#)</span>
+<span class="comment">-- PK lookup = 2 bước: PK index → heap block</span>
+
+<span class="comment">-- Index-Organized Table (IOT): dùng khi LUÔN query theo PK</span>
+<span class="kw">CREATE TABLE</span> lookup_codes (
+  code_id  <span class="fn">NUMBER</span>        <span class="kw">NOT NULL</span>,
+  code     <span class="fn">VARCHAR2</span>(<span class="num">20</span>)  <span class="kw">NOT NULL</span>,
+  meaning  <span class="fn">VARCHAR2</span>(<span class="num">200</span>),
+  <span class="kw">CONSTRAINT</span> pk_lookup <span class="kw">PRIMARY KEY</span> (code_id)
+) <span class="kw2">ORGANIZATION INDEX</span>;  <span class="comment">-- ← từ khóa tạo IOT</span>
+
+<span class="comment">-- Secondary index trên IOT → chứa "Logical ROWID" (PK + physical guess)</span></pre>
+          </div>
+        </div>
+        <div class="info-box note">📌 <span><strong>Oracle ROWID:</strong> Dạng <code>AAABcdAAEAAAAA7AAA</code> — mã hóa (file, block, row) giúp truy cập trực tiếp đến vị trí vật lý mà không qua index. Đây là lý do Oracle heap lookup đôi khi nhanh hơn MySQL secondary index lookup.</span></div>
+      </div>
+
+      <h3 class="orange">So sánh 3 hệ quản trị</h3>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="compare-card-header pg">PostgreSQL</div>
+          <div class="compare-card-body">
+            <ul>
+              <li>Heap mặc định</li>
+              <li>PK = UNIQUE index, không đặc biệt hơn</li>
+              <li>UUIDv4 PK: ít đau hơn MySQL, nhưng vẫn tốn chi phí ở index</li>
+              <li>CLUSTER command: sắp xếp lại heap 1 lần</li>
+              <li>PK lookup: 2 bước</li>
+            </ul>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-card-header my">MySQL/InnoDB</div>
+          <div class="compare-card-body">
+            <ul>
+              <li>Clustered Index bắt buộc</li>
+              <li>PK = table, data nằm trong PK tree</li>
+              <li>UUIDv4 PK: rất chậm, dùng ULID/UUIDv7</li>
+              <li>PK value copy vào mọi secondary index</li>
+              <li>PK lookup: 1 bước</li>
+            </ul>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-card-header ora">Oracle</div>
+          <div class="compare-card-body">
+            <ul>
+              <li>Heap mặc định (như PostgreSQL)</li>
+              <li>IOT: tường minh với ORGANIZATION INDEX</li>
+              <li>ROWID: địa chỉ vật lý cực nhanh</li>
+              <li>Bitmap Index: cho cột cardinality thấp</li>
+              <li>Reverse Key Index: chống index hot-block</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Senior: Primary Key choice -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📕</span>
+      Chọn Primary Key — Senior Level
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Thứ tự insert ảnh hưởng đến performance</h3>
+      <table>
+        <thead><tr><th>Loại PK</th><th>Ví dụ</th><th>Thứ tự insert</th><th>MySQL</th><th>PostgreSQL / Oracle</th></tr></thead>
+        <tbody>
+          <tr><td>Auto-increment</td><td>1, 2, 3...</td><td>Luôn tăng → cuối list</td><td>✅ Nhanh nhất</td><td>✅ Nhanh nhất</td></tr>
+          <tr><td>UUIDv4</td><td>a3f8-... (random)</td><td>Random → giữa list</td><td>🔴 Chậm nhất (3–10x)</td><td>🟡 Ảnh hưởng ít hơn</td></tr>
+          <tr><td>UUIDv7 / ULID</td><td>019abc-... (time)</td><td>Gần như tăng → gần cuối</td><td>✅ Nhanh</td><td>✅ Nhanh</td></tr>
+          <tr><td>Oracle SEQUENCE</td><td>1001, 1002...</td><td>Luôn tăng</td><td>N/A</td><td>✅ Nhanh nhất Oracle</td></tr>
+        </tbody>
+      </table>
+
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>oracle-sequence.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="db-tag db-oracle" style="font-family:monospace">ORACLE</span>
+<span class="comment">-- Oracle: dùng SEQUENCE thay vì AUTO_INCREMENT</span>
+<span class="kw">CREATE SEQUENCE</span> emp_seq
+  <span class="fn">START WITH</span> <span class="num">1</span>
+  <span class="fn">INCREMENT BY</span> <span class="num">1</span>
+  <span class="fn">CACHE</span> <span class="num">100</span>  <span class="comment">-- cache 100 giá trị → tránh I/O liên tục</span>
+  <span class="fn">NOCYCLE</span>;
+
+<span class="comment">-- Oracle 12c+: IDENTITY column (giống auto-increment)</span>
+<span class="kw">CREATE TABLE</span> employees (
+  emp_id  <span class="fn">NUMBER</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+  name    <span class="fn">VARCHAR2</span>(<span class="num">100</span>)
+);</pre>
+        </div>
+      </div>
+
+      <h3 class="red">Anti-patterns cần tránh</h3>
+      <div class="info-box danger">🚨 <span><strong>MySQL:</strong> Dùng UUIDv4 (CHAR 36) làm PK → insert chậm 3–10x, secondary index phình 3x, RAM usage tăng cao. Dùng BINARY(16) + UUIDv7 hoặc BIGINT AUTO_INCREMENT thay thế.</span></div>
+      <div class="info-box danger">🚨 <span><strong>Oracle:</strong> Không đặt CACHE cho SEQUENCE trong high-concurrency → mỗi nextval tốn 1 I/O → bottleneck. Luôn đặt CACHE 100+ cho production sequence.</span></div>
+    </div>
+  </div>
+
+  <!-- Quick Quiz S1 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">🧪</span>
+      Quick Quiz — Kiểm tra S1
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Bảng MySQL/InnoDB có 10 secondary index. Thao tác nào sau đây cập nhật TẤT CẢ 10 index?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'UPDATE chỉ cập nhật index của cột bị thay đổi. Nếu cột không nằm trong index nào thì 0 index bị cập nhật.')">A. UPDATE email (email nằm trong 3 index)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng! DELETE phải xóa entry khỏi TẤT CẢ index của bảng, bất kể cột nào.')">B. DELETE 1 row</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SELECT không thay đổi dữ liệu nên không cập nhật index nào.')">C. SELECT * FROM users WHERE id = 1</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ANALYZE không thay đổi dữ liệu, chỉ cập nhật statistics.')">D. ANALYZE TABLE users</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">PostgreSQL và MySQL khác nhau thế nào khi dùng UUIDv4 làm Primary Key?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL cũng bị ảnh hưởng, nhưng nhẹ hơn vì chỉ secondary index bị random insert, còn heap thì append.')">A. Cả hai đều bị ảnh hưởng giống nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng! MySQL: TABLE = PK index, mọi insert phải đúng vị trí trong sorted tree → chậm 3–10x. PostgreSQL: heap append, chỉ secondary index bị ảnh hưởng nhẹ hơn.')">B. MySQL bị ảnh hưởng nặng hơn nhiều vì Clustered Index</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Ngược lại: PostgreSQL ít bị ảnh hưởng hơn MySQL với UUIDv4.')">C. PostgreSQL bị ảnh hưởng nặng hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Cả hai đều bị ảnh hưởng với UUIDv4, chỉ mức độ khác nhau.')">D. Cả hai đều không ảnh hưởng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Oracle Index-Organized Table (IOT) tương đương với khái niệm gì trong MySQL?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Heap Table là cách lưu trữ mặc định của Oracle, không phải IOT.')">A. Heap Table</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Partial Index là kỹ thuật khác — chỉ index một phần dữ liệu theo điều kiện WHERE.')">B. Partial Index</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng! IOT lưu toàn bộ dữ liệu trong B+Tree theo thứ tự PK, y hệt cách MySQL/InnoDB dùng Clustered Index.')">C. Clustered Index (InnoDB)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Covering Index là kỹ thuật khác — index chứa đủ cột để không cần đọc bảng.')">D. Covering Index</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S2 · 4 NGUYÊN TẮC VÀNG
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s2">
+  <div class="module-header">
+    <div class="module-tag">S2 · Core Principles</div>
+    <div class="module-title">4 Nguyên tắc vàng khi dùng Index</div>
+    <div class="module-subtitle">Nắm 4 nguyên tắc này = nắm 80% kiến thức về index. Khi gặp query chậm, áp dụng theo thứ tự.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-purpose">①</span>
+      Nguyên tắc 1: Fast Lookup — Nhảy thẳng đến vị trí
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Thao tác cơ bản nhất: tìm một giá trị cụ thể gần như tức thì. Database nhảy qua internal nodes thay vì scan tuần tự.</p>
+      <div class="mental-model">💡 <strong>Sức mạnh O(log n):</strong> Từ 1.000 lên 1.000.000.000 row chỉ thêm 2 bước nhảy. Đừng lo lắng về kích thước index.</div>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>fast-lookup.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> movies <span class="kw">WHERE</span> release_year = <span class="num">2019</span>;
+
+<span class="comment">-- Index (release_year): [2015|2016|2017|2018|2019|2020|2021]</span>
+<span class="comment">--                                             ↑ nhảy thẳng đến đây</span>
+<span class="comment">-- Không cần đọc qua 2015, 2016, 2017, 2018...</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-purpose">②</span>
+      Nguyên tắc 2: Scan một chiều — Range + LIMIT siêu nhanh
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Sau khi nhảy đến vị trí, database đọc liên tục theo một hướng (leaf nodes liên kết nhau như linked list).</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>range-scan.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> age >= <span class="num">35</span> <span class="kw">ORDER BY</span> age <span class="kw">ASC LIMIT</span> <span class="num">3</span>;
+
+<span class="comment">-- Index (age): [18|22|25|28|30|35|37|42|48|55|61]</span>
+<span class="comment">--                               ↑ Fast Lookup: age>=35</span>
+<span class="comment">--                               35→37→42 ✓ DỪNG! (LIMIT 3)</span>
+<span class="comment">-- Kết quả: chỉ đọc 3 entries thay vì scan 10M rows</span>
+
+<span class="comment">-- Không có index: scan 10M → filter → sort → lấy 3</span>
+<span class="comment">-- Có index:       nhảy đến 35 → đọc 3 → xong (vài ms vs vài giây)</span></pre>
+        </div>
+      </div>
+      <div class="info-box note">📌 <span><strong>Lưu ý:</strong> Scan chỉ đi <strong>một hướng</strong>. ORDER BY col ASC và DESC dùng cùng 1 index được (scan ngược lại). Nhưng ORDER BY score DESC, created_at ASC cần index đúng hướng: <code>(score DESC, created_at ASC)</code>.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-purpose">③</span>
+      Nguyên tắc 3: Từ trái sang phải — Nguyên tắc Phễu
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Composite index hoạt động như cái phễu: lọc từ trái sang phải, không được bỏ qua cột đầu tiên.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>funnel-principle.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="comment">-- Index: (country, lastname, firstname)</span>
+<span class="comment">-- Sắp xếp: sort by country → trong mỗi country sort by lastname → ...</span>
+
+<span class="kw">WHERE</span> country = <span class="str">'VN'</span> <span class="kw">AND</span> lastname = <span class="str">'Nguyen'</span> <span class="kw">AND</span> firstname = <span class="str">'Huy'</span>
+<span class="comment">-- ✅ Dùng 3/3 bước phễu → tìm chính xác 1 entry</span>
+
+<span class="kw">WHERE</span> country = <span class="str">'VN'</span> <span class="kw">AND</span> lastname = <span class="str">'Nguyen'</span>
+<span class="comment">-- ✅ Dùng 2/3 bước phễu → OK</span>
+
+<span class="kw">WHERE</span> country = <span class="str">'VN'</span>
+<span class="comment">-- ✅ Dùng 1/3 bước phễu → OK nhưng kém tối ưu</span>
+
+<span class="kw">WHERE</span> lastname = <span class="str">'Nguyen'</span>
+<span class="comment">-- ❌ Bỏ qua country (cột đầu tiên) → KHÔNG dùng được index</span>
+<span class="comment">--    Vì: 'Nguyen' nằm rải rác ở JP, US, VN... không liên tục</span></pre>
+        </div>
+      </div>
+      <div class="info-box tip">✅ <span><strong>Quy tắc thứ tự cột:</strong> Không phải "cột selective nhất lên đầu" — mà là <strong>cột nào được dùng ở query thường xuyên nhất thì lên đầu</strong>, để tối đa hóa số query được phục vụ bởi 1 index.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-purpose">④</span>
+      Nguyên tắc 4: Range phá vỡ phễu — Equality trước, Range sau
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Sau cột có range condition (<code>&gt;</code>, <code>&lt;</code>, <code>BETWEEN</code>), các cột tiếp theo trong index chỉ dùng để filter — không thu hẹp scan range được nữa.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>range-breaks-funnel.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="kw">WHERE</span> country = <span class="str">'VN'</span> <span class="kw">AND</span> age > <span class="num">28</span> <span class="kw">AND</span> married = <span class="str">'yes'</span>
+
+<span class="comment">-- ❌ Index (country, age, married):</span>
+<span class="comment">--    country='VN' → phễu ✓</span>
+<span class="comment">--    age>28       → range scan bắt đầu ✓</span>
+<span class="comment">--    married='yes'→ sau range → chỉ filter, đọc CẢ rows có age>28</span>
+<span class="comment">--    Đọc 6 entries, giữ 3 → lãng phí 50%</span>
+
+<span class="comment">-- ✅ Index (country, married, age):</span>
+<span class="comment">--    country='VN'  → phễu ✓</span>
+<span class="comment">--    married='yes' → phễu ✓ (equality trước range!)</span>
+<span class="comment">--    age>28        → range scan CHỈ trên block married='yes'</span>
+<span class="comment">--    Đọc đúng 3 entries → không lãng phí!</span>
+
+<span class="comment">-- QUY TẮC VÀNG: Equality columns TRƯỚC, Range column SAU</span></pre>
+        </div>
+      </div>
+
+      <h3 class="orange">So sánh hỗ trợ Range trên 3 hệ quản trị</h3>
+      <table>
+        <thead><tr><th>Feature</th><th>PostgreSQL</th><th>MySQL</th><th>Oracle</th></tr></thead>
+        <tbody>
+          <tr><td>Skip Scan / Loose Index Scan</td><td>❌ Chưa hỗ trợ</td><td>✅ Loose Index Scan (GROUP BY min/max)</td><td>✅ Index Skip Scan</td></tr>
+          <tr><td>Bitmap AND/OR nhiều index</td><td>✅ Bitmap Index Scan</td><td>❌ Index Merge (hạn chế)</td><td>✅ Bitmap Index (mạnh nhất)</td></tr>
+          <tr><td>Range scan descending</td><td>✅</td><td>✅ (MySQL 8+)</td><td>✅</td></tr>
+          <tr><td>Partial Index</td><td>✅ WHERE clause</td><td>❌ Không hỗ trợ</td><td>❌ Không hỗ trợ</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box note">📌 <span><strong>Oracle Index Skip Scan:</strong> Oracle có thể "nhảy qua" các cột đầu của composite index nếu cardinality thấp. Ví dụ index (gender, salary), query <code>WHERE salary &gt; 5000</code> có thể dùng được nhờ Skip Scan. Đây là lợi thế lớn so với PostgreSQL.</span></div>
+    </div>
+  </div>
+
+  <!-- Quick Quiz S2 -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">🧪</span>
+      Quick Quiz — Kiểm tra S2
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Có index (status, region, total) và query WHERE status='pending' AND total > 1000. Index được dùng như thế nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng: index ĐƯỢC dùng nhưng không hoàn toàn tối ưu vì bỏ qua cột region ở giữa.')">A. Index không được dùng vì bỏ qua cột region</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng! status được dùng để Fast Lookup. region bị bỏ qua. total được dùng để filter (nhưng không thu hẹp scan range vì đứng sau range). Vẫn tốt hơn không có index.')">B. Dùng status để lookup, bỏ qua region, total chỉ filter</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng: Chỉ status được dùng làm lookup point, không phải toàn bộ index.')">C. Dùng toàn bộ 3 cột của index</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng: Database vẫn có thể dùng index này với status, chỉ là không tối ưu hoàn toàn.')">D. Database sẽ full table scan vì thiếu region</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+      <div class="quiz-item">
+        <div class="quiz-q">Oracle Index Skip Scan hữu ích nhất khi nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Skip Scan không liên quan đến LIKE searches.')">A. Query dùng LIKE với wildcard ở đầu (%abc%)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng! Skip Scan hiệu quả nhất khi cột đầu của composite index có cardinality thấp (ít distinct values như gender, status), query bỏ qua cột đó nhưng dùng cột tiếp theo.')">B. Cột đầu của composite index có cardinality thấp (M/F, status)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Skip Scan không liên quan đến kiểu dữ liệu.')">C. Cột có kiểu VARCHAR2 dài</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Với join nhiều bảng, nested loop và hash join mới quan trọng hơn Skip Scan.')">D. Query join nhiều bảng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S3 · INDEX VỚI TỪNG SQL OPERATION
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s3">
+  <div class="module-header">
+    <div class="module-tag">S3 · SQL Operations</div>
+    <div class="module-title">Index với từng SQL Operation</div>
+    <div class="module-subtitle">Áp dụng 4 nguyên tắc vào thực chiến — có ví dụ cho PostgreSQL, MySQL và Oracle.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🔍</span>
+      WHERE: != · NULL · LIKE · Type mismatch
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="red">Phép so sánh != (kẻ giết hiệu suất)</h3>
+      <p><code>!=</code> buộc database phải scan toàn bộ index vì kết quả nằm ở cả hai phía. Thường bị fall back về full table scan.</p>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>not-equal.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="comment">-- ❌ Vấn đề: != không dùng index hiệu quả</span>
+<span class="kw">WHERE</span> status != <span class="str">'open'</span>
+
+<span class="comment">-- ✅ Fix 1: Thêm equality column để thu hẹp phạm vi</span>
+<span class="kw">WHERE</span> shop_id = <span class="num">42</span> <span class="kw">AND</span> status != <span class="str">'open'</span>
+<span class="comment">-- Index (shop_id, status) → lookup shop_id trước → scan nhỏ hơn nhiều</span>
+
+<span class="comment">-- ✅ Fix 2: Chuyển thành IN(...) nếu biết trước giá trị</span>
+<span class="kw">WHERE</span> status <span class="kw">IN</span> (<span class="str">'paid'</span>, <span class="str">'cancelled'</span>, <span class="str">'refunded'</span>)
+<span class="comment">-- Database tách thành 3 equality lookups → hiệu quả hơn</span>
+
+<span class="db-tag db-oracle">ORACLE</span>
+<span class="comment">-- Oracle hỗ trợ &lt;&gt; và != như nhau</span>
+<span class="comment">-- Oracle có thể dùng INDEX RANGE SCAN cho != nếu selectivity cao</span>
+<span class="comment">-- Kiểm tra với EXPLAIN PLAN và nhìn ACCESS PREDICATES vs FILTER PREDICATES</span></pre>
+        </div>
+      </div>
+
+      <h3 class="orange">NULL: Behavior khác nhau giữa các DB</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>null-handling.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="comment">-- NULL sort order:</span>
+<span class="db-tag db-my" style="font-family:monospace">MySQL</span>     NULL đứng TRƯỚC (nhỏ nhất)  → ASC: NULL, 1, 2, 3
+<span class="db-tag db-pg" style="font-family:monospace">PgSQL</span>     NULL đứng SAU (lớn nhất)   → ASC: 1, 2, 3, NULL
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>    NULL đứng SAU (lớn nhất)   → ASC: 1, 2, 3, NULL
+
+<span class="comment">-- NULL-safe equality:</span>
+<span class="db-tag db-my" style="font-family:monospace">MySQL</span>     <span class="kw">WHERE</span> col <span class="kw2">&lt;=&gt;</span> <span class="num">NULL</span>             <span class="comment">-- NULL-safe operator</span>
+<span class="db-tag db-pg" style="font-family:monospace">PgSQL</span>     <span class="kw">WHERE</span> col <span class="kw2">IS NOT DISTINCT FROM</span> <span class="num">NULL</span>
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>    <span class="kw">WHERE</span> (col = val <span class="kw">OR</span> (col <span class="kw">IS NULL AND</span> val <span class="kw">IS NULL</span>))
+
+<span class="comment">-- Oracle đặc biệt: NULL KHÔNG được index trong B-tree index!</span>
+<span class="comment">-- IS NULL query trên Oracle: full table scan nếu chỉ có B-tree index</span>
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle Fix</span>
+<span class="kw">CREATE INDEX</span> idx_nullable <span class="kw">ON</span> t (col, <span class="num">0</span>);
+<span class="comment">-- Thêm cột hằng số → buộc Oracle index cả row có col=NULL</span>
+<span class="kw">WHERE</span> col <span class="kw">IS NULL</span>  <span class="comment">-- Giờ dùng được index</span></pre>
+        </div>
+      </div>
+
+      <h3 class="blue">LIKE và Type Mismatch</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>like-type.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="comment">-- LIKE 'abc%' → range scan (OK với mọi DB)</span>
+<span class="comment">-- LIKE '%abc%' → không dùng B-tree (cần Trigram/Full-text)</span>
+
+<span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="kw">CREATE EXTENSION</span> pg_trgm;
+<span class="kw">CREATE INDEX</span> trgm_idx <span class="kw">ON</span> contacts <span class="kw">USING GIN</span> (name gin_trgm_ops);
+<span class="kw">WHERE</span> name <span class="kw">LIKE</span> <span class="str">'%Nguyen%'</span>  <span class="comment">-- Dùng được với trigram index</span>
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="comment">-- Oracle Text: Full-text search mạnh nhất</span>
+<span class="kw">CREATE INDEX</span> ft_idx <span class="kw">ON</span> contacts (name)
+  <span class="kw2">INDEXTYPE IS</span> ctxsys.context;
+<span class="kw">WHERE CONTAINS</span>(name, <span class="str">'Nguyen'</span>) > <span class="num">0</span>  <span class="comment">-- Full-text search</span>
+
+<span class="comment">-- Type Mismatch (MySQL đặc biệt nguy hiểm):</span>
+<span class="db-tag db-my" style="font-family:monospace">MySQL Bug</span>
+<span class="comment">-- cột payment_id VARCHAR: so sánh với số → CAST cột → index vô dụng</span>
+<span class="kw">WHERE</span> payment_id = <span class="num">57013925718</span>   <span class="comment">-- ❌ Tự CAST(payment_id AS UNSIGNED)</span>
+<span class="kw">WHERE</span> payment_id = <span class="str">'57013925718'</span> <span class="comment">-- ✅ string = string → index OK</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📊</span>
+      ORDER BY · GROUP BY · DISTINCT
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">ORDER BY: Tránh filesort bằng mọi giá</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>order-by.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="comment">-- Bảng issues, query thường xuyên:</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> issues
+<span class="kw">WHERE</span> type = <span class="str">'bug'</span>
+<span class="kw">ORDER BY</span> severity <span class="kw">DESC</span>, created_at <span class="kw">DESC</span>;
+
+<span class="comment">-- ✅ Index: (type, severity DESC, created_at DESC)</span>
+<span class="comment">--    1. Fast Lookup: type='bug'</span>
+<span class="comment">--    2. Scan descending → đã đúng thứ tự → KHÔNG cần filesort</span>
+
+<span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="kw">CREATE INDEX</span> ON issues (type, severity <span class="kw">DESC</span>, created_at <span class="kw">DESC</span>);
+<span class="comment">-- Tăng work_mem nếu vẫn bị sort: SET work_mem = '64MB';</span>
+
+<span class="db-tag db-my" style="font-family:monospace">MySQL 8+</span>
+<span class="kw">CREATE INDEX</span> ON issues (type, severity <span class="kw">DESC</span>, created_at <span class="kw">DESC</span>);
+<span class="comment">-- MySQL 5.x: chỉ ASC — MySQL 8+ mới hỗ trợ DESC trong index</span>
+<span class="comment">-- Tăng sort_buffer_size: SET sort_buffer_size = 8*1024*1024;</span>
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="kw">CREATE INDEX</span> ON issues (type, severity <span class="kw">DESC</span>, created_at <span class="kw">DESC</span>);
+<span class="comment">-- Oracle hỗ trợ ASC/DESC từ version 8i</span>
+<span class="comment">-- Kiểm tra EXPLAIN PLAN: không có SORT ORDER BY → index đang dùng đúng</span></pre>
+        </div>
+      </div>
+
+      <h3 class="green">GROUP BY: Cột WHERE trước, GROUP BY sau</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>group-by.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="kw">SELECT</span> is_paying, gender, <span class="fn">COUNT</span>(*) <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> onboarding = <span class="str">'yes'</span>
+<span class="kw">GROUP BY</span> is_paying, gender;
+
+<span class="comment">-- Index: (onboarding, is_paying, gender)</span>
+<span class="comment">-- ✅ Workflow: lookup onboarding → scan sorted (is_paying, gender)</span>
+<span class="comment">--    → loop-and-count algorithm → không cần temp hash table</span>
+
+<span class="comment">-- Thêm aggregate cột vào index → index-only operation:</span>
+<span class="kw">SELECT</span> is_paying, gender, <span class="fn">AVG</span>(projects_cnt) <span class="kw">FROM</span> users
+<span class="kw">GROUP BY</span> is_paying, gender;
+<span class="comment">-- Index: (is_paying, gender, projects_cnt)</span>
+<span class="comment">--        ↑ WHERE/GROUP BY       ↑ aggregate cột: đọc từ index, không cần load row!</span>
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle đặc biệt</span>
+<span class="comment">-- Oracle hỗ trợ Bitmap Index — cực mạnh cho GROUP BY nhiều cột boolean/status</span>
+<span class="kw">CREATE BITMAP INDEX</span> bmp_paying <span class="kw">ON</span> users (is_paying);
+<span class="kw">CREATE BITMAP INDEX</span> bmp_gender <span class="kw">ON</span> users (gender);
+<span class="comment">-- Oracle tự BITMAP AND các index → không cần composite index</span>
+<span class="comment">-- CHỈ dùng Bitmap Index trên OLAP/DWH, KHÔNG dùng trên OLTP (lock cả block!)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🔗</span>
+      JOIN: Nested Loop, Hash Join & Lateral
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Nested Loop: Index cho bảng bị probe</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>join-index.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="kw">SELECT</span> e.* <span class="kw">FROM</span> employee e
+<span class="kw">JOIN</span> department d <span class="kw">ON</span> e.department_id = d.department_id
+<span class="kw">WHERE</span> e.salary > <span class="num">100000</span> <span class="kw">AND</span> d.country = <span class="str">'VN'</span>;
+
+<span class="comment">-- Hướng 1 (employee driving): lọc employee trước, probe department</span>
+<span class="kw">CREATE INDEX</span> ON employee (salary);
+<span class="kw">CREATE INDEX</span> ON department (department_id, country);
+
+<span class="comment">-- Hướng 2 (department driving): lọc department trước, probe employee</span>
+<span class="kw">CREATE INDEX</span> ON department (country);
+<span class="kw">CREATE INDEX</span> ON employee (department_id, salary);
+
+<span class="comment">-- Không mặc định tạo cả 4 index. Chọn theo plan thực tế, tần suất query và write cost.</span>
+<span class="comment">-- Nested Loop nhanh khi inner/probe side có index phù hợp.</span>
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="comment">-- Oracle hỗ trợ USE_NL, USE_HASH, USE_MERGE hints để ép join algorithm:</span>
+<span class="kw">SELECT</span> <span class="comment">/*+ USE_NL(e d) */</span> e.* <span class="kw">FROM</span> employee e <span class="kw">JOIN</span> department d ...
+<span class="comment">-- USE_NL: ép Nested Loop (tốt khi driving table nhỏ + index đủ)</span>
+<span class="comment">-- USE_HASH: ép Hash Join (tốt khi cả 2 bảng lớn, không có index join)</span></pre>
+        </div>
+      </div>
+
+      <h3 class="green">Lateral Join (PostgreSQL / Oracle 12c+)</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>lateral-join.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="kw">SELECT</span> c.*, recent.*
+<span class="kw">FROM</span> customers c
+<span class="kw">LEFT JOIN LATERAL</span> (
+  <span class="kw">SELECT</span> * <span class="kw">FROM</span> sales s
+  <span class="kw">WHERE</span> s.customer_id = c.id
+  <span class="kw">ORDER BY</span> created_at <span class="kw">DESC LIMIT</span> <span class="num">3</span>
+) recent <span class="kw">ON TRUE</span>;
+<span class="comment">-- Index cần: (customer_id, created_at DESC) trên bảng sales</span>
+<span class="comment">-- Mỗi customer chỉ đọc 3 entries → cực nhanh</span>
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle 12c+</span>
+<span class="kw">SELECT</span> c.*, recent.*
+<span class="kw">FROM</span> customers c,
+  <span class="kw2">LATERAL</span> (
+    <span class="kw">SELECT</span> * <span class="kw">FROM</span> sales s
+    <span class="kw">WHERE</span> s.customer_id = c.id
+    <span class="kw">ORDER BY</span> created_at <span class="kw">DESC FETCH FIRST</span> <span class="num">3</span> <span class="kw">ROWS ONLY</span>
+  ) recent;
+<span class="comment">-- Oracle dùng FETCH FIRST N ROWS ONLY thay vì LIMIT</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S4 · THỰC HÀNH & DEBUG
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s4">
+  <div class="module-header">
+    <div class="module-tag">S4 · Hands-On Practice</div>
+    <div class="module-title">Thực hành & Debug với EXPLAIN</div>
+    <div class="module-subtitle">Làm theo thứ tự. Mỗi task build on task trước. EXPLAIN là vũ khí số 1.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🔭</span>
+      Đọc EXPLAIN trên 3 hệ quản trị
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="tab-group" id="tab-explain">
+        <div class="tab active" onclick="switchTab('tab-explain','exp-pg')">PostgreSQL</div>
+        <div class="tab" onclick="switchTab('tab-explain','exp-my')">MySQL</div>
+        <div class="tab" onclick="switchTab('tab-explain','exp-ora')">Oracle</div>
+      </div>
+      <div class="tab-content active" id="exp-pg">
+        <span class="db-tag db-pg">PostgreSQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><span>● ● ●</span><span>postgresql-explain.sql</span></div>
+          <div class="cmd-body">
+<pre><span class="comment">-- Cú pháp:</span>
+<span class="kw">EXPLAIN</span> <span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> email = <span class="str">'test@example.com'</span>;
+<span class="kw">EXPLAIN ANALYZE</span> <span class="kw">SELECT</span> ...   <span class="comment">-- Chạy thật + đo thời gian</span>
+<span class="kw">EXPLAIN (ANALYZE, BUFFERS)</span> <span class="kw">SELECT</span> ... <span class="comment">-- Thêm cache hit info</span>
+
+<span class="comment">-- Đọc output:</span>
+Index Scan  <span class="kw">using</span> users_email_idx   <span class="comment">← ✅ Dùng index</span>
+Seq Scan <span class="kw">on</span> users                  <span class="comment">← ⚠️ Full table scan</span>
+Bitmap Heap Scan                    <span class="comment">← 🔸 Index + bitmap lookup</span>
+
+<span class="comment">-- Số quan trọng:</span>
+(cost=<span class="num">0.43</span>..<span class="num">8.45</span> rows=<span class="num">1</span> width=<span class="num">200</span>) (actual time=<span class="num">0.1</span>..<span class="num">0.2</span> rows=<span class="num">1</span>)
+<span class="comment">--  ↑ estimated cost   ↑ estimated rows    ↑ actual time  ↑ actual rows</span>
+<span class="comment">-- Nếu estimated rows << actual rows → statistics cũ → chạy ANALYZE</span>
+
+<span class="comment">-- Tăng random_page_cost nếu SSD (default 4.0 tối ưu cho HDD):</span>
+<span class="kw">SET</span> random_page_cost = <span class="num">1.1</span>; <span class="comment">-- SSD/RAM → index được dùng nhiều hơn</span></pre>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="exp-my">
+        <span class="db-tag db-my">MySQL</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><span>● ● ●</span><span>mysql-explain.sql</span></div>
+          <div class="cmd-body">
+<pre><span class="kw">EXPLAIN</span> <span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> email = <span class="str">'test@example.com'</span>;
+<span class="kw">EXPLAIN ANALYZE</span> <span class="kw">SELECT</span> ...  <span class="comment">-- MySQL 8.0.18+</span>
+
+<span class="comment">-- Cột quan trọng nhất: "type"</span>
+type = ALL    <span class="comment">← ❌ Full table scan</span>
+type = index  <span class="comment">← 🟡 Full index scan (đỡ hơn ALL)</span>
+type = range  <span class="comment">← 🟢 Range scan trên index</span>
+type = ref    <span class="comment">← ✅ Index lookup (không unique)</span>
+type = const  <span class="comment">← ✅✅ Tìm đúng 1 row qua unique index</span>
+
+<span class="comment">-- Cột "Extra":</span>
+Using filesort      <span class="comment">← ⚠️ Cần sort bổ sung → thêm cột sort vào index</span>
+Using index         <span class="comment">← ✅ Index-only query</span>
+Using where         <span class="comment">← 🔸 Filter sau khi đọc</span>
+Using index condition <span class="comment">← ✅ ICP (Index Condition Pushdown)</span>
+
+<span class="comment">-- Cập nhật statistics sau bulk import:</span>
+<span class="kw">ANALYZE TABLE</span> users;</pre>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="exp-ora">
+        <span class="db-tag db-oracle">Oracle</span>
+        <div class="cmd-block">
+          <div class="cmd-header"><span>● ● ●</span><span>oracle-explain.sql</span></div>
+          <div class="cmd-body">
+<pre><span class="comment">-- Cách 1: EXPLAIN PLAN (không chạy thật)</span>
+<span class="kw">EXPLAIN PLAN FOR</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> employees <span class="kw">WHERE</span> email = <span class="str">'test@example.com'</span>;
+
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> TABLE(<span class="fn">DBMS_XPLAN.DISPLAY</span>());
+
+<span class="comment">-- Cách 2: AUTOTRACE (SQL*Plus / SQLcl)</span>
+<span class="kw2">SET AUTOTRACE ON</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> employees <span class="kw">WHERE</span> email = <span class="str">'test@example.com'</span>;
+<span class="kw2">SET AUTOTRACE OFF</span>
+
+<span class="comment">-- Cách 3: Xem thực tế (chạy thật + lấy plan từ v$sql)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> TABLE(<span class="fn">DBMS_XPLAN.DISPLAY_CURSOR</span>(
+  sql_id    => <span class="str">'abc123def456'</span>,
+  format    => <span class="str">'ALLSTATS LAST'</span>
+));
+
+<span class="comment">-- Đọc output Oracle:</span>
+TABLE ACCESS FULL          <span class="comment">← ❌ Full scan</span>
+INDEX RANGE SCAN           <span class="comment">← ✅ Range scan trên index</span>
+INDEX UNIQUE SCAN          <span class="comment">← ✅✅ Unique lookup</span>
+INDEX FAST FULL SCAN       <span class="comment">← 🟡 Scan toàn index (multi-block read)</span>
+INDEX SKIP SCAN            <span class="comment">← ✅ Bỏ qua cột đầu composite index</span>
+TABLE ACCESS BY INDEX ROWID<span class="comment">← Load row qua ROWID (sau khi có index)</span>
+
+<span class="comment">-- Cập nhật statistics:</span>
+<span class="kw">EXEC</span> <span class="fn">DBMS_STATS.GATHER_TABLE_STATS</span>(<span class="str">'SCHEMA_NAME'</span>, <span class="str">'EMPLOYEES'</span>);</pre>
+          </div>
+        </div>
+        <div class="info-box note">📌 <span><strong>Oracle Hint:</strong> Khi optimizer chọn sai, dùng hint để ép plan đúng: <code>/*+ INDEX(table_alias index_name) */</code> hoặc <code>/*+ NO_INDEX(t idx_name) */</code>. Đây là công cụ mạnh nhưng nên là giải pháp cuối cùng sau khi đã update statistics.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="practice-task">
+    <div class="practice-task-header">Task 1: Tìm query chậm và tạo index đúng</div>
+    <div class="practice-task-body">
+      <p><strong>Mục tiêu:</strong> Tạo bảng mẫu, tạo dữ liệu, chạy EXPLAIN, phân tích và tạo index phù hợp.</p>
+      <p><strong>Bước thực hiện:</strong></p>
+      <ol>
+        <li>Tạo bảng orders với 100,000+ rows (dùng generate_series hoặc script)</li>
+        <li>Chạy query: <code>WHERE status='pending' AND region='HN' ORDER BY total DESC LIMIT 10</code></li>
+        <li>Chạy EXPLAIN ANALYZE → ghi lại execution time</li>
+        <li>Xác định index cần tạo dựa trên 4 nguyên tắc</li>
+        <li>Tạo index → chạy lại EXPLAIN ANALYZE → so sánh</li>
+      </ol>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>practice-task1.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="kw">CREATE TABLE</span> orders (
+  id         <span class="fn">BIGSERIAL PRIMARY KEY</span>,
+  status     <span class="fn">VARCHAR</span>(<span class="num">20</span>),
+  region     <span class="fn">VARCHAR</span>(<span class="num">10</span>),
+  total      <span class="fn">NUMERIC</span>(<span class="num">12</span>,<span class="num">2</span>),
+  created_at <span class="fn">TIMESTAMP DEFAULT NOW</span>()
+);
+
+<span class="kw">INSERT INTO</span> orders (status, region, total)
+<span class="kw">SELECT</span>
+  (<span class="kw2">ARRAY</span>[<span class="str">'pending'</span>,<span class="str">'paid'</span>,<span class="str">'cancelled'</span>])[<span class="fn">ceil</span>(<span class="fn">random</span>()*<span class="num">3</span>)],
+  (<span class="kw2">ARRAY</span>[<span class="str">'HN'</span>,<span class="str">'HCM'</span>,<span class="str">'DN'</span>])[<span class="fn">ceil</span>(<span class="fn">random</span>()*<span class="num">3</span>)],
+  <span class="fn">round</span>((<span class="fn">random</span>()*<span class="num">10000000</span>)::<span class="fn">numeric</span>, <span class="num">2</span>)
+<span class="kw">FROM</span> <span class="fn">generate_series</span>(<span class="num">1</span>, <span class="num">100000</span>);
+
+<span class="comment">-- Chạy query chậm:</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> status = <span class="str">'pending'</span> <span class="kw">AND</span> region = <span class="str">'HN'</span>
+<span class="kw">ORDER BY</span> total <span class="kw">DESC LIMIT</span> <span class="num">10</span>;
+
+<span class="comment">-- Câu hỏi: Index nào bạn sẽ tạo?</span></pre>
+        </div>
+      </div>
+      <div onclick="toggleSolution(this)" class="solution-toggle">💡 Xem lời giải</div>
+      <div class="solution-box">
+        <p><strong>Index đúng:</strong> <code>(status, region, total DESC)</code></p>
+        <p>Lý do: status và region là equality conditions (Nguyên tắc phễu) → đặt trước. total là cột ORDER BY → đặt sau với hướng DESC để tránh filesort. Database sẽ Fast Lookup đến (pending, HN), rồi scan descending lấy 10 entries đầu mà không cần sort.</p>
+        <div class="cmd-block">
+          <div class="cmd-header"><span>● ● ●</span><span>solution-task1.sql</span></div>
+          <div class="cmd-body">
+<pre><span class="kw">CREATE INDEX</span> idx_orders_search
+  <span class="kw">ON</span> orders (status, region, total <span class="kw">DESC</span>);</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="practice-task">
+    <div class="practice-task-header">Task 2: Tìm và fix query không dùng index</div>
+    <div class="practice-task-body">
+      <p><strong>Mục tiêu:</strong> Nhận diện tại sao database bỏ qua index và sửa query.</p>
+      <ol>
+        <li>Tạo index trên cột birthday</li>
+        <li>Chạy query <code>WHERE YEAR(birthday) = 1990</code> → xem EXPLAIN</li>
+        <li>Nhận diện vấn đề (function trên cột)</li>
+        <li>Viết lại query để dùng index</li>
+      </ol>
+      <div onclick="toggleSolution(this)" class="solution-toggle">💡 Xem lời giải</div>
+      <div class="solution-box">
+        <div class="cmd-block">
+          <div class="cmd-header"><span>● ● ●</span><span>solution-task2.sql</span></div>
+          <div class="cmd-body">
+<pre><span class="comment">-- ❌ Vấn đề: YEAR() áp dụng lên cột → index vô dụng</span>
+<span class="kw">WHERE</span> <span class="fn">YEAR</span>(birthday) = <span class="num">1990</span>
+
+<span class="comment">-- ✅ Fix: viết lại thành range condition trên cột gốc</span>
+<span class="kw">WHERE</span> birthday >= <span class="str">'1990-01-01'</span> <span class="kw">AND</span> birthday < <span class="str">'1991-01-01'</span>
+
+<span class="db-tag db-pg" style="font-family:monospace">PostgreSQL Alt</span>
+<span class="comment">-- Hoặc tạo Functional Index nếu không thể sửa query:</span>
+<span class="kw">CREATE INDEX</span> ON contacts ((<span class="fn">EXTRACT</span>(<span class="fn">YEAR FROM</span> birthday)));
+<span class="kw">WHERE</span> <span class="fn">EXTRACT</span>(<span class="fn">YEAR FROM</span> birthday) = <span class="num">1990</span>  <span class="comment">-- Dùng được index</span>
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="kw">CREATE INDEX</span> ON contacts (<span class="fn">TO_NUMBER</span>(<span class="fn">TO_CHAR</span>(birthday, <span class="str">'YYYY'</span>)));
+<span class="kw">WHERE</span> <span class="fn">TO_NUMBER</span>(<span class="fn">TO_CHAR</span>(birthday, <span class="str">'YYYY'</span>)) = <span class="num">1990</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="practice-task">
+    <div class="practice-task-header">Task 3: Dọn dẹp index thừa</div>
+    <div class="practice-task-body">
+      <p><strong>Mục tiêu:</strong> Tìm index không được dùng và xóa an toàn.</p>
+      <ol>
+        <li>Chạy query tìm unused index trên DB của bạn</li>
+        <li>Đánh giá từng index có an toàn để xóa không</li>
+        <li>Dùng tính năng Invisible Index (MySQL) hoặc DROP INDEX (PostgreSQL) sau khi theo dõi</li>
+      </ol>
+      <div onclick="toggleSolution(this)" class="solution-toggle">💡 Xem lời giải</div>
+      <div class="solution-box">
+        <div class="cmd-block">
+          <div class="cmd-header"><span>● ● ●</span><span>find-unused-index.sql</span></div>
+          <div class="cmd-body">
+<pre><span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="kw">SELECT</span> schemaname, tablename, indexrelname,
+       idx_scan <span class="kw">AS</span> scans, idx_tup_read
+<span class="kw">FROM</span> pg_stat_all_indexes
+<span class="kw">WHERE</span> schemaname = <span class="str">'public'</span>
+  <span class="kw">AND</span> idx_scan = <span class="num">0</span>
+  <span class="kw">AND</span> indexrelname <span class="kw">NOT LIKE</span> <span class="str">'%pkey%'</span>
+<span class="kw">ORDER BY</span> pg_relation_size(indexrelid) <span class="kw">DESC</span>;
+
+<span class="db-tag db-my" style="font-family:monospace">MySQL</span>
+<span class="kw">SELECT</span> object_name, index_name, count_star
+<span class="kw">FROM</span> performance_schema.table_io_waits_summary_by_index_usage
+<span class="kw">WHERE</span> object_schema = <span class="str">'mydb'</span>
+  <span class="kw">AND</span> count_star = <span class="num">0</span>
+  <span class="kw">AND</span> index_name <span class="kw">IS NOT NULL</span>
+<span class="kw">ORDER BY</span> object_name, index_name;
+
+<span class="comment">-- Xóa an toàn với Invisible Index (MySQL):</span>
+<span class="kw">ALTER TABLE</span> users <span class="kw">ALTER INDEX</span> idx_old <span class="kw2">INVISIBLE</span>;
+<span class="comment">-- Theo dõi 1–2 tuần, nếu ổn thì DROP</span>
+<span class="kw">DROP INDEX</span> idx_old <span class="kw">ON</span> users;
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="kw">SELECT</span> i.owner, i.table_name, i.index_name, u.monitoring, u.used
+<span class="kw">FROM</span> dba_indexes i
+<span class="kw">JOIN</span> v$object_usage u <span class="kw">ON</span> i.index_name = u.index_name
+<span class="kw">WHERE</span> u.used = <span class="str">'NO'</span>;
+
+<span class="comment">-- Ẩn index Oracle (11g+): UNUSABLE + REBUILD nếu cần lại</span>
+<span class="kw">ALTER INDEX</span> idx_old <span class="kw2">UNUSABLE</span>; <span class="comment">-- Ẩn nhưng vẫn tồn tại (tốn 0 scan)</span>
+<span class="kw">ALTER INDEX</span> idx_old <span class="kw2">REBUILD</span>;  <span class="comment">-- Kích hoạt lại</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S5 · KỸ THUẬT NÂNG CAO
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s5">
+  <div class="module-header">
+    <div class="module-tag">S5 · Advanced Knowledge</div>
+    <div class="module-title">Kỹ thuật nâng cao</div>
+    <div class="module-subtitle">Partial Index, Functional Index, JSON, Index-only Query và các kỹ thuật chuyên biệt của từng DB.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🚀</span>
+      Functional Index & Partial Index
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>functional-partial-index.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="comment">── FUNCTIONAL INDEX ─────────────────────────────────────</span>
+<span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="kw">CREATE INDEX</span> ON contacts ((<span class="fn">LOWER</span>(email)));
+<span class="kw">CREATE INDEX</span> ON contacts ((<span class="fn">MONTH</span>(birthday)));
+<span class="comment">-- Query phải dùng đúng biểu thức → index mới dùng được</span>
+<span class="kw">WHERE</span> <span class="fn">LOWER</span>(email) = <span class="str">'test@example.com'</span>
+
+<span class="db-tag db-my" style="font-family:monospace">MySQL 5.7+</span>
+<span class="comment">-- Cần Virtual Column:</span>
+<span class="kw">ALTER TABLE</span> contacts <span class="kw">ADD COLUMN</span> email_lower
+  <span class="fn">VARCHAR</span>(<span class="num">255</span>) <span class="kw">AS</span> (<span class="fn">LOWER</span>(email)) <span class="kw2">VIRTUAL</span>;
+<span class="kw">CREATE INDEX</span> ON contacts (email_lower);
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="kw">CREATE INDEX</span> ON contacts (<span class="fn">LOWER</span>(email));
+<span class="comment">-- Oracle hỗ trợ function-based index từ 8i, rất mạnh</span>
+<span class="kw">WHERE</span> <span class="fn">LOWER</span>(email) = <span class="str">'test@example.com'</span>  <span class="comment">-- Oracle tự nhận diện</span>
+
+<span class="comment">── PARTIAL INDEX (chỉ PostgreSQL) ───────────────────────</span>
+<span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="comment">-- Chỉ index orders chưa xử lý → nhỏ hơn 5x, nhanh hơn nhiều</span>
+<span class="kw">CREATE INDEX</span> idx_pending <span class="kw">ON</span> orders (created_at)
+  <span class="kw">WHERE</span> is_processed = <span class="kw">FALSE</span>;
+
+<span class="comment">-- MySQL và Oracle không hỗ trợ Partial Index</span>
+<span class="comment">-- Oracle workaround: Virtual Column + index + function</span>
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle Workaround</span>
+<span class="kw">CREATE INDEX</span> idx_pending <span class="kw">ON</span> orders (
+  <span class="kw">CASE WHEN</span> is_processed = <span class="str">'N'</span> <span class="kw">THEN</span> created_at <span class="kw">END</span>
+);
+<span class="comment">-- Khi is_processed='Y' → NULL → không được index (tương đương partial)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🔬</span>
+      Index-only Query & Kỹ thuật đặc biệt của Oracle
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>index-only-oracle-special.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="comment">── INDEX-ONLY QUERY ─────────────────────────────────────</span>
+<span class="comment">-- Đưa đủ cột vào index → không cần load row từ table</span>
+
+<span class="db-tag db-pg" style="font-family:monospace">PostgreSQL (INCLUDE)</span>
+<span class="kw">CREATE INDEX</span> ON invoices (customer_id, year) <span class="kw2">INCLUDE</span> (price);
+<span class="comment">-- price không ảnh hưởng thứ tự sort, không ảnh hưởng UNIQUE constraint</span>
+<span class="comment">-- Nhưng vẫn dùng được cho index-only query:</span>
+<span class="kw">SELECT</span> customer_id, year, <span class="fn">SUM</span>(price) <span class="kw">FROM</span> invoices
+<span class="kw">WHERE</span> customer_id = <span class="num">42</span> <span class="kw">GROUP BY</span> customer_id, year;
+<span class="comment">-- → Không chạm vào heap table!</span>
+
+<span class="db-tag db-my" style="font-family:monospace">MySQL</span>
+<span class="comment">-- Không có INCLUDE → đưa cột vào cuối index:</span>
+<span class="kw">CREATE INDEX</span> ON invoices (customer_id, year, price);
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="comment">-- Oracle: Index Fast Full Scan = đọc toàn index như table</span>
+<span class="comment">-- Tốt khi query cần nhiều row từ index (không cần table access)</span>
+<span class="kw">CREATE INDEX</span> idx_inv_cov <span class="kw">ON</span> invoices (customer_id, year, price);
+<span class="comment">-- Nếu EXPLAIN PLAN hiện INDEX FAST FULL SCAN → query chỉ đọc index</span>
+
+<span class="comment">── ORACLE ĐẶC BIỆT: Reverse Key Index ──────────────────</span>
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle Only</span>
+<span class="comment">-- Vấn đề: sequence PK luôn tăng → insert vào cùng 1 block → hot block</span>
+<span class="comment">-- Giải pháp: REVERSE KEY → bytes đảo ngược → phân phối đều</span>
+<span class="kw">CREATE INDEX</span> idx_seq_pk <span class="kw">ON</span> orders (order_id) <span class="kw2">REVERSE</span>;
+<span class="comment">-- Nhược điểm: không dùng được Range Scan! Chỉ dùng Unique Scan</span>
+<span class="comment">-- Chỉ dùng khi: high-concurrency insert, query luôn là = (không range)</span>
+
+<span class="comment">── ORACLE ĐẶC BIỆT: Bitmap Index ───────────────────────</span>
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle OLAP</span>
+<span class="kw">CREATE BITMAP INDEX</span> bmp_status <span class="kw">ON</span> orders (status);
+<span class="kw">CREATE BITMAP INDEX</span> bmp_region <span class="kw">ON</span> orders (region);
+<span class="comment">-- Oracle tự BITMAP AND các kết quả:</span>
+<span class="kw">WHERE</span> status = <span class="str">'paid'</span> <span class="kw">AND</span> region = <span class="str">'HN'</span>
+<span class="comment">-- → Bitmap AND: nhanh gấp 10x cho DWH queries</span>
+<span class="comment">-- ⚠️ KHÔNG dùng trên OLTP: row-level UPDATE lock cả bitmap block!</span></pre>
+        </div>
+      </div>
+      <div class="info-box warn">⚠️ <span><strong>Oracle Bitmap Index và OLTP:</strong> Bitmap Index rất mạnh cho DWH/OLAP nhưng gây lock block khi UPDATE/INSERT concurrent. Trên hệ thống OLTP (nhiều transaction đồng thời), tuyệt đối không dùng Bitmap Index.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🗄️</span>
+      Schema Design & Pre-computation
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Khi index không đủ nhanh: tính toán trước</h3>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>pre-computation.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="comment">-- Bảng pre-aggregated thay vì SUM() trên hàng triệu rows mỗi query:</span>
+<span class="kw">CREATE TABLE</span> articles_stats (
+  user_id      <span class="fn">BIGINT</span>,
+  publish_year <span class="fn">INT</span>,
+  total_likes  <span class="fn">BIGINT</span>,
+  <span class="kw">PRIMARY KEY</span> (user_id, publish_year)
+);
+<span class="comment">-- Dashboard query: 1ms thay vì 5 giây</span>
+<span class="kw">SELECT</span> total_likes <span class="kw">FROM</span> articles_stats
+<span class="kw">WHERE</span> user_id = <span class="num">1</span> <span class="kw">AND</span> publish_year = <span class="num">2024</span>;
+
+<span class="comment">── PARTITION: Xóa data lớn trong tích tắc ───────────────</span>
+<span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="kw">CREATE TABLE</span> logs (<span class="kw">LIKE</span> logs_template) <span class="kw2">PARTITION BY RANGE</span> (created_at);
+<span class="kw">CREATE TABLE</span> logs_2024_01 <span class="kw">PARTITION OF</span> logs
+  <span class="kw">FOR VALUES FROM</span> (<span class="str">'2024-01-01'</span>) <span class="kw">TO</span> (<span class="str">'2024-02-01'</span>);
+<span class="comment">-- Xóa cả tháng: DROP PARTITION (vài giây, không DELETE từng row)</span>
+<span class="kw">DROP TABLE</span> logs_2024_01;
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="kw">CREATE TABLE</span> logs (
+  id         <span class="fn">NUMBER</span>,
+  created_at <span class="fn">DATE</span>,
+  message    <span class="fn">VARCHAR2</span>(<span class="num">4000</span>)
+) <span class="kw2">PARTITION BY RANGE</span> (created_at) (
+  <span class="kw">PARTITION</span> p2024_01 <span class="kw">VALUES LESS THAN</span> (<span class="fn">DATE</span> <span class="str">'2024-02-01'</span>),
+  <span class="kw">PARTITION</span> p2024_02 <span class="kw">VALUES LESS THAN</span> (<span class="fn">DATE</span> <span class="str">'2024-03-01'</span>)
+);
+<span class="comment">-- Xóa partition cũ:</span>
+<span class="kw">ALTER TABLE</span> logs <span class="kw2">DROP PARTITION</span> p2024_01;
+<span class="comment">-- Hoặc truncate không xóa cấu trúc:</span>
+<span class="kw">ALTER TABLE</span> logs <span class="kw2">TRUNCATE PARTITION</span> p2024_01;</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S6 · LỖI THƯỜNG GẶP
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s6">
+  <div class="module-header">
+    <div class="module-tag">S6 · Common Errors</div>
+    <div class="module-title">Lỗi thường gặp & Cách fix</div>
+    <div class="module-subtitle">Gặp lỗi là bình thường — quan trọng là biết diagnose nhanh.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-practice">🐛</span>
+      Error catalog — Index không được dùng
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>Triệu chứng</th><th>Root cause</th><th>Fix</th><th>DB</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>EXPLAIN hiện Seq Scan / TABLE ACCESS FULL dù có index</td>
+            <td>Full scan có thể nhanh hơn khi tỷ lệ rows match cao (thường > 10–30%), bảng nhỏ, hoặc statistics cũ</td>
+            <td>ANALYZE table; kiểm tra lại; nếu đúng thì chấp nhận</td>
+            <td>Tất cả</td>
+          </tr>
+          <tr>
+            <td>Index có nhưng không bao giờ được chọn</td>
+            <td>Function trên cột (YEAR(), LOWER(), CONCAT()...)</td>
+            <td>Viết lại query hoặc tạo Functional Index</td>
+            <td>Tất cả</td>
+          </tr>
+          <tr>
+            <td>MySQL: query chậm dù WHERE = số nguyên, cột là VARCHAR</td>
+            <td>Type mismatch → MySQL tự CAST(col AS UNSIGNED) → index vô dụng</td>
+            <td>Thêm dấu nháy: <code>WHERE col = '12345'</code></td>
+            <td>MySQL</td>
+          </tr>
+          <tr>
+            <td>Oracle: IS NULL không dùng index</td>
+            <td>Oracle B-tree không index NULL values</td>
+            <td>Thêm cột hằng số: <code>CREATE INDEX ON t (col, 0)</code></td>
+            <td>Oracle</td>
+          </tr>
+          <tr>
+            <td>Composite index nhưng query bỏ qua cột đầu</td>
+            <td>Vi phạm Nguyên tắc Phễu</td>
+            <td>Đổi thứ tự cột index hoặc tạo index mới; Oracle có thể dùng Skip Scan</td>
+            <td>Tất cả</td>
+          </tr>
+          <tr>
+            <td>EXPLAIN hiện Using filesort (MySQL) / Sort (PostgreSQL)</td>
+            <td>Cột ORDER BY không nằm trong index hoặc sai hướng ASC/DESC</td>
+            <td>Thêm cột sort vào cuối index với đúng hướng</td>
+            <td>Tất cả</td>
+          </tr>
+          <tr>
+            <td>Oracle Bitmap Index gây deadlock/lock wait</td>
+            <td>Bitmap Index lock cả block khi UPDATE → nhiều transaction chờ nhau</td>
+            <td>Đổi sang B-tree Index; Bitmap Index chỉ dùng cho OLAP/DWH</td>
+            <td>Oracle</td>
+          </tr>
+          <tr>
+            <td>MySQL insert chậm sau khi thêm UUIDv4 PK</td>
+            <td>Random UUID → insert vào vị trí random trong Clustered Index → page split</td>
+            <td>Đổi sang ULID/UUIDv7 (BINARY 16) hoặc BIGINT AUTO_INCREMENT</td>
+            <td>MySQL</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🔧</span>
+      Debug workflow — Khi query chậm
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Làm theo thứ tự này khi gặp query chậm</h3>
+      <ol>
+        <li><strong>Đo thời gian thực tế</strong> — không đoán mò. Chạy query nhiều lần, lấy thời gian trung bình.</li>
+        <li><strong>Chạy EXPLAIN/EXPLAIN ANALYZE/AUTOTRACE</strong> — xem plan được chọn, estimated vs actual rows.</li>
+        <li><strong>Kiểm tra statistics</strong> — nếu estimated ≠ actual nhiều → chạy ANALYZE/GATHER_TABLE_STATS.</li>
+        <li><strong>Tìm bottleneck</strong> — Full scan? Filesort? Nhiều row load nhưng ít row trả về? JOIN lớn?</li>
+        <li><strong>Áp dụng 4 nguyên tắc</strong> — tạo index phù hợp, tránh function trên cột, equality trước range.</li>
+        <li><strong>Test lại với EXPLAIN</strong> — xác nhận plan mới, đo thời gian mới.</li>
+      </ol>
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>debug-commands.sql</span></div>
+        <div class="cmd-body">
+<pre><span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="kw">EXPLAIN</span> (<span class="kw2">ANALYZE, BUFFERS, FORMAT TEXT</span>) <span class="kw">SELECT</span> ...;
+<span class="kw">ANALYZE</span> users;  <span class="comment">-- Cập nhật statistics</span>
+<span class="kw">SET</span> random_page_cost = <span class="num">1.1</span>; <span class="comment">-- Nếu dùng SSD</span>
+
+<span class="db-tag db-my" style="font-family:monospace">MySQL</span>
+<span class="kw">EXPLAIN ANALYZE</span> <span class="kw">SELECT</span> ...;
+<span class="kw">ANALYZE TABLE</span> users;
+<span class="kw">SHOW INDEXES FROM</span> users;  <span class="comment">-- Xem tất cả index + cardinality</span>
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="kw">EXPLAIN PLAN FOR</span> <span class="kw">SELECT</span> ...;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> TABLE(<span class="fn">DBMS_XPLAN.DISPLAY</span>(<span class="kw2">FORMAT=>'ALLSTATS'</span>));
+<span class="fn">EXEC DBMS_STATS.GATHER_TABLE_STATS</span>(<span class="str">'schema'</span>, <span class="str">'table'</span>,
+  cascade => <span class="kw">TRUE</span>,     <span class="comment">-- Cập nhật cả index statistics</span>
+  estimate_percent => <span class="fn">DBMS_STATS.AUTO_SAMPLE_SIZE</span>
+);</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S7 · INTERVIEW PREP
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s7">
+  <div class="module-header">
+    <div class="module-tag">S7 · Interview Prep</div>
+    <div class="module-title">Interview Prep — Database Indexing</div>
+    <div class="module-subtitle">Câu hỏi thực tế từ phỏng vấn Backend/DE tại các công ty công nghệ và banking/fintech.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">🎤</span>
+      Junior-level questions
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Index là gì và nó giúp query nhanh hơn như thế nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng: Index là sorted list + B+Tree structure, không phải bản copy toàn bộ bảng.')">A. Index là bản copy của bảng, được sắp xếp theo cột được index</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng! Index là sorted list cho phép nhảy thẳng đến vị trí cần tìm (O log n) thay vì scan từ đầu đến cuối (O n). B+Tree với 1 tỷ row chỉ cần 3–4 bước nhảy.')">B. Index là sorted list cho phép tìm kiếm O(log n) thay vì O(n) full scan</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng: Index làm write CHẬM hơn một chút (phải update index), nhưng read nhanh hơn nhiều.')">C. Index lưu kết quả query được cache trước để trả về nhanh</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không đúng: Database tự cập nhật index khi có INSERT/UPDATE/DELETE.')">D. Index chỉ hiệu quả khi developer tự update thủ công</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Với index (A, B, C), query nào sau đây KHÔNG dùng được index?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WHERE A=1 AND B=2 dùng được 2/3 cột đầu → OK.')">A. WHERE A=1 AND B=2</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WHERE A=1 dùng được cột đầu tiên → OK (dù chỉ 1 bước phễu).')">B. WHERE A=1</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng! WHERE B=2 bỏ qua cột A (cột đầu tiên của index) → vi phạm Nguyên tắc Phễu → không dùng được index. Chỉ Oracle có thể dùng Index Skip Scan trong trường hợp đặc biệt.')">C. WHERE B=2 (không có điều kiện trên A)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'WHERE A=1 AND B=2 AND C=3 dùng được toàn bộ 3 cột → tối ưu nhất.')">D. WHERE A=1 AND B=2 AND C=3</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao query WHERE YEAR(created_at) = 2024 không dùng được index trên cột created_at?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải vấn đề kiểu dữ liệu. YEAR() trả về INT nhưng vấn đề là hàm áp dụng lên CỘT.')">A. Vì YEAR() trả về kiểu INT, không khớp với kiểu TIMESTAMP của cột</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng! Bất kỳ function nào áp dụng lên cột (không phải lên giá trị) đều khiến database không thể map kết quả ngược lại vào sorted list của index. Fix: viết lại thành WHERE created_at >= 2024-01-01 AND created_at < 2025-01-01.')">B. Vì YEAR() biến đổi cột trước khi so sánh, database không thể dùng sorted index trên cột gốc</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải vấn đề tên hàm, mà là vấn đề biến đổi cột.')">C. Vì YEAR() là hàm không được database nhận diện</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Index trên timestamp cụ thể vẫn hoạt động bình thường với điều kiện range.')">D. Vì không thể tạo index trên cột kiểu TIMESTAMP</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">🎯</span>
+      Senior-level questions (open-ended)
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Senior Q1: Database có index mà vẫn không dùng — debug như thế nào?</div>
+        <div class="practice-task-body">
+          <p><strong>Gợi ý các điểm cần đề cập:</strong></p>
+          <ul>
+            <li>Chạy EXPLAIN/EXPLAIN PLAN/AUTOTRACE để xem plan thực tế</li>
+            <li>Kiểm tra các nguyên nhân phổ biến: function trên cột, type mismatch, bỏ qua cột đầu composite index, != condition</li>
+            <li>Kiểm tra statistics có cũ không → ANALYZE/GATHER_TABLE_STATS</li>
+            <li>Xem xét: database có thể đúng — full scan đôi khi nhanh hơn (match > 10–30% rows)</li>
+            <li>Với PostgreSQL: kiểm tra random_page_cost; với Oracle: dùng hint để force test</li>
+          </ul>
+          <div onclick="toggleSolution(this)" class="solution-toggle">💡 Xem sample answer</div>
+          <div class="solution-box">
+            <p>Tôi sẽ bắt đầu bằng EXPLAIN ANALYZE (PostgreSQL) hoặc EXPLAIN PLAN + DBMS_XPLAN (Oracle) để xem plan thực tế. Nếu plan là full scan dù có index, tôi kiểm tra 4 nguyên nhân theo thứ tự ưu tiên: (1) function trên cột như YEAR(), LOWER() — fix bằng cách viết lại query hoặc tạo functional index; (2) type mismatch — fix bằng cách đảm bảo kiểu dữ liệu khớp; (3) vi phạm nguyên tắc phễu — fix bằng cách thêm cột đầu tiên vào WHERE; (4) statistics cũ — fix bằng ANALYZE. Nếu tất cả điều kiện đúng mà database vẫn full scan, tôi sẽ xem xét rằng database có thể đúng: khi query match > 10–30% rows, random I/O qua index có thể đắt hơn sequential full scan. Với Oracle tôi có thể dùng hint INDEX() để force test và so sánh thời gian thực tế.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Senior Q2: Thiết kế index cho bảng orders 50 triệu rows với các query phổ biến</div>
+        <div class="practice-task-body">
+          <p><strong>Context:</strong> Bảng orders(id, customer_id, status, region, total, created_at). Các query phổ biến: (1) Tìm order của customer, sort mới nhất. (2) Dashboard: count theo status + region. (3) Xóa orders cũ hơn 2 năm hàng tháng.</p>
+          <ul>
+            <li>Áp dụng 4 nguyên tắc cho từng query</li>
+            <li>Xem xét composite index bao phủ nhiều query nhất</li>
+            <li>Đề xuất partition cho xóa data lớn</li>
+            <li>So sánh cách tiếp cận trên PostgreSQL vs MySQL vs Oracle</li>
+          </ul>
+          <div onclick="toggleSolution(this)" class="solution-toggle">💡 Xem sample answer</div>
+          <div class="solution-box">
+            <div class="cmd-block">
+              <div class="cmd-header"><span>● ● ●</span><span>senior-q2-solution.sql</span></div>
+              <div class="cmd-body">
+<pre><span class="comment">-- Q1: Customer orders, sorted by created_at DESC</span>
+<span class="kw">CREATE INDEX</span> idx_orders_customer
+  <span class="kw">ON</span> orders (customer_id, created_at <span class="kw">DESC</span>);
+<span class="comment">-- Phễu: customer_id equality → scan created_at descending → LIMIT dừng sớm</span>
+
+<span class="comment">-- Q2: Dashboard count theo status + region</span>
+<span class="kw">CREATE INDEX</span> idx_orders_dashboard
+  <span class="kw">ON</span> orders (status, region, created_at);
+<span class="comment">-- Hoặc index-only: thêm total nếu cần SUM(total)</span>
+
+<span class="comment">-- Q3: Xóa data cũ → dùng PARTITION thay vì DELETE</span>
+<span class="db-tag db-pg" style="font-family:monospace">PostgreSQL</span>
+<span class="kw">CREATE TABLE</span> orders <span class="kw">PARTITION BY RANGE</span> (created_at);
+<span class="comment">-- Tạo partition theo tháng → DROP PARTITION cũ = vài giây</span>
+
+<span class="db-tag db-oracle" style="font-family:monospace">Oracle</span>
+<span class="comment">-- Oracle hỗ trợ Interval Partition: tự tạo partition mới</span>
+<span class="kw">CREATE TABLE</span> orders (...) <span class="kw2">PARTITION BY RANGE</span> (created_at)
+<span class="kw2">INTERVAL</span> (<span class="fn">NUMTOYMINTERVAL</span>(<span class="num">1</span>, <span class="str">'MONTH'</span>))
+(<span class="kw">PARTITION</span> p_init <span class="kw">VALUES LESS THAN</span> (<span class="fn">DATE</span> <span class="str">'2024-01-01'</span>));
+<span class="comment">-- Mỗi tháng Oracle tự tạo partition mới → TRUNCATE PARTITION để xóa</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="practice-task">
+        <div class="practice-task-header">Senior Q3: Khác biệt quan trọng nhất giữa PostgreSQL, MySQL và Oracle khi thiết kế index?</div>
+        <div class="practice-task-body">
+          <ul>
+            <li>MySQL: Clustered Index, PK size ảnh hưởng toàn bộ secondary index, tránh UUIDv4</li>
+            <li>PostgreSQL: Heap Table, Partial Index, Trigram Index, INCLUDE clause</li>
+            <li>Oracle: Bitmap Index cho OLAP, Skip Scan, Function-based Index, IOT, NULL không được index</li>
+          </ul>
+          <div onclick="toggleSolution(this)" class="solution-toggle">💡 Xem sample answer</div>
+          <div class="solution-box">
+            <p>Ba điểm khác biệt quan trọng nhất: (1) <strong>Lưu trữ data</strong>: MySQL/InnoDB dùng Clustered Index — PK là bảng, data nằm trong PK tree, PK size ảnh hưởng mọi secondary index nên phải chọn PK nhỏ và time-ordered. PostgreSQL và Oracle mặc định dùng Heap Table — tất cả index bình đẳng. (2) <strong>Tính năng đặc biệt</strong>: PostgreSQL có Partial Index (WHERE clause trong CREATE INDEX) và Trigram Index cho full-text; Oracle có Bitmap Index cực mạnh cho OLAP/DWH nhưng nguy hiểm trong OLTP, và Index Skip Scan cho phép bỏ qua cột đầu composite index; MySQL thiếu cả hai. (3) <strong>NULL handling</strong>: Oracle không index NULL trong B-tree — phải workaround để IS NULL query dùng được index. PostgreSQL và MySQL không có vấn đề này.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S8 · CHECKLIST & TỔNG KẾT
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s8">
+  <div class="module-header">
+    <div class="module-tag">S8 · Checklist & Wrap-up</div>
+    <div class="module-title">Checklist & Tổng kết Module 01</div>
+    <div class="module-subtitle">Tick đủ mới sang module tiếp theo.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-summary">📊</span>
+      Progress tracker
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p class="progress-text" id="checklist-progress-text">0/10 mục hoàn thành (0%)</p>
+      <div class="progress-bar"><div class="progress-fill" id="checklist-progress-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🧠</span>
+      Summary — Điểm chốt cần nhớ
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>B+Tree = sorted list</strong>Không cần nhớ chi tiết thuật toán. Chỉ cần nhớ: 1 tỷ row → 3–4 bước nhảy (O log n).</div>
+        <div class="summary-item"><strong>MySQL Clustered Index</strong>PK = Table. Tránh UUIDv4. PK size copy vào mọi secondary index. Dùng BIGINT hoặc UUIDv7/ULID.</div>
+        <div class="summary-item"><strong>Nguyên tắc Phễu (3)</strong>Composite index: đi từ trái sang phải, không bỏ qua cột đầu. Equality TRƯỚC, Range SAU.</div>
+        <div class="summary-item"><strong>Function trên cột = index chết</strong>WHERE YEAR(col) = 2024 → full scan. Viết lại thành range hoặc tạo Functional Index.</div>
+        <div class="summary-item"><strong>EXPLAIN là bắt buộc</strong>Tạo index xong phải EXPLAIN để xác nhận plan. Đừng assume index được dùng.</div>
+        <div class="summary-item"><strong>Oracle: NULL không được index</strong>B-tree index không lưu NULL. IS NULL query = full scan. Fix: thêm cột hằng số vào index.</div>
+        <div class="summary-item"><strong>Oracle Bitmap Index</strong>Cực mạnh cho OLAP/DWH. TUYỆT ĐỐI không dùng trên OLTP — lock block khi UPDATE.</div>
+        <div class="summary-item"><strong>Khi index bị bỏ qua</strong>Database có thể đúng. Full scan nhanh hơn khi match > 10–30% rows. Kiểm tra statistics trước.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-practice">✅</span>
+      Definition of Done — Phải tick đủ mới sang module tiếp
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Giải thích được:</strong> B+Tree, Heap Table, Clustered Index bằng lời mà không cần tài liệu.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Nhớ được:</strong> 4 nguyên tắc vàng và áp dụng ngay khi thấy query chậm.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Đọc được EXPLAIN:</strong> Phân biệt Seq Scan vs Index Scan vs Bitmap Scan (PG), ALL vs ref vs const (MySQL), TABLE ACCESS FULL vs INDEX RANGE SCAN (Oracle).</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Làm được Task 1–3:</strong> Tạo index đúng cho query có WHERE + ORDER BY + LIMIT.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Biết fix:</strong> Function trên cột, type mismatch (MySQL), NULL index (Oracle), range đặt sai vị trí.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Biết sự khác biệt:</strong> Partial Index (PgSQL only), Bitmap Index (Oracle OLAP only), Clustered vs Heap.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Dọn dẹp được:</strong> Tìm và xóa index thừa bằng pg_stat_all_indexes / performance_schema / v$object_usage.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Trả lời được:</strong> 3 Senior Questions của module mạch lạc, có dẫn chứng cụ thể.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Hiểu Oracle:</strong> AUTOTRACE, DBMS_XPLAN, khi nào dùng hint, Interval Partition.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Tổng kết được:</strong> Vẽ lại sơ đồ "query đi qua index như thế nào" mà không nhìn tài liệu.</span></div>
+      <div class="info-box tip">➡️ <span><strong>Module tiếp theo:</strong> Sau khi hoàn thành checklist này, chuyển sang <code>Module02_SQL_Tuning_Query_Workflows.html</code> để học subquery, UPDATE/DELETE, RETURNING, CTE, keyset pagination và FOR UPDATE.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-summary">📚</span>
+      Tài liệu tham khảo
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li><strong>Ebook gốc:</strong> "Database Indexing & Những Điều Developer Cần Biết" — Nguyễn Thế Huy (huynt.dev)</li>
+        <li><strong>PostgreSQL docs:</strong> EXPLAIN, pg_trgm, Partial Indexes, INCLUDE clause</li>
+        <li><strong>MySQL docs:</strong> InnoDB Clustered Index, Invisible Index, EXPLAIN FORMAT=TREE</li>
+        <li><strong>Oracle docs:</strong> DBMS_XPLAN, Bitmap Index, IOT, Index Skip Scan, Function-based Index</li>
+        <li><strong>Tool:</strong> explain.depesz.com — visualize PostgreSQL EXPLAIN output</li>
+        <li><strong>Tool:</strong> mysqlexplain.com — visualize MySQL EXPLAIN output</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+  </main>
+</div>
+
+<script>
+const modules=document.querySelectorAll('.module');
+const navItems=document.querySelectorAll('.nav-item');
+
+function showModule(index,navItem){
+  modules.forEach(m=>{m.classList.remove('active');m.style.display='none'});
+  navItems.forEach(i=>i.classList.remove('active'));
+  const target=document.getElementById(`s${index}`);
+  if(target){target.classList.add('active');target.style.display='block'}
+  if(navItem)navItem.classList.add('active');
+  else if(navItems[index])navItems[index].classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function toggleSection(header){
+  const content=header.nextElementSibling;
+  const toggle=header.querySelector('.section-toggle');
+  const isHidden=content.style.display==='none';
+  content.style.display=isHidden?'block':'none';
+  toggle.textContent=isHidden?'▼':'▶';
+}
+
+function answerQuiz(el,isCorrect,msg){
+  const item=el.closest('.quiz-item');
+  const opts=item.querySelectorAll('.quiz-opt');
+  const explain=item.querySelector('.quiz-explain');
+  opts.forEach(opt=>(opt.style.pointerEvents='none'));
+  el.classList.add(isCorrect?'correct':'wrong');
+  if(!isCorrect){opts.forEach(opt=>{const o=opt.getAttribute('onclick');if(o&&o.includes('true'))opt.classList.add('correct')})}
+  explain.textContent=(isCorrect?'✓ Chính xác! ':'✗ Sai. ')+msg;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn){
+  const box=btn.nextElementSibling;
+  const show=box.classList.toggle('show');
+  btn.textContent=show?'🔼 Ẩn lời giải':'💡 Xem lời giải';
+}
+
+function switchTab(groupId,tabId){
+  const group=document.getElementById(groupId);
+  if(!group)return;
+  group.querySelectorAll('.tab').forEach(tab=>tab.classList.remove('active'));
+  const tabs=group.querySelectorAll('.tab');
+  const contents=group.parentElement.querySelectorAll('.tab-content');
+  contents.forEach(c=>c.classList.remove('active'));
+  const target=document.getElementById(tabId);
+  if(target)target.classList.add('active');
+  tabs.forEach(tab=>{
+    const oc=tab.getAttribute('onclick')||'';
+    if(oc.includes(tabId))tab.classList.add('active');
+  });
+}
+
+function toggleCheck(box){
+  box.classList.toggle('checked');
+  updateProgress();
+}
+
+function updateProgress(){
+  const checks=document.querySelectorAll('.check-box');
+  const checked=document.querySelectorAll('.check-box.checked').length;
+  const total=checks.length;
+  const pct=total===0?0:Math.round((checked/total)*100);
+  const fill=document.getElementById('checklist-progress-fill');
+  const text=document.getElementById('checklist-progress-text');
+  if(fill)fill.style.width=`${pct}%`;
+  if(text)text.textContent=`${checked}/${total} mục hoàn thành (${pct}%)`;
+}
+
+showModule(0,navItems[0]);
+updateProgress();
+</script>
+</body>
+</html>

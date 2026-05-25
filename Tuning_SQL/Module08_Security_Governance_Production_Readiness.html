@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 08 — Security, Governance & Production Readiness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+    --accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;--accent4:#d2a8ff;--accent5:#ffa657;
+    --text:#e6edf3;--text-muted:#8b949e;--code-bg:#0d1117;--highlight:#388bfd26;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+  .hero{background:linear-gradient(135deg,#0d1117 0%,#161b22 40%,#1a2a1e 100%);border-bottom:2px solid var(--accent4);padding:40px 24px 30px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#6e40c922,transparent 70%);pointer-events:none}
+  .hero h1{font-size:2rem;font-weight:800;color:var(--accent4);letter-spacing:-0.5px}
+  .hero p{color:var(--text-muted);margin-top:8px;font-size:.95rem}
+  .badge-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .badge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;border:1px solid}
+  .badge-blue{color:var(--accent);border-color:var(--accent);background:#1f6feb1a}
+  .badge-green{color:var(--accent2);border-color:var(--accent2);background:#2ea04326}
+  .badge-orange{color:var(--accent5);border-color:var(--accent5);background:#d2940026}
+  .badge-purple{color:var(--accent4);border-color:var(--accent4);background:#6e40c926}
+  .badge-red{color:var(--accent3);border-color:var(--accent3);background:#f7816620}
+  .container{display:flex;min-height:calc(100vh - 160px)}
+  .sidebar{width:290px;min-width:290px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .sidebar-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:0 16px 12px}
+  .level-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 16px 4px;color:var(--accent4)}
+  .nav-item{display:block;padding:7px 16px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-left:3px solid transparent;transition:all .15s}
+  .nav-item:hover{color:var(--text);background:var(--surface2)}
+  .nav-item.active{color:var(--accent4);border-left-color:var(--accent4);background:#6e40c915;font-weight:600}
+  .nav-number{display:inline-block;width:44px;font-size:.7rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .main{flex:1;padding:32px 40px;max-width:980px}
+  .module{display:none}.module.active{display:block}
+  .module-header{border:1px solid var(--border);border-radius:12px;padding:24px 28px;background:var(--surface);margin-bottom:24px;position:relative;overflow:hidden}
+  .module-header::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent4)}
+  .module-tag{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent4);margin-bottom:8px}
+  .module-title{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+  .module-subtitle{color:var(--text-muted);font-size:.9rem}
+  .section{margin-bottom:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .section-header{padding:14px 20px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--surface2);border-bottom:1px solid var(--border);user-select:none}
+  .section-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .icon-purpose{background:#1f6feb33}.icon-detail{background:#2ea04326}.icon-quiz{background:#d2940026}.icon-summary{background:#6e40c926}.icon-practice{background:#f7816626}
+  .section-content{padding:20px;background:var(--surface)}
+  .section-toggle{margin-left:auto;color:var(--text-muted);font-size:12px}
+  h3{font-size:1rem;font-weight:700;color:var(--accent4);margin:18px 0 10px}
+  h3:first-child{margin-top:0} h3.blue{color:var(--accent)} h3.green{color:var(--accent2)} h3.orange{color:var(--accent5)} h3.red{color:var(--accent3)}
+  p{margin-bottom:12px;color:var(--text);font-size:.88rem}
+  ul,ol{padding-left:20px;margin-bottom:12px} li{font-size:.88rem;margin-bottom:5px}
+  strong{color:var(--text)}
+  .cmd-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden}
+  .cmd-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .cmd-body{padding:14px}
+  pre{font-family:'JetBrains Mono','Courier New','Consolas',monospace;font-size:.82rem;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--text)}
+  .kw{color:#ff7b72}.kw2{color:var(--accent)}.str{color:var(--accent5)}.fn{color:var(--accent4)}.num{color:#79c0ff}.comment{color:var(--text-muted)}
+  .db-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.68rem;font-weight:700;letter-spacing:.5px;margin-bottom:6px;margin-right:4px}
+  .db-pg{background:#4169e122;color:#4d9de0;border:1px solid #4169e155}.db-my{background:#f0931322;color:#f09313;border:1px solid #f0931355}.db-oracle{background:#cc000022;color:#f97316;border:1px solid #cc000055}
+  code{font-family:'JetBrains Mono',monospace;background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.82rem;color:var(--accent4)}
+  .quiz-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+  .quiz-q{font-weight:600;font-size:.88rem;margin-bottom:10px}.quiz-q::before{content:'Q';display:inline-block;width:22px;height:22px;background:var(--accent4);color:#000;border-radius:50%;font-size:.7rem;font-weight:800;text-align:center;line-height:22px;margin-right:8px}
+  .quiz-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .quiz-opt{padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.84rem;transition:all .15s;background:var(--bg)}
+  .quiz-opt:hover{border-color:var(--accent4);color:var(--accent4)}.quiz-opt.correct{border-color:var(--accent2);color:var(--accent2);background:#2ea04310}.quiz-opt.wrong{border-color:var(--accent3);color:var(--accent3);background:#f7816610}
+  .quiz-explain{font-size:.82rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;margin-top:8px;display:none}.quiz-explain.show{display:block}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.summary-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.82rem}.summary-item strong{color:var(--accent4);display:block;margin-bottom:4px}
+  .practice-task{background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}.practice-task-header{padding:12px 16px;background:#6e40c915;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem;color:var(--accent4)}.practice-task-body{padding:16px}
+  .solution-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:.8rem;cursor:pointer;color:var(--accent2);margin-top:10px;transition:all .15s}.solution-toggle:hover{background:var(--surface2)}
+  .solution-box{margin-top:10px;display:none;border-top:1px solid var(--border);padding-top:12px}.solution-box.show{display:block}
+  .info-box{border-radius:8px;padding:14px 16px;margin:12px 0;font-size:.84rem;border:1px solid;display:flex;gap:10px}.info-box.tip{border-color:var(--accent2);background:#2ea04310;color:var(--accent2)}.info-box.warn{border-color:var(--accent5);background:#d2940015;color:var(--accent5)}.info-box.note{border-color:var(--accent4);background:#6e40c915;color:var(--accent4)}.info-box.danger{border-color:var(--accent3);background:#f7816610;color:var(--accent3)}.info-box span{color:var(--text)}
+  .progress-bar{background:var(--surface2);border-radius:4px;height:4px;margin:16px 0;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent4),var(--accent2));border-radius:4px;width:0;transition:width .2s}
+  .nav-buttons{display:flex;gap:12px;margin-top:32px;justify-content:space-between}.nav-btn{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}.nav-btn:hover{border-color:var(--accent4);color:var(--accent4)}.nav-btn.primary{background:var(--accent4);color:#000;border-color:var(--accent4)}.nav-btn.primary:hover{background:#e2c0ff}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.83rem} th{background:var(--surface2);padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent4)} td{padding:8px 12px;border:1px solid var(--border)} tr:nth-child(even) td{background:#ffffff05}
+  .mental-model{border-left:4px solid var(--accent);background:#1f6feb1a;padding:12px 14px;border-radius:6px;margin:12px 0;font-size:.88rem}
+  .checklist-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}.check-box{width:16px;height:16px;border:1px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:.25rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}.check-box.checked{background:var(--accent2);border-color:var(--accent2)}.check-box.checked::after{content:'✓';font-size:10px;color:#000;font-weight:600}.progress-text{font-size:.8rem;color:var(--text-muted);margin-bottom:8px}
+  @media(max-width:768px){.sidebar{display:none}.main{padding:16px}.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Module 08 — Security, Governance & Production Readiness</h1>
+  <p>Bảo vệ database bằng least privilege, audit, encryption, migration governance và production checklist trước khi hệ thống thật sự lên tải.</p>
+  <div class="badge-row">
+    <span class="badge badge-purple">DBA Security</span>
+    <span class="badge badge-green">~5–7 ngày</span>
+    <span class="badge badge-blue">Governance</span>
+    <span class="badge badge-orange">PostgreSQL · MySQL · Oracle</span>
+    <span class="badge badge-red">Production Ready</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Module Navigation</div>
+    <div class="level-label">MODULE 08 · SECURITY</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">S0</span>Tổng quan & Mục tiêu</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">S1</span>Users, Roles & Grants</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">S2</span>Least Privilege</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">S3</span>Audit & Compliance</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">S4</span>Encryption & Secrets</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">S5</span>SQL Injection & App Safety</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">S6</span>Migration Governance</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">S7</span>Interview Prep</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">S8</span>Final Checklist</div>
+  </nav>
+
+  <main class="main">
+
+    <div class="module active" id="s0">
+      <div class="module-header">
+        <div class="module-tag">S0 · Orientation</div>
+        <div class="module-title">Tổng quan & Mục tiêu Module 08</div>
+        <div class="module-subtitle">Module cuối chốt lại phần production readiness: ai được làm gì, dữ liệu nhạy cảm được bảo vệ thế nào, thay đổi schema có kiểm soát ra sao.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">M</span>Roadmap 9 sections của module<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Section</th><th>Tên section</th><th>Trọng tâm</th></tr></thead>
+            <tbody>
+              <tr><td>S0</td><td>Tổng quan & Mục tiêu</td><td>Security/governance giải quyết vấn đề gì</td></tr>
+              <tr><td>S1</td><td>Users, Roles & Grants</td><td>Quản lý identity và quyền</td></tr>
+              <tr><td>S2</td><td>Least Privilege</td><td>App user, migration user, readonly user</td></tr>
+              <tr><td>S3</td><td>Audit & Compliance</td><td>Theo dõi ai làm gì với dữ liệu</td></tr>
+              <tr><td>S4</td><td>Encryption & Secrets</td><td>TLS, at-rest encryption, secret rotation</td></tr>
+              <tr><td>S5</td><td>SQL Injection & App Safety</td><td>DBA nhìn security từ query/app</td></tr>
+              <tr><td>S6</td><td>Migration Governance</td><td>Review change trước production</td></tr>
+              <tr><td>S7</td><td>Interview Prep</td><td>Câu hỏi DBA security</td></tr>
+              <tr><td>S8</td><td>Final Checklist</td><td>Production readiness cuối lộ trình</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-purpose">S</span>Security giải quyết vấn đề gì?<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <h3 class="blue">Database là nơi lỗi bảo mật gây thiệt hại lớn nhất</h3>
+          <p>Nếu app bị compromise nhưng database user chỉ có quyền tối thiểu, blast radius nhỏ hơn rất nhiều. Nếu migration không được review, một câu DDL sai có thể lock production. Nếu audit thiếu, bạn không biết ai đã đọc/xóa/sửa dữ liệu nhạy cảm.</p>
+          <div class="mental-model"><strong>Mental model:</strong> Performance làm hệ thống nhanh. Security và governance làm hệ thống đáng tin để vận hành lâu dài.</div>
+          <h3 class="orange">Dấu hiệu hệ thống chưa production-ready</h3>
+          <ul>
+            <li>App dùng quyền owner/admin để chạy query hằng ngày.</li>
+            <li>Mọi người dùng chung một database account.</li>
+            <li>Không có audit cho DDL, privilege change hoặc truy cập dữ liệu nhạy cảm.</li>
+            <li>Migration chạy thẳng production không có rollback plan.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" disabled>← Trước</button><button class="nav-btn primary" onclick="nextModule()">Bắt đầu →</button></div>
+    </div>
+
+    <div class="module" id="s1">
+      <div class="module-header">
+        <div class="module-tag">S1 · Identity</div>
+        <div class="module-title">Users, Roles & Grants</div>
+        <div class="module-subtitle">Role design tốt giúp tách quyền rõ ràng: app chạy app, migration chạy migration, DBA quản trị, analyst chỉ đọc.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">R</span>Role model chuẩn<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Role/User</th><th>Quyền</th><th>Không nên có</th></tr></thead>
+            <tbody>
+              <tr><td>app_runtime</td><td>SELECT/INSERT/UPDATE/DELETE đúng schema/table cần thiết</td><td>DDL, GRANT, superuser</td></tr>
+              <tr><td>migration_user</td><td>DDL theo pipeline</td><td>Dùng bởi app runtime</td></tr>
+              <tr><td>readonly_analyst</td><td>SELECT trên view/table được phép</td><td>Write, DDL, raw PII nếu không cần</td></tr>
+              <tr><td>dba_admin</td><td>Quản trị có kiểm soát</td><td>Dùng chung tài khoản cá nhân</td></tr>
+            </tbody>
+          </table>
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>roles-grants.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">CREATE ROLE</span> app_runtime <span class="kw">LOGIN PASSWORD</span> <span class="str">'rotate-me'</span>;
+<span class="kw">GRANT USAGE ON SCHEMA</span> app <span class="kw">TO</span> app_runtime;
+<span class="kw">GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA</span> app <span class="kw">TO</span> app_runtime;
+<span class="kw">ALTER DEFAULT PRIVILEGES IN SCHEMA</span> app
+<span class="kw">GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO</span> app_runtime;
+
+<span class="db-tag db-my">MySQL</span>
+<span class="kw">CREATE USER</span> <span class="str">'app_runtime'</span>@<span class="str">'10.%'</span> IDENTIFIED BY <span class="str">'rotate-me'</span>;
+<span class="kw">GRANT SELECT, INSERT, UPDATE, DELETE ON</span> appdb.* <span class="kw">TO</span> <span class="str">'app_runtime'</span>@<span class="str">'10.%'</span>;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">CREATE USER</span> app_runtime IDENTIFIED BY <span class="str">"rotate-me"</span>;
+<span class="kw">CREATE ROLE</span> app_runtime_role;
+<span class="kw">GRANT CREATE SESSION TO</span> app_runtime;
+<span class="kw">GRANT SELECT, INSERT, UPDATE, DELETE ON</span> app.orders <span class="kw">TO</span> app_runtime_role;
+<span class="kw">GRANT</span> app_runtime_role <span class="kw">TO</span> app_runtime;</pre>
+            </div>
+          </div>
+          <div class="info-box warn">⚠️ <span><strong>Rule:</strong> Không để application dùng superuser/root/SYS/SYSTEM/schema owner để chạy workload bình thường.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s2">
+      <div class="module-header">
+        <div class="module-tag">S2 · Least Privilege</div>
+        <div class="module-title">Least Privilege & Access Review</div>
+        <div class="module-subtitle">Quyền tối thiểu không phải để gây khó chịu. Nó giới hạn thiệt hại khi app bug, credential lộ hoặc người dùng thao tác sai.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">P</span>Permission review SQL<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>permission-review.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">SELECT</span> grantee, table_schema, table_name, privilege_type
+<span class="kw">FROM</span> information_schema.role_table_grants
+<span class="kw">WHERE</span> table_schema = <span class="str">'app'</span>
+<span class="kw">ORDER BY</span> grantee, table_name, privilege_type;
+
+<span class="db-tag db-my">MySQL</span>
+<span class="kw">SHOW GRANTS FOR</span> <span class="str">'app_runtime'</span>@<span class="str">'10.%'</span>;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">SELECT</span> grantee, owner, table_name, privilege
+<span class="kw">FROM</span> dba_tab_privs
+<span class="kw">WHERE</span> owner = <span class="str">'APP'</span>
+<span class="kw">ORDER BY</span> grantee, table_name, privilege;
+
+<span class="kw">SELECT</span> grantee, granted_role
+<span class="kw">FROM</span> dba_role_privs
+<span class="kw">ORDER BY</span> grantee;</pre>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Review item</th><th>Câu hỏi</th></tr></thead>
+            <tbody>
+              <tr><td>App user</td><td>Có DDL/GRANT/admin privilege không?</td></tr>
+              <tr><td>Readonly user</td><td>Có đọc raw PII ngoài nhu cầu không?</td></tr>
+              <tr><td>Migration user</td><td>Có dùng ngoài CI/CD pipeline không?</td></tr>
+              <tr><td>Human access</td><td>Có account cá nhân, MFA, audit trail không?</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-practice">P</span>Practice: tách quyền runtime/migration<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="practice-task">
+            <div class="practice-task-header">Task — App đang dùng schema owner</div>
+            <div class="practice-task-body">
+              <p>Thiết kế lại quyền để app chỉ có DML, migration pipeline có DDL, analyst chỉ SELECT qua view đã mask PII.</p>
+              <button class="solution-toggle" onclick="toggleSolution(this)">Xem gợi ý</button>
+              <div class="solution-box"><p>Tạo 3 role riêng: runtime, migration, readonly. Runtime không có <code>CREATE/ALTER/DROP/GRANT</code>. Analyst đọc view như <code>customer_public_view</code> thay vì bảng raw.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s3">
+      <div class="module-header">
+        <div class="module-tag">S3 · Audit</div>
+        <div class="module-title">Audit & Compliance</div>
+        <div class="module-subtitle">Audit giúp trả lời: ai truy cập dữ liệu nào, lúc nào, từ đâu, và đã thay đổi gì.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">A</span>Audit targets<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Sự kiện</th><th>Vì sao cần audit</th></tr></thead>
+            <tbody>
+              <tr><td>Login failed/success</td><td>Phát hiện brute force hoặc credential bị lộ</td></tr>
+              <tr><td>DDL</td><td>Ai thay đổi schema/index/constraint</td></tr>
+              <tr><td>Privilege change</td><td>Ai cấp quyền nhạy cảm</td></tr>
+              <tr><td>Access PII</td><td>Compliance, điều tra dữ liệu nhạy cảm</td></tr>
+              <tr><td>DELETE/TRUNCATE lớn</td><td>Điều tra data loss</td></tr>
+            </tbody>
+          </table>
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>audit-examples.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="comment">-- PostgreSQL thường dùng pgaudit extension</span>
+shared_preload_libraries = <span class="str">'pgaudit'</span>
+pgaudit.log = <span class="str">'write, ddl, role'</span>
+
+<span class="db-tag db-my">MySQL</span>
+<span class="comment">-- MySQL Enterprise Audit hoặc plugin audit tương đương</span>
+<span class="kw">SHOW VARIABLES LIKE</span> <span class="str">'audit%'</span>;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">AUDIT CREATE TABLE</span>;
+<span class="kw">AUDIT DROP ANY TABLE</span>;
+<span class="kw">AUDIT GRANT ANY PRIVILEGE</span>;
+
+<span class="kw">SELECT</span> event_timestamp, dbusername, action_name, object_schema, object_name
+<span class="kw">FROM</span> unified_audit_trail
+<span class="kw">ORDER BY</span> event_timestamp <span class="kw">DESC</span>
+<span class="kw">FETCH FIRST</span> <span class="num">50</span> <span class="kw">ROWS ONLY</span>;</pre>
+            </div>
+          </div>
+          <div class="info-box note">📌 <span><strong>Audit trade-off:</strong> Audit quá ít thì vô dụng, audit quá nhiều thì nhiễu và tốn storage. Bắt đầu với DDL, privilege, auth, write lớn và PII access.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s4">
+      <div class="module-header">
+        <div class="module-tag">S4 · Encryption</div>
+        <div class="module-title">Encryption, TLS & Secret Rotation</div>
+        <div class="module-subtitle">Dữ liệu cần được bảo vệ khi lưu, khi truyền và khi credential bị xoay vòng.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">E</span>Encryption layers<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Layer</th><th>Mục tiêu</th><th>Ví dụ</th></tr></thead>
+            <tbody>
+              <tr><td>In transit</td><td>Không lộ dữ liệu trên network</td><td>TLS/SSL connection</td></tr>
+              <tr><td>At rest</td><td>Disk/snapshot bị lấy vẫn khó đọc</td><td>TDE, encrypted volume</td></tr>
+              <tr><td>Column/app-level</td><td>Bảo vệ field nhạy cảm</td><td>PII/token encryption</td></tr>
+              <tr><td>Secrets</td><td>Credential không hardcode</td><td>Vault/KMS/secret manager</td></tr>
+            </tbody>
+          </table>
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>tls-check.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">SHOW</span> ssl;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> pg_stat_ssl <span class="kw">WHERE</span> pid = pg_backend_pid();
+
+<span class="db-tag db-my">MySQL</span>
+<span class="kw">SHOW VARIABLES LIKE</span> <span class="str">'require_secure_transport'</span>;
+<span class="kw">SHOW STATUS LIKE</span> <span class="str">'Ssl_cipher'</span>;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="comment">-- Kiểm tra network encryption thường qua sqlnet.ora / view cấu hình môi trường</span>
+<span class="comment">-- SQLNET.ENCRYPTION_SERVER = REQUIRED</span>
+<span class="comment">-- SQLNET.CRYPTO_CHECKSUM_SERVER = REQUIRED</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">R</span>Secret rotation pattern<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <ol>
+            <li>Tạo credential mới song song credential cũ.</li>
+            <li>Grant đúng quyền cho credential mới.</li>
+            <li>Deploy app dùng secret mới.</li>
+            <li>Quan sát connection mới đã dùng credential mới.</li>
+            <li>Revoke/drop credential cũ.</li>
+            <li>Ghi lại audit trail và rollback plan.</li>
+          </ol>
+          <div class="info-box warn">⚠️ <span><strong>Không rotate kiểu “đổi password trực tiếp”</strong> nếu app không hỗ trợ reload secret an toàn. Hãy dùng dual credentials để tránh downtime.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s5">
+      <div class="module-header">
+        <div class="module-tag">S5 · App Safety</div>
+        <div class="module-title">SQL Injection Defense & Application Safety</div>
+        <div class="module-subtitle">DBA không viết toàn bộ app code, nhưng DBA phải biết dấu hiệu query nguy hiểm và thiết kế quyền để giảm thiệt hại.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">Q</span>Query safety rules<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Rule</th><th>Vì sao</th></tr></thead>
+            <tbody>
+              <tr><td>Parameterized query</td><td>Không nối string user input vào SQL</td></tr>
+              <tr><td>Allowlist dynamic ORDER BY/table name</td><td>Bind parameter không thay thế identifier</td></tr>
+              <tr><td>Least privilege app user</td><td>Injection không thể DROP/ALTER nếu user không có quyền</td></tr>
+              <tr><td>Statement timeout</td><td>Giảm tác hại query runaway</td></tr>
+              <tr><td>Row-level security/view masking khi cần</td><td>Giảm lộ dữ liệu nhạy cảm</td></tr>
+            </tbody>
+          </table>
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>safe-query-pattern.txt</span></div>
+            <div class="cmd-body">
+<pre><span class="comment">-- Anti-pattern</span>
+sql = <span class="str">"SELECT * FROM users WHERE email = '"</span> + input_email + <span class="str">"'"</span>
+
+<span class="comment">-- Safe pattern</span>
+sql = <span class="str">"SELECT * FROM users WHERE email = ?"</span>
+params = [input_email]
+
+<span class="comment">-- Dynamic ORDER BY: dùng allowlist</span>
+allowed_sort = {<span class="str">"created_at"</span>, <span class="str">"email"</span>, <span class="str">"id"</span>}</pre>
+            </div>
+          </div>
+          <div class="info-box tip">✅ <span><strong>DBA perspective:</strong> Nếu app user chỉ có DML trên vài table, SQL injection vẫn nguy hiểm nhưng blast radius nhỏ hơn nhiều so với app dùng owner/admin.</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">T</span>Timeouts & guardrails<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>timeouts.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">ALTER ROLE</span> app_runtime <span class="kw">SET</span> statement_timeout = <span class="str">'30s'</span>;
+<span class="kw">ALTER ROLE</span> app_runtime <span class="kw">SET</span> idle_in_transaction_session_timeout = <span class="str">'60s'</span>;
+
+<span class="db-tag db-my">MySQL</span>
+<span class="kw">SET PERSIST</span> max_execution_time = <span class="num">30000</span>;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="comment">-- Dùng Database Resource Manager/Profile để giới hạn resource/session</span>
+<span class="kw">CREATE PROFILE</span> app_profile <span class="kw">LIMIT</span>
+  SESSIONS_PER_USER <span class="num">50</span>
+  IDLE_TIME <span class="num">30</span>;</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s6">
+      <div class="module-header">
+        <div class="module-tag">S6 · Change Management</div>
+        <div class="module-title">Migration Governance & Production Change</div>
+        <div class="module-subtitle">Schema change production cần review như code: impact, lock, rollback, backfill, observability.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">M</span>Migration review checklist<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Check</th><th>Câu hỏi</th></tr></thead>
+            <tbody>
+              <tr><td>Lock impact</td><td>DDL có lock table lâu không?</td></tr>
+              <tr><td>Backward compatibility</td><td>App version cũ và mới cùng chạy được không?</td></tr>
+              <tr><td>Backfill</td><td>Batch nhỏ, retry được, có progress không?</td></tr>
+              <tr><td>Rollback</td><td>Rollback schema/data có thực tế không?</td></tr>
+              <tr><td>Index build</td><td>Có dùng online/concurrent build nếu DB hỗ trợ không?</td></tr>
+              <tr><td>Monitoring</td><td>Có metric/alert trong lúc migration không?</td></tr>
+            </tbody>
+          </table>
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>online-index.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">CREATE INDEX CONCURRENTLY</span> idx_orders_user_created
+<span class="kw">ON</span> orders(user_id, created_at);
+
+<span class="db-tag db-my">MySQL</span>
+<span class="kw">ALTER TABLE</span> orders
+  <span class="kw">ADD INDEX</span> idx_orders_user_created(user_id, created_at),
+  <span class="kw">ALGORITHM</span>=INPLACE,
+  <span class="kw">LOCK</span>=NONE;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">CREATE INDEX</span> idx_orders_user_created
+<span class="kw">ON</span> orders(user_id, created_at)
+<span class="kw">ONLINE</span>;</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">E</span>Error catalog — Production change<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Lỗi</th><th>Hậu quả</th><th>Fix</th></tr></thead>
+            <tbody>
+              <tr><td>ADD NOT NULL column có default lớn</td><td>Rewrite/lock bảng lớn</td><td>Thêm nullable, backfill batch, validate sau</td></tr>
+              <tr><td>Drop column ngay khi deploy</td><td>App version cũ lỗi</td><td>Expand/contract migration</td></tr>
+              <tr><td>Create index giờ cao điểm</td><td>I/O spike, lock/lag</td><td>Online/concurrent, off-peak, throttle</td></tr>
+              <tr><td>Backfill một transaction lớn</td><td>Lock, WAL/binlog phình, rollback lâu</td><td>Batch nhỏ, commit từng batch</td></tr>
+              <tr><td>Không có rollback plan</td><td>Sự cố kéo dài</td><td>Plan rollback hoặc forward-fix rõ ràng</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s7">
+      <div class="module-header">
+        <div class="module-tag">S7 · Interview Prep</div>
+        <div class="module-title">Interview Prep — Security & Governance</div>
+        <div class="module-subtitle">Các câu hỏi kiểm tra tư duy production, không chỉ cú pháp GRANT/REVOKE.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-quiz">Q</span>Quick quiz<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="quiz-item">
+            <div class="quiz-q">Vì sao app runtime không nên dùng schema owner?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Hiệu năng không phải lý do chính.')">A. Vì schema owner luôn chậm hơn</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu app bị khai thác, quyền owner làm blast radius rất lớn.')">B. Vì blast radius quá lớn nếu app bug/bị compromise</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Schema owner vẫn chạy query được, vấn đề là quyền quá rộng.')">C. Vì owner không thể SELECT</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+          <div class="quiz-item">
+            <div class="quiz-q">Migration production tốt cần gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Chạy nhanh không đủ nếu lock lớn hoặc rollback không có.')">A. Chỉ cần chạy nhanh trên local</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cần hiểu lock, compatibility, rollback/forward-fix, backfill và monitoring.')">B. Review lock impact, compatibility, rollback, backfill, monitoring</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Không phải migration nào cũng cần downtime.')">C. Luôn downtime toàn hệ thống</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">S</span>Senior answer templates<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <h3 class="blue">Q1: Bạn thiết kế quyền database cho app thế nào?</h3>
+          <p>Tôi tách runtime user, migration user, readonly/analyst user và DBA admin. Runtime chỉ có DML cần thiết, không có DDL/GRANT/admin. Migration chạy qua pipeline có review. Human access dùng account cá nhân, audit, MFA hoặc jump host tùy môi trường.</p>
+          <h3 class="green">Q2: Bạn audit gì trong database?</h3>
+          <p>Tôi audit authentication, privilege changes, DDL, DELETE/TRUNCATE lớn và access vào dữ liệu nhạy cảm. Audit phải có retention, owner review và query/report để điều tra. Tôi tránh audit quá rộng gây nhiễu và tốn storage vô ích.</p>
+          <h3 class="orange">Q3: Làm sao deploy schema change an toàn?</h3>
+          <p>Tôi dùng expand/contract migration: thêm cấu trúc mới backward-compatible, deploy app đọc/ghi cả hai nếu cần, backfill batch nhỏ, validate, chuyển traffic, rồi mới drop cấu trúc cũ. Trước khi chạy có đánh giá lock, plan rollback/forward-fix và monitoring.</p>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s8">
+      <div class="module-header">
+        <div class="module-tag">S8 · Final Summary</div>
+        <div class="module-title">Final Checklist & Tổng kết lộ trình DBA nền tảng</div>
+        <div class="module-subtitle">Nếu hoàn thành checklist này, bạn đã có khung tư duy đủ chắc để học sâu từng database engine ở cấp độ DBA chuyên nghiệp.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">S</span>Summary — Điểm chốt cần nhớ<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>Least privilege</strong>Quyền tối thiểu giảm blast radius khi app lỗi hoặc credential lộ.</div>
+            <div class="summary-item"><strong>Audit có mục tiêu</strong>Audit DDL, privilege, auth, PII và write nguy hiểm.</div>
+            <div class="summary-item"><strong>Encrypt đúng lớp</strong>TLS, at-rest, column/app-level và secret rotation là các lớp khác nhau.</div>
+            <div class="summary-item"><strong>Injection defense</strong>Parameterized query + allowlist + least privilege.</div>
+            <div class="summary-item"><strong>Migration governance</strong>Review lock, compatibility, rollback, backfill, monitoring.</div>
+            <div class="summary-item"><strong>Production readiness</strong>Security, backup, monitoring, incident runbook phải cùng tồn tại.</div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-practice">D</span>Definition of Done<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="progress-text">Progress: <span id="progressPct">0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Thiết kế được role model tách runtime, migration, readonly và DBA admin.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Review được quyền hiện tại trên PostgreSQL, MySQL và Oracle.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Biết audit các sự kiện DDL, privilege, auth, PII và destructive write.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Giải thích được encryption in transit, at rest, column/app-level và secret rotation.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Nhận diện được SQL injection risk và guardrail từ phía DBA.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Review được migration production về lock, compatibility, rollback, backfill và monitoring.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Trả lời được 3 câu senior answer trong Interview Prep.</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">F</span>Lộ trình sau 8 module<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="info-box tip">✅ <span><strong>Tiếp theo nếu muốn học sâu:</strong> chọn một engine làm nhánh chuyên sâu: PostgreSQL DBA, MySQL/InnoDB DBA hoặc Oracle DBA. Lúc đó học sâu internals, HA tooling, automation, performance lab và case study production.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn" disabled>Hoàn thành</button></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let currentModule = 0;
+const totalModules = 9;
+function showModule(index, navEl){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  const target=document.getElementById('s'+index);
+  if(target){target.classList.add('active');currentModule=index;window.scrollTo({top:0,behavior:'smooth'});}
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(navEl){navEl.classList.add('active');}
+  else{
+    const items=document.querySelectorAll('.nav-item');
+    if(items[index])items[index].classList.add('active');
+  }
+}
+function nextModule(){if(currentModule<totalModules-1)showModule(currentModule+1);}
+function prevModule(){if(currentModule>0)showModule(currentModule-1);}
+function toggleSection(header){
+  const content=header.nextElementSibling;
+  const toggle=header.querySelector('.section-toggle');
+  const hidden=content.style.display==='none';
+  content.style.display=hidden?'block':'none';
+  if(toggle)toggle.textContent=hidden?'▼':'▶';
+}
+function toggleSolution(btn){
+  const box=btn.nextElementSibling;
+  box.classList.toggle('show');
+  btn.textContent=box.classList.contains('show')?'Ẩn gợi ý':'Xem gợi ý';
+}
+function answerQuiz(opt,isCorrect,msg){
+  const item=opt.closest('.quiz-item');
+  item.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('correct','wrong'));
+  opt.classList.add(isCorrect?'correct':'wrong');
+  if(!isCorrect){
+    item.querySelectorAll('.quiz-opt').forEach(o=>{
+      const oc=o.getAttribute('onclick')||'';
+      if(oc.includes('true'))o.classList.add('correct');
+    });
+  }
+  const ex=item.querySelector('.quiz-explain');
+  ex.textContent=msg;
+  ex.classList.add('show');
+}
+function toggleCheck(box){box.classList.toggle('checked');updateProgress();}
+function updateProgress(){
+  const boxes=document.querySelectorAll('.check-box');
+  const checked=document.querySelectorAll('.check-box.checked');
+  const pct=boxes.length===0?0:Math.round(checked.length/boxes.length*100);
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('progressFill').style.width=pct+'%';
+}
+updateProgress();
+</script>
+</body>
+</html>

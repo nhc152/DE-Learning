@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 02 — SQL Query Workflows & Data Manipulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+    --accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;--accent4:#d2a8ff;--accent5:#ffa657;
+    --text:#e6edf3;--text-muted:#8b949e;--code-bg:#0d1117;--highlight:#388bfd26;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+  .hero{background:linear-gradient(135deg,#0d1117 0%,#161b22 40%,#1a2a1e 100%);border-bottom:2px solid var(--accent4);padding:40px 24px 30px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#6e40c922,transparent 70%);pointer-events:none}
+  .hero h1{font-size:2rem;font-weight:800;color:var(--accent4);letter-spacing:-0.5px}
+  .hero p{color:var(--text-muted);margin-top:8px;font-size:.95rem}
+  .badge-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .badge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;border:1px solid}
+  .badge-blue{color:var(--accent);border-color:var(--accent);background:#1f6feb1a}
+  .badge-green{color:var(--accent2);border-color:var(--accent2);background:#2ea04326}
+  .badge-orange{color:var(--accent5);border-color:var(--accent5);background:#d2940026}
+  .badge-purple{color:var(--accent4);border-color:var(--accent4);background:#6e40c926}
+  .badge-red{color:var(--accent3);border-color:var(--accent3);background:#f7816620}
+  .container{display:flex;min-height:calc(100vh - 160px)}
+  .sidebar{width:290px;min-width:290px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .sidebar-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:0 16px 12px}
+  .level-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 16px 4px;color:var(--accent4)}
+  .nav-item{display:block;padding:7px 16px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-left:3px solid transparent;transition:all .15s}
+  .nav-item:hover{color:var(--text);background:var(--surface2)}
+  .nav-item.active{color:var(--accent4);border-left-color:var(--accent4);background:#6e40c915;font-weight:600}
+  .nav-number{display:inline-block;width:44px;font-size:.7rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .main{flex:1;padding:32px 40px;max-width:980px}
+  .module{display:none}
+  .module.active{display:block}
+  .module-header{border:1px solid var(--border);border-radius:12px;padding:24px 28px;background:var(--surface);margin-bottom:24px;position:relative;overflow:hidden}
+  .module-header::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent4)}
+  .module-tag{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent4);margin-bottom:8px}
+  .module-title{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+  .module-subtitle{color:var(--text-muted);font-size:.9rem}
+  .section{margin-bottom:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .section-header{padding:14px 20px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--surface2);border-bottom:1px solid var(--border);user-select:none}
+  .section-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .icon-purpose{background:#1f6feb33}
+  .icon-detail{background:#2ea04326}
+  .icon-quiz{background:#d2940026}
+  .icon-summary{background:#6e40c926}
+  .icon-practice{background:#f7816626}
+  .section-content{padding:20px;background:var(--surface)}
+  .section-toggle{margin-left:auto;color:var(--text-muted);font-size:12px}
+  h3{font-size:1rem;font-weight:700;color:var(--accent4);margin:18px 0 10px}
+  h3:first-child{margin-top:0}
+  h3.blue{color:var(--accent)}
+  h3.green{color:var(--accent2)}
+  h3.orange{color:var(--accent5)}
+  h3.red{color:var(--accent3)}
+  p{margin-bottom:12px;color:var(--text);font-size:.88rem}
+  ul,ol{padding-left:20px;margin-bottom:12px}
+  li{font-size:.88rem;margin-bottom:5px}
+  strong{color:var(--text)}
+  .cmd-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden}
+  .cmd-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .cmd-body{padding:14px}
+  pre{font-family:'JetBrains Mono','Courier New','Consolas',monospace;font-size:.82rem;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--text)}
+  .kw{color:#ff7b72}.kw2{color:var(--accent)}.str{color:var(--accent5)}.fn{color:var(--accent4)}.num{color:#79c0ff}.comment{color:var(--text-muted)}
+  .db-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.68rem;font-weight:700;letter-spacing:.5px;margin-bottom:6px;margin-right:4px}
+  .db-pg{background:#4169e122;color:#4d9de0;border:1px solid #4169e155}
+  .db-my{background:#f0931322;color:#f09313;border:1px solid #f0931355}
+  .db-oracle{background:#cc000022;color:#f97316;border:1px solid #cc000055}
+  code{font-family:'JetBrains Mono',monospace;background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.82rem;color:var(--accent4)}
+  .quiz-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+  .quiz-q{font-weight:600;font-size:.88rem;margin-bottom:10px}
+  .quiz-q::before{content:'Q';display:inline-block;width:22px;height:22px;background:var(--accent4);color:#000;border-radius:50%;font-size:.7rem;font-weight:800;text-align:center;line-height:22px;margin-right:8px}
+  .quiz-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .quiz-opt{padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.84rem;transition:all .15s;background:var(--bg)}
+  .quiz-opt:hover{border-color:var(--accent4);color:var(--accent4)}
+  .quiz-opt.correct{border-color:var(--accent2);color:var(--accent2);background:#2ea04310}
+  .quiz-opt.wrong{border-color:var(--accent3);color:var(--accent3);background:#f7816610}
+  .quiz-explain{font-size:.82rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;margin-top:8px;display:none}
+  .quiz-explain.show{display:block}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .summary-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.82rem}
+  .summary-item strong{color:var(--accent4);display:block;margin-bottom:4px}
+  .practice-task{background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}
+  .practice-task-header{padding:12px 16px;background:#6e40c915;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem;color:var(--accent4)}
+  .practice-task-body{padding:16px}
+  .solution-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:.8rem;cursor:pointer;color:var(--accent2);margin-top:10px;transition:all .15s}
+  .solution-toggle:hover{background:var(--surface2)}
+  .solution-box{margin-top:10px;display:none;border-top:1px solid var(--border);padding-top:12px}
+  .solution-box.show{display:block}
+  .info-box{border-radius:8px;padding:14px 16px;margin:12px 0;font-size:.84rem;border:1px solid;display:flex;gap:10px}
+  .info-box.tip{border-color:var(--accent2);background:#2ea04310;color:var(--accent2)}
+  .info-box.warn{border-color:var(--accent5);background:#d2940015;color:var(--accent5)}
+  .info-box.note{border-color:var(--accent4);background:#6e40c915;color:var(--accent4)}
+  .info-box.danger{border-color:var(--accent3);background:#f7816610;color:var(--accent3)}
+  .info-box span{color:var(--text)}
+  .progress-bar{background:var(--surface2);border-radius:4px;height:4px;margin:16px 0;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent4),var(--accent2));border-radius:4px;width:0;transition:width .2s}
+  .nav-buttons{display:flex;gap:12px;margin-top:32px;justify-content:space-between}
+  .nav-btn{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}
+  .nav-btn:hover{border-color:var(--accent4);color:var(--accent4)}
+  .nav-btn.primary{background:var(--accent4);color:#000;border-color:var(--accent4)}
+  .nav-btn.primary:hover{background:#e2c0ff}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.83rem}
+  th{background:var(--surface2);padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent4)}
+  td{padding:8px 12px;border:1px solid var(--border)}
+  tr:nth-child(even) td{background:#ffffff05}
+  .mental-model{border-left:4px solid var(--accent);background:#1f6feb1a;padding:12px 14px;border-radius:6px;margin:12px 0;font-size:.88rem}
+  .tab-group{display:flex;gap:0;margin-bottom:0;border-bottom:1px solid var(--border)}
+  .tab{padding:8px 18px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--accent4);border-bottom-color:var(--accent4);font-weight:600}
+  .tab-content{display:none;padding-top:16px}
+  .tab-content.active{display:block}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0}
+  .compare-card{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .compare-card-header{padding:8px 12px;font-weight:700;font-size:.78rem;text-align:center}
+  .compare-card-header.pg{background:#4169e133;color:#4d9de0}
+  .compare-card-header.my{background:#f0931333;color:#f09313}
+  .compare-card-header.ora{background:#cc000033;color:#f97316}
+  .compare-card-body{padding:10px 12px;font-size:.78rem;color:var(--text-muted)}
+  .compare-card-body li{margin-bottom:4px}
+  .checklist-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .check-box{width:16px;height:16px;border:1px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:.25rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+  .check-box.checked{background:var(--accent2);border-color:var(--accent2)}
+  .check-box.checked::after{content:'✓';font-size:10px;color:#000;font-weight:600}
+  .progress-text{font-size:.8rem;color:var(--text-muted);margin-bottom:8px}
+  @media(max-width:768px){.sidebar{display:none}.main{padding:16px}.summary-grid{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Module 02 — SQL Query Workflows & Data Manipulation</h1>
+  <p>Viết query, cập nhật dữ liệu, khóa dòng và xử lý workflow SQL đúng cách — từ subquery đến lock concurrency.</p>
+  <div class="badge-row">
+    <span class="badge badge-purple">Junior → DBA</span>
+    <span class="badge badge-blue">Query Workflows</span>
+    <span class="badge badge-green">DML & Locking</span>
+    <span class="badge badge-orange">PostgreSQL · MySQL · Oracle</span>
+    <span class="badge badge-red">~5–7 ngày</span>
+  </div>
+</div>
+
+<div class="container">
+<nav class="sidebar">
+  <div class="sidebar-title">Module Navigation</div>
+  <div class="level-label">MODULE 02 · SQL QUERY WORKFLOWS</div>
+  <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">S0</span>Tổng quan & Mục tiêu</div>
+  <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">S1</span>Subquery & EXISTS</div>
+  <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">S2</span>UPDATE / DELETE</div>
+  <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">S3</span>RETURNING / MERGE</div>
+  <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">S4</span>Dedup bằng CTE</div>
+  <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">S5</span>Pagination</div>
+  <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">S6</span>FOR UPDATE & Locks</div>
+  <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">S7</span>CTE & Query Shape</div>
+  <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">S8</span>Tips nâng cao</div>
+  <div class="nav-item" onclick="showModule(9,this)"><span class="nav-number">S9</span>Practice & Checklist</div>
+</nav>
+
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════════════
+     S0 · ORIENTATION — Tổng quan & Mục tiêu
+════════════════════════════════════════════════════════ -->
+<div class="module active" id="s0">
+  <div class="module-header">
+    <div class="module-tag">S0 · Orientation</div>
+    <div class="module-title">Tổng quan & Mục tiêu Module 02</div>
+    <div class="module-subtitle">Module 1 trả lời "index nào phù hợp?". Module 2 trả lời "query/workflow nên viết thế nào để database chạy đúng plan và ít lock nhất?".</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-summary">🧭</span>
+      Roadmap 10 sections của module
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>Section</th><th>Tên section</th><th>Trọng tâm</th><th>Thời gian</th></tr></thead>
+        <tbody>
+          <tr><td>S0</td><td>Tổng quan & Mục tiêu</td><td>Roadmap, vấn đề, exit criteria</td><td>30 phút</td></tr>
+          <tr><td>S1</td><td>Subquery & EXISTS</td><td>Semi join, anti join, shape query</td><td>45 phút</td></tr>
+          <tr><td>S2</td><td>UPDATE / DELETE</td><td>DML index, batch nhỏ, giảm lock</td><td>45 phút</td></tr>
+          <tr><td>S3</td><td>RETURNING / MERGE</td><td>Lấy dữ liệu sau DML, upsert đa DB</td><td>45 phút</td></tr>
+          <tr><td>S4</td><td>Dedup bằng CTE</td><td>ROW_NUMBER, xóa trùng lặp trong DB</td><td>30 phút</td></tr>
+          <tr><td>S5</td><td>Pagination</td><td>Keyset pagination thay OFFSET sâu</td><td>30 phút</td></tr>
+          <tr><td>S6</td><td>FOR UPDATE & Locks</td><td>Worker queue, SKIP LOCKED, deadlock</td><td>45 phút</td></tr>
+          <tr><td>S7</td><td>CTE & Query Shape</td><td>Materialization, temp table, derived</td><td>30 phút</td></tr>
+          <tr><td>S8</td><td>Tips nâng cao</td><td>Range, ghost condition, wildcard</td><td>30 phút</td></tr>
+          <tr><td>S9</td><td>Practice & Checklist</td><td>Bài tập, quiz, DoD</td><td>60 phút</td></tr>
+        </tbody>
+      </table>
+      <div class="info-box note">📌 <span><strong>Phạm vi:</strong> Nội dung bám các chương sau phần indexing: thao tác dữ liệu hiệu quả, viết query như chuyên gia và các tips query. Oracle SQL được bổ sung để phục vụ lộ trình DBA.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-purpose">🎯</span>
+      Module này giải quyết vấn đề gì?
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Query shape ảnh hưởng execution plan</h3>
+      <p>Subquery, EXISTS, IN hay JOIN — cùng một kết quả nhưng plan khác nhau. Optimizer hiện đại thường rewrite subquery thành semi join, anti join, nhưng không phải lúc nào cũng tối ưu. Biết shape đúng giúp không bị bất ngờ khi data tăng.</p>
+      <div class="info-box warn">⚠️ <span><strong>Cảnh báo phổ biến:</strong> <code>NOT IN</code> với subquery có thể trả NULL sai logic. <code>JOIN</code> thay <code>EXISTS</code> khi không cần cột bên kia sẽ tạo duplicate rows không cần thiết.</span></div>
+
+      <h3 class="green">DML cũng cần index và tuning</h3>
+      <p>UPDATE và DELETE không chỉ "ghi dữ liệu" — database phải <strong>tìm dòng trước</strong> rồi mới khóa và sửa/xóa. Điều kiện WHERE tệ sẽ gây full scan và lock rộng, ảnh hưởng đến mọi transaction đang chạy song song.</p>
+      <div class="info-box note">📌 <span><strong>Rule:</strong> Trước DML lớn ở production, luôn chạy SELECT tương đương với EXPLAIN để kiểm tra số dòng scan và lock range.</span></div>
+
+      <h3 class="orange">Trước đây người ta giải quyết thế nào (sai)</h3>
+      <ul>
+        <li>Kéo toàn bộ data lên app rồi dedup bằng Python/Java → chậm và tốn memory.</li>
+        <li>Dùng OFFSET 100.000 để phân trang → càng về sau càng chậm theo tuyến tính.</li>
+        <li>Dùng nhiều vòng lặp SELECT → UPDATE theo từng row → cực chậm và lock dài.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">🔁</span>
+      Data flow — SQL query workflow
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block">
+        <div class="cmd-header"><span>● ● ●</span><span>sql-workflow-flow.txt</span></div>
+        <div class="cmd-body">
+<pre><span class="kw2">Application / API</span>
+    │  (gửi SQL query)
+    ▼
+<span class="kw2">Parser → Optimizer</span>
+    │  (rewrite subquery → semi join, anti join nếu có thể)
+    │  (chọn index, join order, plan tối ưu)
+    ▼
+<span class="kw2">Execution Engine</span>
+    │  (SELECT: đọc dữ liệu theo plan)
+    │  (DML: tìm dòng → khóa row → ghi → release)
+    ▼
+<span class="kw2">Lock Manager</span>
+    │  (FOR UPDATE: giữ lock đến cuối transaction)
+    │  (SKIP LOCKED: bỏ qua dòng đang bị lock)
+    ▼
+<span class="kw2">RETURNING / Result</span>
+    │  (trả dữ liệu mới nhất ngay sau DML)
+    ▼
+<span class="kw2">Application nhận kết quả</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-practice">✅</span>
+      Exit criteria — "Bạn đã nắm module này khi..."
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <ul>
+        <li>Phân biệt được <code>EXISTS</code>, <code>IN</code>, <code>JOIN</code> và biết rủi ro duplicate/NULL của từng pattern.</li>
+        <li>Kiểm tra EXPLAIN trước khi chạy UPDATE/DELETE lớn ở production.</li>
+        <li>Viết được UPDATE từ bảng khác trên PostgreSQL (<code>FROM</code>), MySQL (<code>JOIN</code>) và Oracle (<code>MERGE</code>).</li>
+        <li>Dùng <code>ROW_NUMBER()</code> để dedup dữ liệu hoàn toàn trong database.</li>
+        <li>Chuyển OFFSET sâu sang keyset pagination và giải thích index cần thiết.</li>
+        <li>Thiết kế worker queue an toàn bằng <code>FOR UPDATE SKIP LOCKED</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <div></div>
+    <button class="nav-btn primary" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">S1 Subquery & EXISTS →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S1 · Subquery & EXISTS
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s1">
+  <div class="module-header">
+    <div class="module-tag">S1 · Query Shape</div>
+    <div class="module-title">Subquery không chậm như bạn nghĩ</div>
+    <div class="module-subtitle">Optimizer hiện đại thường rewrite subquery thành semi join hoặc anti join tương đương. Vấn đề nằm ở shape và index, không phải cứ có subquery là chậm.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📘</span>
+      EXISTS vs IN vs JOIN
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Dùng EXISTS khi chỉ cần kiểm tra sự tồn tại</h3>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>exists-semi-join.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- Câu hỏi: user nào đã từng mua hàng?</span>
+<span class="kw">SELECT</span> u.id, u.email
+<span class="kw">FROM</span> users u
+<span class="kw">WHERE EXISTS</span> (
+  <span class="kw">SELECT</span> <span class="num">1</span>
+  <span class="kw">FROM</span> orders o
+  <span class="kw">WHERE</span> o.user_id = u.id
+);
+
+<span class="comment">-- Index cần trên bảng con/probe side:</span>
+<span class="kw">CREATE INDEX</span> idx_orders_user_id <span class="kw">ON</span> orders(user_id);</pre>
+      </div></div>
+      <div class="mental-model">💡 <strong>Mental model:</strong> <code>EXISTS</code> là "gặp một dòng hợp lệ thì dừng". Nếu bạn không cần cột từ bảng con, đừng JOIN rồi DISTINCT để khử trùng — tốn thêm một bước không cần thiết.</div>
+
+      <h3 class="orange">Anti join: tìm bản ghi không có quan hệ</h3>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>anti-join.sql</span></div><div class="cmd-body">
+<pre><span class="kw">SELECT</span> u.id
+<span class="kw">FROM</span> users u
+<span class="kw">WHERE NOT EXISTS</span> (
+  <span class="kw">SELECT</span> <span class="num">1</span>
+  <span class="kw">FROM</span> orders o
+  <span class="kw">WHERE</span> o.user_id = u.id
+);
+
+<span class="comment">-- Tránh NOT IN nếu subquery có thể trả NULL:</span>
+<span class="kw">WHERE</span> id <span class="kw">NOT IN</span> (<span class="kw">SELECT</span> user_id <span class="kw">FROM</span> orders) <span class="comment">-- dễ sai logic với NULL</span></pre>
+      </div></div>
+
+      <table>
+        <thead><tr><th>Pattern</th><th>Khi dùng</th><th>Điểm DBA cần kiểm tra</th></tr></thead>
+        <tbody>
+          <tr><td><code>EXISTS</code></td><td>Chỉ cần biết có dòng liên quan</td><td>Index trên foreign key/cột correlation</td></tr>
+          <tr><td><code>IN</code></td><td>Danh sách nhỏ hoặc subquery đã unique</td><td>NULL, cardinality, hash/semi join plan</td></tr>
+          <tr><td><code>JOIN</code></td><td>Cần lấy cột từ bảng liên quan</td><td>Duplicate rows, join order, index hai phía</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">❓</span>
+      Quiz nhanh — Subquery & EXISTS
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Khi chỉ cần kiểm tra user có order hay không, pattern nào thường phù hợp nhất?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JOIN có thể tạo duplicate rows nếu user có nhiều orders.')">A. JOIN rồi DISTINCT</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. EXISTS cho phép optimizer dùng semi join và dừng khi gặp dòng phù hợp — không scan toàn bộ bảng con.')">B. WHERE EXISTS</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COUNT(*) thường phải đếm nhiều hơn mức cần thiết.')">C. Subquery COUNT(*) > 0</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao NOT IN với subquery dễ sai khi bảng con có NULL?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'NOT IN không báo lỗi syntax, nhưng logic sai.')">A. NOT IN không cho phép subquery</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Nếu subquery trả về bất kỳ NULL nào, NOT IN luôn trả về empty set — không có dòng nào khớp dù logic nghiệp vụ đúng. NOT EXISTS an toàn hơn.')">B. NULL trong subquery làm NOT IN luôn trả empty set</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Index không liên quan đến vấn đề NULL logic.')">C. NOT IN không dùng được index</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(0,document.querySelectorAll('.nav-item')[0])">← Tổng quan</button>
+    <button class="nav-btn primary" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">S2 UPDATE / DELETE →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S2 · UPDATE / DELETE
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s2">
+  <div class="module-header">
+    <div class="module-tag">S2 · DML Tuning</div>
+    <div class="module-title">UPDATE & DELETE cũng cần index</div>
+    <div class="module-subtitle">DML không chỉ "ghi dữ liệu". Database vẫn phải tìm dòng trước, sau đó mới khóa và sửa/xóa. Điều kiện lọc tệ sẽ tạo full scan và lock rộng.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📘</span>
+      Tối ưu WHERE của DML
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="red">Anti-pattern: DELETE theo điều kiện không index</h3>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>dml-index.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- Xóa log cũ: nếu created_at không có index/partition, DB phải scan rất nhiều</span>
+<span class="kw">DELETE FROM</span> audit_logs
+<span class="kw">WHERE</span> created_at &lt; <span class="str">'2025-01-01'</span>;
+
+<span class="kw">CREATE INDEX</span> idx_audit_logs_created_at
+<span class="kw">ON</span> audit_logs(created_at);
+
+<span class="comment">-- Với bảng cực lớn: ưu tiên partition rồi DROP/TRUNCATE partition</span></pre>
+      </div></div>
+
+      <h3 class="green">Batch nhỏ để giảm lock và undo/redo</h3>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>batch-delete.sql</span></div><div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">WITH</span> batch <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id
+  <span class="kw">FROM</span> audit_logs
+  <span class="kw">WHERE</span> created_at &lt; <span class="str">'2025-01-01'</span>
+  <span class="kw">ORDER BY</span> id
+  <span class="kw">LIMIT</span> <span class="num">5000</span>
+)
+<span class="kw">DELETE FROM</span> audit_logs a
+<span class="kw">USING</span> batch b
+<span class="kw">WHERE</span> a.id = b.id;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">DELETE FROM</span> audit_logs
+<span class="kw">WHERE</span> rowid <span class="kw">IN</span> (
+  <span class="kw">SELECT</span> rid <span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> rowid rid
+    <span class="kw">FROM</span> audit_logs
+    <span class="kw">WHERE</span> created_at &lt; <span class="kw">DATE</span> <span class="str">'2025-01-01'</span>
+    <span class="kw">ORDER BY</span> id
+  )
+  <span class="kw">WHERE</span> ROWNUM &lt;= <span class="num">5000</span>
+);</pre>
+      </div></div>
+      <div class="info-box warn">⚠️ <span><strong>DBA rule:</strong> Trước khi chạy DML lớn ở production, luôn chạy SELECT tương đương với EXPLAIN để xem số dòng scan, index dùng và thứ tự khóa.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">❓</span>
+      Quiz nhanh — DML Tuning
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Tại sao nên DELETE theo batch 5000 dòng thay vì DELETE toàn bộ một lần?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Batch không liên quan đến tốc độ index scan.')">A. Để index scan nhanh hơn</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Batch nhỏ giảm lock time, giảm undo/redo log size, tránh block các transaction khác. Mỗi batch là 1 transaction ngắn.')">B. Giảm lock time và undo/redo log, không block transaction khác lâu</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'DELETE không tự tạo index.')">C. Batch giúp tự tạo index tạm thời</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(1,document.querySelectorAll('.nav-item')[1])">← Subquery & EXISTS</button>
+    <button class="nav-btn primary" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">S3 RETURNING / MERGE →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S3 · RETURNING / MERGE
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s3">
+  <div class="module-header">
+    <div class="module-tag">S3 · DML Output</div>
+    <div class="module-title">UPDATE JOIN, RETURNING và MERGE</div>
+    <div class="module-subtitle">Đẩy thao tác dữ liệu xuống database giúp giảm round-trip và tránh xử lý từng row ở tầng ứng dụng.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📘</span>
+      Cập nhật từ bảng khác — 3 DB khác nhau
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>update-from-join.sql</span></div><div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">UPDATE</span> products p
+<span class="kw">SET</span> stock = s.new_stock,
+    updated_at = <span class="fn">NOW</span>()
+<span class="kw">FROM</span> stock_import s
+<span class="kw">WHERE</span> s.sku = p.sku;
+
+<span class="db-tag db-my">MySQL</span>
+<span class="kw">UPDATE</span> products p
+<span class="kw">JOIN</span> stock_import s <span class="kw">ON</span> s.sku = p.sku
+<span class="kw">SET</span> p.stock = s.new_stock,
+    p.updated_at = <span class="fn">NOW</span>();
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">MERGE INTO</span> products p
+<span class="kw">USING</span> stock_import s
+<span class="kw">ON</span> (s.sku = p.sku)
+<span class="kw">WHEN MATCHED THEN UPDATE SET</span>
+  p.stock = s.new_stock,
+  p.updated_at = <span class="fn">SYSTIMESTAMP</span>;</pre>
+      </div></div>
+      <div class="info-box tip">✅ <span><strong>Index cần:</strong> <code>products(sku)</code> và <code>stock_import(sku)</code>. Nếu source có duplicate SKU, MERGE/UPDATE có thể lỗi hoặc update không xác định — dedup source trước.</span></div>
+
+      <h3 class="blue">RETURNING: lấy dữ liệu ngay sau khi ghi</h3>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>returning.sql</span></div><div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">INSERT INTO</span> orders(user_id, status, total)
+<span class="kw">VALUES</span> (<span class="num">42</span>, <span class="str">'pending'</span>, <span class="num">990000</span>)
+<span class="kw">RETURNING</span> id, created_at;
+
+<span class="kw">UPDATE</span> orders
+<span class="kw">SET</span> status = <span class="str">'paid'</span>
+<span class="kw">WHERE</span> id = <span class="num">1001</span>
+<span class="kw">RETURNING</span> id, status, updated_at;
+
+<span class="db-tag db-oracle">Oracle PL/SQL</span>
+<span class="kw">UPDATE</span> orders
+<span class="kw">SET</span> status = <span class="str">'PAID'</span>
+<span class="kw">WHERE</span> id = <span class="num">1001</span>
+<span class="kw">RETURNING</span> status, updated_at <span class="kw">INTO</span> v_status, v_updated_at;</pre>
+      </div></div>
+      <div class="mental-model">💡 <strong>Mental model:</strong> RETURNING tránh SELECT thêm sau DML — ít round-trip, an toàn hơn vì lấy dữ liệu đúng tại thời điểm write.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">❓</span>
+      Quiz nhanh — RETURNING / MERGE
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">RETURNING trong PostgreSQL giúp giảm điều gì so với SELECT sau DML?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'RETURNING không giúp DML chạy nhanh hơn về bản thân.')">A. Giảm thời gian thực thi DML</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Giảm round-trip: không cần SELECT thêm sau DML. Lấy data ngay trong cùng một lệnh, đảm bảo tính nhất quán.')">B. Giảm round-trip — lấy dữ liệu trong cùng lệnh DML</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'RETURNING không ảnh hưởng đến lock.')">C. Giảm lock time</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(2,document.querySelectorAll('.nav-item')[2])">← UPDATE / DELETE</button>
+    <button class="nav-btn primary" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">S4 Dedup bằng CTE →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S4 · Dedup bằng CTE
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s4">
+  <div class="module-header">
+    <div class="module-tag">S4 · Cleanup</div>
+    <div class="module-title">Xóa dòng trùng lặp bằng CTE</div>
+    <div class="module-subtitle">Dùng window function để đánh số bản ghi trùng, giữ lại một dòng đúng chuẩn và xóa phần còn lại trong database.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📘</span>
+      ROW_NUMBER để dedup
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>deduplicate.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- Giữ bản ghi mới nhất theo email, xóa các bản ghi còn lại</span>
+<span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id,
+         <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+           <span class="kw">PARTITION BY</span> email
+           <span class="kw">ORDER BY</span> updated_at <span class="kw">DESC</span>, id <span class="kw">DESC</span>
+         ) <span class="kw">AS</span> rn
+  <span class="kw">FROM</span> users
+)
+<span class="kw">DELETE FROM</span> users u
+<span class="kw">USING</span> ranked r
+<span class="kw">WHERE</span> u.id = r.id
+  <span class="kw">AND</span> r.rn &gt; <span class="num">1</span>;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">DELETE FROM</span> users
+<span class="kw">WHERE</span> rowid <span class="kw">IN</span> (
+  <span class="kw">SELECT</span> rid
+  <span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> rowid rid,
+           <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+             <span class="kw">PARTITION BY</span> email
+             <span class="kw">ORDER BY</span> updated_at <span class="kw">DESC</span>, id <span class="kw">DESC</span>
+           ) rn
+    <span class="kw">FROM</span> users
+  )
+  <span class="kw">WHERE</span> rn &gt; <span class="num">1</span>
+);</pre>
+      </div></div>
+      <div class="info-box warn">⚠️ <span><strong>Trước khi DELETE:</strong> chạy phần CTE dưới dạng SELECT để kiểm tra dòng nào bị xóa. Sau dedup, thêm unique constraint hoặc unique index để lỗi không quay lại.</span></div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(3,document.querySelectorAll('.nav-item')[3])">← RETURNING / MERGE</button>
+    <button class="nav-btn primary" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">S5 Pagination →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S5 · Pagination
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s5">
+  <div class="module-header">
+    <div class="module-tag">S5 · Pagination</div>
+    <div class="module-title">Phân trang đúng cách: keyset pagination</div>
+    <div class="module-subtitle">OFFSET sâu buộc database bỏ qua rất nhiều row. Keyset pagination dùng vị trí cuối cùng của trang trước để đi tiếp — O(1) thay vì O(N).</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📘</span>
+      OFFSET vs Keyset — so sánh thực tế
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="red">OFFSET sâu: càng về sau càng chậm</h3>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>bad-pagination.sql</span></div><div class="cmd-body">
+<pre><span class="kw">SELECT</span> id, created_at, title
+<span class="kw">FROM</span> posts
+<span class="kw">WHERE</span> status = <span class="str">'published'</span>
+<span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>, id <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">20</span> <span class="kw">OFFSET</span> <span class="num">200000</span>;</pre>
+      </div></div>
+
+      <h3 class="green">Keyset: dùng last_seen key</h3>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>keyset-pagination.sql</span></div><div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL / MySQL</span>
+<span class="kw">SELECT</span> id, created_at, title
+<span class="kw">FROM</span> posts
+<span class="kw">WHERE</span> status = <span class="str">'published'</span>
+  <span class="kw">AND</span> (
+    created_at &lt; <span class="str">'2026-05-25 10:00:00'</span>
+    <span class="kw">OR</span> (created_at = <span class="str">'2026-05-25 10:00:00'</span> <span class="kw">AND</span> id &lt; <span class="num">98001</span>)
+  )
+<span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>, id <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">20</span>;
+
+<span class="kw">CREATE INDEX</span> idx_posts_feed
+<span class="kw">ON</span> posts(status, created_at <span class="kw">DESC</span>, id <span class="kw">DESC</span>);
+
+<span class="db-tag db-oracle">Oracle 12c+</span>
+<span class="kw">SELECT</span> id, created_at, title
+<span class="kw">FROM</span> posts
+<span class="kw">WHERE</span> status = <span class="str">'PUBLISHED'</span>
+  <span class="kw">AND</span> (
+    created_at &lt; <span class="kw">TIMESTAMP</span> <span class="str">'2026-05-25 10:00:00'</span>
+    <span class="kw">OR</span> (created_at = <span class="kw">TIMESTAMP</span> <span class="str">'2026-05-25 10:00:00'</span> <span class="kw">AND</span> id &lt; <span class="num">98001</span>)
+  )
+<span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>, id <span class="kw">DESC</span>
+<span class="kw">FETCH FIRST</span> <span class="num">20</span> <span class="kw">ROWS ONLY</span>;</pre>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">❓</span>
+      Quiz nhanh — Pagination
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Vì sao LIMIT/OFFSET sâu chậm?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Database vẫn phải đi qua/bỏ qua nhiều row trước khi trả page hiện tại — O(offset) không đổi dù có index.')">A. Database phải bỏ qua rất nhiều row trước đó dù có index</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'LIMIT không tự vô hiệu hóa index.')">B. LIMIT luôn làm index vô dụng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ORDER BY có thể dùng index nếu index khớp.')">C. ORDER BY không bao giờ dùng index</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(4,document.querySelectorAll('.nav-item')[4])">← Dedup bằng CTE</button>
+    <button class="nav-btn primary" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">S6 FOR UPDATE & Locks →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S6 · FOR UPDATE & Locks
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s6">
+  <div class="module-header">
+    <div class="module-tag">S6 · Concurrency</div>
+    <div class="module-title">FOR UPDATE: khóa dòng ở tầng database</div>
+    <div class="module-subtitle">Dùng database lock khi nhiều worker cùng xử lý một tài nguyên. Khóa phải đi kèm index tốt để không khóa/scan quá rộng.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📘</span>
+      Worker queue với SKIP LOCKED
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>for-update-skip-locked.sql</span></div><div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">WITH</span> picked <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id
+  <span class="kw">FROM</span> jobs
+  <span class="kw">WHERE</span> status = <span class="str">'pending'</span>
+  <span class="kw">ORDER BY</span> priority <span class="kw">DESC</span>, id
+  <span class="kw">LIMIT</span> <span class="num">10</span>
+  <span class="kw">FOR UPDATE SKIP LOCKED</span>
+)
+<span class="kw">UPDATE</span> jobs j
+<span class="kw">SET</span> status = <span class="str">'processing'</span>, locked_at = <span class="fn">NOW</span>()
+<span class="kw">FROM</span> picked p
+<span class="kw">WHERE</span> j.id = p.id
+<span class="kw">RETURNING</span> j.*;
+
+<span class="kw">CREATE INDEX</span> idx_jobs_pick
+<span class="kw">ON</span> jobs(status, priority <span class="kw">DESC</span>, id);
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">SELECT</span> id
+<span class="kw">FROM</span> jobs
+<span class="kw">WHERE</span> status = <span class="str">'PENDING'</span>
+<span class="kw">ORDER BY</span> priority <span class="kw">DESC</span>, id
+<span class="kw">FETCH FIRST</span> <span class="num">10</span> <span class="kw">ROWS ONLY</span>
+<span class="kw">FOR UPDATE SKIP LOCKED</span>;
+
+<span class="comment">-- Sau đó UPDATE các id đã lock trong cùng transaction.</span></pre>
+      </div></div>
+
+      <table>
+        <thead><tr><th>Vấn đề</th><th>Cách xử lý</th></tr></thead>
+        <tbody>
+          <tr><td>Worker đụng nhau</td><td><code>FOR UPDATE SKIP LOCKED</code></td></tr>
+          <tr><td>Lock wait lâu</td><td>Giữ transaction ngắn, commit sớm, index đúng WHERE/ORDER BY</td></tr>
+          <tr><td>Deadlock</td><td>Khóa theo cùng thứ tự key trong mọi code path</td></tr>
+          <tr><td>Bộ đếm bị nghẽn</td><td>Shard counter, aggregate sau, hoặc dùng append event thay vì update một row nóng</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">❓</span>
+      Quiz nhanh — Locks & Concurrency
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">FOR UPDATE SKIP LOCKED giải quyết vấn đề gì trong worker queue?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Nó không tăng tốc query — nó giúp tránh blocking.')">A. Tăng tốc SELECT</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cho phép nhiều worker cùng chạy mà không block nhau — worker bỏ qua dòng đang bị lock bởi worker khác, tránh queue jam.')">B. Nhiều worker chạy song song không block nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SKIP LOCKED không rollback transaction.')">C. Tự rollback khi có deadlock</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(5,document.querySelectorAll('.nav-item')[5])">← Pagination</button>
+    <button class="nav-btn primary" onclick="showModule(7,document.querySelectorAll('.nav-item')[7])">S7 CTE & Query Shape →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S7 · CTE & Query Shape
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s7">
+  <div class="module-header">
+    <div class="module-tag">S7 · Complex SQL</div>
+    <div class="module-title">CTE: xử lý query phức tạp</div>
+    <div class="module-subtitle">CTE giúp chia query thành các bước dễ đọc. Điểm quan trọng với DBA là biết CTE có bị materialize hay optimizer có inline được không.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📘</span>
+      CTE đúng mục đích
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>cte-report.sql</span></div><div class="cmd-body">
+<pre><span class="kw">WITH</span> paid_orders <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> id, user_id, total, created_at
+  <span class="kw">FROM</span> orders
+  <span class="kw">WHERE</span> status = <span class="str">'paid'</span>
+    <span class="kw">AND</span> created_at &gt;= <span class="str">'2026-05-01'</span>
+),
+user_revenue <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> user_id, <span class="fn">SUM</span>(total) revenue
+  <span class="kw">FROM</span> paid_orders
+  <span class="kw">GROUP BY</span> user_id
+)
+<span class="kw">SELECT</span> u.id, u.email, r.revenue
+<span class="kw">FROM</span> user_revenue r
+<span class="kw">JOIN</span> users u <span class="kw">ON</span> u.id = r.user_id
+<span class="kw">ORDER BY</span> r.revenue <span class="kw">DESC</span>
+<span class="kw">FETCH FIRST</span> <span class="num">100</span> <span class="kw">ROWS ONLY</span>;</pre>
+      </div></div>
+      <div class="info-box note">📌 <span><strong>DB differences:</strong> PostgreSQL mới có thể inline CTE trong nhiều trường hợp; Oracle gọi CTE là subquery factoring và optimizer có thể dùng TEMP TABLE TRANSFORMATION; MySQL 8 hỗ trợ CTE nhưng cần EXPLAIN để kiểm tra materialization.</span></div>
+
+      <h3 class="orange">Khi nào dùng temp table thay CTE?</h3>
+      <ul>
+        <li>Kết quả trung gian dùng lại nhiều lần trong transaction hoặc batch job.</li>
+        <li>Cần tạo index riêng trên kết quả trung gian.</li>
+        <li>Query quá phức tạp khiến optimizer ước lượng sai nặng.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(6,document.querySelectorAll('.nav-item')[6])">← FOR UPDATE & Locks</button>
+    <button class="nav-btn primary" onclick="showModule(8,document.querySelectorAll('.nav-item')[8])">S8 Tips nâng cao →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S8 · Tips nâng cao
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s8">
+  <div class="module-header">
+    <div class="module-tag">S8 · Advanced Tips</div>
+    <div class="module-title">Tips query hữu ích khác</div>
+    <div class="module-subtitle">Các kỹ thuật nhỏ nhưng thực tế: biến range thành equality, thêm điều kiện giúp optimizer, xử lý hai điều kiện phạm vi và wildcard đầu chuỗi.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">📘</span>
+      Range, điều kiện ma, tìm kiếm
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <h3 class="blue">Hai điều kiện range đụng nhau</h3>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>geo-range.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- Tìm địa điểm trong bounding box: lat và lng đều là range</span>
+<span class="kw">WHERE</span> lat <span class="kw">BETWEEN</span> <span class="num">10.7</span> <span class="kw">AND</span> <span class="num">10.9</span>
+  <span class="kw">AND</span> lng <span class="kw">BETWEEN</span> <span class="num">106.6</span> <span class="kw">AND</span> <span class="num">106.8</span>;
+
+<span class="comment">-- B-tree composite index chỉ tối ưu tốt range đầu tiên.</span>
+<span class="comment">-- Giải pháp: geohash/tile/cell để biến một phần thành equality.</span>
+<span class="kw">WHERE</span> geo_cell <span class="kw">IN</span> (<span class="str">'w3gv1'</span>, <span class="str">'w3gv2'</span>, <span class="str">'w3gv3'</span>)
+  <span class="kw">AND</span> lat <span class="kw">BETWEEN</span> <span class="num">10.7</span> <span class="kw">AND</span> <span class="num">10.9</span>
+  <span class="kw">AND</span> lng <span class="kw">BETWEEN</span> <span class="num">106.6</span> <span class="kw">AND</span> <span class="num">106.8</span>;
+
+<span class="kw">CREATE INDEX</span> idx_places_cell_lat_lng <span class="kw">ON</span> places(geo_cell, lat, lng);</pre>
+      </div></div>
+
+      <h3 class="green">Điều kiện "ma": không đổi kết quả, giúp optimizer</h3>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>ghost-condition.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- App luôn chỉ hiển thị order 90 ngày gần nhất, nhưng query thiếu điều kiện thời gian</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> user_id = <span class="num">42</span>
+  <span class="kw">AND</span> status = <span class="str">'paid'</span>;
+
+<span class="comment">-- Thêm điều kiện giúp giảm phạm vi scan mà không đổi kết quả nghiệp vụ</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> user_id = <span class="num">42</span>
+  <span class="kw">AND</span> status = <span class="str">'paid'</span>
+  <span class="kw">AND</span> created_at &gt;= <span class="fn">CURRENT_DATE</span> - <span class="kw">INTERVAL</span> <span class="str">'90 days'</span>;</pre>
+      </div></div>
+
+      <h3 class="orange">Wildcard ở đầu chuỗi</h3>
+      <table>
+        <thead><tr><th>Nhu cầu</th><th>Giải pháp</th><th>DB hỗ trợ</th></tr></thead>
+        <tbody>
+          <tr><td><code>LIKE 'abc%'</code></td><td>B-tree range scan</td><td>Tất cả</td></tr>
+          <tr><td><code>LIKE '%abc%'</code></td><td>Trigram/full-text/search engine</td><td>PostgreSQL pg_trgm, MySQL FULLTEXT, Oracle Text</td></tr>
+          <tr><td>Tìm suffix <code>%@gmail.com</code></td><td>Functional index trên reverse string hoặc lưu domain riêng</td><td>Tùy DB</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(7,document.querySelectorAll('.nav-item')[7])">← CTE & Query Shape</button>
+    <button class="nav-btn primary" onclick="showModule(9,document.querySelectorAll('.nav-item')[9])">S9 Practice & Checklist →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     S9 · Practice & Checklist
+════════════════════════════════════════════════════════ -->
+<div class="module" id="s9">
+  <div class="module-header">
+    <div class="module-tag">S9 · Practice & Review</div>
+    <div class="module-title">Bài tập, Quiz & Checklist</div>
+    <div class="module-subtitle">Hoàn thành phần này sau khi đã đọc từ S1 đến S8. Mục tiêu là tự nhận ra query shape và lock risk mà không cần nhìn tài liệu.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-practice">🛠️</span>
+      Practice Tasks
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Task 1 — Rewrite OFFSET pagination</div>
+        <div class="practice-task-body">
+          <p>Viết lại query feed dùng <code>OFFSET 100000</code> sang keyset pagination. Chọn index phù hợp cho <code>WHERE tenant_id = ? AND status = ? ORDER BY created_at DESC, id DESC</code>.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Index: <code>(tenant_id, status, created_at DESC, id DESC)</code>. Query trang sau dùng điều kiện <code>created_at &lt; last_created_at OR (created_at = last_created_at AND id &lt; last_id)</code>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="practice-task">
+        <div class="practice-task-header">Task 2 — Worker queue an toàn</div>
+        <div class="practice-task-body">
+          <p>Thiết kế query để 5 worker cùng lấy job pending mà không xử lý trùng. Nêu index cần thiết và lý do.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">💡 Xem lời giải</button>
+          <div class="solution-box">
+            <p>Dùng <code>FOR UPDATE SKIP LOCKED</code> trong transaction ngắn. Index theo pattern pick job: <code>(status, priority DESC, id)</code>. Transaction phải commit ngay sau khi UPDATE status sang 'processing'.</p>
+          </div>
+        </div>
+      </div>
+      <div class="practice-task">
+        <div class="practice-task-header">Task 3 — Dedup user email</div>
+        <div class="practice-task-body">
+          <p>Dùng <code>ROW_NUMBER()</code> để giữ bản ghi mới nhất theo email và xóa phần còn lại. Sau đó thêm unique constraint để lỗi không quay lại.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-quiz">❓</span>
+      Quiz tổng kết — 5 câu trọng tâm
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Khi chỉ cần kiểm tra user có order hay không, pattern nào thường phù hợp nhất?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'JOIN có thể tạo duplicate rows nếu user có nhiều orders.')">A. JOIN rồi DISTINCT</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. EXISTS cho phép optimizer dùng semi join và dừng khi gặp dòng phù hợp.')">B. WHERE EXISTS</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'COUNT(*) thường phải đếm nhiều hơn mức cần thiết.')">C. Subquery COUNT(*) > 0</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+      <div class="quiz-item">
+        <div class="quiz-q">Vì sao LIMIT/OFFSET sâu chậm?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Database vẫn phải đi qua/bỏ qua nhiều row trước đó.')">A. Database phải bỏ qua rất nhiều row trước đó</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'LIMIT không tự vô hiệu hóa index.')">B. LIMIT luôn làm index vô dụng</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ORDER BY có thể dùng index nếu index khớp.')">C. ORDER BY không bao giờ dùng index</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+      <div class="quiz-item">
+        <div class="quiz-q">FOR UPDATE SKIP LOCKED dùng để làm gì?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Nó không tăng tốc SELECT thông thường.')">A. Tăng tốc SELECT query</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Cho phép nhiều worker cùng chạy, bỏ qua dòng đang bị lock — tránh queue jam và blocking.')">B. Cho phép nhiều worker xử lý queue song song không block nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'SKIP LOCKED không rollback.')">C. Tự rollback khi detect deadlock</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+      <div class="quiz-item">
+        <div class="quiz-q">ROW_NUMBER() OVER (PARTITION BY email ORDER BY updated_at DESC) trả về giá trị 1 cho dòng nào?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ROW_NUMBER sắp xếp DESC nên dòng mới nhất được số 1.')">A. Dòng cũ nhất theo email</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. ORDER BY updated_at DESC → dòng có updated_at lớn nhất (mới nhất) được gán rn=1. Dùng WHERE rn > 1 để xóa phần còn lại.')">B. Dòng mới nhất (updated_at lớn nhất) theo email</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'ROW_NUMBER đánh số theo partition, không theo toàn bảng.')">C. Dòng đầu tiên trong toàn bảng</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+      <div class="quiz-item">
+        <div class="quiz-q">Khi nào nên dùng temp table thay vì CTE?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'CTE hoàn toàn có thể dùng tốt trong nhiều trường hợp.')">A. Luôn luôn — CTE luôn chậm hơn temp table</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Temp table hợp lý khi kết quả trung gian cần dùng lại nhiều lần, cần index riêng, hoặc optimizer ước lượng sai nặng với CTE.')">B. Khi cần dùng lại nhiều lần, cần index riêng, hoặc optimizer ước lượng sai</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Temp table không phải lúc nào cũng nhanh hơn.')">C. Khi muốn query chắc chắn nhanh hơn</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-summary">🧩</span>
+      Summary Grid — Điểm chốt
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Subquery không tự chậm</strong>Optimizer có thể rewrite. Xem plan trước khi rewrite máy móc.</div>
+        <div class="summary-item"><strong>DML cũng cần tuning</strong>UPDATE/DELETE phải tìm dòng trước khi ghi. WHERE tệ tạo scan và lock rộng.</div>
+        <div class="summary-item"><strong>Keyset pagination</strong>Ổn định hơn OFFSET sâu, cần order key duy nhất + index phù hợp.</div>
+        <div class="summary-item"><strong>Lock ngắn</strong>Transaction càng ngắn càng ít lock wait/deadlock. SKIP LOCKED cho worker queue.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-practice">✅</span>
+      Definition of Done (DoD) — phải tick đủ mới sang module tiếp
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p class="progress-text" id="checklist-progress-text">0/5 mục hoàn thành (0%)</p>
+      <div class="progress-bar"><div class="progress-fill" id="checklist-progress-fill"></div></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Chạy được:</strong> Phân biệt được <code>EXISTS</code>, <code>IN</code>, <code>JOIN</code> và rủi ro duplicate/NULL.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Hiểu được:</strong> Kiểm tra EXPLAIN trước khi chạy UPDATE/DELETE lớn và vẽ lại flow DML từ parse đến lock.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Phá được:</strong> Viết được UPDATE từ bảng khác trên PostgreSQL, MySQL và Oracle MERGE — tự test và ghi lại lỗi gặp phải.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Tối ưu được:</strong> Dùng được <code>ROW_NUMBER()</code> để dedup và chuyển OFFSET sâu sang keyset pagination.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Trả lời được:</strong> Giải thích <code>FOR UPDATE SKIP LOCKED</code>, tại sao lock ngắn quan trọng, và khi nào dùng temp table thay CTE.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-summary">⏭️</span>
+      Preview Module 03
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p><strong>Module tiếp theo:</strong> Partitioning & Advanced Index Strategies</p>
+      <p><strong>Cần chuẩn bị từ module này:</strong> Nắm vững DML index, biết khi nào cần xem EXPLAIN, hiểu rõ lock scope.</p>
+      <p><strong>Kết nối:</strong> Batched DELETE hôm nay sẽ trở thành DROP PARTITION ở Module 03 — nhanh hơn hàng chục lần với bảng lớn.</p>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="showModule(8,document.querySelectorAll('.nav-item')[8])">← Tips nâng cao</button>
+    <div style="color:var(--accent2);font-weight:600;align-self:center;">🎉 Hoàn thành Module 02!</div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+const modules=document.querySelectorAll('.module');
+const navItems=document.querySelectorAll('.nav-item');
+
+function showModule(index,navItem){
+  modules.forEach(m=>{m.classList.remove('active');m.style.display='none'});
+  navItems.forEach(i=>i.classList.remove('active'));
+  const target=document.getElementById(`s${index}`);
+  if(target){target.classList.add('active');target.style.display='block'}
+  if(navItem)navItem.classList.add('active');
+  else if(navItems[index])navItems[index].classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function toggleSection(header){
+  const content=header.nextElementSibling;
+  const toggle=header.querySelector('.section-toggle');
+  const isHidden=content.style.display==='none';
+  content.style.display=isHidden?'block':'none';
+  toggle.textContent=isHidden?'▼':'▶';
+}
+
+function answerQuiz(el,isCorrect,msg){
+  const item=el.closest('.quiz-item');
+  const opts=item.querySelectorAll('.quiz-opt');
+  const explain=item.querySelector('.quiz-explain');
+  opts.forEach(opt=>(opt.style.pointerEvents='none'));
+  el.classList.add(isCorrect?'correct':'wrong');
+  if(!isCorrect){opts.forEach(opt=>{const o=opt.getAttribute('onclick');if(o&&o.includes('true'))opt.classList.add('correct')})}
+  explain.textContent=(isCorrect?'✓ Chính xác! ':'✗ Sai. ')+msg;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn){
+  const box=btn.nextElementSibling;
+  const show=box.classList.toggle('show');
+  btn.textContent=show?'🔼 Ẩn lời giải':'💡 Xem lời giải';
+}
+
+function switchTab(groupId,tabId){
+  const group=document.getElementById(groupId);
+  if(!group)return;
+  group.querySelectorAll('.tab').forEach(tab=>tab.classList.remove('active'));
+  const clicked=group.querySelector(`[onclick*="${tabId}"]`);
+  if(clicked)clicked.classList.add('active');
+  const container=group.parentElement;
+  container.querySelectorAll('.tab-content').forEach(content=>content.classList.remove('active'));
+  const target=document.getElementById(tabId);
+  if(target)target.classList.add('active');
+}
+
+function toggleCheck(box){
+  box.classList.toggle('checked');
+  updateProgress();
+}
+
+function updateProgress(){
+  const checks=document.querySelectorAll('.check-box');
+  const checked=document.querySelectorAll('.check-box.checked').length;
+  const total=checks.length;
+  const pct=total===0?0:Math.round((checked/total)*100);
+  const fill=document.getElementById('checklist-progress-fill');
+  const text=document.getElementById('checklist-progress-text');
+  if(fill)fill.style.width=`${pct}%`;
+  if(text)text.textContent=`${checked}/${total} mục hoàn thành (${pct}%)`;
+}
+
+showModule(0,navItems[0]);
+updateProgress();
+</script>
+</body>
+</html>

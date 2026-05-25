@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 03 — Schema Design & Physical Data Modeling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+    --accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;--accent4:#d2a8ff;--accent5:#ffa657;
+    --text:#e6edf3;--text-muted:#8b949e;--code-bg:#0d1117;--highlight:#388bfd26;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+  .hero{background:linear-gradient(135deg,#0d1117 0%,#161b22 40%,#1a2a1e 100%);border-bottom:2px solid var(--accent4);padding:40px 24px 30px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#6e40c922,transparent 70%);pointer-events:none}
+  .hero h1{font-size:2rem;font-weight:800;color:var(--accent4);letter-spacing:-0.5px}
+  .hero p{color:var(--text-muted);margin-top:8px;font-size:.95rem}
+  .badge-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .badge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;border:1px solid}
+  .badge-blue{color:var(--accent);border-color:var(--accent);background:#1f6feb1a}
+  .badge-green{color:var(--accent2);border-color:var(--accent2);background:#2ea04326}
+  .badge-orange{color:var(--accent5);border-color:var(--accent5);background:#d2940026}
+  .badge-purple{color:var(--accent4);border-color:var(--accent4);background:#6e40c926}
+  .badge-red{color:var(--accent3);border-color:var(--accent3);background:#f7816620}
+  .container{display:flex;min-height:calc(100vh - 160px)}
+  .sidebar{width:290px;min-width:290px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .sidebar-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:0 16px 12px}
+  .level-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 16px 4px;color:var(--accent4)}
+  .nav-item{display:block;padding:7px 16px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-left:3px solid transparent;transition:all .15s}
+  .nav-item:hover{color:var(--text);background:var(--surface2)}
+  .nav-item.active{color:var(--accent4);border-left-color:var(--accent4);background:#6e40c915;font-weight:600}
+  .nav-number{display:inline-block;width:44px;font-size:.7rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .main{flex:1;padding:32px 40px;max-width:980px}
+  .module{display:none}
+  .module.active{display:block}
+  .module-header{border:1px solid var(--border);border-radius:12px;padding:24px 28px;background:var(--surface);margin-bottom:24px;position:relative;overflow:hidden}
+  .module-header::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent4)}
+  .module-tag{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent4);margin-bottom:8px}
+  .module-title{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+  .module-subtitle{color:var(--text-muted);font-size:.9rem}
+  .section{margin-bottom:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .section-header{padding:14px 20px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--surface2);border-bottom:1px solid var(--border);user-select:none}
+  .section-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .icon-purpose{background:#1f6feb33}
+  .icon-detail{background:#2ea04326}
+  .icon-quiz{background:#d2940026}
+  .icon-summary{background:#6e40c926}
+  .icon-practice{background:#f7816626}
+  .section-content{padding:20px;background:var(--surface)}
+  .section-toggle{margin-left:auto;color:var(--text-muted);font-size:12px}
+  h3{font-size:1rem;font-weight:700;color:var(--accent4);margin:18px 0 10px}
+  h3:first-child{margin-top:0}
+  h3.blue{color:var(--accent)}
+  h3.green{color:var(--accent2)}
+  h3.orange{color:var(--accent5)}
+  h3.red{color:var(--accent3)}
+  p{margin-bottom:12px;color:var(--text);font-size:.88rem}
+  ul,ol{padding-left:20px;margin-bottom:12px}
+  li{font-size:.88rem;margin-bottom:5px}
+  strong{color:var(--text)}
+  .cmd-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden}
+  .cmd-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .cmd-body{padding:14px}
+  pre{font-family:'JetBrains Mono','Courier New','Consolas',monospace;font-size:.82rem;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--text)}
+  .kw{color:#ff7b72}.kw2{color:var(--accent)}.str{color:var(--accent5)}.fn{color:var(--accent4)}.num{color:#79c0ff}.comment{color:var(--text-muted)}
+  .db-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.68rem;font-weight:700;letter-spacing:.5px;margin-bottom:6px;margin-right:4px}
+  .db-pg{background:#4169e122;color:#4d9de0;border:1px solid #4169e155}
+  .db-my{background:#f0931322;color:#f09313;border:1px solid #f0931355}
+  .db-oracle{background:#cc000022;color:#f97316;border:1px solid #cc000055}
+  code{font-family:'JetBrains Mono',monospace;background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.82rem;color:var(--accent4)}
+  .quiz-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+  .quiz-q{font-weight:600;font-size:.88rem;margin-bottom:10px}
+  .quiz-q::before{content:'Q';display:inline-block;width:22px;height:22px;background:var(--accent4);color:#000;border-radius:50%;font-size:.7rem;font-weight:800;text-align:center;line-height:22px;margin-right:8px}
+  .quiz-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .quiz-opt{padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.84rem;transition:all .15s;background:var(--bg)}
+  .quiz-opt:hover{border-color:var(--accent4);color:var(--accent4)}
+  .quiz-opt.correct{border-color:var(--accent2);color:var(--accent2);background:#2ea04310}
+  .quiz-opt.wrong{border-color:var(--accent3);color:var(--accent3);background:#f7816610}
+  .quiz-explain{font-size:.82rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;margin-top:8px;display:none}
+  .quiz-explain.show{display:block}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .summary-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.82rem}
+  .summary-item strong{color:var(--accent4);display:block;margin-bottom:4px}
+  .practice-task{background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}
+  .practice-task-header{padding:12px 16px;background:#6e40c915;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem;color:var(--accent4)}
+  .practice-task-body{padding:16px}
+  .solution-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:.8rem;cursor:pointer;color:var(--accent2);margin-top:10px;transition:all .15s}
+  .solution-toggle:hover{background:var(--surface2)}
+  .solution-box{margin-top:10px;display:none;border-top:1px solid var(--border);padding-top:12px}
+  .solution-box.show{display:block}
+  .info-box{border-radius:8px;padding:14px 16px;margin:12px 0;font-size:.84rem;border:1px solid;display:flex;gap:10px}
+  .info-box.tip{border-color:var(--accent2);background:#2ea04310;color:var(--accent2)}
+  .info-box.warn{border-color:var(--accent5);background:#d2940015;color:var(--accent5)}
+  .info-box.note{border-color:var(--accent4);background:#6e40c915;color:var(--accent4)}
+  .info-box.danger{border-color:var(--accent3);background:#f7816610;color:var(--accent3)}
+  .info-box span{color:var(--text)}
+  .progress-bar{background:var(--surface2);border-radius:4px;height:4px;margin:16px 0;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent4),var(--accent2));border-radius:4px;width:0;transition:width .2s}
+  .nav-buttons{display:flex;gap:12px;margin-top:32px;justify-content:space-between}
+  .nav-btn{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}
+  .nav-btn:hover{border-color:var(--accent4);color:var(--accent4)}
+  .nav-btn.primary{background:var(--accent4);color:#000;border-color:var(--accent4)}
+  .nav-btn.primary:hover{background:#e2c0ff}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.83rem}
+  th{background:var(--surface2);padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent4)}
+  td{padding:8px 12px;border:1px solid var(--border)}
+  tr:nth-child(even) td{background:#ffffff05}
+  .checklist-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .check-box{width:16px;height:16px;border:1px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:.25rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+  .check-box.checked{background:var(--accent2);border-color:var(--accent2)}
+  .check-box.checked::after{content:'✓';font-size:10px;color:#000;font-weight:600}
+  .progress-text{font-size:.8rem;color:var(--text-muted);margin-bottom:8px}
+  .mental-model{border-left:4px solid var(--accent);background:#1f6feb1a;padding:12px 14px;border-radius:6px;margin:12px 0;font-size:.88rem}
+  .tab-group{display:flex;gap:0;margin-bottom:0;border-bottom:1px solid var(--border)}
+  .tab{padding:8px 18px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--accent4);border-bottom-color:var(--accent4);font-weight:600}
+  .tab-content{display:none;padding-top:16px}
+  .tab-content.active{display:block}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0}
+  .compare-card{border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .compare-card-header{padding:8px 12px;font-weight:700;font-size:.78rem;text-align:center}
+  .compare-card-header.pg{background:#4169e133;color:#4d9de0}
+  .compare-card-header.my{background:#f0931333;color:#f09313}
+  .compare-card-header.ora{background:#cc000033;color:#f97316}
+  .compare-card-body{padding:10px 12px;font-size:.78rem;color:var(--text-muted)}
+  .compare-card-body li{margin-bottom:4px}
+  @media(max-width:768px){.sidebar{display:none}.main{padding:16px}.summary-grid{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>Module 03 — Schema Design & Physical Data Modeling</h1>
+  <p>Thiết kế schema, constraint, partition và cấu trúc lưu trữ để database nhanh ngay từ nền móng — áp dụng cho PostgreSQL, MySQL và Oracle.</p>
+  <div class="badge-row">
+    <span class="badge badge-purple">Junior → DBA</span>
+    <span class="badge badge-green">~5–7 ngày</span>
+    <span class="badge badge-blue">Schema Performance</span>
+    <span class="badge badge-orange">PostgreSQL · MySQL · Oracle</span>
+    <span class="badge badge-red">Interview Prep</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Module Navigation</div>
+    <div class="level-label">MODULE 03 · SCHEMA DESIGN</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">S0</span>Tổng quan & Mục tiêu</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">S1</span>Primary Key & Data Type</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">S2</span>Constraint & NULL</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">S3</span>JSON & Semi-structured</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">S4</span>Tree & Hierarchy</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">S5</span>Partition & Physical Layout</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">S6</span>Pre-computation</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">S7</span>Các Index Đặc Thù Khác</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">S8</span>Practice & Error Catalog</div>
+    <div class="nav-item" onclick="showModule(9,this)"><span class="nav-number">S9</span>Interview Prep</div>
+    <div class="nav-item" onclick="showModule(10,this)"><span class="nav-number">S10</span>Checklist & Tổng kết</div>
+  </nav>
+
+  <main class="main">
+
+<div class="module active" id="s0">
+  <div class="module-header">
+    <div class="module-tag">S0 · Orientation</div>
+    <div class="module-title">Tổng quan & Mục tiêu Module 03</div>
+    <div class="module-subtitle">Sau khi biết index và query tuning, bước tiếp theo là thiết kế schema để query tự nhiên có plan tốt, lock ít và dữ liệu dễ mở rộng.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">M</span>Roadmap 11 sections<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>Section</th><th>Tên section</th><th>Trọng tâm</th></tr></thead>
+        <tbody>
+          <tr><td>S0</td><td>Tổng quan & Mục tiêu</td><td>Schema design ảnh hưởng thế nào tới tuning</td></tr>
+          <tr><td>S1</td><td>Primary Key & Data Type</td><td>Chọn key và kiểu dữ liệu không phá index</td></tr>
+          <tr><td>S2</td><td>Constraint & NULL</td><td>Bảo vệ dữ liệu và giúp optimizer hiểu quan hệ</td></tr>
+          <tr><td>S3</td><td>JSON Column</td><td>Khi nào dùng JSON, khi nào phải tách cột thật</td></tr>
+          <tr><td>S4</td><td>Hierarchy</td><td>Adjacency list, materialized path, closure table</td></tr>
+          <tr><td>S5</td><td>Partition & Physical Layout</td><td>Xóa data lớn, partition pruning, CLUSTER/IOT</td></tr>
+          <tr><td>S6</td><td>Pre-computation</td><td>Summary table, materialized view, counter cache</td></tr>
+          <tr><td>S7</td><td>Các Index Đặc Thù Khác</td><td>Spatial, Trigram, Prefix Index</td></tr>
+          <tr><td>S8</td><td>Practice & Error Catalog</td><td>Bài tập thiết kế schema và lỗi thường gặp</td></tr>
+          <tr><td>S9</td><td>Interview Prep</td><td>Câu hỏi DBA/backend senior thường gặp</td></tr>
+          <tr><td>S10</td><td>Checklist & Tổng kết</td><td>Definition of Done trước khi lên production</td></tr>
+        </tbody>
+      </table>
+      <div class="info-box note">📌 <span><strong>Phạm vi Module 03:</strong> Bao phủ các phần trong ebook về UUID vs auto-increment, JSON column, constraint, ràng buộc loại trừ, materialized path, partition, bảng sắp xếp trước và tính toán trước. Oracle SQL được bổ sung cho lộ trình DBA.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-purpose">T</span>Schema tốt giải quyết vấn đề gì?<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <h3 class="blue">Index không cứu được schema sai</h3>
+      <p>Index và query tuning chỉ tối ưu trên cấu trúc dữ liệu đã có. Nếu kiểu dữ liệu sai, PK quá lớn, dữ liệu bán cấu trúc bị nhét vào JSON vô tội vạ hoặc thiếu constraint, database sẽ phải trả giá ở mọi query và mọi thao tác ghi.</p>
+      <div class="mental-model"><strong>Mental model:</strong> Schema là đường ray. Query và index là con tàu. Đường ray cong sai từ đầu thì tàu có mạnh cũng không chạy ổn định.</div>
+      <h3 class="green">Sau module này bạn phải làm được</h3>
+      <ul>
+        <li>Chọn primary key và data type phù hợp với PostgreSQL, MySQL/InnoDB, Oracle.</li>
+        <li>Thiết kế constraint để dữ liệu không bẩn và query plan dễ dự đoán.</li>
+        <li>Quyết định khi nào dùng JSON, partition, materialized view hoặc summary table.</li>
+        <li>Giải thích trade-off giữa normalized schema, denormalization và pre-computation.</li>
+      </ul>
+    </div>
+  </div>
+  
+</div>
+
+<div class="module" id="s1">
+  <div class="module-header">
+    <div class="module-tag">S1 · Foundation</div>
+    <div class="module-title">Primary Key & Data Type Design</div>
+    <div class="module-subtitle">Primary key và kiểu dữ liệu là quyết định rất khó sửa sau khi hệ thống đã có dữ liệu lớn.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">K</span>Chọn Primary Key<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>Loại key</th><th>Ưu điểm</th><th>Rủi ro</th><th>Khi dùng</th></tr></thead>
+        <tbody>
+          <tr><td>BIGINT auto-increment</td><td>Nhỏ, tăng dần, index gọn</td><td>Dễ đoán ID, cần strategy khi sharding</td><td>OLTP phổ biến</td></tr>
+          <tr><td>UUIDv4</td><td>Generate độc lập, khó đoán</td><td>Random insert, index lớn</td><td>Không ưu tiên cho PK bảng write-heavy</td></tr>
+          <tr><td>UUIDv7 / ULID</td><td>Gần tăng dần, phân tán tốt</td><td>Cần chuẩn hóa format lưu</td><td>Distributed systems</td></tr>
+          <tr><td>Natural key</td><td>Có ý nghĩa nghiệp vụ</td><td>Đổi nghiệp vụ là đau, FK rộng</td><td>Bảng lookup ổn định</td></tr>
+        </tbody>
+      </table>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>primary-key-design.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- MySQL/InnoDB: PK nhỏ và tăng dần giúp clustered index ổn định</span>
+<span class="kw">CREATE TABLE</span> orders (
+  id <span class="fn">BIGINT</span> <span class="kw">PRIMARY KEY AUTO_INCREMENT</span>,
+  user_id <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  created_at <span class="fn">DATETIME</span> <span class="kw">NOT NULL</span>
+);
+
+<span class="comment">-- PostgreSQL: UUIDv7/ULID vẫn nên lưu dạng compact nếu dùng làm PK</span>
+<span class="kw">CREATE TABLE</span> events (
+  id <span class="fn">uuid</span> <span class="kw">PRIMARY KEY</span>,
+  aggregate_id <span class="fn">uuid</span> <span class="kw">NOT NULL</span>,
+  created_at <span class="fn">timestamptz</span> <span class="kw">NOT NULL</span>
+);</pre>
+      </div></div>
+      <div class="info-box warn">⚠️ <span><strong>Rule:</strong> Với MySQL/InnoDB, PK nằm trong mọi secondary index. PK càng to, toàn bộ database càng phình.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">D</span>Data type ảnh hưởng index<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <h3 class="blue">Chọn kiểu nhỏ nhất nhưng đủ nghĩa</h3>
+      <ul>
+        <li>Dùng <code>BIGINT</code> cho ID nếu có khả năng vượt <code>INT</code>.</li>
+        <li>Không lưu số tiền bằng <code>FLOAT</code>; dùng <code>DECIMAL/NUMERIC</code> hoặc integer minor unit.</li>
+        <li>Không lưu ngày giờ dạng string; dùng kiểu date/timestamp native.</li>
+        <li>Tránh so sánh khác kiểu vì có thể khiến database cast cột và bỏ index.</li>
+      </ul>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>type-mismatch.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- Anti-pattern: phone là VARCHAR nhưng query truyền số</span>
+<span class="kw">WHERE</span> phone = <span class="num">84901234567</span>
+
+<span class="comment">-- Đúng: so sánh cùng kiểu</span>
+<span class="kw">WHERE</span> phone = <span class="str">'84901234567'</span></pre>
+      </div></div>
+    </div>
+  </div>
+  
+</div>
+
+<div class="module" id="s2">
+  <div class="module-header">
+    <div class="module-tag">S2 · Data Integrity</div>
+    <div class="module-title">Constraint, UNIQUE & NULL</div>
+    <div class="module-subtitle">Constraint không chỉ để bắt lỗi. Nó là hợp đồng dữ liệu giúp app đơn giản hơn và giúp optimizer có thêm thông tin.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">C</span>Constraint là hàng rào cuối cùng<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>constraints.sql</span></div><div class="cmd-body">
+<pre><span class="kw">CREATE TABLE</span> orders (
+  id <span class="fn">BIGINT</span> <span class="kw">PRIMARY KEY</span>,
+  user_id <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  status <span class="fn">VARCHAR</span>(<span class="num">20</span>) <span class="kw">NOT NULL</span>,
+  total_amount <span class="fn">NUMERIC</span>(<span class="num">12</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>,
+  created_at <span class="fn">TIMESTAMP</span> <span class="kw">NOT NULL</span>,
+  <span class="kw">CONSTRAINT</span> fk_orders_user <span class="kw">FOREIGN KEY</span> (user_id) <span class="kw">REFERENCES</span> users(id),
+  <span class="kw">CONSTRAINT</span> chk_orders_status <span class="kw">CHECK</span> (status <span class="kw">IN</span> (<span class="str">'pending'</span>,<span class="str">'paid'</span>,<span class="str">'cancelled'</span>)),
+  <span class="kw">CONSTRAINT</span> chk_orders_total <span class="kw">CHECK</span> (total_amount &gt;= <span class="num">0</span>)
+);</pre>
+      </div></div>
+      <div class="info-box tip">✅ <span><strong>DBA mindset:</strong> Nếu dữ liệu sai không thể đi vào database, bạn không cần viết query phức tạp để né dữ liệu bẩn về sau.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">N</span>UNIQUE với NULL<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>DB</th><th>UNIQUE + NULL</th><th>Pattern khi cần unique có điều kiện</th></tr></thead>
+        <tbody>
+          <tr><td>PostgreSQL</td><td>Nhiều NULL được phép</td><td>Partial unique index</td></tr>
+          <tr><td>MySQL</td><td>Nhiều NULL được phép</td><td>Generated column hoặc unique composite</td></tr>
+          <tr><td>Oracle</td><td>Nhiều NULL được phép trong B-tree unique</td><td>Function-based unique index</td></tr>
+        </tbody>
+      </table>
+      <div class="tab-group" id="tabs-uq">
+        <div class="tab active" onclick="switchTab('tabs-uq','uq-pg')">PostgreSQL</div>
+        <div class="tab" onclick="switchTab('tabs-uq','uq-ora')">Oracle</div>
+      </div>
+      <div class="tab-content active" id="uq-pg">
+        <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>unique-null.sql</span></div><div class="cmd-body">
+<pre><span class="kw">CREATE UNIQUE INDEX</span> uq_active_email
+<span class="kw">ON</span> users (email)
+<span class="kw">WHERE</span> deleted_at <span class="kw">IS NULL</span>;</pre>
+        </div></div>
+      </div>
+      <div class="tab-content" id="uq-ora">
+        <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>unique-null.sql</span></div><div class="cmd-body">
+<pre><span class="kw">CREATE UNIQUE INDEX</span> uq_active_email
+<span class="kw">ON</span> users (
+  <span class="kw">CASE WHEN</span> deleted_at <span class="kw">IS NULL THEN</span> email <span class="kw">END</span>
+);</pre>
+        </div></div>
+      </div>
+      <h3 class="orange">Ràng buộc loại trừ</h3>
+      <p>PostgreSQL có exclusion constraint để chống overlap, ví dụ không cho hai booking cùng phòng bị chồng thời gian.</p>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>exclusion-constraint.sql</span></div><div class="cmd-body">
+<pre><span class="kw">CREATE EXTENSION IF NOT EXISTS</span> btree_gist;
+
+<span class="kw">ALTER TABLE</span> room_bookings
+<span class="kw">ADD CONSTRAINT</span> no_room_overlap
+<span class="kw">EXCLUDE USING</span> gist (
+  room_id <span class="kw">WITH</span> =,
+  tstzrange(start_at, end_at) <span class="kw">WITH</span> &amp;&amp;
+);</pre>
+      </div></div>
+    </div>
+  </div>
+  
+</div>
+
+<div class="module" id="s3">
+  <div class="module-header">
+    <div class="module-tag">S3 · Semi-structured Data</div>
+    <div class="module-title">JSON Column: Khi NoSQL gặp SQL</div>
+    <div class="module-subtitle">JSON rất hữu ích cho metadata linh hoạt, nhưng nguy hiểm nếu bạn đưa dữ liệu core query path vào đó.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">J</span>Khi nào dùng JSON?<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>Dùng JSON khi</th><th>Không dùng JSON khi</th></tr></thead>
+        <tbody>
+          <tr><td>Metadata thay đổi theo loại object</td><td>Cột được lọc/sort/join thường xuyên</td></tr>
+          <tr><td>Dữ liệu ít cần constraint phức tạp</td><td>Cần FK, CHECK, UNIQUE rõ ràng</td></tr>
+          <tr><td>Phụ trợ cho hiển thị/audit</td><td>Trở thành điều kiện query chính của sản phẩm</td></tr>
+        </tbody>
+      </table>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>json-index.sql</span></div><div class="cmd-body">
+<pre><span class="kw">CREATE TABLE</span> products (
+  id <span class="fn">BIGSERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  name <span class="fn">TEXT</span> <span class="kw">NOT NULL</span>,
+  attrs <span class="fn">JSONB</span> <span class="kw">NOT NULL</span>
+);
+<span class="kw">CREATE INDEX</span> idx_products_attrs_gin <span class="kw">ON</span> products <span class="kw">USING</span> gin(attrs);
+<span class="kw">CREATE INDEX</span> idx_products_color <span class="kw">ON</span> products ((attrs-&gt;&gt;<span class="str">'color'</span>));
+
+<span class="db-tag db-my">MySQL</span>
+<span class="kw">ALTER TABLE</span> products
+  <span class="kw">ADD COLUMN</span> color <span class="fn">VARCHAR</span>(<span class="num">30</span>) <span class="kw">GENERATED ALWAYS AS</span> (JSON_UNQUOTE(attrs-&gt;<span class="str">'$.color'</span>)) <span class="kw">STORED</span>,
+  <span class="kw">ADD INDEX</span> idx_products_color (color);
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">CREATE SEARCH INDEX</span> idx_products_attrs <span class="kw">ON</span> products(attrs) <span class="kw">FOR JSON</span>;</pre>
+      </div></div>
+      <div class="info-box warn">⚠️ <span><strong>Rule:</strong> Khi một JSON key bắt đầu xuất hiện trong WHERE/ORDER BY/JOIN thường xuyên, hãy cân nhắc tách thành column thật hoặc generated column.</span></div>
+    </div>
+  </div>
+  
+</div>
+
+<div class="module" id="s4">
+  <div class="module-header">
+    <div class="module-tag">S4 · Hierarchical Data</div>
+    <div class="module-title">Đường dẫn vật lý hóa & lưu trữ cây</div>
+    <div class="module-subtitle">Dữ liệu dạng cây xuất hiện ở category, org chart, comment thread, menu, permission tree. Chọn sai model sẽ làm query đệ quy hoặc move node rất đắt.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">H</span>Ba mô hình phổ biến<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>Model</th><th>Ưu điểm</th><th>Nhược điểm</th><th>Khi dùng</th></tr></thead>
+        <tbody>
+          <tr><td>Adjacency list</td><td>Dễ hiểu, dễ update</td><td>Đọc subtree cần recursive query</td><td>Cây nhỏ, update nhiều</td></tr>
+          <tr><td>Materialized path</td><td>Đọc subtree nhanh bằng prefix</td><td>Move node phải update nhiều path</td><td>Category/menu đọc nhiều</td></tr>
+          <tr><td>Closure table</td><td>Query ancestor/descendant rất nhanh</td><td>Bảng phụ lớn hơn, write phức tạp</td><td>Permission/org chart</td></tr>
+        </tbody>
+      </table>
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>materialized-path.sql</span></div><div class="cmd-body">
+<pre><span class="kw">CREATE TABLE</span> categories (
+  id <span class="fn">BIGINT</span> <span class="kw">PRIMARY KEY</span>,
+  name <span class="fn">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+  path <span class="fn">VARCHAR</span>(<span class="num">500</span>) <span class="kw">NOT NULL</span>
+);
+
+<span class="comment">-- path ví dụ: /electronics/phone/android/</span>
+<span class="kw">CREATE INDEX</span> idx_categories_path <span class="kw">ON</span> categories(path);
+
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span> categories
+<span class="kw">WHERE</span> path <span class="kw">LIKE</span> <span class="str">'/electronics/phone/%'</span>;</pre>
+      </div></div>
+      <div class="info-box note">📌 <span><strong>Oracle:</strong> Với adjacency list, Oracle có <code>CONNECT BY</code>; PostgreSQL/MySQL 8 dùng recursive CTE. Nhưng nếu subtree được đọc rất thường xuyên, materialized path hoặc closure table vẫn đáng cân nhắc.</span></div>
+    </div>
+  </div>
+  
+</div>
+
+<div class="module" id="s5">
+  <div class="module-header">
+    <div class="module-tag">S5 · Physical Layout</div>
+    <div class="module-title">Partition & bảng sắp xếp trước</div>
+    <div class="module-subtitle">Partition giúp quản lý dữ liệu lớn, đặc biệt là xóa/archive theo thời gian. Physical ordering giúp range scan tốt hơn, nhưng không thay thế index.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">P</span>Partition để xóa data lớn<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>partitioning.sql</span></div><div class="cmd-body">
+<pre><span class="kw">CREATE TABLE</span> audit_logs (
+  id <span class="fn">BIGINT</span>,
+  created_at <span class="fn">TIMESTAMPTZ</span> <span class="kw">NOT NULL</span>,
+  payload <span class="fn">JSONB</span> <span class="kw">NOT NULL</span>
+) <span class="kw">PARTITION BY RANGE</span> (created_at);
+
+<span class="kw">CREATE TABLE</span> audit_logs_2026_05 <span class="kw">PARTITION OF</span> audit_logs
+<span class="kw">FOR VALUES FROM</span> (<span class="str">'2026-05-01'</span>) <span class="kw">TO</span> (<span class="str">'2026-06-01'</span>);
+
+<span class="comment">-- Xóa cả tháng: DROP/TRUNCATE partition, không DELETE từng row</span>
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">CREATE TABLE</span> audit_logs (
+  id <span class="fn">NUMBER</span>,
+  created_at <span class="fn">TIMESTAMP</span> <span class="kw">NOT NULL</span>,
+  payload <span class="fn">CLOB</span> <span class="kw">CHECK</span> (payload <span class="kw">IS JSON</span>)
+)
+<span class="kw">PARTITION BY RANGE</span> (created_at)
+<span class="kw">INTERVAL</span> (<span class="kw">NUMTOYMINTERVAL</span>(<span class="num">1</span>, <span class="str">'MONTH'</span>))
+(<span class="kw">PARTITION</span> p_init <span class="kw">VALUES LESS THAN</span> (<span class="kw">TIMESTAMP</span> <span class="str">'2026-01-01 00:00:00'</span>));</pre>
+      </div></div>
+      <div class="info-box warn">⚠️ <span><strong>Partition không thay thế index:</strong> Partition pruning chỉ giảm số partition phải đọc. Trong mỗi partition, query vẫn cần index phù hợp.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">O</span>Physical ordering<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>DB</th><th>Cơ chế</th><th>Lưu ý</th></tr></thead>
+        <tbody>
+          <tr><td>PostgreSQL</td><td><code>CLUSTER</code> theo index</td><td>Sắp xếp lại một lần, không tự duy trì vĩnh viễn</td></tr>
+          <tr><td>MySQL/InnoDB</td><td>Clustered index theo PK</td><td>PK quyết định physical order</td></tr>
+          <tr><td>Oracle</td><td>Index Organized Table</td><td>Chỉ dùng khi truy cập chủ yếu theo PK/range PK</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+</div>
+
+<div class="module" id="s6">
+  <div class="module-header">
+    <div class="module-tag">S6 · Pre-computation</div>
+    <div class="module-title">Khi index cũng không đủ nhanh</div>
+    <div class="module-subtitle">Nếu query phải tổng hợp quá nhiều dữ liệu mỗi lần chạy, index chỉ giúp một phần. Lúc này cần tính trước có kiểm soát.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">S</span>Summary table & materialized view<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>precompute.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- Summary table cho dashboard doanh thu theo ngày</span>
+<span class="kw">CREATE TABLE</span> daily_revenue (
+  revenue_date <span class="fn">DATE</span> <span class="kw">PRIMARY KEY</span>,
+  order_count <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  total_amount <span class="fn">NUMERIC</span>(<span class="num">14</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>,
+  refreshed_at <span class="fn">TIMESTAMP</span> <span class="kw">NOT NULL</span>
+);
+
+<span class="kw">CREATE MATERIALIZED VIEW</span> mv_daily_revenue <span class="kw">AS</span>
+<span class="kw">SELECT</span> created_at::<span class="fn">date</span> <span class="kw">AS</span> revenue_date,
+       <span class="fn">COUNT</span>(*) order_count,
+       <span class="fn">SUM</span>(total_amount) total_amount
+<span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> status = <span class="str">'paid'</span>
+<span class="kw">GROUP BY</span> created_at::<span class="fn">date</span>;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">CREATE MATERIALIZED VIEW</span> mv_daily_revenue
+<span class="kw">BUILD IMMEDIATE REFRESH FAST ON DEMAND AS</span>
+<span class="kw">SELECT</span> TRUNC(created_at) revenue_date, COUNT(*) order_count, SUM(total_amount) total_amount
+<span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> status = <span class="str">'PAID'</span>
+<span class="kw">GROUP BY</span> TRUNC(created_at);</pre>
+      </div></div>
+      <table>
+        <thead><tr><th>Kỹ thuật</th><th>Read</th><th>Write</th><th>Khi dùng</th></tr></thead>
+        <tbody>
+          <tr><td>Summary table</td><td>Rất nhanh</td><td>Cần job/trigger cập nhật</td><td>Dashboard, report</td></tr>
+          <tr><td>Materialized view</td><td>Nhanh</td><td>Cần refresh strategy</td><td>Aggregate nặng</td></tr>
+          <tr><td>Counter cache</td><td>Nhanh</td><td>Dễ hot row nếu update liên tục</td><td>Đếm like/comment vừa phải</td></tr>
+          <tr><td>Denormalization</td><td>Giảm join</td><td>Nguy cơ dữ liệu lệch</td><td>Read-heavy, có sync rõ ràng</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+</div>
+
+
+<div class="module" id="s7">
+  <div class="module-header">
+    <div class="module-tag">S7 · Special Indexes</div>
+    <div class="module-title">Các Index Đặc Thù Khác</div>
+    <div class="module-subtitle">Không phải lúc nào B-Tree cũng giải quyết được mọi bài toán. Spatial, Text và chuỗi dài đòi hỏi những loại index chuyên biệt.</div>
+  </div>
+  
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">1</span>Tìm kiếm Không gian (Spatial Index)
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Khi tìm kiếm dữ liệu địa lý (tọa độ, khoảng cách, bán kính), B-Tree không thể xử lý tốt vì dữ liệu có 2 chiều (Latitude/Longitude). Giải pháp là dùng <strong>R-Tree</strong> hoặc <strong>GIST</strong>.</p>
+      
+      <div class="tab-group" id="tabs-spatial">
+        <div class="tab active" onclick="switchTab('tabs-spatial','spatial-pg')">PostgreSQL</div>
+        <div class="tab" onclick="switchTab('tabs-spatial','spatial-my')">MySQL</div>
+        <div class="tab" onclick="switchTab('tabs-spatial','spatial-ora')">Oracle</div>
+      </div>
+      
+      <div class="tab-content active" id="spatial-pg">
+        <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>postgis.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- Yêu cầu extension PostGIS</span>
+<span class="kw">CREATE EXTENSION</span> postgis;
+<span class="kw">CREATE TABLE</span> stores (
+  id <span class="fn">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+  name <span class="fn">VARCHAR</span>(<span class="num">100</span>),
+  location <span class="fn">GEOMETRY</span>(Point, <span class="num">4326</span>)
+);
+<span class="comment">-- Dùng GIST index</span>
+<span class="kw">CREATE INDEX</span> idx_stores_location <span class="kw">ON</span> stores <span class="kw">USING GIST</span> (location);
+
+<span class="comment">-- Tìm store trong bán kính 5km</span>
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> stores 
+<span class="kw">WHERE ST_DWithin</span>(location, ST_MakePoint(lng, lat)::geography, <span class="num">5000</span>);</pre>
+        </div></div>
+      </div>
+      
+      <div class="tab-content" id="spatial-my">
+        <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>spatial.sql</span></div><div class="cmd-body">
+<pre><span class="kw">CREATE TABLE</span> stores (
+  id <span class="fn">INT PRIMARY KEY AUTO_INCREMENT</span>,
+  name <span class="fn">VARCHAR</span>(<span class="num">100</span>),
+  location <span class="fn">POINT NOT NULL SRID</span> <span class="num">4326</span>,
+  <span class="kw">SPATIAL INDEX</span> (location)
+);
+
+<span class="comment">-- Tìm store bằng ST_Distance_Sphere</span>
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> stores 
+<span class="kw">WHERE ST_Distance_Sphere</span>(location, ST_PointFromText(<span class="str">'POINT(lng lat)'</span>, <span class="num">4326</span>)) &lt;= <span class="num">5000</span>;</pre>
+        </div></div>
+      </div>
+      
+      <div class="tab-content" id="spatial-ora">
+        <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>spatial.sql</span></div><div class="cmd-body">
+<pre><span class="comment">-- Dùng Oracle Spatial (MDSYS.SDO_GEOMETRY)</span>
+<span class="kw">CREATE TABLE</span> stores (
+  id <span class="fn">NUMBER PRIMARY KEY</span>,
+  name <span class="fn">VARCHAR2</span>(<span class="num">100</span>),
+  location SDO_GEOMETRY
+);
+<span class="comment">-- Đăng ký metadata cho cột spatial</span>
+<span class="kw">INSERT INTO</span> user_sdo_geom_metadata <span class="kw">VALUES</span> (
+  <span class="str">'STORES'</span>, <span class="str">'LOCATION'</span>, SDO_DIM_ARRAY(SDO_DIM_ELEMENT(<span class="str">'X'</span>, -180, 180, 0.005), SDO_DIM_ELEMENT(<span class="str">'Y'</span>, -90, 90, 0.005)), <span class="num">4326</span>
+);
+<span class="kw">CREATE INDEX</span> idx_stores_location <span class="kw">ON</span> stores(location) <span class="kw">INDEXTYPE IS</span> MDSYS.SPATIAL_INDEX;
+
+<span class="comment">-- Tìm store trong bán kính 5km</span>
+<span class="kw">SELECT</span> name <span class="kw">FROM</span> stores 
+<span class="kw">WHERE SDO_WITHIN_DISTANCE</span>(location, SDO_GEOMETRY(<span class="num">2001</span>, <span class="num">4326</span>, SDO_POINT_TYPE(lng, lat, NULL), NULL, NULL), <span class="str">'distance=5000 unit=m'</span>) = <span class="str">'TRUE'</span>;</pre>
+        </div></div>
+      </div>
+      
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">2</span>Trigram Index cho LIKE '%text%'
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>Khi dùng chuỗi tìm kiếm bắt đầu bằng dấu <code>%</code> (vd: <code>LIKE '%abc%'</code>), B-Tree bị vô hiệu hóa vì không thể so sánh tiền tố. Thay vào đó, ta băm nhỏ chuỗi thành các cụm 3 ký tự (trigram).</p>
+      
+      <div class="tab-group" id="tabs-trigram">
+        <div class="tab active" onclick="switchTab('tabs-trigram','trig-pg')">PostgreSQL</div>
+        <div class="tab" onclick="switchTab('tabs-trigram','trig-my')">MySQL</div>
+        <div class="tab" onclick="switchTab('tabs-trigram','trig-ora')">Oracle</div>
+      </div>
+      
+      <div class="tab-content active" id="trig-pg">
+        <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>pg_trgm.sql</span></div><div class="cmd-body">
+<pre><span class="kw">CREATE EXTENSION IF NOT EXISTS</span> pg_trgm;
+<span class="comment">-- Hỗ trợ LIKE '%...' hoặc biểu thức chính quy (Regex) siêu nhanh</span>
+<span class="kw">CREATE INDEX</span> idx_users_name_trgm <span class="kw">ON</span> users <span class="kw">USING GIN</span> (name gin_trgm_ops);
+
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> name <span class="kw">ILIKE</span> <span class="str">'%duc%'</span>;</pre>
+        </div></div>
+      </div>
+      
+      <div class="tab-content" id="trig-my">
+        <div class="info-box note">📌 <span>MySQL không có trigram chuyên dụng như Postgres. Thay vào đó, sử dụng <strong>FULLTEXT INDEX</strong> hoặc các search engine như Elasticsearch.</span></div>
+      </div>
+      
+      <div class="tab-content" id="trig-ora">
+        <div class="info-box note">📌 <span>Oracle sử dụng <strong>Oracle Text (CTXSYS.CONTEXT)</strong> để thực hiện Full-text search thay cho LIKE '%...%'.</span></div>
+      </div>
+      
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon icon-detail">3</span>Giới hạn Index & Prefix Index
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-content">
+      <p>B-Tree có giới hạn số bytes tối đa (vd: InnoDB MySQL giới hạn 3072 bytes). Nếu cột <code>VARCHAR(5000)</code> hoặc <code>TEXT</code> được đánh index, database sẽ từ chối. Giải pháp là đánh <strong>Prefix Index</strong> (Index tiền tố).</p>
+      
+      <div class="cmd-block"><div class="cmd-header"><span>● ● ●</span><span>prefix_index.sql</span></div><div class="cmd-body">
+<pre><span class="db-tag db-my">MySQL</span>
+<span class="comment">-- Đánh index chỉ trên 50 ký tự đầu tiên của chuỗi</span>
+<span class="kw">CREATE INDEX</span> idx_articles_title <span class="kw">ON</span> articles(title(<span class="num">50</span>));
+
+<span class="comment">-- Nếu chuỗi quá dài, bạn có thể tạo Hash Index (kích thước nhỏ gọn, dùng để so sánh =)</span>
+<span class="kw">CREATE INDEX</span> idx_session_token_hash <span class="kw">ON</span> sessions <span class="kw">USING HASH</span> (token);</pre>
+        </div></div>
+        <div class="info-box warn">⚠️ <span><strong>Trade-off:</strong> Prefix index không thể dùng cho <code>ORDER BY</code> hoặc <code>GROUP BY</code>, và cũng không thể đóng vai trò làm Covering Index được.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="module" id="s8">
+  <div class="module-header">
+    <div class="module-tag">S8 · Practice & Error Catalog</div>
+    <div class="module-title">Thực hành thiết kế schema & lỗi thường gặp</div>
+    <div class="module-subtitle">Áp dụng toàn bộ module vào một hệ thống order/log/event và nhận diện các lỗi schema khiến tuning về sau rất khó.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-practice">P</span>Practice tasks<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="practice-task">
+        <div class="practice-task-header">Task 1 — Thiết kế bảng orders</div>
+        <div class="practice-task-body">
+          <p>Thiết kế bảng <code>orders</code> cho OLTP: chọn PK, FK, status constraint, amount type, timestamp và index tối thiểu cho query theo user/status/created_at.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">Xem gợi ý</button>
+          <div class="solution-box"><p>Dùng <code>BIGINT</code> hoặc UUIDv7 compact làm PK, <code>NUMERIC/DECIMAL</code> cho tiền, <code>CHECK status IN (...)</code>, <code>NOT NULL</code> cho cột bắt buộc, index như <code>(user_id, status, created_at DESC)</code>.</p></div>
+        </div>
+      </div>
+      <div class="practice-task">
+        <div class="practice-task-header">Task 2 — Thiết kế audit_logs theo tháng</div>
+        <div class="practice-task-body">
+          <p>Thiết kế bảng log 500M rows/năm, cần xóa log sau 180 ngày. Chọn partition key, retention strategy và index trong partition.</p>
+          <button class="solution-toggle" onclick="toggleSolution(this)">Xem gợi ý</button>
+          <div class="solution-box"><p>Partition range theo <code>created_at</code> theo tháng/ngày tùy volume. Retention bằng <code>DROP/TRUNCATE PARTITION</code>. Index theo query thật, ví dụ <code>(tenant_id, created_at)</code>.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">E</span>Error catalog — Schema smell<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <table>
+        <thead><tr><th>Triệu chứng</th><th>Root cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Secondary index MySQL phình rất lớn</td><td>PK quá rộng như CHAR(36) UUID</td><td>Dùng BIGINT hoặc UUIDv7/ULID dạng compact</td></tr>
+          <tr><td>Query phải cast cột mới so sánh được</td><td>Data type sai hoặc không nhất quán</td><td>Chuẩn hóa kiểu dữ liệu, migrate dần</td></tr>
+          <tr><td>Dữ liệu trùng/lệch nghiệp vụ</td><td>Thiếu UNIQUE/CHECK/FK</td><td>Thêm constraint sau khi cleanup dữ liệu</td></tr>
+          <tr><td>JSON query ngày càng chậm</td><td>Core attributes bị nhét vào JSON</td><td>Tách column thật/generated column + index</td></tr>
+          <tr><td>Xóa dữ liệu cũ mất nhiều giờ</td><td>Bảng lớn không partition theo retention key</td><td>Partition theo thời gian và xóa partition</td></tr>
+          <tr><td>Dashboard aggregate chậm dù có index</td><td>Phải tính lại quá nhiều dữ liệu</td><td>Summary table/materialized view</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+</div>
+
+<div class="module" id="s9">
+  <div class="module-header">
+    <div class="module-tag">S9 · Interview Prep</div>
+    <div class="module-title">Interview Prep — Schema Design for DBA</div>
+    <div class="module-subtitle">Các câu hỏi giúp kiểm tra bạn có hiểu trade-off thiết kế schema hay chỉ nhớ cú pháp SQL.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-quiz">Q</span>Quick quiz<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="quiz-item">
+        <div class="quiz-q">Vì sao UUIDv4 làm primary key thường không tốt cho MySQL/InnoDB write-heavy?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'UUIDv4 vẫn unique được, vấn đề chính là random insert và kích thước key.')">A. Vì UUIDv4 không đảm bảo unique</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. InnoDB lưu table theo clustered PK; UUIDv4 random gây page split và PK lớn bị copy vào mọi secondary index.')">B. Vì clustered PK bị insert random và secondary index phình</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'PostgreSQL có kiểu uuid native; MySQL cũng lưu được UUID ở dạng string/binary.')">C. Vì database không lưu được UUID</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+      <div class="quiz-item">
+        <div class="quiz-q">Partition có thay thế index không?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Partition pruning chỉ giảm phạm vi partition, không tự tối ưu lookup trong partition.')">A. Có, partition rồi thì không cần index nữa</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Partition giúp loại bớt partition; trong mỗi partition vẫn cần index theo query pattern.')">B. Không, partition và index giải quyết hai việc khác nhau</div>
+          <div class="quiz-opt" onclick="answerQuiz(this,false,'Partition không chỉ dùng cho backup; retention và pruning là use case phổ biến.')">C. Partition chỉ để backup</div>
+        </div>
+        <div class="quiz-explain"></div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">S</span>Senior answer templates<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <h3 class="blue">Q1: Khi nào dùng JSON column?</h3>
+      <p>Tôi dùng JSON cho metadata linh hoạt, ít cần constraint và không nằm trên critical query path. Nếu một key trong JSON bắt đầu được filter/sort/join thường xuyên, tôi sẽ tách thành column thật hoặc generated column rồi index. Với PostgreSQL có thể dùng JSONB + GIN/expression index; MySQL dùng generated column; Oracle có JSON search index.</p>
+      <h3 class="green">Q2: Khi nào denormalize?</h3>
+      <p>Khi query read-heavy phải join/aggregate quá nhiều và index không còn đủ, tôi cân nhắc denormalize hoặc summary table. Điều kiện là phải có chiến lược đồng bộ rõ ràng, kiểm soát stale data, test write amplification và có job kiểm tra consistency.</p>
+      <h3 class="orange">Q3: Thiết kế bảng log lớn cần xóa dữ liệu cũ thế nào?</h3>
+      <p>Tôi partition theo thời gian nếu retention cũng theo thời gian. Xóa dữ liệu cũ bằng drop/truncate partition thay vì DELETE từng dòng. Sau đó vẫn tạo index trong partition theo query thật, ví dụ tenant/time hoặc service/time. Với Oracle có thể dùng interval partition để tự tạo partition mới.</p>
+    </div>
+  </div>
+  
+</div>
+
+<div class="module" id="s10">
+  <div class="module-header">
+    <div class="module-tag">S10 · Summary</div>
+    <div class="module-title">Checklist & Tổng kết Module 03</div>
+    <div class="module-subtitle">Nếu tick đủ checklist này, bạn đã có nền tảng schema design đủ tốt để chuyển sang module vận hành/monitoring.</div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">S</span>Summary — Điểm chốt cần nhớ<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>PK là quyết định vật lý</strong>Với MySQL/InnoDB, PK là clustered index và ảnh hưởng toàn bộ secondary index.</div>
+        <div class="summary-item"><strong>Data type phải nhất quán</strong>Type mismatch có thể làm index vô dụng và tạo bug ngầm.</div>
+        <div class="summary-item"><strong>Constraint bảo vệ dữ liệu</strong>Đừng để app là lớp duy nhất giữ dữ liệu đúng.</div>
+        <div class="summary-item"><strong>JSON không thay schema</strong>Dùng cho metadata linh hoạt, không phải core query path lâu dài.</div>
+        <div class="summary-item"><strong>Partition không thay index</strong>Nó giúp quản lý/pruning, nhưng lookup vẫn cần index.</div>
+        <div class="summary-item"><strong>Tính trước khi cần</strong>Summary table/materialized view là công cụ đúng cho aggregate nặng.</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-practice">D</span>Definition of Done<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <p class="progress-text" id="checklist-progress-text">0/6 mục hoàn thành (0%)</p>
+      <div class="progress-bar"><div class="progress-fill" id="checklist-progress-fill"></div></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Giải thích được:</strong> Vì sao PK size/order ảnh hưởng physical storage.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Chọn được:</strong> Data type đúng cho ID, money, timestamp, status.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Thiết kế được:</strong> PK, FK, UNIQUE, CHECK, NOT NULL cho bảng OLTP.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Biết xử lý:</strong> UNIQUE + NULL trên PostgreSQL/MySQL/Oracle.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Quyết định được:</strong> JSON column hay column thật/generated column.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Chọn được:</strong> Tree model phù hợp cho category/org/permission.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Thiết kế được:</strong> Partition strategy cho retention theo thời gian.</span></div>
+      <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span><strong>Trả lời được:</strong> 3 câu senior answer trong Interview Prep.</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">N</span>Module tiếp theo<span class="section-toggle">▼</span></div>
+    <div class="section-content">
+      <div class="info-box tip">➡️ <span><strong>Module 04 đề xuất:</strong> Database Operations & Monitoring — slow query log, statistics, vacuum/analyze, backup/restore, replication, capacity planning.</span></div>
+    </div>
+  </div>
+  
+</div>
+
+  </main>
+</div>
+
+<script>
+const modules=document.querySelectorAll('.module');
+const navItems=document.querySelectorAll('.nav-item');
+
+function showModule(index,navItem){
+  modules.forEach(m=>{m.classList.remove('active');m.style.display='none'});
+  navItems.forEach(i=>i.classList.remove('active'));
+  const target=document.getElementById(`s${index}`);
+  if(target){target.classList.add('active');target.style.display='block'}
+  if(navItem)navItem.classList.add('active');
+  else if(navItems[index])navItems[index].classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function toggleSection(header){
+  const content=header.nextElementSibling;
+  const toggle=header.querySelector('.section-toggle');
+  const isHidden=content.style.display==='none';
+  content.style.display=isHidden?'block':'none';
+  toggle.textContent=isHidden?'▼':'▶';
+}
+
+function answerQuiz(el,isCorrect,msg){
+  const item=el.closest('.quiz-item');
+  const opts=item.querySelectorAll('.quiz-opt');
+  const explain=item.querySelector('.quiz-explain');
+  opts.forEach(opt=>(opt.style.pointerEvents='none'));
+  el.classList.add(isCorrect?'correct':'wrong');
+  if(!isCorrect){opts.forEach(opt=>{const o=opt.getAttribute('onclick');if(o&&o.includes('true'))opt.classList.add('correct')})}
+  explain.textContent=(isCorrect?'✓ Chính xác! ':'✗ Sai. ')+msg;
+  explain.classList.add('show');
+}
+
+function toggleSolution(btn){
+  const box=btn.nextElementSibling;
+  const show=box.classList.toggle('show');
+  btn.textContent=show?'🔼 Ẩn lời giải':'💡 Xem lời giải';
+}
+
+function switchTab(groupId,tabId){
+  const group=document.getElementById(groupId);
+  if(!group)return;
+  group.querySelectorAll('.tab').forEach(tab=>tab.classList.remove('active'));
+  const tabs=group.querySelectorAll('.tab');
+  const contents=group.parentElement.querySelectorAll('.tab-content');
+  contents.forEach(c=>c.classList.remove('active'));
+  const target=document.getElementById(tabId);
+  if(target)target.classList.add('active');
+  tabs.forEach(tab=>{
+    const oc=tab.getAttribute('onclick')||'';
+    if(oc.includes(tabId))tab.classList.add('active');
+  });
+}
+
+function toggleCheck(box){
+  box.classList.toggle('checked');
+  updateProgress();
+}
+
+function updateProgress(){
+  const checks=document.querySelectorAll('.check-box');
+  const checked=document.querySelectorAll('.check-box.checked').length;
+  const total=checks.length;
+  const pct=total===0?0:Math.round((checked/total)*100);
+  const fill=document.getElementById('checklist-progress-fill');
+  const text=document.getElementById('checklist-progress-text');
+  if(fill)fill.style.width=`${pct}%`;
+  if(text)text.textContent=`${checked}/${total} mục hoàn thành (${pct}%)`;
+}
+
+showModule(0,navItems[0]);
+updateProgress();
+</script>
+</body>
+</html>

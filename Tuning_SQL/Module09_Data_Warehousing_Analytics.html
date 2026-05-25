@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 09 — Data Warehousing & Analytical Workloads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;--accent4:#d2a8ff;--accent5:#ffa657;--text:#e6edf3;--text-muted:#8b949e;--code-bg:#0d1117;--highlight:#388bfd26}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+  .hero{background:linear-gradient(135deg,#0d1117 0%,#161b22 40%,#1a2a1e 100%);border-bottom:2px solid var(--accent4);padding:40px 24px 30px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#6e40c922,transparent 70%);pointer-events:none}
+  .hero h1{font-size:2rem;font-weight:800;color:var(--accent4);letter-spacing:-0.5px}
+  .hero p{color:var(--text-muted);margin-top:8px;font-size:.95rem}
+  .badge-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}.badge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;border:1px solid}.badge-blue{color:var(--accent);border-color:var(--accent);background:#1f6feb1a}.badge-green{color:var(--accent2);border-color:var(--accent2);background:#2ea04326}.badge-orange{color:var(--accent5);border-color:var(--accent5);background:#d2940026}.badge-purple{color:var(--accent4);border-color:var(--accent4);background:#6e40c926}
+  .container{display:flex;min-height:calc(100vh - 160px)}.sidebar{width:290px;min-width:290px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}.sidebar-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:0 16px 12px}.level-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:8px 16px 4px;color:var(--accent4)}
+  .nav-item{display:block;padding:7px 16px;cursor:pointer;font-size:.82rem;color:var(--text-muted);border-left:3px solid transparent;transition:all .15s}.nav-item:hover{color:var(--text);background:var(--surface2)}.nav-item.active{color:var(--accent4);border-left-color:var(--accent4);background:#6e40c915;font-weight:600}.nav-number{display:inline-block;width:44px;font-size:.7rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+  .main{flex:1;padding:32px 40px;max-width:980px}.module{display:none}.module.active{display:block}.module-header{border:1px solid var(--border);border-radius:12px;padding:24px 28px;background:var(--surface);margin-bottom:24px;position:relative;overflow:hidden}.module-header::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent4)}.module-tag{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent4);margin-bottom:8px}.module-title{font-size:1.6rem;font-weight:800;margin-bottom:8px}.module-subtitle{color:var(--text-muted);font-size:.9rem}
+  .section{margin-bottom:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden}.section-header{padding:14px 20px;font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--surface2);border-bottom:1px solid var(--border);user-select:none}.section-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}.icon-purpose{background:#1f6feb33}.icon-detail{background:#2ea04326}.icon-quiz{background:#d2940026}.icon-summary{background:#6e40c926}.icon-practice{background:#f7816626}.section-content{padding:20px;background:var(--surface)}.section-toggle{margin-left:auto;color:var(--text-muted);font-size:12px}
+  h3{font-size:1rem;font-weight:700;color:var(--accent4);margin:18px 0 10px}h3:first-child{margin-top:0}h3.blue{color:var(--accent)}h3.green{color:var(--accent2)}h3.orange{color:var(--accent5)}h3.red{color:var(--accent3)}p{margin-bottom:12px;color:var(--text);font-size:.88rem}ul,ol{padding-left:20px;margin-bottom:12px}li{font-size:.88rem;margin-bottom:5px}strong{color:var(--text)}
+  .cmd-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;margin:12px 0;overflow:hidden}.cmd-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.72rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace}.cmd-body{padding:14px}pre{font-family:'JetBrains Mono','Courier New','Consolas',monospace;font-size:.82rem;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--text)}
+  .kw{color:#ff7b72}.kw2{color:var(--accent)}.str{color:var(--accent5)}.fn{color:var(--accent4)}.num{color:#79c0ff}.comment{color:var(--text-muted)}.db-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.68rem;font-weight:700;letter-spacing:.5px;margin-bottom:6px;margin-right:4px}.db-pg{background:#4169e122;color:#4d9de0;border:1px solid #4169e155}.db-my{background:#f0931322;color:#f09313;border:1px solid #f0931355}.db-oracle{background:#cc000022;color:#f97316;border:1px solid #cc000055}code{font-family:'JetBrains Mono',monospace;background:var(--surface2);border:1px solid var(--border);padding:1px 6px;border-radius:4px;font-size:.82rem;color:var(--accent4)}
+  .quiz-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}.quiz-q{font-weight:600;font-size:.88rem;margin-bottom:10px}.quiz-q::before{content:'Q';display:inline-block;width:22px;height:22px;background:var(--accent4);color:#000;border-radius:50%;font-size:.7rem;font-weight:800;text-align:center;line-height:22px;margin-right:8px}.quiz-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}.quiz-opt{padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.84rem;transition:all .15s;background:var(--bg)}.quiz-opt:hover{border-color:var(--accent4);color:var(--accent4)}.quiz-opt.correct{border-color:var(--accent2);color:var(--accent2);background:#2ea04310}.quiz-opt.wrong{border-color:var(--accent3);color:var(--accent3);background:#f7816610}.quiz-explain{font-size:.82rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:10px;margin-top:8px;display:none}.quiz-explain.show{display:block}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.summary-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.82rem}.summary-item strong{color:var(--accent4);display:block;margin-bottom:4px}.practice-task{background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}.practice-task-header{padding:12px 16px;background:#6e40c915;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem;color:var(--accent4)}.practice-task-body{padding:16px}.solution-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:.8rem;cursor:pointer;color:var(--accent2);margin-top:10px;transition:all .15s}.solution-box{margin-top:10px;display:none;border-top:1px solid var(--border);padding-top:12px}.solution-box.show{display:block}
+  .info-box{border-radius:8px;padding:14px 16px;margin:12px 0;font-size:.84rem;border:1px solid;display:flex;gap:10px}.info-box.tip{border-color:var(--accent2);background:#2ea04310;color:var(--accent2)}.info-box.warn{border-color:var(--accent5);background:#d2940015;color:var(--accent5)}.info-box.note{border-color:var(--accent4);background:#6e40c915;color:var(--accent4)}.info-box.danger{border-color:var(--accent3);background:#f7816610;color:var(--accent3)}.info-box span{color:var(--text)}
+  .progress-bar{background:var(--surface2);border-radius:4px;height:4px;margin:16px 0;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent4),var(--accent2));border-radius:4px;width:0;transition:width .2s}.nav-buttons{display:flex;gap:12px;margin-top:32px;justify-content:space-between}.nav-btn{padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}.nav-btn:hover{border-color:var(--accent4);color:var(--accent4)}.nav-btn.primary{background:var(--accent4);color:#000;border-color:var(--accent4)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.83rem}th{background:var(--surface2);padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--accent4)}td{padding:8px 12px;border:1px solid var(--border)}tr:nth-child(even) td{background:#ffffff05}.mental-model{border-left:4px solid var(--accent);background:#1f6feb1a;padding:12px 14px;border-radius:6px;margin:12px 0;font-size:.88rem}.checklist-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}.check-box{width:16px;height:16px;border:1px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:.25rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}.check-box.checked{background:var(--accent2);border-color:var(--accent2)}.check-box.checked::after{content:'✓';font-size:10px;color:#000;font-weight:600}.progress-text{font-size:.8rem;color:var(--text-muted);margin-bottom:8px}
+  @media(max-width:768px){.sidebar{display:none}.main{padding:16px}.summary-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>Module 09 — Data Warehousing & Analytical Workloads</h1>
+  <p>Thiết kế workload phân tích: star schema, fact/dimension, partition, materialized view và tối ưu report lớn trên PostgreSQL, MySQL và Oracle.</p>
+  <div class="badge-row">
+    <span class="badge badge-purple">Analytics DBA</span>
+    <span class="badge badge-green">~5–7 ngày</span>
+    <span class="badge badge-blue">OLAP / DWH</span>
+    <span class="badge badge-orange">PostgreSQL · MySQL · Oracle</span>
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar">
+    <div class="sidebar-title">Module Navigation</div>
+    <div class="level-label">MODULE 09 · DATA WAREHOUSE</div>
+    <div class="nav-item active" onclick="showModule(0,this)"><span class="nav-number">S0</span>Tổng quan & Mục tiêu</div>
+    <div class="nav-item" onclick="showModule(1,this)"><span class="nav-number">S1</span>OLTP vs OLAP</div>
+    <div class="nav-item" onclick="showModule(2,this)"><span class="nav-number">S2</span>Star Schema</div>
+    <div class="nav-item" onclick="showModule(3,this)"><span class="nav-number">S3</span>Fact & Dimension</div>
+    <div class="nav-item" onclick="showModule(4,this)"><span class="nav-number">S4</span>Partition & Load</div>
+    <div class="nav-item" onclick="showModule(5,this)"><span class="nav-number">S5</span>Index & MV</div>
+    <div class="nav-item" onclick="showModule(6,this)"><span class="nav-number">S6</span>ETL/ELT & Quality</div>
+    <div class="nav-item" onclick="showModule(7,this)"><span class="nav-number">S7</span>Interview Prep</div>
+    <div class="nav-item" onclick="showModule(8,this)"><span class="nav-number">S8</span>Checklist & Tổng kết</div>
+  </nav>
+
+  <main class="main">
+    <div class="module active" id="s0">
+      <div class="module-header">
+        <div class="module-tag">S0 · Orientation</div>
+        <div class="module-title">Tổng quan & Mục tiêu Module 09</div>
+        <div class="module-subtitle">OLTP tối ưu cho giao dịch nhỏ, OLAP tối ưu cho đọc nhiều dữ liệu để phân tích. Tư duy thiết kế và tuning khác nhau rõ rệt.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">M</span>Roadmap 9 sections của module<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Section</th><th>Tên section</th><th>Trọng tâm</th></tr></thead>
+            <tbody>
+              <tr><td>S0</td><td>Tổng quan</td><td>Vì sao analytical workload khác OLTP</td></tr>
+              <tr><td>S1</td><td>OLTP vs OLAP</td><td>Workload, schema, index, concurrency</td></tr>
+              <tr><td>S2</td><td>Star Schema</td><td>Fact/dimension và grain</td></tr>
+              <tr><td>S3</td><td>Fact & Dimension</td><td>SCD, surrogate key, degenerate dimension</td></tr>
+              <tr><td>S4</td><td>Partition & Load</td><td>Partition exchange, batch window, incremental load</td></tr>
+              <tr><td>S5</td><td>Index & Materialized View</td><td>Bitmap, BRIN, MV rewrite, summary</td></tr>
+              <tr><td>S6</td><td>ETL/ELT & Quality</td><td>Staging, validation, reconciliation</td></tr>
+              <tr><td>S7</td><td>Interview Prep</td><td>Câu hỏi analytics DBA</td></tr>
+              <tr><td>S8</td><td>Checklist</td><td>Production readiness cho DWH</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-purpose">A</span>Analytics giải quyết vấn đề gì?<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <h3 class="blue">Report lớn không nên kéo OLTP xuống</h3>
+          <p>OLTP phục vụ nghiệp vụ realtime: tạo order, thanh toán, cập nhật inventory. Analytical workload đọc nhiều tháng/năm dữ liệu, join rộng, group lớn. Chạy report nặng trực tiếp trên OLTP dễ làm chậm production.</p>
+          <div class="mental-model"><strong>Mental model:</strong> OLTP là quầy thu ngân. DWH là phòng phân tích. Đừng bắt quầy thu ngân vừa bán hàng vừa làm báo cáo chiến lược.</div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" disabled>← Trước</button><button class="nav-btn primary" onclick="nextModule()">Bắt đầu →</button></div>
+    </div>
+
+    <div class="module" id="s1">
+      <div class="module-header">
+        <div class="module-tag">S1 · Workload Shape</div>
+        <div class="module-title">OLTP vs OLAP</div>
+        <div class="module-subtitle">Cùng là SQL, nhưng mục tiêu tối ưu khác nhau: latency từng giao dịch so với throughput phân tích khối lượng lớn.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">C</span>So sánh workload<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Tiêu chí</th><th>OLTP</th><th>OLAP / DWH</th></tr></thead>
+            <tbody>
+              <tr><td>Query</td><td>Nhỏ, selective, nhiều transaction</td><td>Scan lớn, aggregate, join rộng</td></tr>
+              <tr><td>Schema</td><td>Normalized để ghi đúng</td><td>Star/snowflake để đọc nhanh</td></tr>
+              <tr><td>Index</td><td>B-tree selective cho lookup</td><td>Partition, bitmap/BRIN/MV/columnar tùy DB</td></tr>
+              <tr><td>Concurrency</td><td>Nhiều write nhỏ</td><td>Batch load + nhiều read/report</td></tr>
+              <tr><td>SLA</td><td>p95/p99 request thấp</td><td>Report hoàn thành trong window</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box warn">⚠️ <span><strong>Rule:</strong> Đừng copy nguyên schema OLTP sang DWH rồi mong report nhanh. DWH cần thiết kế grain, dimension và aggregate riêng.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s2">
+      <div class="module-header">
+        <div class="module-tag">S2 · Modeling</div>
+        <div class="module-title">Star Schema & Grain</div>
+        <div class="module-subtitle">Grain là mức chi tiết của fact table. Nếu grain không rõ, mọi report sau đó sẽ mơ hồ.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">S</span>Fact và dimension<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>star-schema.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="kw">CREATE TABLE</span> dim_date (
+  date_key <span class="fn">INTEGER</span> <span class="kw">PRIMARY KEY</span>,
+  full_date <span class="fn">DATE</span> <span class="kw">NOT NULL</span>,
+  month_key <span class="fn">INTEGER</span> <span class="kw">NOT NULL</span>,
+  quarter <span class="fn">INTEGER</span> <span class="kw">NOT NULL</span>
+);
+
+<span class="kw">CREATE TABLE</span> dim_customer (
+  customer_key <span class="fn">BIGINT</span> <span class="kw">PRIMARY KEY</span>,
+  customer_id <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  country <span class="fn">VARCHAR</span>(<span class="num">50</span>),
+  segment <span class="fn">VARCHAR</span>(<span class="num">50</span>)
+);
+
+<span class="kw">CREATE TABLE</span> fact_sales (
+  date_key <span class="fn">INTEGER</span> <span class="kw">NOT NULL</span>,
+  customer_key <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  product_key <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  order_id <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  quantity <span class="fn">INTEGER</span> <span class="kw">NOT NULL</span>,
+  sales_amount <span class="fn">NUMERIC</span>(<span class="num">14</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>
+);</pre>
+            </div>
+          </div>
+          <div class="info-box note">📌 <span><strong>Grain ví dụ:</strong> Mỗi row trong <code>fact_sales</code> là một order line đã bán, không phải một order, một ngày hay một customer.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s3">
+      <div class="module-header">
+        <div class="module-tag">S3 · Dimensions</div>
+        <div class="module-title">Fact, Dimension & Slowly Changing Dimension</div>
+        <div class="module-subtitle">Dimension không chỉ là lookup table. Nó mô tả ngữ cảnh của measure và có lịch sử thay đổi.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">D</span>SCD Type 2<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>scd-type2.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="kw">CREATE TABLE</span> dim_customer (
+  customer_key <span class="fn">BIGINT</span> <span class="kw">PRIMARY KEY</span>,
+  customer_id <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  customer_name <span class="fn">VARCHAR</span>(<span class="num">200</span>),
+  segment <span class="fn">VARCHAR</span>(<span class="num">50</span>),
+  valid_from <span class="fn">TIMESTAMP</span> <span class="kw">NOT NULL</span>,
+  valid_to <span class="fn">TIMESTAMP</span>,
+  is_current <span class="fn">BOOLEAN</span> <span class="kw">NOT NULL</span>
+);
+
+<span class="kw">CREATE INDEX</span> idx_dim_customer_current
+<span class="kw">ON</span> dim_customer(customer_id, is_current);</pre>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Concept</th><th>Ý nghĩa</th></tr></thead>
+            <tbody>
+              <tr><td>Surrogate key</td><td>Key nội bộ DWH, ổn định cho dimension version</td></tr>
+              <tr><td>Natural key</td><td>ID từ source system, ví dụ customer_id</td></tr>
+              <tr><td>SCD Type 1</td><td>Overwrite giá trị cũ</td></tr>
+              <tr><td>SCD Type 2</td><td>Giữ lịch sử bằng nhiều version</td></tr>
+              <tr><td>Degenerate dimension</td><td>Order number nằm trực tiếp trong fact</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s4">
+      <div class="module-header">
+        <div class="module-tag">S4 · Loading</div>
+        <div class="module-title">Partition, Batch Window & Incremental Load</div>
+        <div class="module-subtitle">DWH thường nạp dữ liệu theo batch hoặc micro-batch. Partition giúp load, drop, exchange và pruning tốt hơn.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">P</span>Partition theo thời gian<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>dwh-partition.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">CREATE TABLE</span> fact_sales (
+  date_key <span class="fn">INTEGER</span> <span class="kw">NOT NULL</span>,
+  customer_key <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  product_key <span class="fn">BIGINT</span> <span class="kw">NOT NULL</span>,
+  sales_amount <span class="fn">NUMERIC</span>(<span class="num">14</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>
+) <span class="kw">PARTITION BY RANGE</span> (date_key);
+
+<span class="kw">CREATE TABLE</span> fact_sales_202605 <span class="kw">PARTITION OF</span> fact_sales
+<span class="kw">FOR VALUES FROM</span> (<span class="num">20260501</span>) <span class="kw">TO</span> (<span class="num">20260601</span>);
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">CREATE TABLE</span> fact_sales (
+  date_key <span class="fn">NUMBER</span> <span class="kw">NOT NULL</span>,
+  customer_key <span class="fn">NUMBER</span> <span class="kw">NOT NULL</span>,
+  sales_amount <span class="fn">NUMBER</span>(<span class="num">14</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>
+)
+<span class="kw">PARTITION BY RANGE</span> (date_key)
+(<span class="kw">PARTITION</span> p202605 <span class="kw">VALUES LESS THAN</span> (<span class="num">20260601</span>));</pre>
+            </div>
+          </div>
+          <div class="info-box tip">✅ <span><strong>DWH pattern:</strong> Load vào staging, validate, rồi exchange/attach partition để publish dữ liệu nhanh và rollback dễ.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s5">
+      <div class="module-header">
+        <div class="module-tag">S5 · Acceleration</div>
+        <div class="module-title">Index, Bitmap & Materialized View</div>
+        <div class="module-subtitle">Analytical workload thường cần scan/aggregate lớn. Index B-tree không phải lúc nào là công cụ chính.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">I</span>Index/MV theo database<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>analytics-acceleration.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="db-tag db-pg">PostgreSQL</span>
+<span class="kw">CREATE INDEX</span> idx_fact_sales_date_brin
+<span class="kw">ON</span> fact_sales <span class="kw">USING</span> brin(date_key);
+
+<span class="kw">CREATE MATERIALIZED VIEW</span> mv_sales_daily <span class="kw">AS</span>
+<span class="kw">SELECT</span> date_key, product_key, <span class="fn">SUM</span>(sales_amount) sales_amount
+<span class="kw">FROM</span> fact_sales
+<span class="kw">GROUP BY</span> date_key, product_key;
+
+<span class="db-tag db-oracle">Oracle</span>
+<span class="kw">CREATE BITMAP INDEX</span> bmp_sales_product <span class="kw">ON</span> fact_sales(product_key);
+<span class="kw">CREATE BITMAP INDEX</span> bmp_sales_customer <span class="kw">ON</span> fact_sales(customer_key);
+
+<span class="kw">CREATE MATERIALIZED VIEW</span> mv_sales_daily
+<span class="kw">BUILD IMMEDIATE REFRESH FAST ON DEMAND ENABLE QUERY REWRITE AS</span>
+<span class="kw">SELECT</span> date_key, product_key, <span class="fn">SUM</span>(sales_amount) sales_amount, <span class="fn">COUNT</span>(*) cnt
+<span class="kw">FROM</span> fact_sales
+<span class="kw">GROUP BY</span> date_key, product_key;</pre>
+            </div>
+          </div>
+          <div class="info-box warn">⚠️ <span><strong>Oracle Bitmap Index:</strong> Rất mạnh cho DWH/OLAP, nhưng không dùng cho OLTP write-heavy vì lock/contention khi DML đồng thời.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s6">
+      <div class="module-header">
+        <div class="module-tag">S6 · Pipeline Quality</div>
+        <div class="module-title">ETL/ELT, Staging & Data Quality</div>
+        <div class="module-subtitle">DWH sai dữ liệu thì report nhanh cũng vô nghĩa. Pipeline phải validate, reconcile và rerun được.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">Q</span>Quality gates<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Gate</th><th>Kiểm tra</th></tr></thead>
+            <tbody>
+              <tr><td>Completeness</td><td>Đủ số dòng/source file/batch chưa?</td></tr>
+              <tr><td>Uniqueness</td><td>Natural key có duplicate không?</td></tr>
+              <tr><td>Referential integrity</td><td>Fact có dimension key hợp lệ không?</td></tr>
+              <tr><td>Reconciliation</td><td>Tổng tiền/số order khớp source không?</td></tr>
+              <tr><td>Freshness</td><td>Dữ liệu có trễ SLA không?</td></tr>
+            </tbody>
+          </table>
+          <div class="cmd-block">
+            <div class="cmd-header"><span>● ● ●</span><span>quality-checks.sql</span></div>
+            <div class="cmd-body">
+<pre><span class="comment">-- Duplicate natural key trong staging</span>
+<span class="kw">SELECT</span> order_id, <span class="fn">COUNT</span>(*)
+<span class="kw">FROM</span> stg_orders
+<span class="kw">GROUP BY</span> order_id
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; <span class="num">1</span>;
+
+<span class="comment">-- Fact không map được dimension</span>
+<span class="kw">SELECT</span> f.customer_id
+<span class="kw">FROM</span> stg_sales f
+<span class="kw">LEFT JOIN</span> dim_customer d <span class="kw">ON</span> d.customer_id = f.customer_id <span class="kw">AND</span> d.is_current = <span class="kw">TRUE</span>
+<span class="kw">WHERE</span> d.customer_key <span class="kw">IS NULL</span>;</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">E</span>Error catalog — Analytics workload<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <table>
+            <thead><tr><th>Lỗi</th><th>Hậu quả</th><th>Fix</th></tr></thead>
+            <tbody>
+              <tr><td>Không định nghĩa grain</td><td>Double count, report mâu thuẫn</td><td>Document grain từng fact table</td></tr>
+              <tr><td>Dimension không giữ lịch sử</td><td>Report quá khứ bị thay đổi</td><td>SCD Type 2 khi cần historical analysis</td></tr>
+              <tr><td>Report chạy trên OLTP</td><td>Làm chậm production</td><td>Replica/DWH/materialized summary</td></tr>
+              <tr><td>Không partition fact lớn</td><td>Load/drop/report chậm</td><td>Partition theo date_key/load window</td></tr>
+              <tr><td>Không reconcile pipeline</td><td>Sai số âm thầm</td><td>Quality gates và audit table</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s7">
+      <div class="module-header">
+        <div class="module-tag">S7 · Interview Prep</div>
+        <div class="module-title">Interview Prep — Data Warehousing</div>
+        <div class="module-subtitle">Câu hỏi tập trung vào modeling trade-off, không chỉ cú pháp SQL.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-quiz">Q</span>Quick quiz<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="quiz-item">
+            <div class="quiz-q">Grain của fact table là gì?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Grain xác định mỗi row trong fact đại diện cho mức chi tiết nào.')">A. Mức chi tiết mà mỗi row fact đại diện</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Đó là partition key hoặc clustering key, không phải grain.')">B. Cột dùng để partition</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Index không định nghĩa ý nghĩa business của fact row.')">C. Index chính của bảng fact</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+          <div class="quiz-item">
+            <div class="quiz-q">Vì sao bitmap index hợp với Oracle DWH hơn OLTP?</div>
+            <div class="quiz-options">
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Bitmap index vẫn có thể rất nhanh cho filter/aggregate OLAP.')">A. Vì bitmap index luôn chậm</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,true,'Đúng. Bitmap index mạnh cho đọc/AND/OR nhiều điều kiện, nhưng DML đồng thời dễ contention.')">B. Vì đọc analytical tốt nhưng DML đồng thời dễ contention</div>
+              <div class="quiz-opt" onclick="answerQuiz(this,false,'Bitmap index không thay thế toàn bộ constraint.')">C. Vì bitmap index chỉ dùng cho primary key</div>
+            </div>
+            <div class="quiz-explain"></div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-detail">S</span>Senior answer templates<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <h3 class="blue">Q1: Thiết kế star schema bắt đầu từ đâu?</h3>
+          <p>Tôi bắt đầu từ business process và grain của fact table. Sau đó xác định measures, dimensions, surrogate keys, natural keys và lịch sử thay đổi dimension. Nếu grain không rõ, report rất dễ double count hoặc mâu thuẫn.</p>
+          <h3 class="green">Q2: Khi nào dùng materialized view?</h3>
+          <p>Khi report lặp lại aggregate lớn và latency yêu cầu thấp hơn khả năng tính realtime. Tôi dùng materialized view hoặc summary table với refresh strategy rõ, kiểm tra freshness và reconciliation với source.</p>
+          <h3 class="orange">Q3: Làm sao tránh report làm chậm OLTP?</h3>
+          <p>Tách workload bằng replica hoặc DWH, ETL/ELT theo batch/micro-batch, pre-aggregate dữ liệu nặng và giới hạn quyền/report query trên OLTP. Với report cần realtime, dùng bảng summary hoặc stream pipeline tùy SLA.</p>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn primary" onclick="nextModule()">Tiếp →</button></div>
+    </div>
+
+    <div class="module" id="s8">
+      <div class="module-header">
+        <div class="module-tag">S8 · Summary</div>
+        <div class="module-title">Checklist & Tổng kết Module 09</div>
+        <div class="module-subtitle">Hoàn thành checklist này trước khi đi tiếp sang migration/upgrade hoặc chuyên sâu từng database engine.</div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-summary">S</span>Summary — Điểm chốt cần nhớ<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="summary-grid">
+            <div class="summary-item"><strong>OLTP khác OLAP</strong>Đừng tối ưu report lớn bằng tư duy giao dịch nhỏ.</div>
+            <div class="summary-item"><strong>Grain là nền móng</strong>Không rõ grain thì fact table sẽ gây double count.</div>
+            <div class="summary-item"><strong>Dimension có lịch sử</strong>SCD giúp report quá khứ không bị đổi nghĩa.</div>
+            <div class="summary-item"><strong>Partition giúp load/report</strong>Đặc biệt với fact table theo thời gian.</div>
+            <div class="summary-item"><strong>MV/summary giảm aggregate lặp</strong>Đổi freshness lấy tốc độ đọc.</div>
+            <div class="summary-item"><strong>Quality gates bắt buộc</strong>Report nhanh nhưng sai là thất bại.</div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header" onclick="toggleSection(this)"><span class="section-icon icon-practice">D</span>Definition of Done<span class="section-toggle">▼</span></div>
+        <div class="section-content">
+          <div class="progress-text">Progress: <span id="progressPct">0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Phân biệt được OLTP và OLAP về schema, index, concurrency và SLA.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Thiết kế được star schema cơ bản với fact/dimension và grain rõ ràng.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Giải thích được SCD Type 1/Type 2 và surrogate key.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Thiết kế được partition strategy cho fact table lớn.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Biết dùng BRIN/MV trên PostgreSQL và Bitmap/MV rewrite trên Oracle ở mức nền tảng.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Xây được quality gates cho pipeline ETL/ELT.</span></div>
+          <div class="checklist-row"><div class="check-box" onclick="toggleCheck(this)"></div><span>Trả lời được 3 câu senior answer trong Interview Prep.</span></div>
+        </div>
+      </div>
+      <div class="nav-buttons"><button class="nav-btn" onclick="prevModule()">← Trước</button><button class="nav-btn" disabled>Hoàn thành</button></div>
+    </div>
+  </main>
+</div>
+
+<script>
+let currentModule=0;const totalModules=9;
+function showModule(index,navEl){document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));const target=document.getElementById('s'+index);if(target){target.classList.add('active');currentModule=index;window.scrollTo({top:0,behavior:'smooth'});}document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));if(navEl){navEl.classList.add('active');}else{const items=document.querySelectorAll('.nav-item');if(items[index])items[index].classList.add('active');}}
+function nextModule(){if(currentModule<totalModules-1)showModule(currentModule+1);}function prevModule(){if(currentModule>0)showModule(currentModule-1);}
+function toggleSection(header){const content=header.nextElementSibling;const toggle=header.querySelector('.section-toggle');const hidden=content.style.display==='none';content.style.display=hidden?'block':'none';if(toggle)toggle.textContent=hidden?'▼':'▶';}
+function answerQuiz(opt,isCorrect,msg){const item=opt.closest('.quiz-item');item.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('correct','wrong'));opt.classList.add(isCorrect?'correct':'wrong');if(!isCorrect){item.querySelectorAll('.quiz-opt').forEach(o=>{const oc=o.getAttribute('onclick')||'';if(oc.includes('true'))o.classList.add('correct');});}const ex=item.querySelector('.quiz-explain');ex.textContent=msg;ex.classList.add('show');}
+function toggleCheck(box){box.classList.toggle('checked');updateProgress();}
+function updateProgress(){const boxes=document.querySelectorAll('.check-box');const checked=document.querySelectorAll('.check-box.checked');const pct=boxes.length===0?0:Math.round(checked.length/boxes.length*100);document.getElementById('progressPct').textContent=pct+'%';document.getElementById('progressFill').style.width=pct+'%';}
+updateProgress();
+</script>
+</body>
+</html>
