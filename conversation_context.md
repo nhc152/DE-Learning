@@ -25,9 +25,9 @@ Tùy vào thời gian và mục tiêu, có 3 lộ trình chính được rút ra
 
 ## 3. CƠ CẤU WORKSPACE VÀ PROJECT THỰC HÀNH MỚI
 
-Để tránh làm bẩn thư mục tài liệu gốc `DE-Learning`, một repository mới đã được khởi tạo thành công trên máy tính để lưu trữ bài tập thực hành (Portfolio Projects):
-- **Đường dẫn local:** `d:\TaiLieu\Data Engineer\DE Roadmap\de-roadmap-artifacts`
-- **Trạng thái:** Đã khởi tạo Git (`git init`), cấu hình `.gitignore` chuẩn, tạo tệp `README.md` giới thiệu chung và cấu trúc sẵn các thư mục con:
+Để tiện quản lý và đồng bộ (chỉ cần dùng một repository Git duy nhất), thư mục làm bài tập đã được chuyển vào nằm trong repository tài liệu gốc `DE-Learning`:
+- **Đường dẫn local:** `d:\TaiLieu\Data Engineer\DE Roadmap\DE-Learning\de-roadmap-artifacts`
+- **Trạng thái:** Đã tích hợp trực tiếp vào Git của `DE-Learning`, cấu hình `.gitignore` chuẩn, tạo tệp `README.md` giới thiệu chung và cấu trúc sẵn các thư mục con:
   - `week01_sql_advanced/`
   - `week02_python_etl/`
   - `week03_data_cleaning/`
@@ -45,16 +45,15 @@ Tùy vào thời gian và mục tiêu, có 3 lộ trình chính được rút ra
 Khi bắt đầu học bất kỳ tuần (Week) nào, thực hiện theo 6 bước:
 1.  **Đọc tài liệu:** Kéo thả file `WeekXX_*.html` từ thư mục `DE-Learning` vào trình duyệt để học lý thuyết.
 2.  **Xem đề bài:** Cuộn xuống cuối file HTML để xem phần bài tập thực hành (Practice Task).
-3.  **Viết code:** Mở VS Code tại thư mục `de-roadmap-artifacts`, tạo file code trong folder tuần tương ứng và viết code giải bài tập.
+3.  **Viết code:** Truy cập vào thư mục `de-roadmap-artifacts` bên trong `DE-Learning`, viết code giải bài tập trong folder tuần tương ứng.
 4.  **Tối ưu bằng AI:** Copy đề bài và code của bạn gửi cho Claude AI để nhờ review/tối ưu hóa theo tiêu chuẩn Senior DE.
-5.  **Push GitHub:** Lưu trữ code bài tập lên Git cá nhân để tích lũy portfolio.
+5.  **Push GitHub:** `git add`, `git commit` và `git push` để lưu trữ bài tập lên GitHub (chung repository `DE-Learning`).
 6.  **Đánh dấu tiến độ:** Tích hoàn thành các công việc trên `DE_Mastery_Dashboard.html` để cập nhật tiến trình học tập.
 
 ---
 
-## 🚀 5. HÀNH ĐỘNG TIẾP THEO (KHI SANG MÁY KHÁC)
+## 🚀 5. HÀNG ĐỘNG TIẾP THEO (KHI SANG MÁY KHÁC)
 
 Khi chuyển sang máy tính khác (ở công ty), bạn hãy thực hiện các bước sau để đồng bộ:
-1.  **Đồng bộ Tài liệu học:** `git pull` tại thư mục `DE-Learning` để cập nhật file context này và các thay đổi mới nhất của tài liệu học tập.
-2.  **Đồng bộ Thư mục bài làm:** Clone repo `de-roadmap-artifacts` từ GitHub cá nhân của bạn về máy công ty để tiếp tục code bài tập.
-3.  **Bắt đầu học:** Mở file [Week00_Setup.html](file:///d:/TaiLieu/Data%20Engineer/DE%20Roadmap/DE-Learning/Week00_Setup.html) hoặc [Week01_SQL_Advanced.html](file:///d:/TaiLieu/Data%20Engineer/DE%20Roadmap/DE-Learning/Week01_SQL_Advanced.html) để thực hành.
+1.  **Đồng bộ toàn bộ:** `git pull` tại thư mục `DE-Learning` trên máy tính ở công ty. Bạn sẽ nhận được cả tài liệu học tập mới, file bối cảnh này và toàn bộ code bài tập đã làm.
+2.  **Bắt đầu học:** Mở file [Week00_Setup.html](file:///d:/TaiLieu/Data%20Engineer/DE%20Roadmap/DE-Learning/Week00_Setup.html) hoặc [Week01_SQL_Advanced.html](file:///d:/TaiLieu/Data%20Engineer/DE%20Roadmap/DE-Learning/Week01_SQL_Advanced.html) để thực hành.
